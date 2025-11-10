@@ -37,7 +37,29 @@ pnpm-debug.log*
 .stylelintcache
 *.tsbuildinfo
 
+# Vite
+vite.config.ts.timestamp-*
+dist-ssr
+*.local
+
+# Editor directories
+.vscode/*
+!.vscode/extensions.json
+.idea
+.fleet
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
 # Backup files
 *.bak
 *.backup
 *.tmp
+
+# Package lock files (choose one)
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml

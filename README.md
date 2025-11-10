@@ -62,14 +62,14 @@ Works on all modern browsers with IndexedDB support:
 
 ### Prerequisites
 
-- Node.js 14+ and npm/yarn
+- Node.js 18+ and npm/yarn
 - Modern web browser
 
-### Installation
+### Local Development
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/YOUR_USERNAME/5e_character_forge.git
+git clone https://github.com/joelmale/5e_character_forge.git
 cd 5e_character_forge
 ```
 
@@ -80,13 +80,33 @@ npm install
 
 3. Run the development server:
 ```bash
-npm start
+npm run dev
 ```
 
-4. Build for production:
+4. Open your browser to `http://localhost:3000`
+
+5. Build for production:
 ```bash
 npm run build
 ```
+
+### Docker Deployment
+
+See [DEPLOYMENT.md](./DEPLOYMENT.md) for complete Docker Swarm deployment instructions.
+
+**Quick Start with Docker:**
+```bash
+# Build the image
+docker build -t 5e-character-forge .
+
+# Run locally
+docker run -p 8080:80 5e-character-forge
+
+# Deploy to Swarm
+docker stack deploy -c docker-compose.yml character-forge
+```
+
+**Live Demo:** https://character.nexusvtt.com
 
 ## Usage
 
@@ -122,9 +142,20 @@ npm run build
 
 ```
 5e_character_forge/
-├── dnd_Char_Gen.tsx                    # Main React application
+├── src/
+│   ├── App.tsx                         # Main React application
+│   ├── main.tsx                        # Application entry point
+│   └── index.css                       # Tailwind CSS styles
+├── .github/workflows/
+│   └── deploy.yml                      # CI/CD pipeline
+├── Dockerfile                          # Multi-stage Docker build
+├── nginx.conf                          # Nginx configuration for SPA
+├── docker-compose.yml                  # Docker Swarm stack definition
+├── vite.config.ts                      # Vite build configuration
+├── tailwind.config.js                  # Tailwind CSS configuration
+├── package.json                        # Dependencies and scripts
+├── DEPLOYMENT.md                       # Deployment guide
 ├── D&D_5e_Character_App_Design.md      # Design documentation
-├── Initial_Code_Generation_Prompt.md   # Original project prompt
 └── README.md                            # This file
 ```
 

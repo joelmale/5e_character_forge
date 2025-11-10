@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  5e-character-forge:
+    image: joelmale/5e-character-forge:latest
+    networks:
+      - npm_network
+    deploy:
+      replicas: 2
+      update_config:
+        parallelism: 1
+        delay: 10s
+        failure_action: rollback
+        order: start-first
+      rollback_config:
+        parallelism: 1
+        delay: 5s
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+      labels:
+        - "com.docker.swarm.service.name=5e-character-forge"
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+
+networks:
+  npm_network:
+    external: true
+    name: npm_network
