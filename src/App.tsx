@@ -120,6 +120,21 @@ interface Character {
 type AbilityName = keyof Character['abilities'];
 type SkillName = keyof Character['skills'];
 
+// Equipment and Skill interfaces for character creation
+interface EquipmentItem {
+  name: string;
+  type: 'weapon' | 'armor' | 'gear' | 'tool';
+  quantity: number;
+  weight?: number;
+}
+
+interface EquipmentChoice {
+  choiceId: string;
+  description: string;
+  options: EquipmentItem[][];
+  selected: number | null; // Index of selected option
+}
+
 interface CharacterCreationData {
   name: string;
   level: number;
@@ -129,6 +144,12 @@ interface CharacterCreationData {
   abilityScoreMethod: 'standard-array' | 'standard-roll' | 'classic-roll' | '5d6-drop-2' | 'point-buy' | 'custom';
   background: string;
   alignment: string;
+
+  // Sprint 1 additions
+  selectedSkills: SkillName[]; // Skills chosen from class options
+  equipmentChoices: EquipmentChoice[]; // Equipment selection choices
+  hpCalculationMethod: 'max' | 'rolled';
+  rolledHP?: number; // If rolled, store the result
 
   // Custom text for traits
   personality: string;
@@ -147,6 +168,9 @@ const initialCreationData: CharacterCreationData = {
   abilityScoreMethod: 'standard-array',
   background: 'Outlander',
   alignment: 'Neutral Good',
+  selectedSkills: [],
+  equipmentChoices: [],
+  hpCalculationMethod: 'max',
   personality: "I'm quiet until I have something important to say.",
   ideals: "Honesty. The truth must be preserved.",
   bonds: "I owe my life to the individual who saved me.",
@@ -494,10 +518,12 @@ interface Class {
   hit_die: number;
   primary_stat: string;
   save_throws: string[];
-  skill_proficiencies: string[];
+  skill_proficiencies: string[]; // Available skill choices
+  num_skill_choices?: number; // How many skills to choose (filled by helper if missing)
   class_features: string[];
   description: string;
   keyRole: string;
+  equipment_choices?: EquipmentChoice[]; // Starting equipment options (filled by helper if missing)
 }
 
 interface ClassCategory {
@@ -521,9 +547,38 @@ const CLASS_CATEGORIES: ClassCategory[] = [
         primary_stat: 'Strength, Constitution',
         save_throws: ['STR', 'CON'],
         skill_proficiencies: ['AnimalHandling', 'Athletics', 'Intimidation', 'Nature', 'Perception', 'Survival'],
+        num_skill_choices: 2,
         class_features: ['Rage', 'Unarmored Defense', 'Reckless Attack', 'Danger Sense'],
         description: 'The primal warrior; fueled by Rage to ignore pain and deal massive damage. Barbarians are fierce combatants who draw strength from their anger.',
         keyRole: 'Tank/Damage Dealer - Frontline warrior with high HP and damage resistance',
+        equipment_choices: [
+          {
+            choiceId: 'barbarian-weapon-1',
+            description: 'Choose your primary weapon',
+            options: [
+              [{ name: 'Greataxe', type: 'weapon', quantity: 1, weight: 7 }],
+              [{ name: 'Martial Melee Weapon', type: 'weapon', quantity: 1, weight: 0 }],
+            ],
+            selected: null,
+          },
+          {
+            choiceId: 'barbarian-weapon-2',
+            description: 'Choose your secondary weapons',
+            options: [
+              [{ name: 'Handaxe', type: 'weapon', quantity: 2, weight: 2 }],
+              [{ name: 'Simple Weapon', type: 'weapon', quantity: 1, weight: 0 }],
+            ],
+            selected: null,
+          },
+          {
+            choiceId: 'barbarian-pack',
+            description: 'Choose your equipment pack',
+            options: [
+              [{ name: "Explorer's Pack", type: 'gear', quantity: 1, weight: 59 }],
+            ],
+            selected: null,
+          },
+        ],
       },
       {
         slug: 'bard',
@@ -532,10 +587,19 @@ const CLASS_CATEGORIES: ClassCategory[] = [
         hit_die: 8,
         primary_stat: 'Charisma',
         save_throws: ['DEX', 'CHA'],
-        skill_proficiencies: ['Any three skills'],
+        skill_proficiencies: ['Acrobatics', 'AnimalHandling', 'Arcana', 'Athletics', 'Deception', 'History', 'Insight', 'Intimidation', 'Investigation', 'Medicine', 'Nature', 'Perception', 'Performance', 'Persuasion', 'Religion', 'SleightOfHand', 'Stealth', 'Survival'],
+        num_skill_choices: 3,
         class_features: ['Bardic Inspiration', 'Jack of All Trades', 'Song of Rest', 'Magical Secrets'],
         description: 'The inspiring musician and speaker; uses magic to charm, perform, and support allies. Bards are versatile spellcasters and skill masters.',
         keyRole: 'Support/Utility - Buffs allies, debuffs enemies, and provides magical versatility',
+        equipment_choices: [
+          {
+            choiceId: 'bard-pack',
+            description: 'Choose your equipment pack',
+            options: [[{ name: "Entertainer's Pack", type: 'gear', quantity: 1, weight: 40 }]],
+            selected: null,
+          },
+        ],
       },
       {
         slug: 'cleric',
@@ -850,9 +914,34 @@ const CLASS_CATEGORIES: ClassCategory[] = [
   },
 ];
 
-// Helper to get all classes from categories
-const getAllClasses = (): Class[] => {
-  return CLASS_CATEGORIES.flatMap(category => category.classes);
+// Type for class with guaranteed Sprint 1 fields
+type ClassWithDefaults = Omit<Class, 'num_skill_choices' | 'equipment_choices'> & {
+  num_skill_choices: number;
+  equipment_choices: EquipmentChoice[];
+};
+
+// Helper to get all classes from categories and fill in defaults
+const getAllClasses = (): ClassWithDefaults[] => {
+  const classes = CLASS_CATEGORIES.flatMap(category => category.classes);
+
+  // Add defaults for classes missing new Sprint 1 fields
+  return classes.map(cls => ({
+    ...cls,
+    num_skill_choices: cls.num_skill_choices ?? (
+      cls.slug.includes('rogue') ? 4 :
+      cls.slug.includes('bard') ? 3 :
+      cls.slug.includes('ranger') ? 3 :
+      2
+    ),
+    equipment_choices: cls.equipment_choices ?? [
+      {
+        choiceId: `${cls.slug}-default-pack`,
+        description: 'Starting equipment pack',
+        options: [[{ name: "Adventurer's Pack", type: 'gear', quantity: 1, weight: 30 }]],
+        selected: null,
+      },
+    ],
+  }));
 };
 
 const ALIGNMENTS = [
