@@ -924,24 +924,39 @@ type ClassWithDefaults = Omit<Class, 'num_skill_choices' | 'equipment_choices'> 
 const getAllClasses = (): ClassWithDefaults[] => {
   const classes = CLASS_CATEGORIES.flatMap(category => category.classes);
 
+  // Default skill list for classes that don't have specific skills defined
+  const allSkillNames = ['Acrobatics', 'AnimalHandling', 'Arcana', 'Athletics', 'Deception', 'History',
+    'Insight', 'Intimidation', 'Investigation', 'Medicine', 'Nature', 'Perception', 'Performance',
+    'Persuasion', 'Religion', 'SleightOfHand', 'Stealth', 'Survival'];
+
   // Add defaults for classes missing new Sprint 1 fields
-  return classes.map(cls => ({
-    ...cls,
-    num_skill_choices: cls.num_skill_choices ?? (
-      cls.slug.includes('rogue') ? 4 :
-      cls.slug.includes('bard') ? 3 :
-      cls.slug.includes('ranger') ? 3 :
-      2
-    ),
-    equipment_choices: cls.equipment_choices ?? [
-      {
-        choiceId: `${cls.slug}-default-pack`,
-        description: 'Starting equipment pack',
-        options: [[{ name: "Adventurer's Pack", type: 'gear', quantity: 1, weight: 30 }]],
-        selected: null,
-      },
-    ],
-  }));
+  return classes.map(cls => {
+    // Ensure skill_proficiencies is always an array
+    let skillProfs = cls.skill_proficiencies;
+    if (!Array.isArray(skillProfs) || skillProfs.length === 0 || skillProfs[0] === 'Any three skills') {
+      // If it's not a valid array, use all skills
+      skillProfs = allSkillNames;
+    }
+
+    return {
+      ...cls,
+      skill_proficiencies: skillProfs,
+      num_skill_choices: cls.num_skill_choices ?? (
+        cls.slug.includes('rogue') ? 4 :
+        cls.slug.includes('bard') ? 3 :
+        cls.slug.includes('ranger') ? 3 :
+        2
+      ),
+      equipment_choices: cls.equipment_choices ?? [
+        {
+          choiceId: `${cls.slug}-default-pack`,
+          description: 'Starting equipment pack',
+          options: [[{ name: "Adventurer's Pack", type: 'gear', quantity: 1, weight: 30 }]],
+          selected: null,
+        },
+      ],
+    };
+  });
 };
 
 const ALIGNMENTS = [
@@ -1128,12 +1143,16 @@ const calculateCharacterStats = (data: CharacterCreationData): Character => {
   }
   const maxHitPoints = hitDieValue + finalAbilities.CON.modifier + (raceData.slug === 'dwarf' ? level : 0);
 
-  // 3. Calculate Skills
+  // 3. Calculate Skills (from selected skills + background skills)
+  const backgroundData = BACKGROUNDS.find(bg => bg.name === data.background);
+  const backgroundSkills = backgroundData?.skillProficiencies || [];
+  const allProficientSkills = [...data.selectedSkills, ...backgroundSkills.map(s => s as SkillName)];
+
   const finalSkills: Character['skills'] = {} as Character['skills'];
   ALL_SKILLS.forEach((skillName) => {
     const ability = SKILL_TO_ABILITY[skillName];
     const modifier = finalAbilities[ability].modifier;
-    const isProficient = classData.skill_proficiencies.includes(skillName);
+    const isProficient = allProficientSkills.includes(skillName);
 
     finalSkills[skillName] = {
       proficient: isProficient,
