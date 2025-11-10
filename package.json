@@ -12,7 +12,8 @@
   "dependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "lucide-react": "^0.293.0"
+    "lucide-react": "^0.293.0",
+    "@3d-dice/dice-box": "^1.1.4"
   },
   "devDependencies": {
     "@types/react": "^18.2.43",

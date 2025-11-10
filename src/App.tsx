@@ -1,5 +1,9 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Dice6, Plus, Trash2, Loader2, BookOpen, User as UserIcon, Shield, Zap, ArrowLeft, ArrowRight, Check, Download, Upload } from 'lucide-react';
+import { DiceBox3D } from './components/DiceBox3D';
+import { RollHistoryModal, RollHistoryTicker } from './components/RollHistory';
+import { createAbilityRoll, createSkillRoll, createInitiativeRoll, getRollHistory, addRollToHistory, clearRollHistory, type DiceRoll as DiceRollType } from './utils/diceRoller';
+import { diceSounds } from './utils/diceSounds';
 
 // --- IndexedDB Configuration ---
 const DB_NAME = '5e_character_forge';
@@ -228,6 +232,7 @@ interface CharacterSheetProps {
   onClose: () => void;
   onDelete: (id: string) => void;
   setRollResult: React.Dispatch<React.SetStateAction<{ text: string; value: number | null }>>;
+  onDiceRoll: (roll: DiceRollType) => void;
 }
 
 interface WizardProps {
@@ -249,32 +254,57 @@ const handleDiceRoll = (rollName: string, modifier: number, setRollResult: Chara
 
 // --- Sub-Components (CharacterSheet) ---
 
-const AbilityScoreBlock: React.FC<{ name: AbilityName; ability: AbilityScore; setRollResult: CharacterSheetProps['setRollResult'] }> = ({ name, ability, setRollResult }) => (
-  <button
-    onClick={() => handleDiceRoll(`${name} Check`, ability.modifier, setRollResult)}
-    className="flex flex-col items-center justify-center p-1 bg-gray-700/50 rounded-lg shadow-inner hover:bg-red-700/70 transition-colors cursor-pointer w-full"
-  >
-    <div className="text-xs font-bold text-red-400">{name}</div>
-    <div className="text-lg font-extrabold text-white bg-gray-900 rounded-full w-10 h-10 flex items-center justify-center border-2 border-red-500 my-1">{ability.score}</div>
-    <div className="text-xl font-extrabold text-yellow-300">{formatModifier(ability.modifier)}</div>
-  </button>
-);
+const AbilityScoreBlock: React.FC<{ name: AbilityName; ability: AbilityScore; setRollResult: CharacterSheetProps['setRollResult']; onDiceRoll: (roll: DiceRollType) => void }> = ({ name, ability, setRollResult, onDiceRoll }) => {
+  const handleClick = () => {
+    const roll = createAbilityRoll(name, ability.score);
+    setRollResult({ text: `${roll.label}: ${roll.notation}`, value: roll.total });
+    onDiceRoll(roll);
+  };
 
-const SkillEntry: React.FC<{ name: SkillName; skill: Skill; setRollResult: CharacterSheetProps['setRollResult'] }> = ({ name, skill, setRollResult }) => (
-  <button
-    onClick={() => handleDiceRoll(name.replace(/([A-Z])/g, ' $1').trim(), skill.value, setRollResult)}
-    className="flex items-center space-x-2 p-1.5 hover:bg-gray-800/50 rounded-lg transition-colors w-full text-left"
-  >
-    <input type="checkbox" checked={skill.proficient} readOnly className="form-checkbox text-red-600 rounded-sm bg-gray-700/50 border-gray-600 w-4 h-4 cursor-pointer" />
-    <span className="font-mono text-lg w-8 text-yellow-400">{formatModifier(skill.value)}</span>
-    <span className="text-sm font-semibold text-white truncate">{name.replace(/([A-Z])/g, ' $1').trim()}</span>
-  </button>
-);
+  return (
+    <button
+      onClick={handleClick}
+      className="flex flex-col items-center justify-center p-1 bg-gray-700/50 rounded-lg shadow-inner hover:bg-red-700/70 transition-colors cursor-pointer w-full"
+    >
+      <div className="text-xs font-bold text-red-400">{name}</div>
+      <div className="text-lg font-extrabold text-white bg-gray-900 rounded-full w-10 h-10 flex items-center justify-center border-2 border-red-500 my-1">{ability.score}</div>
+      <div className="text-xl font-extrabold text-yellow-300">{formatModifier(ability.modifier)}</div>
+    </button>
+  );
+};
 
-const CharacterSheet: React.FC<CharacterSheetProps> = ({ character, onClose, onDelete, setRollResult }) => {
+const SkillEntry: React.FC<{ name: SkillName; skill: Skill; setRollResult: CharacterSheetProps['setRollResult']; onDiceRoll: (roll: DiceRollType) => void }> = ({ name, skill, setRollResult, onDiceRoll }) => {
+  const skillLabel = name.replace(/([A-Z])/g, ' $1').trim();
+
+  const handleClick = () => {
+    const roll = createSkillRoll(skillLabel, skill.value);
+    setRollResult({ text: `${roll.label}: ${roll.notation}`, value: roll.total });
+    onDiceRoll(roll);
+  };
+
+  return (
+    <button
+      onClick={handleClick}
+      className="flex items-center space-x-2 p-1.5 hover:bg-gray-800/50 rounded-lg transition-colors w-full text-left"
+    >
+      <input type="checkbox" checked={skill.proficient} readOnly className="form-checkbox text-red-600 rounded-sm bg-gray-700/50 border-gray-600 w-4 h-4 cursor-pointer" />
+      <span className="font-mono text-lg w-8 text-yellow-400">{formatModifier(skill.value)}</span>
+      <span className="text-sm font-semibold text-white truncate">{skillLabel}</span>
+    </button>
+  );
+};
+
+const CharacterSheet: React.FC<CharacterSheetProps> = ({ character, onClose, onDelete, setRollResult, onDiceRoll }) => {
   const abilities = Object.entries(character.abilities) as [AbilityName, AbilityScore][];
   const skills = Object.entries(character.skills) as [SkillName, Skill][];
   const passivePerception = (character.skills.Perception.value + 10);
+
+  // Handle initiative roll
+  const handleInitiativeRoll = () => {
+    const roll = createInitiativeRoll(character.initiative);
+    setRollResult({ text: `${roll.label}: ${roll.notation}`, value: roll.total });
+    onDiceRoll(roll);
+  };
 
   return (
     <div className="p-4 md:p-8 bg-gray-900 text-gray-100 min-h-screen">
@@ -301,7 +331,7 @@ const CharacterSheet: React.FC<CharacterSheetProps> = ({ character, onClose, onD
         <div className="grid grid-cols-3 md:grid-cols-6 gap-4 bg-gray-800/70 p-4 rounded-xl shadow-lg border border-red-900">
           <div className="col-span-1 flex flex-col items-center"><Shield className="w-6 h-6 text-red-500 mb-1" /><span className="text-sm font-semibold text-gray-400">AC</span><div className="text-4xl font-extrabold text-white">{character.armorClass}</div></div>
           <div className="col-span-2 flex flex-col items-center"><Zap className="w-6 h-6 text-red-500 mb-1" /><span className="text-sm font-semibold text-gray-400">HP (Max)</span><div className="text-4xl font-extrabold text-green-400">{character.hitPoints} <span className="text-gray-400">/</span> {character.maxHitPoints}</div></div>
-          <button onClick={() => handleDiceRoll('Initiative', character.initiative, setRollResult)} className="col-span-1 flex flex-col items-center bg-gray-700/50 p-2 rounded-lg hover:bg-red-700/70 transition-colors" title="Roll Initiative"><Dice6 className="w-6 h-6 text-red-500 mb-1" /><span className="text-sm font-semibold text-gray-400">Init</span><div className="text-4xl font-extrabold text-yellow-300">{formatModifier(character.initiative)}</div></button>
+          <button onClick={handleInitiativeRoll} className="col-span-1 flex flex-col items-center bg-gray-700/50 p-2 rounded-lg hover:bg-red-700/70 transition-colors" title="Roll Initiative"><Dice6 className="w-6 h-6 text-red-500 mb-1" /><span className="text-sm font-semibold text-gray-400">Init</span><div className="text-4xl font-extrabold text-yellow-300">{formatModifier(character.initiative)}</div></button>
           <div className="col-span-1 flex flex-col items-center"><BookOpen className="w-6 h-6 text-red-500 mb-1" /><span className="text-sm font-semibold text-gray-400">Prof.</span><div className="text-4xl font-extrabold text-yellow-300">{formatModifier(character.proficiencyBonus)}</div></div>
           <div className="col-span-1 flex flex-col items-center"><UserIcon className="w-6 h-6 text-red-500 mb-1" /><span className="text-sm font-semibold text-gray-400">P.Perc</span><div className="text-4xl font-extrabold text-white">{passivePerception}</div></div>
         </div>
@@ -311,7 +341,7 @@ const CharacterSheet: React.FC<CharacterSheetProps> = ({ character, onClose, onD
           <div className="col-span-1 space-y-4">
             <h2 className="text-xl font-bold text-red-500 border-b border-red-800 pb-1">Ability Scores</h2>
             <div className="grid grid-cols-3 gap-2">
-              {abilities.map(([name, ability]) => (<AbilityScoreBlock key={name} name={name} ability={ability} setRollResult={setRollResult} />))}
+              {abilities.map(([name, ability]) => (<AbilityScoreBlock key={name} name={name} ability={ability} setRollResult={setRollResult} onDiceRoll={onDiceRoll} />))}
             </div>
             <div className="flex items-center justify-between p-3 bg-gray-800 rounded-lg border-l-4 border-yellow-500">
                 <span className="text-lg font-bold">Inspiration</span>
@@ -324,7 +354,7 @@ const CharacterSheet: React.FC<CharacterSheetProps> = ({ character, onClose, onD
           <div className="col-span-1 md:col-span-2 space-y-4">
             <h2 className="text-xl font-bold text-red-500 border-b border-red-800 pb-1">Skills</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 bg-gray-800/70 p-3 rounded-xl border border-red-900 max-h-[450px] overflow-y-auto">
-              {skills.sort((a, b) => a[0].localeCompare(b[0])).map(([name, skill]) => (<SkillEntry key={name} name={name} skill={skill} setRollResult={setRollResult} />))}
+              {skills.sort((a, b) => a[0].localeCompare(b[0])).map(([name, skill]) => (<SkillEntry key={name} name={name} skill={skill} setRollResult={setRollResult} onDiceRoll={onDiceRoll} />))}
             </div>
           </div>
         </div>
@@ -687,10 +717,41 @@ const App: React.FC = () => {
   const [selectedCharacterId, setSelectedCharacterId] = useState<string | null>(null);
   const [isWizardOpen, setIsWizardOpen] = useState<boolean>(false);
   const [rollResult, setRollResult] = useState<{ text: string; value: number | null }>({ text: 'Ready to Roll!', value: null });
+  const [rollHistory, setRollHistory] = useState<DiceRollType[]>([]);
+  const [latestRoll, setLatestRoll] = useState<DiceRollType | null>(null);
 
   const selectedCharacter = useMemo(() => {
     return characters.find(c => c.id === selectedCharacterId);
   }, [characters, selectedCharacterId]);
+
+  // Load roll history on mount
+  useEffect(() => {
+    const history = getRollHistory();
+    setRollHistory(history);
+  }, []);
+
+  // Handle dice roll
+  const handleDiceRoll = useCallback((roll: DiceRollType) => {
+    // Add to history
+    const updatedHistory = addRollToHistory(roll);
+    setRollHistory(updatedHistory);
+    setLatestRoll(roll);
+
+    // Play sounds
+    diceSounds.playRollSound(roll.diceResults.length);
+
+    if (roll.critical === 'success') {
+      setTimeout(() => diceSounds.playCritSuccessSound(), 300);
+    } else if (roll.critical === 'failure') {
+      setTimeout(() => diceSounds.playCritFailureSound(), 300);
+    }
+  }, []);
+
+  // Clear roll history
+  const handleClearHistory = useCallback(() => {
+    clearRollHistory();
+    setRollHistory([]);
+  }, []);
 
   // Load characters from IndexedDB
   const loadCharacters = useCallback(async () => {
@@ -766,12 +827,18 @@ const App: React.FC = () => {
 
   if (selectedCharacter) {
     return (
-      <CharacterSheet
-        character={selectedCharacter}
-        onClose={() => setSelectedCharacterId(null)}
-        onDelete={handleDeleteCharacter}
-        setRollResult={setRollResult}
-      />
+      <>
+        <CharacterSheet
+          character={selectedCharacter}
+          onClose={() => setSelectedCharacterId(null)}
+          onDelete={handleDeleteCharacter}
+          setRollResult={setRollResult}
+          onDiceRoll={handleDiceRoll}
+        />
+        <DiceBox3D latestRoll={latestRoll} />
+        <RollHistoryTicker rolls={rollHistory} />
+        <RollHistoryModal rolls={rollHistory} onClear={handleClearHistory} />
+      </>
     );
   }
 
