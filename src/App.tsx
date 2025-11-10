@@ -1802,40 +1802,46 @@ const CharacterCreationWizard: React.FC<WizardProps> = ({ isOpen, onClose, onCha
     };
 
     return (
-        <div className="fixed inset-0 bg-gray-900 bg-opacity-90 flex items-center justify-center z-50 p-4" onClick={onClose}>
+        <div className="fixed inset-0 bg-gray-900 bg-opacity-90 flex items-center justify-center z-50 p-4 overflow-y-auto" onClick={onClose}>
             <div
-                className="bg-gray-800 rounded-2xl shadow-2xl p-6 md:p-8 w-full max-w-2xl transition-all transform duration-300 scale-100"
+                className="bg-gray-800 rounded-2xl shadow-2xl w-full max-w-5xl transition-all transform duration-300 scale-100 my-8 flex flex-col max-h-[calc(100vh-4rem)]"
                 onClick={(e) => e.stopPropagation()}
             >
-                <div className="flex justify-between items-center border-b border-red-700 pb-3 mb-6">
-                    <h2 className="text-2xl font-bold text-red-500 flex items-center">
-                        <Dice6 className="w-6 h-6 mr-2" /> {STEP_TITLES[currentStep]}
-                    </h2>
-                    <button onClick={onClose} className="text-gray-400 hover:text-white text-xl font-bold">&times;</button>
+                {/* Fixed Header */}
+                <div className="flex-shrink-0 p-6 md:p-8 pb-4">
+                    <div className="flex justify-between items-center border-b border-red-700 pb-3">
+                        <h2 className="text-2xl font-bold text-red-500 flex items-center">
+                            <Dice6 className="w-6 h-6 mr-2" /> {STEP_TITLES[currentStep]}
+                        </h2>
+                        <button onClick={onClose} className="text-gray-400 hover:text-white text-xl font-bold">&times;</button>
+                    </div>
+
+                    {/* Progress Bar */}
+                    <div className='mt-4'>
+                        <div className='h-2 bg-gray-700 rounded-full overflow-hidden'>
+                            <div
+                                className='h-full bg-red-600 transition-all duration-500'
+                                style={{ width: `${((currentStep + 1) / STEP_TITLES.length) * 100}%` }}
+                            />
+                        </div>
+                        <p className='text-center text-sm text-gray-400 mt-2'>Step {currentStep + 1} of {STEP_TITLES.length}</p>
+                    </div>
                 </div>
 
-                {/* Progress Bar */}
-                <div className='mb-6'>
-                    <div className='h-2 bg-gray-700 rounded-full overflow-hidden'>
-                        <div
-                            className='h-full bg-red-600 transition-all duration-500'
-                            style={{ width: `${((currentStep + 1) / STEP_TITLES.length) * 100}%` }}
-                        />
-                    </div>
-                    <p className='text-center text-sm text-gray-400 mt-2'>Step {currentStep + 1} of {STEP_TITLES.length}</p>
+                {/* Scrollable Content */}
+                <div className="flex-1 overflow-y-auto px-6 md:px-8 pb-6 md:pb-8">
+                    {/* Error & Loading */}
+                    {error && (<div className="bg-red-900/50 text-red-300 p-3 rounded-lg mb-4 text-sm font-medium">{error}</div>)}
+                    {isLoading && (
+                        <div className="text-center p-8">
+                            <Loader2 className="w-8 h-8 mx-auto animate-spin text-red-500" />
+                            <p className="mt-2 text-red-400">Calculating stats and saving...</p>
+                        </div>
+                    )}
+
+                    {/* Wizard Content */}
+                    {!isLoading && renderStep()}
                 </div>
-
-                {/* Error & Loading */}
-                {error && (<div className="bg-red-900/50 text-red-300 p-3 rounded-lg mb-4 text-sm font-medium">{error}</div>)}
-                {isLoading && (
-                    <div className="text-center p-8">
-                        <Loader2 className="w-8 h-8 mx-auto animate-spin text-red-500" />
-                        <p className="mt-2 text-red-400">Calculating stats and saving...</p>
-                    </div>
-                )}
-
-                {/* Wizard Content */}
-                {!isLoading && renderStep()}
             </div>
         </div>
     );
