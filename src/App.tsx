@@ -168,14 +168,12 @@ const calculateCharacterStats = (data: CharacterCreationData): Character => {
   }
 
   const finalAbilities: Character['abilities'] = {} as Character['abilities'];
-  let totalScore = 0;
 
   // 1. Calculate Abilities with Racial Bonuses
   (Object.keys(data.abilities) as AbilityName[]).forEach((ability) => {
     const rawScore = data.abilities[ability] + (raceData.ability_bonuses[ability] || 0);
     const modifier = getModifier(rawScore);
     finalAbilities[ability] = { score: rawScore, modifier };
-    totalScore += rawScore;
   });
 
   const level = data.level;
@@ -245,11 +243,6 @@ interface WizardProps {
 // --- Utility Functions ---
 
 const formatModifier = (mod: number): string => mod >= 0 ? `+${mod}` : `${mod}`;
-const handleDiceRoll = (rollName: string, modifier: number, setRollResult: CharacterSheetProps['setRollResult']) => {
-  const roll = Math.floor(Math.random() * 20) + 1;
-  const total = roll + modifier;
-  setRollResult({ text: `${rollName} Roll: ${formatModifier(modifier)}`, value: total });
-};
 
 
 // --- Sub-Components (CharacterSheet) ---

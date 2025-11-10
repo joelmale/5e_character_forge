@@ -1,14 +1,17 @@
 import React, { useState } from 'react';
 import { History, X, Trash2 } from 'lucide-react';
 import type { DiceRoll } from '../utils/diceRoller';
-import { clearRollHistory } from '../utils/diceRoller';
 
-interface RollHistoryProps {
+interface RollHistoryTickerProps {
+  rolls: DiceRoll[];
+}
+
+interface RollHistoryModalProps {
   rolls: DiceRoll[];
   onClear: () => void;
 }
 
-export const RollHistoryTicker: React.FC<RollHistoryProps> = ({ rolls }) => {
+export const RollHistoryTicker: React.FC<RollHistoryTickerProps> = ({ rolls }) => {
   if (rolls.length === 0) return null;
 
   return (
@@ -50,7 +53,7 @@ export const RollHistoryTicker: React.FC<RollHistoryProps> = ({ rolls }) => {
   );
 };
 
-export const RollHistoryModal: React.FC<RollHistoryProps> = ({
+export const RollHistoryModal: React.FC<RollHistoryModalProps> = ({
   rolls,
   onClear,
 }) => {

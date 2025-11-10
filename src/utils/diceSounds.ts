@@ -17,10 +17,10 @@ class DiceSoundManager {
    */
   private initAudio(): void {
     // Create AudioContext for procedural sounds
-    if (typeof AudioContext !== 'undefined') {
-      this.audioContext = new AudioContext();
-    } else if (typeof (window as any).webkitAudioContext !== 'undefined') {
-      this.audioContext = new (window as any).webkitAudioContext();
+    try {
+      this.audioContext = new (window.AudioContext || (window as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext || AudioContext)();
+    } catch (e) {
+      console.warn('Web Audio API not supported', e);
     }
 
     // Preload dice rolling MP3 files
