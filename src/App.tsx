@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Dice6, Plus, Trash2, Loader2, BookOpen, User as UserIcon, Shield, Zap, ArrowLeft, ArrowRight, Check, Download, Upload } from 'lucide-react';
+import { Dice6, Plus, Trash2, Loader2, BookOpen, User as UserIcon, Shield, Zap, ArrowLeft, ArrowRight, Check, Download, Upload, XCircle } from 'lucide-react';
 import { DiceBox3D } from './components/DiceBox3D';
 import { RollHistoryModal, RollHistoryTicker } from './components/RollHistory';
 import { createAbilityRoll, createSkillRoll, createInitiativeRoll, getRollHistory, addRollToHistory, clearRollHistory, type DiceRoll as DiceRollType } from './utils/diceRoller';
@@ -162,6 +162,81 @@ const ALIGNMENTS = [
   'Neutral Evil',
   'Chaotic Evil'
 ];
+
+const ALIGNMENT_INFO: Record<string, { category: string; description: string; examples: string[] }> = {
+  'Lawful Good': {
+    category: '🌟 The Good Alignments',
+    description: 'A Lawful Good character acts as a model citizen, believing that a well-ordered society with a strong code of conduct is the best way to ensure the most people are safe and happy. They often follow laws, traditions, and authority, but will break a law if it\'s necessary to uphold a greater good (e.g., saving an innocent life).',
+    examples: [
+      'A paladin who adheres strictly to their religious and knightly oath to protect the innocent and uphold justice.',
+      'A just king or judge who follows the letter of the law to maintain peace and order, even when it is difficult.',
+    ],
+  },
+  'Neutral Good': {
+    category: '🌟 The Good Alignments',
+    description: 'A Neutral Good character believes in doing good above all else, but does not feel bound to either strict rules (Law) or complete freedom (Chaos). They will use the best method available—whether it\'s following the law or breaking it—to help others.',
+    examples: [
+      'A cleric who travels the land helping the poor and sick, ignoring political boundaries and refusing to join any standing military or order.',
+      'A kind-hearted adventurer who fights monsters and protects villagers simply because it\'s the right thing to do, without following a specific code or relying on complicated schemes.',
+    ],
+  },
+  'Chaotic Good': {
+    category: '🌟 The Good Alignments',
+    description: 'A Chaotic Good character strongly believes in the triumph of good over evil, but views laws, governments, and traditions as oppressive and restrictive. They champion individual freedom and act according to their own moral compass, which often means defying corrupt authority or disrupting unfair systems.',
+    examples: [
+      'A swashbuckling rogue who steals from corrupt nobles and gives the money to the poor, actively flouting the local laws for a noble cause (a "Robin Hood" figure).',
+      'A rebel wizard who forms a secret resistance to overthrow an unjust tyrant, prioritizing personal liberty over the established—but evil—order.',
+    ],
+  },
+  'Lawful Neutral': {
+    category: '⚖️ The Neutral Alignments',
+    description: 'A Lawful Neutral character values tradition, discipline, honor, and obedience to a code more than any moral outcome. They believe that strong laws and order are necessary for existence, and they follow those laws impartially, whether they lead to good or evil.',
+    examples: [
+      'A soldier who always follows the orders of their commanding officer, regardless of whether they agree with the specific mission.',
+      'A monk dedicated to a specific, strict spiritual tradition whose rules dictate their every action and purpose.',
+    ],
+  },
+  'True Neutral': {
+    category: '⚖️ The Neutral Alignments',
+    description: 'A True Neutral character—sometimes called "Neutral Neutral"—is defined by a commitment to true impartiality, balance, and survival, often focusing on their own skin or simple needs. They view all extremes (good/evil, law/chaos) as dangerous and will ally with or oppose any side if it serves their current goal or maintains the balance of power.',
+    examples: [
+      'A druid who strives to protect the balance of nature, seeing civilization and destructive monsters as equally harmful extremes that must be kept in check.',
+      'A mercenary who works only for the highest bidder, acting solely out of self-interest and not caring about the justice or wickedness of their client.',
+    ],
+  },
+  'Chaotic Neutral': {
+    category: '⚖️ The Neutral Alignments',
+    description: 'A Chaotic Neutral character is an individualist and a free spirit who follows their every whim. They are largely motivated by self-interest and personal freedom, with no strong compulsion toward good or evil. They are unpredictable and simply do whatever they feel like doing at the moment.',
+    examples: [
+      'A jester or trickster who pulls pranks and causes chaos for fun, sometimes helping people and sometimes hindering them, based only on what amuses them.',
+      'A wild barbarian who lives outside of society, constantly seeking new experiences and thrills, and caring little for the consequences of their actions on others.',
+    ],
+  },
+  'Lawful Evil': {
+    category: '😈 The Evil Alignments',
+    description: 'A Lawful Evil character acts within a set of personal or systemic rules, but uses that system to achieve self-serving, evil goals. They believe in the power of hierarchy and control, often using laws, tradition, or oaths to secure power and impose their will on others. They can be relied upon to keep their word, but only if it serves their interests.',
+    examples: [
+      'A tyrant who uses oppressive laws and fear to control their kingdom and enrich themselves, upholding the letter of the law while violating its spirit.',
+      'A devil who follows a strict hierarchy and honors all contracts, knowing that every deal is a path to the corruption and eventual damnation of souls.',
+    ],
+  },
+  'Neutral Evil': {
+    category: '😈 The Evil Alignments',
+    description: 'A Neutral Evil character is concerned with their own well-being, power, and advancement above all else. They are typically unburdened by loyalty or rules, using whatever method—organized crime, deception, or outright violence—to get what they want. They kill, steal, and deceive without remorse if it benefits them.',
+    examples: [
+      'A crime boss who runs an organization for personal gain, forming temporary alliances when useful and breaking them when they are no longer beneficial.',
+      'A power-hungry wizard who pursues forbidden knowledge and dark magic, seeing others as tools or obstacles to be eliminated in their quest for magical supremacy.',
+    ],
+  },
+  'Chaotic Evil': {
+    category: '😈 The Evil Alignments',
+    description: 'A Chaotic Evil character represents the destructive force of pure, malicious self-interest and sadism. They are motivated by the desire to cause pain, spread chaos, and destroy beauty or goodness. They are brutal, arbitrary, and unpredictable, often acting alone or in loose bands of monstrous thugs.',
+    examples: [
+      'A demon whose sole purpose is to destroy and corrupt, delighting in senseless violence and suffering.',
+      'A crazed cultist or homicidal maniac who seeks only to burn down society and murder as many people as possible, without any coherent plan or goal beyond destruction.',
+    ],
+  },
+};
 
 const BACKGROUNDS = [
   {
@@ -468,6 +543,10 @@ interface StepProps {
 }
 
 const Step1Details: React.FC<StepProps> = ({ data, updateData, nextStep }) => {
+    const [showAlignmentInfo, setShowAlignmentInfo] = useState(true);
+    const [showBackgroundInfo, setShowBackgroundInfo] = useState(true);
+
+    const selectedAlignment = data.alignment ? ALIGNMENT_INFO[data.alignment] : null;
     const selectedBackground = BACKGROUNDS.find(bg => bg.name === data.background);
 
     return (
@@ -495,6 +574,31 @@ const Step1Details: React.FC<StepProps> = ({ data, updateData, nextStep }) => {
                 </select>
             </div>
 
+            {selectedAlignment && showAlignmentInfo && (
+                <div className="bg-gray-700/50 border border-gray-600 rounded-lg p-4 space-y-3 relative">
+                    <button
+                        onClick={() => setShowAlignmentInfo(false)}
+                        className="absolute top-2 right-2 text-gray-400 hover:text-white transition-colors"
+                        title="Close"
+                    >
+                        <XCircle className="w-5 h-5" />
+                    </button>
+
+                    <div className="text-sm font-semibold text-purple-400">{selectedAlignment.category}</div>
+                    <h4 className="text-lg font-bold text-yellow-300">{data.alignment}</h4>
+                    <p className="text-sm text-gray-300">{selectedAlignment.description}</p>
+
+                    <div className="pt-2 border-t border-gray-600">
+                        <div className="font-semibold text-yellow-400 mb-2">Examples:</div>
+                        <ul className="space-y-2 text-xs text-gray-400">
+                            {selectedAlignment.examples.map((example, idx) => (
+                                <li key={idx} className="pl-3 border-l-2 border-gray-600">{example}</li>
+                            ))}
+                        </ul>
+                    </div>
+                </div>
+            )}
+
             <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">Background</label>
                 <select
@@ -509,8 +613,16 @@ const Step1Details: React.FC<StepProps> = ({ data, updateData, nextStep }) => {
                 </select>
             </div>
 
-            {selectedBackground && (
-                <div className="bg-gray-700/50 border border-gray-600 rounded-lg p-4 space-y-3">
+            {selectedBackground && showBackgroundInfo && (
+                <div className="bg-gray-700/50 border border-gray-600 rounded-lg p-4 space-y-3 relative">
+                    <button
+                        onClick={() => setShowBackgroundInfo(false)}
+                        className="absolute top-2 right-2 text-gray-400 hover:text-white transition-colors"
+                        title="Close"
+                    >
+                        <XCircle className="w-5 h-5" />
+                    </button>
+
                     <h4 className="text-lg font-bold text-yellow-300">{selectedBackground.name}</h4>
                     <p className="text-sm text-gray-300">{selectedBackground.description}</p>
 
