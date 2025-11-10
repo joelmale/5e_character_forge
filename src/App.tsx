@@ -1118,8 +1118,15 @@ const calculateCharacterStats = (data: CharacterCreationData): Character => {
   const level = data.level;
   const pb = PROFICIENCY_BONUSES[level as keyof typeof PROFICIENCY_BONUSES] || 2;
 
-  // 2. Calculate Hit Points (Simplified for Level 1)
-  const maxHitPoints = classData.hit_die + finalAbilities.CON.modifier + (raceData.slug === 'dwarf' ? level : 0);
+  // 2. Calculate Hit Points (Based on chosen method)
+  let hitDieValue: number;
+  if (data.hpCalculationMethod === 'rolled' && data.rolledHP) {
+    hitDieValue = data.rolledHP;
+  } else {
+    // Default to max for level 1
+    hitDieValue = classData.hit_die;
+  }
+  const maxHitPoints = hitDieValue + finalAbilities.CON.modifier + (raceData.slug === 'dwarf' ? level : 0);
 
   // 3. Calculate Skills
   const finalSkills: Character['skills'] = {} as Character['skills'];
@@ -1342,8 +1349,9 @@ const CharacterSheet: React.FC<CharacterSheetProps> = ({ character, onClose, onD
 const STEP_TITLES = [
     'Character Details',
     'Choose Race',
-    'Choose Class',
+    'Choose Class & Skills',
     'Determine Abilities',
+    'Select Equipment',
     'Finalize Background'
 ];
 
@@ -1729,14 +1737,103 @@ const Step3Class: React.FC<StepProps> = ({ data, updateData, nextStep, prevStep 
                 </div>
             )}
 
+            {/* Skill Selection */}
+            {selectedClass && (
+                <div className="bg-gray-700/50 border border-gray-600 rounded-lg p-4 space-y-3">
+                    <h4 className="text-lg font-bold text-yellow-300">
+                        Choose Skills ({data.selectedSkills.length} / {selectedClass.num_skill_choices} selected)
+                    </h4>
+                    <p className="text-xs text-gray-400">
+                        Select {selectedClass.num_skill_choices} skill{selectedClass.num_skill_choices !== 1 ? 's' : ''} from your class options.
+                        Skills from your background are automatically granted.
+                    </p>
+
+                    {/* Background Skills (Auto-granted) */}
+                    {(() => {
+                        const backgroundData = BACKGROUNDS.find(bg => bg.name === data.background);
+                        const backgroundSkills = backgroundData?.skillProficiencies || [];
+
+                        if (backgroundSkills.length > 0) {
+                            return (
+                                <div className="p-3 bg-green-900/20 border border-green-700 rounded-lg">
+                                    <div className="text-xs font-semibold text-green-400 mb-2">
+                                        Background Skills (Auto-granted from {data.background}):
+                                    </div>
+                                    <div className="flex flex-wrap gap-2">
+                                        {backgroundSkills.map(skill => (
+                                            <span key={skill} className="px-2 py-1 bg-green-700 text-white text-xs rounded">
+                                                {skill}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+                            );
+                        }
+                        return null;
+                    })()}
+
+                    {/* Class Skill Selection */}
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                        {selectedClass.skill_proficiencies.map(skill => {
+                            const backgroundData = BACKGROUNDS.find(bg => bg.name === data.background);
+                            const backgroundSkills = backgroundData?.skillProficiencies || [];
+                            const isBackgroundSkill = backgroundSkills.includes(skill);
+                            const isSelected = data.selectedSkills.includes(skill as SkillName);
+                            const canSelect = data.selectedSkills.length < selectedClass.num_skill_choices;
+
+                            return (
+                                <button
+                                    key={skill}
+                                    onClick={() => {
+                                        if (isBackgroundSkill) return; // Can't select background skills
+
+                                        if (isSelected) {
+                                            // Deselect
+                                            updateData({
+                                                selectedSkills: data.selectedSkills.filter(s => s !== skill)
+                                            });
+                                        } else if (canSelect) {
+                                            // Select
+                                            updateData({
+                                                selectedSkills: [...data.selectedSkills, skill as SkillName]
+                                            });
+                                        }
+                                    }}
+                                    disabled={isBackgroundSkill}
+                                    className={`p-2 rounded-lg text-sm border-2 transition-all ${
+                                        isBackgroundSkill
+                                            ? 'bg-green-900/20 border-green-700 text-green-400 cursor-not-allowed opacity-60'
+                                            : isSelected
+                                            ? 'bg-blue-800 border-blue-500 text-white'
+                                            : canSelect
+                                            ? 'bg-gray-700 border-gray-600 hover:bg-gray-600 text-gray-300'
+                                            : 'bg-gray-800 border-gray-700 text-gray-500 cursor-not-allowed'
+                                    }`}
+                                    title={isBackgroundSkill ? 'Already granted by background' : ''}
+                                >
+                                    {skill}
+                                    {isBackgroundSkill && <span className="ml-1 text-xs">(BG)</span>}
+                                </button>
+                            );
+                        })}
+                    </div>
+
+                    {data.selectedSkills.length < selectedClass.num_skill_choices && (
+                        <div className="text-xs text-yellow-400 mt-2">
+                            ⚠️ Please select {selectedClass.num_skill_choices - data.selectedSkills.length} more skill{selectedClass.num_skill_choices - data.selectedSkills.length !== 1 ? 's' : ''}
+                        </div>
+                    )}
+                </div>
+            )}
+
             <div className='flex justify-between'>
                 <button onClick={prevStep} className="px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded-lg text-white flex items-center">
                     <ArrowLeft className="w-4 h-4 mr-2" /> Back
                 </button>
                 <button
                     onClick={nextStep}
-                    disabled={!data.classSlug}
-                    className="px-4 py-2 bg-red-600 hover:bg-red-500 rounded-lg text-white flex items-center disabled:bg-gray-600"
+                    disabled={!data.classSlug || !selectedClass || data.selectedSkills.length < selectedClass.num_skill_choices}
+                    className="px-4 py-2 bg-red-600 hover:bg-red-500 rounded-lg text-white flex items-center disabled:bg-gray-600 disabled:cursor-not-allowed"
                 >
                     Next: Abilities <ArrowRight className="w-4 h-4 ml-2" />
                 </button>
@@ -2157,7 +2254,111 @@ const Step4Abilities: React.FC<StepProps> = ({ data, updateData, nextStep, prevS
     );
 };
 
-const Step5Traits: React.FC<StepProps & { onSubmit: (data: CharacterCreationData) => void }> = ({ data, updateData, prevStep, onSubmit }) => {
+const Step5Equipment: React.FC<StepProps> = ({ data, updateData, nextStep, prevStep }) => {
+    const allClasses = getAllClasses();
+    const selectedClass = allClasses.find(c => c.slug === data.classSlug);
+
+    if (!selectedClass) {
+        return <div>Loading...</div>;
+    }
+
+    // Initialize equipment choices if not already set
+    if (data.equipmentChoices.length === 0 && selectedClass.equipment_choices.length > 0) {
+        updateData({ equipmentChoices: selectedClass.equipment_choices });
+    }
+
+    const handleEquipmentChoice = (choiceId: string, optionIndex: number) => {
+        const updatedChoices = data.equipmentChoices.map(choice =>
+            choice.choiceId === choiceId ? { ...choice, selected: optionIndex } : choice
+        );
+        updateData({ equipmentChoices: updatedChoices });
+    };
+
+    const allChoicesMade = data.equipmentChoices.every(choice => choice.selected !== null);
+
+    return (
+        <div className='space-y-6'>
+            <h3 className='text-xl font-bold text-red-300'>Select Starting Equipment</h3>
+            <p className="text-sm text-gray-400">
+                Choose your starting equipment based on your class. Your background will also grant additional items.
+            </p>
+
+            {/* Equipment Choices */}
+            {data.equipmentChoices.map((choice, idx) => (
+                <div key={choice.choiceId} className="bg-gray-700/50 border border-gray-600 rounded-lg p-4 space-y-3">
+                    <h4 className="font-semibold text-yellow-300">
+                        {idx + 1}. {choice.description}
+                    </h4>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {choice.options.map((option, optionIdx) => (
+                            <button
+                                key={optionIdx}
+                                onClick={() => handleEquipmentChoice(choice.choiceId, optionIdx)}
+                                className={`p-3 rounded-lg border-2 text-left transition-all ${
+                                    choice.selected === optionIdx
+                                        ? 'bg-blue-800 border-blue-500'
+                                        : 'bg-gray-700 border-gray-600 hover:bg-gray-600'
+                                }`}
+                            >
+                                <div className="space-y-1">
+                                    {option.map((item, itemIdx) => (
+                                        <div key={itemIdx} className="text-sm">
+                                            <span className="text-white font-medium">{item.name}</span>
+                                            {item.quantity > 1 && (
+                                                <span className="text-gray-400 ml-1">x{item.quantity}</span>
+                                            )}
+                                            {item.weight && item.weight > 0 && (
+                                                <span className="text-gray-500 text-xs ml-2">({item.weight} lb)</span>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            ))}
+
+            {/* Background Equipment Info */}
+            {(() => {
+                const backgroundData = BACKGROUNDS.find(bg => bg.name === data.background);
+                if (backgroundData?.equipment) {
+                    return (
+                        <div className="p-3 bg-green-900/20 border border-green-700 rounded-lg">
+                            <div className="text-xs font-semibold text-green-400 mb-2">
+                                Background Equipment (Auto-granted from {data.background}):
+                            </div>
+                            <p className="text-sm text-gray-300">{backgroundData.equipment}</p>
+                        </div>
+                    );
+                }
+                return null;
+            })()}
+
+            {!allChoicesMade && (
+                <div className="text-xs text-yellow-400">
+                    ⚠️ Please make all equipment choices before continuing
+                </div>
+            )}
+
+            <div className='flex justify-between'>
+                <button onClick={prevStep} className="px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded-lg text-white flex items-center">
+                    <ArrowLeft className="w-4 h-4 mr-2" /> Back
+                </button>
+                <button
+                    onClick={nextStep}
+                    disabled={!allChoicesMade}
+                    className="px-4 py-2 bg-red-600 hover:bg-red-500 rounded-lg text-white flex items-center disabled:bg-gray-600 disabled:cursor-not-allowed"
+                >
+                    Next: Traits <ArrowRight className="w-4 h-4 ml-2" />
+                </button>
+            </div>
+        </div>
+    );
+};
+
+const Step6Traits: React.FC<StepProps & { onSubmit: (data: CharacterCreationData) => void }> = ({ data, updateData, prevStep, onSubmit }) => {
     return (
         <div className='space-y-6'>
             <h3 className='text-xl font-bold text-red-300'>Final Details & Personality</h3>
@@ -2210,6 +2411,79 @@ const Step5Traits: React.FC<StepProps & { onSubmit: (data: CharacterCreationData
                     />
                 </div>
             </div>
+
+            {/* Hit Points Calculation Method */}
+            {(() => {
+                const allClasses = getAllClasses();
+                const selectedClass = allClasses.find(c => c.slug === data.classSlug);
+                if (!selectedClass) return null;
+
+                const conModifier = getModifier(data.abilities.CON);
+
+                return (
+                    <div className="bg-gray-700/50 border border-gray-600 rounded-lg p-4 space-y-3">
+                        <h4 className="text-lg font-bold text-yellow-300">Starting Hit Points</h4>
+                        <p className="text-xs text-gray-400">
+                            Choose how to determine your starting HP (at 1st level, most players take maximum).
+                        </p>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <button
+                                onClick={() => updateData({ hpCalculationMethod: 'max', rolledHP: undefined })}
+                                className={`p-3 rounded-lg border-2 text-left transition-all ${
+                                    data.hpCalculationMethod === 'max'
+                                        ? 'bg-blue-800 border-blue-500'
+                                        : 'bg-gray-700 border-gray-600 hover:bg-gray-600'
+                                }`}
+                            >
+                                <div className="font-semibold text-white">Take Maximum (Recommended)</div>
+                                <div className="text-sm text-gray-300 mt-1">
+                                    {selectedClass.hit_die} + {conModifier} = {selectedClass.hit_die + conModifier} HP
+                                </div>
+                                <div className="text-xs text-gray-400 mt-1">Standard for 1st level characters</div>
+                            </button>
+
+                            <button
+                                onClick={() => {
+                                    // Roll the hit die
+                                    const rolled = rollDice(1, selectedClass.hit_die)[0];
+                                    updateData({ hpCalculationMethod: 'rolled', rolledHP: rolled });
+                                }}
+                                className={`p-3 rounded-lg border-2 text-left transition-all ${
+                                    data.hpCalculationMethod === 'rolled'
+                                        ? 'bg-blue-800 border-blue-500'
+                                        : 'bg-gray-700 border-gray-600 hover:bg-gray-600'
+                                }`}
+                            >
+                                <div className="font-semibold text-white">Roll Hit Die</div>
+                                <div className="text-sm text-gray-300 mt-1">
+                                    {data.hpCalculationMethod === 'rolled' && data.rolledHP ? (
+                                        <>
+                                            Rolled: {data.rolledHP} + {conModifier} = {data.rolledHP + conModifier} HP
+                                        </>
+                                    ) : (
+                                        <>
+                                            1d{selectedClass.hit_die} + {conModifier}
+                                        </>
+                                    )}
+                                </div>
+                                <div className="text-xs text-gray-400 mt-1">
+                                    {data.hpCalculationMethod === 'rolled' ? 'Click to re-roll' : 'Click to roll'}
+                                </div>
+                            </button>
+                        </div>
+
+                        <div className="text-xs text-gray-500 mt-2">
+                            Final HP: <span className="text-white font-bold">
+                                {data.hpCalculationMethod === 'max'
+                                    ? selectedClass.hit_die + conModifier
+                                    : data.rolledHP ? data.rolledHP + conModifier : 0
+                                } HP
+                            </span>
+                        </div>
+                    </div>
+                );
+            })()}
 
             <div className='flex justify-between'>
                 <button onClick={prevStep} className="px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded-lg text-white flex items-center"><ArrowLeft className="w-4 h-4 mr-2" /> Back</button>
@@ -2266,7 +2540,8 @@ const CharacterCreationWizard: React.FC<WizardProps> = ({ isOpen, onClose, onCha
             case 1: return <Step2Race {...commonProps} />;
             case 2: return <Step3Class {...commonProps} />;
             case 3: return <Step4Abilities {...commonProps} />;
-            case 4: return <Step5Traits {...commonProps} onSubmit={handleSubmit} />;
+            case 4: return <Step5Equipment {...commonProps} />;
+            case 5: return <Step6Traits {...commonProps} onSubmit={handleSubmit} />;
             default: return <p>Unknown step.</p>;
         }
     };
