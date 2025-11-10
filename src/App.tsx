@@ -2041,31 +2041,53 @@ const Step5Traits: React.FC<StepProps & { onSubmit: (data: CharacterCreationData
         <div className='space-y-6'>
             <h3 className='text-xl font-bold text-red-300'>Final Details & Personality</h3>
 
-            <textarea
-                placeholder="Personality Traits"
-                value={data.personality}
-                onChange={(e) => updateData({ personality: e.target.value })}
-                className="w-full h-20 p-3 bg-gray-700 text-white rounded-lg focus:ring-red-500 focus:border-red-500 resize-none"
-            />
-             <textarea
-                placeholder="Ideals"
-                value={data.ideals}
-                onChange={(e) => updateData({ ideals: e.target.value })}
-                className="w-full h-16 p-3 bg-gray-700 text-white rounded-lg focus:ring-red-500 focus:border-red-500 resize-none"
-            />
+            <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Personality Traits
+                </label>
+                <textarea
+                    placeholder="Describe your character's personality traits and quirks..."
+                    value={data.personality}
+                    onChange={(e) => updateData({ personality: e.target.value })}
+                    className="w-full h-20 p-3 bg-gray-700 text-white rounded-lg focus:ring-red-500 focus:border-red-500 resize-none"
+                />
+            </div>
+
+            <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Ideals
+                </label>
+                <textarea
+                    placeholder="What principles and beliefs guide your character?"
+                    value={data.ideals}
+                    onChange={(e) => updateData({ ideals: e.target.value })}
+                    className="w-full h-16 p-3 bg-gray-700 text-white rounded-lg focus:ring-red-500 focus:border-red-500 resize-none"
+                />
+            </div>
+
             <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-                <textarea
-                    placeholder="Bonds"
-                    value={data.bonds}
-                    onChange={(e) => updateData({ bonds: e.target.value })}
-                    className="w-full h-16 p-3 bg-gray-700 text-white rounded-lg focus:ring-red-500 focus:border-red-500 resize-none"
-                />
-                <textarea
-                    placeholder="Flaws"
-                    value={data.flaws}
-                    onChange={(e) => updateData({ flaws: e.target.value })}
-                    className="w-full h-16 p-3 bg-gray-700 text-white rounded-lg focus:ring-red-500 focus:border-red-500 resize-none"
-                />
+                <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                        Bonds
+                    </label>
+                    <textarea
+                        placeholder="Who or what is your character connected to?"
+                        value={data.bonds}
+                        onChange={(e) => updateData({ bonds: e.target.value })}
+                        className="w-full h-16 p-3 bg-gray-700 text-white rounded-lg focus:ring-red-500 focus:border-red-500 resize-none"
+                    />
+                </div>
+                <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                        Flaws
+                    </label>
+                    <textarea
+                        placeholder="What weaknesses does your character have?"
+                        value={data.flaws}
+                        onChange={(e) => updateData({ flaws: e.target.value })}
+                        className="w-full h-16 p-3 bg-gray-700 text-white rounded-lg focus:ring-red-500 focus:border-red-500 resize-none"
+                    />
+                </div>
             </div>
 
             <div className='flex justify-between'>
