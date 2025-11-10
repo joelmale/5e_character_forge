@@ -471,11 +471,373 @@ const getAllRaces = (): Race[] => {
   return RACE_CATEGORIES.flatMap(category => category.races);
 };
 
-const MOCK_CLASSES = [
-  { slug: 'fighter', name: 'Fighter', hit_die: 10, primary_stat: 'STR', save_throws: ['STR', 'CON'], skill_proficiencies: ['Athletics', 'Acrobatics'], class_features: ['Fighting Style', 'Second Wind'] },
-  { slug: 'wizard', name: 'Wizard', hit_die: 6, primary_stat: 'INT', save_throws: ['INT', 'WIS'], skill_proficiencies: ['Arcana', 'History'], class_features: ['Spellcasting', 'Arcane Recovery'] },
-  { slug: 'rogue', name: 'Rogue', hit_die: 8, primary_stat: 'DEX', save_throws: ['DEX', 'INT'], skill_proficiencies: ['SleightOfHand', 'Stealth', 'Acrobatics', 'Deception'], class_features: ['Expertise', 'Sneak Attack'] },
+interface Class {
+  slug: string;
+  name: string;
+  source: string;
+  hit_die: number;
+  primary_stat: string;
+  save_throws: string[];
+  skill_proficiencies: string[];
+  class_features: string[];
+  description: string;
+  keyRole: string;
+}
+
+interface ClassCategory {
+  name: string;
+  icon: string;
+  description: string;
+  classes: Class[];
+}
+
+const CLASS_CATEGORIES: ClassCategory[] = [
+  {
+    name: 'Core Classes',
+    icon: '📚',
+    description: 'The 13 essential D&D 5e classes from the Player\'s Handbook',
+    classes: [
+      {
+        slug: 'barbarian',
+        name: 'Barbarian',
+        source: 'Player\'s Handbook',
+        hit_die: 12,
+        primary_stat: 'Strength, Constitution',
+        save_throws: ['STR', 'CON'],
+        skill_proficiencies: ['AnimalHandling', 'Athletics', 'Intimidation', 'Nature', 'Perception', 'Survival'],
+        class_features: ['Rage', 'Unarmored Defense', 'Reckless Attack', 'Danger Sense'],
+        description: 'The primal warrior; fueled by Rage to ignore pain and deal massive damage. Barbarians are fierce combatants who draw strength from their anger.',
+        keyRole: 'Tank/Damage Dealer - Frontline warrior with high HP and damage resistance',
+      },
+      {
+        slug: 'bard',
+        name: 'Bard',
+        source: 'Player\'s Handbook',
+        hit_die: 8,
+        primary_stat: 'Charisma',
+        save_throws: ['DEX', 'CHA'],
+        skill_proficiencies: ['Any three skills'],
+        class_features: ['Bardic Inspiration', 'Jack of All Trades', 'Song of Rest', 'Magical Secrets'],
+        description: 'The inspiring musician and speaker; uses magic to charm, perform, and support allies. Bards are versatile spellcasters and skill masters.',
+        keyRole: 'Support/Utility - Buffs allies, debuffs enemies, and provides magical versatility',
+      },
+      {
+        slug: 'cleric',
+        name: 'Cleric',
+        source: 'Player\'s Handbook',
+        hit_die: 8,
+        primary_stat: 'Wisdom',
+        save_throws: ['WIS', 'CHA'],
+        skill_proficiencies: ['History', 'Insight', 'Medicine', 'Persuasion', 'Religion'],
+        class_features: ['Divine Domain', 'Channel Divinity', 'Destroy Undead', 'Divine Intervention'],
+        description: 'The priest of a god; a versatile magical and martial healer and divine caster. Clerics channel the power of their deity.',
+        keyRole: 'Healer/Support - Primary healer with strong combat and utility spells',
+      },
+      {
+        slug: 'druid',
+        name: 'Druid',
+        source: 'Player\'s Handbook',
+        hit_die: 8,
+        primary_stat: 'Wisdom',
+        save_throws: ['INT', 'WIS'],
+        skill_proficiencies: ['Arcana', 'AnimalHandling', 'Insight', 'Medicine', 'Nature', 'Perception', 'Religion', 'Survival'],
+        class_features: ['Wild Shape', 'Druidic Circle', 'Timeless Body', 'Beast Spells'],
+        description: 'The keeper of nature; harnesses primal magic and can transform into beasts. Druids are guardians of the wilderness.',
+        keyRole: 'Controller/Shapeshifter - Versatile caster who can become powerful beasts',
+      },
+      {
+        slug: 'fighter',
+        name: 'Fighter',
+        source: 'Player\'s Handbook',
+        hit_die: 10,
+        primary_stat: 'Strength or Dexterity',
+        save_throws: ['STR', 'CON'],
+        skill_proficiencies: ['Acrobatics', 'Athletics', 'History', 'Insight', 'Intimidation', 'Perception', 'Survival'],
+        class_features: ['Fighting Style', 'Second Wind', 'Action Surge', 'Extra Attack'],
+        description: 'The master of all weapons and armor; a versatile combat specialist. Fighters are unmatched in physical combat prowess.',
+        keyRole: 'Damage Dealer/Tank - Consistent damage output with excellent survivability',
+      },
+      {
+        slug: 'monk',
+        name: 'Monk',
+        source: 'Player\'s Handbook',
+        hit_die: 8,
+        primary_stat: 'Dexterity, Wisdom',
+        save_throws: ['STR', 'DEX'],
+        skill_proficiencies: ['Acrobatics', 'Athletics', 'History', 'Insight', 'Religion', 'Stealth'],
+        class_features: ['Martial Arts', 'Ki', 'Unarmored Defense', 'Flurry of Blows', 'Stunning Strike'],
+        description: 'The martial artist; uses internal energy (Ki) to perform stunning physical feats. Monks are mobile melee fighters.',
+        keyRole: 'Striker/Controller - High mobility with crowd control abilities',
+      },
+      {
+        slug: 'paladin',
+        name: 'Paladin',
+        source: 'Player\'s Handbook',
+        hit_die: 10,
+        primary_stat: 'Strength, Charisma',
+        save_throws: ['WIS', 'CHA'],
+        skill_proficiencies: ['Athletics', 'Insight', 'Intimidation', 'Medicine', 'Persuasion', 'Religion'],
+        class_features: ['Divine Sense', 'Lay on Hands', 'Divine Smite', 'Aura of Protection'],
+        description: 'The sworn champion of an ideal; uses martial prowess and divine Smites in combat. Paladins are holy warriors bound by oath.',
+        keyRole: 'Tank/Burst Damage - Durable frontliner with powerful single-target damage',
+      },
+      {
+        slug: 'ranger',
+        name: 'Ranger',
+        source: 'Player\'s Handbook',
+        hit_die: 10,
+        primary_stat: 'Dexterity, Wisdom',
+        save_throws: ['STR', 'DEX'],
+        skill_proficiencies: ['AnimalHandling', 'Athletics', 'Insight', 'Investigation', 'Nature', 'Perception', 'Stealth', 'Survival'],
+        class_features: ['Favored Enemy', 'Natural Explorer', 'Hunter\'s Mark', 'Extra Attack'],
+        description: 'The wilderness warrior and tracker; excels at hunting specific foes and navigating terrain. Rangers blend martial and magical abilities.',
+        keyRole: 'Striker/Scout - Damage dealer with tracking and exploration expertise',
+      },
+      {
+        slug: 'rogue',
+        name: 'Rogue',
+        source: 'Player\'s Handbook',
+        hit_die: 8,
+        primary_stat: 'Dexterity',
+        save_throws: ['DEX', 'INT'],
+        skill_proficiencies: ['Acrobatics', 'Athletics', 'Deception', 'Insight', 'Intimidation', 'Investigation', 'Perception', 'Performance', 'Persuasion', 'SleightOfHand', 'Stealth'],
+        class_features: ['Expertise', 'Sneak Attack', 'Cunning Action', 'Uncanny Dodge', 'Evasion'],
+        description: 'The specialist in stealth, deception, and precise Sneak Attack damage. Rogues are masters of skills and deadly precision.',
+        keyRole: 'Striker/Skill Monkey - High single-target damage with unmatched skill proficiency',
+      },
+      {
+        slug: 'sorcerer',
+        name: 'Sorcerer',
+        source: 'Player\'s Handbook',
+        hit_die: 6,
+        primary_stat: 'Charisma',
+        save_throws: ['CON', 'CHA'],
+        skill_proficiencies: ['Arcana', 'Deception', 'Insight', 'Intimidation', 'Persuasion', 'Religion'],
+        class_features: ['Sorcerous Origin', 'Font of Magic', 'Metamagic', 'Sorcery Points'],
+        description: 'The innate spellcaster; magic flows through their bloodline, giving them unique ways to manipulate spells. Sorcerers shape magic itself.',
+        keyRole: 'Blaster/Controller - Flexible spellcaster who modifies spell effects',
+      },
+      {
+        slug: 'warlock',
+        name: 'Warlock',
+        source: 'Player\'s Handbook',
+        hit_die: 8,
+        primary_stat: 'Charisma',
+        save_throws: ['WIS', 'CHA'],
+        skill_proficiencies: ['Arcana', 'Deception', 'History', 'Intimidation', 'Investigation', 'Nature', 'Religion'],
+        class_features: ['Otherworldly Patron', 'Pact Magic', 'Eldritch Invocations', 'Pact Boon'],
+        description: 'The dark pact master; draws powerful, focused magic from an otherworldly patron. Warlocks gain power through supernatural bargains.',
+        keyRole: 'Blaster/Utility - Consistent damage with customizable magical abilities',
+      },
+      {
+        slug: 'wizard',
+        name: 'Wizard',
+        source: 'Player\'s Handbook',
+        hit_die: 6,
+        primary_stat: 'Intelligence',
+        save_throws: ['INT', 'WIS'],
+        skill_proficiencies: ['Arcana', 'History', 'Insight', 'Investigation', 'Medicine', 'Religion'],
+        class_features: ['Arcane Recovery', 'Arcane Tradition', 'Spell Mastery', 'Signature Spells'],
+        description: 'The scholarly archmage; masters the widest variety of spells through study and spellbooks. Wizards are the ultimate magical specialists.',
+        keyRole: 'Controller/Utility - Largest spell list with solutions for every problem',
+      },
+      {
+        slug: 'artificer',
+        name: 'Artificer',
+        source: 'Tasha\'s Cauldron of Everything',
+        hit_die: 8,
+        primary_stat: 'Intelligence',
+        save_throws: ['CON', 'INT'],
+        skill_proficiencies: ['Arcana', 'History', 'Investigation', 'Medicine', 'Nature', 'Perception', 'SleightOfHand'],
+        class_features: ['Magical Tinkering', 'Infuse Item', 'The Right Tool for the Job', 'Flash of Genius'],
+        description: 'The magical inventor; creates and infuses wondrous items and gadgets to augment combat and utility. Artificers blend magic and technology.',
+        keyRole: 'Support/Utility - Enhances allies with magical items and versatile spells',
+      },
+    ],
+  },
+  {
+    name: 'Martial & Skill Specialists',
+    icon: '⚔️',
+    description: 'Subclasses focused on physical prowess and specialized techniques',
+    classes: [
+      {
+        slug: 'fighter-battle-master',
+        name: 'Fighter (Battle Master)',
+        source: 'Player\'s Handbook - Subclass',
+        hit_die: 10,
+        primary_stat: 'Strength or Dexterity',
+        save_throws: ['STR', 'CON'],
+        skill_proficiencies: ['Acrobatics', 'Athletics', 'History', 'Insight', 'Intimidation', 'Perception', 'Survival'],
+        class_features: ['Combat Superiority', 'Maneuvers', 'Student of War', 'Know Your Enemy'],
+        description: 'The tactical genius who uses special combat Maneuvers to control the battlefield. Battle Masters are strategic fighters.',
+        keyRole: 'Controller/Tactician - Uses maneuvers to disrupt enemies and support allies',
+      },
+      {
+        slug: 'rogue-arcane-trickster',
+        name: 'Rogue (Arcane Trickster)',
+        source: 'Player\'s Handbook - Subclass',
+        hit_die: 8,
+        primary_stat: 'Dexterity, Intelligence',
+        save_throws: ['DEX', 'INT'],
+        skill_proficiencies: ['Acrobatics', 'Athletics', 'Deception', 'Insight', 'Intimidation', 'Investigation', 'Perception', 'Performance'],
+        class_features: ['Spellcasting', 'Mage Hand Legerdemain', 'Magical Ambush', 'Versatile Trickster'],
+        description: 'The sneaky thief who uses Illusion and Enchantment magic for infiltration and escape. Magic enhances their roguish tricks.',
+        keyRole: 'Striker/Utility - Combines stealth with magical deception',
+      },
+      {
+        slug: 'rogue-swashbuckler',
+        name: 'Rogue (Swashbuckler)',
+        source: 'Xanathar\'s Guide to Everything - Subclass',
+        hit_die: 8,
+        primary_stat: 'Dexterity, Charisma',
+        save_throws: ['DEX', 'INT'],
+        skill_proficiencies: ['Acrobatics', 'Athletics', 'Deception', 'Insight', 'Intimidation', 'Investigation', 'Perception', 'Performance', 'Persuasion'],
+        class_features: ['Fancy Footwork', 'Rakish Audacity', 'Panache', 'Master Duelist'],
+        description: 'The charming, daring duelist who excels at one-on-one combat and social encounters. Swashbucklers are charismatic fighters.',
+        keyRole: 'Striker/Face - Mobile damage dealer with social prowess',
+      },
+      {
+        slug: 'barbarian-zealot',
+        name: 'Barbarian (Path of the Zealot)',
+        source: 'Xanathar\'s Guide to Everything - Subclass',
+        hit_die: 12,
+        primary_stat: 'Strength, Constitution',
+        save_throws: ['STR', 'CON'],
+        skill_proficiencies: ['AnimalHandling', 'Athletics', 'Intimidation', 'Nature', 'Perception', 'Survival'],
+        class_features: ['Divine Fury', 'Warrior of the Gods', 'Fanatical Focus', 'Rage Beyond Death'],
+        description: 'A divinely-inspired warrior whose Rage is so strong they are nearly impossible to kill. Zealots fight with religious fervor.',
+        keyRole: 'Tank/Damage Dealer - Unkillable warrior with bonus radiant/necrotic damage',
+      },
+    ],
+  },
+  {
+    name: 'Divine & Primal Casters',
+    icon: '🌿',
+    description: 'Subclasses drawing power from gods, nature, and sacred oaths',
+    classes: [
+      {
+        slug: 'cleric-life',
+        name: 'Cleric (Life Domain)',
+        source: 'Player\'s Handbook - Subclass',
+        hit_die: 8,
+        primary_stat: 'Wisdom',
+        save_throws: ['WIS', 'CHA'],
+        skill_proficiencies: ['History', 'Insight', 'Medicine', 'Persuasion', 'Religion'],
+        class_features: ['Disciple of Life', 'Channel Divinity: Preserve Life', 'Blessed Healer', 'Supreme Healing'],
+        description: 'The ultimate healer; maximizes the power of healing spells and keeps allies alive. Life Clerics are unmatched in restorative magic.',
+        keyRole: 'Healer - The best healing in the game with enhanced healing spells',
+      },
+      {
+        slug: 'druid-moon',
+        name: 'Druid (Circle of the Moon)',
+        source: 'Player\'s Handbook - Subclass',
+        hit_die: 8,
+        primary_stat: 'Wisdom',
+        save_throws: ['INT', 'WIS'],
+        skill_proficiencies: ['Arcana', 'AnimalHandling', 'Insight', 'Medicine', 'Nature', 'Perception', 'Religion', 'Survival'],
+        class_features: ['Combat Wild Shape', 'Circle Forms', 'Primal Strike', 'Elemental Wild Shape'],
+        description: 'The combat shapeshifter; focuses on using Wild Shape to turn into powerful combat beasts. Moon Druids are frontline transformers.',
+        keyRole: 'Tank/Shapeshifter - Transforms into powerful beasts for combat',
+      },
+      {
+        slug: 'paladin-devotion',
+        name: 'Paladin (Oath of Devotion)',
+        source: 'Player\'s Handbook - Subclass',
+        hit_die: 10,
+        primary_stat: 'Strength, Charisma',
+        save_throws: ['WIS', 'CHA'],
+        skill_proficiencies: ['Athletics', 'Insight', 'Intimidation', 'Medicine', 'Persuasion', 'Religion'],
+        class_features: ['Sacred Weapon', 'Turn the Unholy', 'Aura of Devotion', 'Purity of Spirit'],
+        description: 'The classic, honorable knight; upholds the highest ideals of justice, courage, and duty. Devotion Paladins are paragons of virtue.',
+        keyRole: 'Tank/Support - Protects allies with auras and channels justice',
+      },
+      {
+        slug: 'paladin-vengeance',
+        name: 'Paladin (Oath of Vengeance)',
+        source: 'Player\'s Handbook - Subclass',
+        hit_die: 10,
+        primary_stat: 'Strength, Charisma',
+        save_throws: ['WIS', 'CHA'],
+        skill_proficiencies: ['Athletics', 'Insight', 'Intimidation', 'Medicine', 'Persuasion', 'Religion'],
+        class_features: ['Abjure Enemy', 'Vow of Enmity', 'Relentless Avenger', 'Soul of Vengeance'],
+        description: 'A dark knight driven by an unyielding need for retribution against evildoers. Vengeance Paladins hunt their sworn enemies.',
+        keyRole: 'Striker - Focused damage dealer hunting specific foes',
+      },
+      {
+        slug: 'ranger-gloom-stalker',
+        name: 'Ranger (Gloom Stalker)',
+        source: 'Xanathar\'s Guide to Everything - Subclass',
+        hit_die: 10,
+        primary_stat: 'Dexterity, Wisdom',
+        save_throws: ['STR', 'DEX'],
+        skill_proficiencies: ['AnimalHandling', 'Athletics', 'Insight', 'Investigation', 'Nature', 'Perception', 'Stealth', 'Survival'],
+        class_features: ['Dread Ambusher', 'Umbral Sight', 'Iron Mind', 'Stalker\'s Flurry'],
+        description: 'The master of darkness and ambushes; excels at fighting in the dark and making powerful first strikes. Gloom Stalkers are shadow hunters.',
+        keyRole: 'Striker/Ambusher - Devastating first-round damage in darkness',
+      },
+    ],
+  },
+  {
+    name: 'Arcane & Occult Casters',
+    icon: '✨',
+    description: 'Subclasses mastering magic through study, talent, or dark pacts',
+    classes: [
+      {
+        slug: 'wizard-evocation',
+        name: 'Wizard (School of Evocation)',
+        source: 'Player\'s Handbook - Subclass',
+        hit_die: 6,
+        primary_stat: 'Intelligence',
+        save_throws: ['INT', 'WIS'],
+        skill_proficiencies: ['Arcana', 'History', 'Insight', 'Investigation', 'Medicine', 'Religion'],
+        class_features: ['Sculpt Spells', 'Potent Cantrip', 'Empowered Evocation', 'Overchannel'],
+        description: 'The master of destructive magic, specializing in dealing massive damage with fire, lightning, and force spells. Evocation Wizards are blasters.',
+        keyRole: 'Blaster - Maximum spell damage without harming allies',
+      },
+      {
+        slug: 'sorcerer-draconic',
+        name: 'Sorcerer (Draconic Bloodline)',
+        source: 'Player\'s Handbook - Subclass',
+        hit_die: 6,
+        primary_stat: 'Charisma',
+        save_throws: ['CON', 'CHA'],
+        skill_proficiencies: ['Arcana', 'Deception', 'Insight', 'Intimidation', 'Persuasion', 'Religion'],
+        class_features: ['Dragon Ancestor', 'Draconic Resilience', 'Elemental Affinity', 'Dragon Wings'],
+        description: 'Magic comes from a dragon ancestor, giving them scales for defense and power over a specific element. Draconic Sorcerers embody draconic might.',
+        keyRole: 'Blaster - Enhanced elemental damage with improved survivability',
+      },
+      {
+        slug: 'warlock-hexblade',
+        name: 'Warlock (Hexblade Patron)',
+        source: 'Xanathar\'s Guide to Everything - Subclass',
+        hit_die: 8,
+        primary_stat: 'Charisma',
+        save_throws: ['WIS', 'CHA'],
+        skill_proficiencies: ['Arcana', 'Deception', 'History', 'Intimidation', 'Investigation', 'Nature', 'Religion'],
+        class_features: ['Hexblade\'s Curse', 'Hex Warrior', 'Accursed Specter', 'Master of Hexes'],
+        description: 'The mysterious warrior; uses their charisma to fight with weapons granted by a sentient weapon or entity. Hexblades are martial spellcasters.',
+        keyRole: 'Striker/Gish - Melee-focused warlock with cursed weapon attacks',
+      },
+      {
+        slug: 'bard-lore',
+        name: 'Bard (College of Lore)',
+        source: 'Player\'s Handbook - Subclass',
+        hit_die: 8,
+        primary_stat: 'Charisma',
+        save_throws: ['DEX', 'CHA'],
+        skill_proficiencies: ['Any three skills'],
+        class_features: ['Bonus Proficiencies', 'Cutting Words', 'Additional Magical Secrets', 'Peerless Skill'],
+        description: 'The scholarly raconteur; learns extra spells from any class and uses cutting words to debuff enemies. Lore Bards are knowledge masters.',
+        keyRole: 'Support/Utility - Ultimate support with spells from any class',
+      },
+    ],
+  },
 ];
+
+// Helper to get all classes from categories
+const getAllClasses = (): Class[] => {
+  return CLASS_CATEGORIES.flatMap(category => category.classes);
+};
 
 const ALIGNMENTS = [
   'Lawful Good',
@@ -632,7 +994,8 @@ const getModifier = (score: number): number => Math.floor((score - 10) / 2);
 const calculateCharacterStats = (data: CharacterCreationData): Character => {
   const allRaces = getAllRaces();
   const raceData = allRaces.find(r => r.slug === data.raceSlug);
-  const classData = MOCK_CLASSES.find(c => c.slug === data.classSlug);
+  const allClasses = getAllClasses();
+  const classData = allClasses.find(c => c.slug === data.classSlug);
 
   if (!raceData || !classData) {
     throw new Error("Incomplete creation data.");
@@ -1120,31 +1483,144 @@ const Step2Race: React.FC<StepProps> = ({ data, updateData, nextStep, prevStep }
     );
 };
 
-const Step3Class: React.FC<StepProps> = ({ data, updateData, nextStep, prevStep }) => (
-    <div className='space-y-6'>
-        <h3 className='text-xl font-bold text-red-300'>Select Class (Hit Die and Starting Proficiencies)</h3>
-        <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
-            {MOCK_CLASSES.map(_class => (
-                <button
-                    key={_class.slug}
-                    onClick={() => updateData({ classSlug: _class.slug })}
-                    className={`p-4 rounded-xl text-left border-2 transition-all ${data.classSlug === _class.slug
-                        ? 'bg-red-800 border-red-500 shadow-md'
-                        : 'bg-gray-700 border-gray-600 hover:bg-gray-600'}`
-                    }
-                >
-                    <p className='text-lg font-bold text-yellow-300'>{_class.name}</p>
-                    <p className='text-sm text-gray-400 mt-1'>Hit Die: d{_class.hit_die}</p>
-                    <p className='text-xs text-gray-500 mt-1'>Saves: {_class.save_throws.join(', ')}</p>
+const Step3Class: React.FC<StepProps> = ({ data, updateData, nextStep, prevStep }) => {
+    const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set(['Core Classes']));
+    const [showClassInfo, setShowClassInfo] = useState(true);
+
+    const allClasses = getAllClasses();
+    const selectedClass = allClasses.find(c => c.slug === data.classSlug);
+
+    const toggleCategory = (categoryName: string) => {
+        setExpandedCategories(prev => {
+            const newSet = new Set(prev);
+            if (newSet.has(categoryName)) {
+                newSet.delete(categoryName);
+            } else {
+                newSet.add(categoryName);
+            }
+            return newSet;
+        });
+    };
+
+    return (
+        <div className='space-y-6'>
+            <h3 className='text-xl font-bold text-red-300'>Select Class (Hit Die and Starting Proficiencies)</h3>
+
+            {/* Class Categories */}
+            <div className='space-y-3'>
+                {CLASS_CATEGORIES.map(category => (
+                    <div key={category.name} className='border border-gray-600 rounded-lg overflow-hidden'>
+                        {/* Category Header */}
+                        <button
+                            onClick={() => toggleCategory(category.name)}
+                            className='w-full p-4 bg-gray-700 hover:bg-gray-650 flex items-center justify-between transition-colors'
+                        >
+                            <div className='flex items-center gap-3'>
+                                <span className='text-2xl'>{category.icon}</span>
+                                <div className='text-left'>
+                                    <div className='font-bold text-yellow-300 text-lg'>{category.name}</div>
+                                    <div className='text-xs text-gray-400'>{category.description}</div>
+                                </div>
+                            </div>
+                            {expandedCategories.has(category.name) ? (
+                                <ChevronUp className='w-5 h-5 text-gray-400' />
+                            ) : (
+                                <ChevronDown className='w-5 h-5 text-gray-400' />
+                            )}
+                        </button>
+
+                        {/* Category Classes */}
+                        {expandedCategories.has(category.name) && (
+                            <div className='p-4 bg-gray-800/50 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3'>
+                                {category.classes.map(_class => (
+                                    <button
+                                        key={_class.slug}
+                                        onClick={() => updateData({ classSlug: _class.slug })}
+                                        className={`p-3 rounded-lg text-left border-2 transition-all ${
+                                            data.classSlug === _class.slug
+                                                ? 'bg-red-800 border-red-500 shadow-md'
+                                                : 'bg-gray-700 border-gray-600 hover:bg-gray-600'
+                                        }`}
+                                    >
+                                        <p className='text-sm font-bold text-yellow-300'>{_class.name}</p>
+                                        <p className='text-xs text-gray-500 mt-1'>Hit Die: d{_class.hit_die}</p>
+                                        <p className='text-xs text-gray-500'>{_class.primary_stat}</p>
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                ))}
+            </div>
+
+            {/* Selected Class Details */}
+            {selectedClass && showClassInfo && (
+                <div className="bg-gray-700/50 border border-gray-600 rounded-lg p-4 space-y-3 relative">
+                    <button
+                        onClick={() => setShowClassInfo(false)}
+                        className="absolute top-2 right-2 text-gray-400 hover:text-white transition-colors"
+                        title="Close"
+                    >
+                        <XCircle className="w-5 h-5" />
+                    </button>
+
+                    <div className="flex items-start justify-between pr-8">
+                        <div>
+                            <h4 className="text-lg font-bold text-yellow-300">{selectedClass.name}</h4>
+                            <p className="text-xs text-gray-500">{selectedClass.source}</p>
+                        </div>
+                    </div>
+
+                    <p className="text-sm text-gray-300">{selectedClass.description}</p>
+
+                    <div className="space-y-2 text-sm">
+                        <div>
+                            <span className="font-semibold text-red-400">Hit Die: </span>
+                            <span className="text-gray-300">d{selectedClass.hit_die}</span>
+                        </div>
+
+                        <div>
+                            <span className="font-semibold text-red-400">Primary Ability: </span>
+                            <span className="text-gray-300">{selectedClass.primary_stat}</span>
+                        </div>
+
+                        <div>
+                            <span className="font-semibold text-red-400">Saving Throws: </span>
+                            <span className="text-gray-300">{selectedClass.save_throws.join(', ')}</span>
+                        </div>
+
+                        <div>
+                            <span className="font-semibold text-red-400">Key Features: </span>
+                            <ul className="list-disc list-inside text-gray-300 ml-4">
+                                {selectedClass.class_features.slice(0, 4).map((feature, idx) => (
+                                    <li key={idx} className="text-xs">{feature}</li>
+                                ))}
+                            </ul>
+                        </div>
+
+                        <div className="pt-2 border-t border-gray-600">
+                            <div className="font-semibold text-yellow-400 mb-1">Key Role:</div>
+                            <p className="text-xs text-gray-400">{selectedClass.keyRole}</p>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            <div className='flex justify-between'>
+                <button onClick={prevStep} className="px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded-lg text-white flex items-center">
+                    <ArrowLeft className="w-4 h-4 mr-2" /> Back
                 </button>
-            ))}
+                <button
+                    onClick={nextStep}
+                    disabled={!data.classSlug}
+                    className="px-4 py-2 bg-red-600 hover:bg-red-500 rounded-lg text-white flex items-center disabled:bg-gray-600"
+                >
+                    Next: Abilities <ArrowRight className="w-4 h-4 ml-2" />
+                </button>
+            </div>
         </div>
-        <div className='flex justify-between'>
-            <button onClick={prevStep} className="px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded-lg text-white flex items-center"><ArrowLeft className="w-4 h-4 mr-2" /> Back</button>
-            <button onClick={nextStep} disabled={!data.classSlug} className="px-4 py-2 bg-red-600 hover:bg-red-500 rounded-lg text-white flex items-center disabled:bg-gray-600">Next: Abilities <ArrowRight className="w-4 h-4 ml-2" /></button>
-        </div>
-    </div>
-);
+    );
+};
 
 const Step4Abilities: React.FC<StepProps> = ({ data, updateData, nextStep, prevStep }) => {
     const scores = useMemo(() => [15, 14, 13, 12, 10, 8], []);
