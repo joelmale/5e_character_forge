@@ -2,8 +2,10 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Dice6, Plus, Trash2, Loader2, BookOpen, User as UserIcon, Shield, Zap, ArrowLeft, ArrowRight, Check, Download, Upload, XCircle, ChevronDown, ChevronUp } from 'lucide-react';
 import { DiceBox3D } from './components/DiceBox3D';
 import { RollHistoryModal, RollHistoryTicker } from './components/RollHistory';
-import { createAbilityRoll, createSkillRoll, createInitiativeRoll, getRollHistory, addRollToHistory, clearRollHistory, rollDice, type DiceRoll as DiceRollType } from './utils/diceRoller';
+import { FeatureModal } from './components/FeatureModal';
+import { createAbilityRoll, createSkillRoll, createInitiativeRoll, getRollHistory, addRollToHistory, clearRollHistory, rollDice, generateUUID, type DiceRoll as DiceRollType } from './utils/diceRoller';
 import { diceSounds } from './utils/diceSounds';
+import { featureDescriptions } from './utils/featureDescriptions';
 
 // --- IndexedDB Configuration ---
 const DB_NAME = '5e_character_forge';
@@ -60,6 +62,18 @@ const deleteCharacter = async (id: string): Promise<void> => {
     const transaction = db.transaction([STORE_NAME], 'readwrite');
     const objectStore = transaction.objectStore(STORE_NAME);
     const request = objectStore.delete(id);
+
+    request.onerror = () => reject(request.error);
+    request.onsuccess = () => resolve();
+  });
+};
+
+const updateCharacter = async (character: Character): Promise<void> => {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([STORE_NAME], 'readwrite');
+    const objectStore = transaction.objectStore(STORE_NAME);
+    const request = objectStore.put(character);
 
     request.onerror = () => reject(request.error);
     request.onsuccess = () => resolve();
@@ -1033,7 +1047,7 @@ const calculateCharacterStats = (data: CharacterCreationData): Character => {
 
   // 4. Construct Final Character Object
   return {
-    id: crypto.randomUUID(), // Generate UUID for IndexedDB
+    id: generateUUID(), // Generate UUID for IndexedDB
     name: data.name || "Unnamed Hero",
     race: raceData.name,
     class: classData.name,
@@ -1067,6 +1081,8 @@ interface CharacterSheetProps {
   onDelete: (id: string) => void;
   setRollResult: React.Dispatch<React.SetStateAction<{ text: string; value: number | null }>>;
   onDiceRoll: (roll: DiceRollType) => void;
+  onToggleInspiration: (id: string) => void;
+  onFeatureClick: (featureName: string) => void;
 }
 
 interface WizardProps {
@@ -1123,7 +1139,7 @@ const SkillEntry: React.FC<{ name: SkillName; skill: Skill; setRollResult: Chara
   );
 };
 
-const CharacterSheet: React.FC<CharacterSheetProps> = ({ character, onClose, onDelete, setRollResult, onDiceRoll }) => {
+const CharacterSheet: React.FC<CharacterSheetProps> = ({ character, onClose, onDelete, setRollResult, onDiceRoll, onToggleInspiration, onFeatureClick }) => {
   const abilities = Object.entries(character.abilities) as [AbilityName, AbilityScore][];
   const skills = Object.entries(character.skills) as [SkillName, Skill][];
   const passivePerception = (character.skills.Perception.value + 10);
@@ -1160,7 +1176,7 @@ const CharacterSheet: React.FC<CharacterSheetProps> = ({ character, onClose, onD
         <div className="grid grid-cols-3 md:grid-cols-6 gap-4 bg-gray-800/70 p-4 rounded-xl shadow-lg border border-red-900">
           <div className="col-span-1 flex flex-col items-center"><Shield className="w-6 h-6 text-red-500 mb-1" /><span className="text-sm font-semibold text-gray-400">AC</span><div className="text-4xl font-extrabold text-white">{character.armorClass}</div></div>
           <div className="col-span-2 flex flex-col items-center"><Zap className="w-6 h-6 text-red-500 mb-1" /><span className="text-sm font-semibold text-gray-400">HP (Max)</span><div className="text-4xl font-extrabold text-green-400">{character.hitPoints} <span className="text-gray-400">/</span> {character.maxHitPoints}</div></div>
-          <button onClick={handleInitiativeRoll} className="col-span-1 flex flex-col items-center bg-gray-700/50 p-2 rounded-lg hover:bg-red-700/70 transition-colors" title="Roll Initiative"><Dice6 className="w-6 h-6 text-red-500 mb-1" /><span className="text-sm font-semibold text-gray-400">Init</span><div className="text-4xl font-extrabold text-yellow-300">{formatModifier(character.initiative)}</div></button>
+          <button onClick={handleInitiativeRoll} className="col-span-1 flex flex-col items-center bg-gray-700/50 p-2 rounded-lg hover:bg-red-700/70 transition-colors cursor-pointer" title="Roll Initiative"><Dice6 className="w-6 h-6 text-red-500 mb-1" /><span className="text-sm font-semibold text-gray-400">Initiative</span><div className="text-4xl font-extrabold text-yellow-300">{formatModifier(character.initiative)}</div></button>
           <div className="col-span-1 flex flex-col items-center"><BookOpen className="w-6 h-6 text-red-500 mb-1" /><span className="text-sm font-semibold text-gray-400">Prof.</span><div className="text-4xl font-extrabold text-yellow-300">{formatModifier(character.proficiencyBonus)}</div></div>
           <div className="col-span-1 flex flex-col items-center"><UserIcon className="w-6 h-6 text-red-500 mb-1" /><span className="text-sm font-semibold text-gray-400">P.Perc</span><div className="text-4xl font-extrabold text-white">{passivePerception}</div></div>
         </div>
@@ -1174,7 +1190,11 @@ const CharacterSheet: React.FC<CharacterSheetProps> = ({ character, onClose, onD
             </div>
             <div className="flex items-center justify-between p-3 bg-gray-800 rounded-lg border-l-4 border-yellow-500">
                 <span className="text-lg font-bold">Inspiration</span>
-                <button className={`w-8 h-8 rounded-full transition-all ${character.inspiration ? 'bg-yellow-500' : 'bg-gray-600'}`}>
+                <button
+                  onClick={() => onToggleInspiration(character.id)}
+                  className={`w-8 h-8 rounded-full transition-all cursor-pointer ${character.inspiration ? 'bg-yellow-500' : 'bg-gray-600 hover:bg-gray-500'}`}
+                  title={character.inspiration ? 'Remove Inspiration' : 'Grant Inspiration'}
+                >
                     {character.inspiration && <Zap className="w-5 h-5 mx-auto text-gray-900" />}
                 </button>
             </div>
@@ -1204,8 +1224,20 @@ const CharacterSheet: React.FC<CharacterSheetProps> = ({ character, onClose, onD
             <div className="p-4 bg-gray-800 rounded-xl shadow-lg border-l-4 border-green-500">
               <h3 className="text-lg font-bold text-green-400 mb-2">Racial & Class Features</h3>
               <ul className="list-disc list-inside space-y-1 text-sm text-gray-300">
-                {character.featuresAndTraits.racialTraits.map((trait, index) => (<li key={`r-${index}`} className='text-gray-400'><span className="font-semibold text-white">[Racial]</span> {trait}</li>))}
-                {character.featuresAndTraits.classFeatures.map((feature, index) => (<li key={`c-${index}`} className='text-gray-400'><span className="font-semibold text-white">[Class]</span> {feature}</li>))}
+                {character.featuresAndTraits.racialTraits.map((trait, index) => (
+                  <li key={`r-${index}`}>
+                    <button onClick={() => onFeatureClick(trait)} className="text-left hover:text-yellow-300 transition-colors cursor-pointer">
+                      <span className="font-semibold text-white">[Racial]</span> {trait}
+                    </button>
+                  </li>
+                ))}
+                {character.featuresAndTraits.classFeatures.map((feature, index) => (
+                  <li key={`c-${index}`}>
+                    <button onClick={() => onFeatureClick(feature)} className="text-left hover:text-yellow-300 transition-colors cursor-pointer">
+                      <span className="font-semibold text-white">[Class]</span> {feature}
+                    </button>
+                  </li>
+                ))}
               </ul>
             </div>
           </div>
@@ -2205,10 +2237,21 @@ const App: React.FC = () => {
   const [rollResult, setRollResult] = useState<{ text: string; value: number | null }>({ text: 'Ready to Roll!', value: null });
   const [rollHistory, setRollHistory] = useState<DiceRollType[]>([]);
   const [latestRoll, setLatestRoll] = useState<DiceRollType | null>(null);
+  const [featureModal, setFeatureModal] = useState<{name: string, description: string, source?: string} | null>(null);
 
   const selectedCharacter = useMemo(() => {
     return characters.find(c => c.id === selectedCharacterId);
   }, [characters, selectedCharacterId]);
+
+  // Handle feature click
+  const handleFeatureClick = useCallback((featureName: string) => {
+    const feature = featureDescriptions[featureName];
+    if (feature) {
+      setFeatureModal({ name: featureName, ...feature });
+    } else {
+      setFeatureModal({ name: featureName, description: 'No description available for this feature.' });
+    }
+  }, []);
 
   // Load roll history on mount
   useEffect(() => {
@@ -2297,7 +2340,7 @@ const App: React.FC = () => {
         // Add each character
         for (const char of importedData) {
           // Generate new ID to avoid conflicts
-          const newChar = { ...char, id: crypto.randomUUID() };
+          const newChar = { ...char, id: generateUUID() };
           await addCharacter(newChar);
         }
 
@@ -2311,6 +2354,22 @@ const App: React.FC = () => {
     reader.readAsText(file);
   }, [loadCharacters]);
 
+  const handleToggleInspiration = useCallback(async (characterId: string) => {
+    const character = characters.find(c => c.id === characterId);
+    if (!character) return;
+
+    const updatedCharacter = { ...character, inspiration: !character.inspiration };
+
+    try {
+      await updateCharacter(updatedCharacter);
+      // Optimistically update the state
+      setCharacters(prev => prev.map(c => c.id === characterId ? updatedCharacter : c));
+    } catch (e) {
+      console.error("Error updating inspiration:", e);
+      // Optionally revert state if DB update fails
+    }
+  }, [characters]);
+
   if (selectedCharacter) {
     return (
       <>
@@ -2320,10 +2379,13 @@ const App: React.FC = () => {
           onDelete={handleDeleteCharacter}
           setRollResult={setRollResult}
           onDiceRoll={handleDiceRoll}
+          onToggleInspiration={handleToggleInspiration}
+          onFeatureClick={handleFeatureClick}
         />
         <DiceBox3D latestRoll={latestRoll} />
         <RollHistoryTicker rolls={rollHistory} />
         <RollHistoryModal rolls={rollHistory} onClear={handleClearHistory} />
+        <FeatureModal feature={featureModal} onClose={() => setFeatureModal(null)} />
       </>
     );
   }

@@ -13,6 +13,24 @@ export interface DiceRoll {
 }
 
 /**
+ * Generate a unique ID (polyfill for crypto.randomUUID)
+ * @returns UUID v4 string
+ */
+export function generateUUID(): string {
+  // Try native crypto.randomUUID first
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+
+  // Fallback: Generate UUID v4 manually
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+
+/**
  * Roll dice with specified count and sides
  * @param count Number of dice to roll
  * @param sides Number of sides on each die
@@ -69,7 +87,7 @@ export function createAbilityRoll(
   const critical = detectCritical(dieValue, 20);
 
   return {
-    id: crypto.randomUUID(),
+    id: generateUUID(),
     type: 'ability',
     label: `${abilityName} Check`,
     notation: `1d20${modifier >= 0 ? '+' : ''}${modifier}`,
@@ -97,7 +115,7 @@ export function createSkillRoll(
   const critical = detectCritical(dieValue, 20);
 
   return {
-    id: crypto.randomUUID(),
+    id: generateUUID(),
     type: 'skill',
     label: skillName,
     notation: `1d20${skillValue >= 0 ? '+' : ''}${skillValue}`,
@@ -121,7 +139,7 @@ export function createInitiativeRoll(initiativeModifier: number): DiceRoll {
   const critical = detectCritical(dieValue, 20);
 
   return {
-    id: crypto.randomUUID(),
+    id: generateUUID(),
     type: 'initiative',
     label: 'Initiative',
     notation: `1d20${initiativeModifier >= 0 ? '+' : ''}${initiativeModifier}`,
