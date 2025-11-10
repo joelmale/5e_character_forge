@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Dice6, Plus, Trash2, Loader2, BookOpen, User as UserIcon, Shield, Zap, ArrowLeft, ArrowRight, Check, Download, Upload, XCircle } from 'lucide-react';
+import { Dice6, Plus, Trash2, Loader2, BookOpen, User as UserIcon, Shield, Zap, ArrowLeft, ArrowRight, Check, Download, Upload, XCircle, ChevronDown, ChevronUp } from 'lucide-react';
 import { DiceBox3D } from './components/DiceBox3D';
 import { RollHistoryModal, RollHistoryTicker } from './components/RollHistory';
 import { createAbilityRoll, createSkillRoll, createInitiativeRoll, getRollHistory, addRollToHistory, clearRollHistory, type DiceRoll as DiceRollType } from './utils/diceRoller';
@@ -139,11 +139,337 @@ const initialCreationData: CharacterCreationData = {
 
 // --- Mock API Data and Ruleset Functions (Simulating dnd5eapi.co) ---
 
-const MOCK_RACES = [
-  { slug: 'human', name: 'Human', ability_bonuses: { STR: 1, DEX: 1, CON: 1, INT: 1, WIS: 1, CHA: 1 }, racial_traits: ['Ability Score Increase (+1 to all)', 'Speed 30ft', 'Skills: Common'] },
-  { slug: 'dwarf', name: 'Dwarf (Hill)', ability_bonuses: { CON: 2, WIS: 1 }, racial_traits: ['Ability Score Increase', 'Speed 25ft', 'Dwarven Toughness (+1 HP/level)'] },
-  { slug: 'elf', name: 'Elf (High)', ability_bonuses: { DEX: 2, INT: 1 }, racial_traits: ['Ability Score Increase', 'Speed 30ft', 'Darkvision', 'Fey Ancestry'] },
+interface Race {
+  slug: string;
+  name: string;
+  source: string;
+  ability_bonuses: Partial<Record<AbilityName, number>>;
+  racial_traits: string[];
+  description: string;
+  typicalRoles: string[];
+}
+
+interface RaceCategory {
+  name: string;
+  icon: string;
+  description: string;
+  races: Race[];
+}
+
+const RACE_CATEGORIES: RaceCategory[] = [
+  {
+    name: 'Core Races',
+    icon: '📖',
+    description: 'The most common and essential races from the Player\'s Handbook',
+    races: [
+      {
+        slug: 'human',
+        name: 'Human',
+        source: 'Player\'s Handbook',
+        ability_bonuses: { STR: 1, DEX: 1, CON: 1, INT: 1, WIS: 1, CHA: 1 },
+        racial_traits: ['Ability Score Increase (+1 to all)', 'Speed 30ft', 'Extra Language'],
+        description: 'Humans are the most adaptable and ambitious people among the common races. Whatever drives them, humans are the innovators, the achievers, and the pioneers of the worlds.',
+        typicalRoles: ['Any class - extremely versatile'],
+      },
+      {
+        slug: 'dwarf-mountain',
+        name: 'Dwarf (Mountain)',
+        source: 'Player\'s Handbook',
+        ability_bonuses: { STR: 2, CON: 2 },
+        racial_traits: ['Dwarven Armor Training', 'Speed 25ft', 'Darkvision', 'Dwarven Resilience'],
+        description: 'Strong and hardy, mountain dwarves are well-suited for lives of adventuring. Taller than hill dwarves, they tend to have lighter coloration.',
+        typicalRoles: ['Fighter', 'Paladin', 'Cleric'],
+      },
+      {
+        slug: 'dwarf-hill',
+        name: 'Dwarf (Hill)',
+        source: 'Player\'s Handbook',
+        ability_bonuses: { CON: 2, WIS: 1 },
+        racial_traits: ['Dwarven Toughness (+1 HP/level)', 'Speed 25ft', 'Darkvision', 'Dwarven Resilience'],
+        description: 'As a hill dwarf, you have keen senses, deep intuition, and remarkable resilience. Known for their wisdom and toughness.',
+        typicalRoles: ['Cleric', 'Fighter', 'Barbarian'],
+      },
+      {
+        slug: 'elf-high',
+        name: 'Elf (High)',
+        source: 'Player\'s Handbook',
+        ability_bonuses: { DEX: 2, INT: 1 },
+        racial_traits: ['Cantrip', 'Extra Language', 'Speed 30ft', 'Darkvision', 'Fey Ancestry'],
+        description: 'High elves value magic in all its forms and even the warriors among them learn to use it.',
+        typicalRoles: ['Wizard', 'Fighter', 'Ranger'],
+      },
+      {
+        slug: 'elf-wood',
+        name: 'Elf (Wood)',
+        source: 'Player\'s Handbook',
+        ability_bonuses: { DEX: 2, WIS: 1 },
+        racial_traits: ['Fleet of Foot (35ft speed)', 'Mask of the Wild', 'Darkvision', 'Fey Ancestry'],
+        description: 'Wood elves have keen senses and intuition, and their fleet feet carry them quickly through their forest homes.',
+        typicalRoles: ['Ranger', 'Druid', 'Rogue', 'Monk'],
+      },
+      {
+        slug: 'elf-drow',
+        name: 'Elf (Drow)',
+        source: 'Player\'s Handbook',
+        ability_bonuses: { DEX: 2, CHA: 1 },
+        racial_traits: ['Superior Darkvision (120ft)', 'Sunlight Sensitivity', 'Drow Magic', 'Fey Ancestry'],
+        description: 'Descended from an earlier subrace of dark-skinned elves, the drow were banished from the surface world for their worship of evil gods.',
+        typicalRoles: ['Warlock', 'Sorcerer', 'Rogue', 'Bard'],
+      },
+      {
+        slug: 'halfling-lightfoot',
+        name: 'Halfling (Lightfoot)',
+        source: 'Player\'s Handbook',
+        ability_bonuses: { DEX: 2, CHA: 1 },
+        racial_traits: ['Naturally Stealthy', 'Lucky', 'Brave', 'Speed 25ft'],
+        description: 'Lightfoot halflings can easily hide from notice, even using other people as cover. They\'re inclined to get along with others.',
+        typicalRoles: ['Rogue', 'Bard', 'Warlock'],
+      },
+      {
+        slug: 'halfling-stout',
+        name: 'Halfling (Stout)',
+        source: 'Player\'s Handbook',
+        ability_bonuses: { DEX: 2, CON: 1 },
+        racial_traits: ['Stout Resilience (poison advantage)', 'Lucky', 'Brave', 'Speed 25ft'],
+        description: 'Stout halflings are hardier than average and have some resistance to poison. Some say they have dwarven blood.',
+        typicalRoles: ['Fighter', 'Barbarian', 'Monk'],
+      },
+      {
+        slug: 'gnome-forest',
+        name: 'Gnome (Forest)',
+        source: 'Player\'s Handbook',
+        ability_bonuses: { INT: 2, DEX: 1 },
+        racial_traits: ['Speak with Small Beasts', 'Minor Illusion cantrip', 'Darkvision', 'Gnome Cunning'],
+        description: 'Forest gnomes have a natural knack for illusion and inherent quickness. They gather in hidden communities in sylvan forests.',
+        typicalRoles: ['Wizard', 'Rogue', 'Ranger'],
+      },
+      {
+        slug: 'gnome-rock',
+        name: 'Gnome (Rock)',
+        source: 'Player\'s Handbook',
+        ability_bonuses: { INT: 2, CON: 1 },
+        racial_traits: ['Artificer\'s Lore', 'Tinker', 'Darkvision', 'Gnome Cunning'],
+        description: 'Rock gnomes are the most common gnomes, known for their inventiveness and hardy nature.',
+        typicalRoles: ['Artificer', 'Wizard', 'Cleric'],
+      },
+      {
+        slug: 'tiefling',
+        name: 'Tiefling',
+        source: 'Player\'s Handbook',
+        ability_bonuses: { CHA: 2, INT: 1 },
+        racial_traits: ['Hellish Resistance (fire)', 'Infernal Legacy spells', 'Darkvision'],
+        description: 'Tieflings are derived from human bloodlines touched by infernal heritage. They tend to be shunned and meet suspicion from others.',
+        typicalRoles: ['Warlock', 'Sorcerer', 'Bard', 'Paladin'],
+      },
+      {
+        slug: 'dragonborn',
+        name: 'Dragonborn',
+        source: 'Player\'s Handbook',
+        ability_bonuses: { STR: 2, CHA: 1 },
+        racial_traits: ['Draconic Ancestry', 'Breath Weapon', 'Damage Resistance', 'Speed 30ft'],
+        description: 'Born of dragons, dragonborn walk proudly through a world that greets them with fearful incomprehension.',
+        typicalRoles: ['Fighter', 'Paladin', 'Sorcerer', 'Barbarian'],
+      },
+      {
+        slug: 'half-elf',
+        name: 'Half-Elf',
+        source: 'Player\'s Handbook',
+        ability_bonuses: { CHA: 2, STR: 1, DEX: 1 },
+        racial_traits: ['Skill Versatility (2 skills)', 'Darkvision', 'Fey Ancestry', 'Speed 30ft'],
+        description: 'Walking in two worlds but truly belonging to neither, half-elves combine the best qualities of their elf and human parents.',
+        typicalRoles: ['Bard', 'Warlock', 'Sorcerer', 'Paladin'],
+      },
+      {
+        slug: 'half-orc',
+        name: 'Half-Orc',
+        source: 'Player\'s Handbook',
+        ability_bonuses: { STR: 2, CON: 1 },
+        racial_traits: ['Savage Attacks', 'Relentless Endurance', 'Menacing (Intimidation)', 'Darkvision'],
+        description: 'Half-orcs combine the best and worst qualities of their orc and human ancestry, with immense strength and physical prowess.',
+        typicalRoles: ['Barbarian', 'Fighter', 'Paladin'],
+      },
+    ],
+  },
+  {
+    name: 'Exotic Races',
+    icon: '🗺️',
+    description: 'Unique races from Volo\'s Guide and other expanded sources',
+    races: [
+      {
+        slug: 'goliath',
+        name: 'Goliath',
+        source: 'Volo\'s Guide to Monsters',
+        ability_bonuses: { STR: 2, CON: 1 },
+        racial_traits: ['Powerful Build', 'Stone\'s Endurance', 'Mountain Born', 'Natural Athlete'],
+        description: 'At the highest mountain peaks dwell the reclusive goliaths, wandering a bleak realm of rock, wind, and cold.',
+        typicalRoles: ['Barbarian', 'Fighter', 'Monk', 'Ranger'],
+      },
+      {
+        slug: 'kenku',
+        name: 'Kenku',
+        source: 'Volo\'s Guide to Monsters',
+        ability_bonuses: { DEX: 2, WIS: 1 },
+        racial_traits: ['Expert Forgery', 'Mimicry', 'Expert Duplication', 'Speed 30ft'],
+        description: 'Kenku are cursed with the inability to fly or speak in their own voices, forced to mimic the sounds they hear.',
+        typicalRoles: ['Rogue', 'Bard', 'Ranger', 'Monk'],
+      },
+      {
+        slug: 'aasimar',
+        name: 'Aasimar',
+        source: 'Volo\'s Guide to Monsters',
+        ability_bonuses: { CHA: 2 },
+        racial_traits: ['Healing Hands', 'Celestial Resistance', 'Darkvision', 'Light cantrip'],
+        description: 'Aasimar bear within their souls the light of the heavens. They are descended from humans with a touch of celestial power.',
+        typicalRoles: ['Paladin', 'Cleric', 'Sorcerer', 'Warlock'],
+      },
+      {
+        slug: 'tabaxi',
+        name: 'Tabaxi',
+        source: 'Volo\'s Guide to Monsters',
+        ability_bonuses: { DEX: 2, CHA: 1 },
+        racial_traits: ['Feline Agility', 'Cat\'s Claws', 'Cat\'s Talent (Perception/Stealth)', 'Speed 30ft'],
+        description: 'Hailing from a strange and distant land, tabaxi are catlike humanoids driven by curiosity to collect interesting artifacts and stories.',
+        typicalRoles: ['Rogue', 'Monk', 'Ranger', 'Bard'],
+      },
+      {
+        slug: 'firbolg',
+        name: 'Firbolg',
+        source: 'Volo\'s Guide to Monsters',
+        ability_bonuses: { WIS: 2, STR: 1 },
+        racial_traits: ['Firbolg Magic', 'Hidden Step (invisibility)', 'Powerful Build', 'Speech of Beast and Leaf'],
+        description: 'Firbolg are humble guardians of the forest, living in harmony with nature and avoiding contact with other races.',
+        typicalRoles: ['Druid', 'Ranger', 'Cleric'],
+      },
+      {
+        slug: 'triton',
+        name: 'Triton',
+        source: 'Volo\'s Guide to Monsters',
+        ability_bonuses: { STR: 1, CON: 1, CHA: 1 },
+        racial_traits: ['Amphibious', 'Control Air and Water spells', 'Guardians of the Depths', 'Emissary of the Sea'],
+        description: 'Tritons guard the ocean depths, building small settlements and waging war against their enemies in defense of their ocean home.',
+        typicalRoles: ['Paladin', 'Fighter', 'Cleric'],
+      },
+    ],
+  },
+  {
+    name: 'Monstrous Races',
+    icon: '🚀',
+    description: 'Playable monster races for unique and challenging characters',
+    races: [
+      {
+        slug: 'goblin',
+        name: 'Goblin',
+        source: 'Volo\'s Guide to Monsters',
+        ability_bonuses: { DEX: 2, CON: 1 },
+        racial_traits: ['Fury of the Small', 'Nimble Escape', 'Darkvision', 'Speed 30ft'],
+        description: 'Goblins occupy an uneasy place in a dangerous world, relying on their speed and cunning to survive.',
+        typicalRoles: ['Rogue', 'Ranger', 'Artificer'],
+      },
+      {
+        slug: 'kobold',
+        name: 'Kobold',
+        source: 'Volo\'s Guide to Monsters',
+        ability_bonuses: { DEX: 2, STR: -2 },
+        racial_traits: ['Pack Tactics', 'Grovel, Cower, and Beg', 'Sunlight Sensitivity', 'Darkvision'],
+        description: 'Kobolds are small, reptilian humanoids who believe themselves to be descended from dragons.',
+        typicalRoles: ['Rogue', 'Sorcerer', 'Wizard'],
+      },
+      {
+        slug: 'bugbear',
+        name: 'Bugbear',
+        source: 'Volo\'s Guide to Monsters',
+        ability_bonuses: { STR: 2, DEX: 1 },
+        racial_traits: ['Surprise Attack', 'Long-Limbed (reach +5ft)', 'Powerful Build', 'Darkvision'],
+        description: 'Bugbears are born for battle and mayhem, relying on brute strength and stealth to surprise enemies.',
+        typicalRoles: ['Barbarian', 'Fighter', 'Rogue'],
+      },
+      {
+        slug: 'orc',
+        name: 'Orc',
+        source: 'Volo\'s Guide to Monsters',
+        ability_bonuses: { STR: 2, CON: 1, INT: -2 },
+        racial_traits: ['Aggressive (bonus action dash)', 'Menacing', 'Powerful Build', 'Darkvision'],
+        description: 'Orcs are savage raiders and pillagers, with a culture built on strength and conquest.',
+        typicalRoles: ['Barbarian', 'Fighter'],
+      },
+      {
+        slug: 'yuan-ti-pureblood',
+        name: 'Yuan-Ti Pureblood',
+        source: 'Volo\'s Guide to Monsters',
+        ability_bonuses: { CHA: 2, INT: 1 },
+        racial_traits: ['Magic Resistance', 'Poison Immunity', 'Innate Spellcasting', 'Darkvision'],
+        description: 'The serpent creatures known as yuan-ti are all that remains of an ancient, decadent human empire.',
+        typicalRoles: ['Warlock', 'Sorcerer', 'Bard'],
+      },
+    ],
+  },
+  {
+    name: 'Planar Races',
+    icon: '✨',
+    description: 'Races from other planes and magical settings',
+    races: [
+      {
+        slug: 'loxodon',
+        name: 'Loxodon',
+        source: 'Guildmasters\' Guide to Ravnica',
+        ability_bonuses: { CON: 2, WIS: 1 },
+        racial_traits: ['Powerful Build', 'Natural Armor', 'Trunk (extra appendage)', 'Keen Smell'],
+        description: 'Loxodons are humanoid elephants, known for their wisdom, loyalty, and unshakeable calm.',
+        typicalRoles: ['Cleric', 'Paladin', 'Monk', 'Druid'],
+      },
+      {
+        slug: 'owlin',
+        name: 'Owlin',
+        source: 'Strixhaven: A Curriculum of Chaos',
+        ability_bonuses: { DEX: 1, WIS: 2 },
+        racial_traits: ['Flight', 'Darkvision', 'Silent Feathers (Stealth prof)', 'Speed 30ft'],
+        description: 'Owlin are owl-like humanoids with a keen intellect and the ability to fly through the night sky.',
+        typicalRoles: ['Ranger', 'Druid', 'Rogue', 'Wizard'],
+      },
+      {
+        slug: 'fairy',
+        name: 'Fairy',
+        source: 'The Wild Beyond the Witchlight',
+        ability_bonuses: { DEX: 2, WIS: 1 },
+        racial_traits: ['Flight', 'Fairy Magic', 'Small size', 'Speed 30ft'],
+        description: 'Fairies are tiny magical beings from the Feywild, filled with mirth and mischief.',
+        typicalRoles: ['Druid', 'Wizard', 'Bard', 'Rogue'],
+      },
+      {
+        slug: 'harengon',
+        name: 'Harengon',
+        source: 'The Wild Beyond the Witchlight',
+        ability_bonuses: { DEX: 2, WIS: 1 },
+        racial_traits: ['Hare-Trigger (add proficiency to initiative)', 'Leporine Senses', 'Lucky Footwork', 'Rabbit Hop'],
+        description: 'Harengon are rabbit-folk who embody the spirit of freedom and travel from the Feywild.',
+        typicalRoles: ['Monk', 'Ranger', 'Rogue', 'Fighter'],
+      },
+      {
+        slug: 'gith',
+        name: 'Githyanki',
+        source: 'Mordenkainen\'s Tome of Foes',
+        ability_bonuses: { STR: 2, INT: 1 },
+        racial_traits: ['Decadent Mastery (skill prof)', 'Martial Prodigy (armor prof)', 'Githyanki Psionics'],
+        description: 'The brutal githyanki are trained from birth as warriors, riding red dragons into battle.',
+        typicalRoles: ['Fighter', 'Wizard', 'Paladin'],
+      },
+      {
+        slug: 'genasi-fire',
+        name: 'Genasi (Fire)',
+        source: 'Elemental Evil Player\'s Companion',
+        ability_bonuses: { CON: 2, INT: 1 },
+        racial_traits: ['Darkvision', 'Fire Resistance', 'Reach to the Blaze (fire spells)', 'Speed 30ft'],
+        description: 'Fire genasi channel the flamboyant and often destructive nature of flame, with skin that burns to the touch.',
+        typicalRoles: ['Sorcerer', 'Wizard', 'Warlock'],
+      },
+    ],
+  },
 ];
+
+// Helper to get all races from categories
+const getAllRaces = (): Race[] => {
+  return RACE_CATEGORIES.flatMap(category => category.races);
+};
 
 const MOCK_CLASSES = [
   { slug: 'fighter', name: 'Fighter', hit_die: 10, primary_stat: 'STR', save_throws: ['STR', 'CON'], skill_proficiencies: ['Athletics', 'Acrobatics'], class_features: ['Fighting Style', 'Second Wind'] },
@@ -304,7 +630,8 @@ const PROFICIENCY_BONUSES = { 1: 2, 2: 2, 3: 2, 4: 2, 5: 3, 6: 3, 7: 3, 8: 3, 9:
 const getModifier = (score: number): number => Math.floor((score - 10) / 2);
 
 const calculateCharacterStats = (data: CharacterCreationData): Character => {
-  const raceData = MOCK_RACES.find(r => r.slug === data.raceSlug);
+  const allRaces = getAllRaces();
+  const raceData = allRaces.find(r => r.slug === data.raceSlug);
   const classData = MOCK_CLASSES.find(c => c.slug === data.classSlug);
 
   if (!raceData || !classData) {
@@ -661,32 +988,137 @@ const Step1Details: React.FC<StepProps> = ({ data, updateData, nextStep }) => {
     );
 };
 
-const Step2Race: React.FC<StepProps> = ({ data, updateData, nextStep, prevStep }) => (
-    <div className='space-y-6'>
-        <h3 className='text-xl font-bold text-red-300'>Select Race (Racial Bonuses will be applied automatically)</h3>
-        <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
-            {MOCK_RACES.map(race => (
-                <button
-                    key={race.slug}
-                    onClick={() => updateData({ raceSlug: race.slug })}
-                    className={`p-4 rounded-xl text-left border-2 transition-all ${data.raceSlug === race.slug
-                        ? 'bg-red-800 border-red-500 shadow-md'
-                        : 'bg-gray-700 border-gray-600 hover:bg-gray-600'}`
-                    }
-                >
-                    <p className='text-lg font-bold text-yellow-300'>{race.name}</p>
-                    <ul className='text-xs text-gray-400 mt-1 list-disc list-inside'>
-                        {race.racial_traits.map((trait, i) => <li key={i}>{trait}</li>)}
-                    </ul>
+const Step2Race: React.FC<StepProps> = ({ data, updateData, nextStep, prevStep }) => {
+    const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set(['Core Races']));
+    const [showRaceInfo, setShowRaceInfo] = useState(true);
+
+    const allRaces = getAllRaces();
+    const selectedRace = allRaces.find(r => r.slug === data.raceSlug);
+
+    const toggleCategory = (categoryName: string) => {
+        setExpandedCategories(prev => {
+            const newSet = new Set(prev);
+            if (newSet.has(categoryName)) {
+                newSet.delete(categoryName);
+            } else {
+                newSet.add(categoryName);
+            }
+            return newSet;
+        });
+    };
+
+    return (
+        <div className='space-y-6'>
+            <h3 className='text-xl font-bold text-red-300'>Select Race (Racial Bonuses will be applied automatically)</h3>
+
+            {/* Race Categories */}
+            <div className='space-y-3'>
+                {RACE_CATEGORIES.map(category => (
+                    <div key={category.name} className='border border-gray-600 rounded-lg overflow-hidden'>
+                        {/* Category Header */}
+                        <button
+                            onClick={() => toggleCategory(category.name)}
+                            className='w-full p-4 bg-gray-700 hover:bg-gray-650 flex items-center justify-between transition-colors'
+                        >
+                            <div className='flex items-center gap-3'>
+                                <span className='text-2xl'>{category.icon}</span>
+                                <div className='text-left'>
+                                    <div className='font-bold text-yellow-300 text-lg'>{category.name}</div>
+                                    <div className='text-xs text-gray-400'>{category.description}</div>
+                                </div>
+                            </div>
+                            {expandedCategories.has(category.name) ? (
+                                <ChevronUp className='w-5 h-5 text-gray-400' />
+                            ) : (
+                                <ChevronDown className='w-5 h-5 text-gray-400' />
+                            )}
+                        </button>
+
+                        {/* Category Races */}
+                        {expandedCategories.has(category.name) && (
+                            <div className='p-4 bg-gray-800/50 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3'>
+                                {category.races.map(race => (
+                                    <button
+                                        key={race.slug}
+                                        onClick={() => updateData({ raceSlug: race.slug })}
+                                        className={`p-3 rounded-lg text-left border-2 transition-all ${
+                                            data.raceSlug === race.slug
+                                                ? 'bg-red-800 border-red-500 shadow-md'
+                                                : 'bg-gray-700 border-gray-600 hover:bg-gray-600'
+                                        }`}
+                                    >
+                                        <p className='text-sm font-bold text-yellow-300'>{race.name}</p>
+                                        <p className='text-xs text-gray-500 mt-1'>{race.source}</p>
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                ))}
+            </div>
+
+            {/* Selected Race Details */}
+            {selectedRace && showRaceInfo && (
+                <div className="bg-gray-700/50 border border-gray-600 rounded-lg p-4 space-y-3 relative">
+                    <button
+                        onClick={() => setShowRaceInfo(false)}
+                        className="absolute top-2 right-2 text-gray-400 hover:text-white transition-colors"
+                        title="Close"
+                    >
+                        <XCircle className="w-5 h-5" />
+                    </button>
+
+                    <div className="flex items-start justify-between pr-8">
+                        <div>
+                            <h4 className="text-lg font-bold text-yellow-300">{selectedRace.name}</h4>
+                            <p className="text-xs text-gray-500">{selectedRace.source}</p>
+                        </div>
+                    </div>
+
+                    <p className="text-sm text-gray-300">{selectedRace.description}</p>
+
+                    <div className="space-y-2 text-sm">
+                        <div>
+                            <span className="font-semibold text-red-400">Ability Bonuses: </span>
+                            <span className="text-gray-300">
+                                {Object.entries(selectedRace.ability_bonuses)
+                                    .map(([ability, bonus]) => `${ability} +${bonus}`)
+                                    .join(', ')}
+                            </span>
+                        </div>
+
+                        <div>
+                            <span className="font-semibold text-red-400">Racial Traits: </span>
+                            <ul className="list-disc list-inside text-gray-300 ml-4">
+                                {selectedRace.racial_traits.map((trait, idx) => (
+                                    <li key={idx} className="text-xs">{trait}</li>
+                                ))}
+                            </ul>
+                        </div>
+
+                        <div className="pt-2 border-t border-gray-600">
+                            <div className="font-semibold text-yellow-400 mb-1">Typical Roles:</div>
+                            <p className="text-xs text-gray-400">{selectedRace.typicalRoles.join(', ')}</p>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            <div className='flex justify-between'>
+                <button onClick={prevStep} className="px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded-lg text-white flex items-center">
+                    <ArrowLeft className="w-4 h-4 mr-2" /> Back
                 </button>
-            ))}
+                <button
+                    onClick={nextStep}
+                    disabled={!data.raceSlug}
+                    className="px-4 py-2 bg-red-600 hover:bg-red-500 rounded-lg text-white flex items-center disabled:bg-gray-600"
+                >
+                    Next: Choose Class <ArrowRight className="w-4 h-4 ml-2" />
+                </button>
+            </div>
         </div>
-        <div className='flex justify-between'>
-            <button onClick={prevStep} className="px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded-lg text-white flex items-center"><ArrowLeft className="w-4 h-4 mr-2" /> Back</button>
-            <button onClick={nextStep} disabled={!data.raceSlug} className="px-4 py-2 bg-red-600 hover:bg-red-500 rounded-lg text-white flex items-center disabled:bg-gray-600">Next: Choose Class <ArrowRight className="w-4 h-4 ml-2" /></button>
-        </div>
-    </div>
-);
+    );
+};
 
 const Step3Class: React.FC<StepProps> = ({ data, updateData, nextStep, prevStep }) => (
     <div className='space-y-6'>
@@ -740,7 +1172,8 @@ const Step4Abilities: React.FC<StepProps> = ({ data, updateData, nextStep, prevS
         }
     };
 
-    const raceData = MOCK_RACES.find(r => r.slug === data.raceSlug);
+    const allRaces = getAllRaces();
+    const raceData = allRaces.find(r => r.slug === data.raceSlug);
     const abilityNames = Object.keys(data.abilities) as AbilityName[];
 
     return (
