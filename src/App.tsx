@@ -151,6 +151,75 @@ const MOCK_CLASSES = [
   { slug: 'rogue', name: 'Rogue', hit_die: 8, primary_stat: 'DEX', save_throws: ['DEX', 'INT'], skill_proficiencies: ['SleightOfHand', 'Stealth', 'Acrobatics', 'Deception'], class_features: ['Expertise', 'Sneak Attack'] },
 ];
 
+const ALIGNMENTS = [
+  'Lawful Good',
+  'Neutral Good',
+  'Chaotic Good',
+  'Lawful Neutral',
+  'True Neutral',
+  'Chaotic Neutral',
+  'Lawful Evil',
+  'Neutral Evil',
+  'Chaotic Evil'
+];
+
+const BACKGROUNDS = [
+  {
+    name: 'Acolyte',
+    description: 'You have spent your life in the service of a temple to a specific god or pantheon of gods. You act as an intermediary between the realm of the holy and the mortal world, performing sacred rites and offering sacrifices.',
+    skillProficiencies: ['Insight', 'Religion'],
+    languages: 'Two of your choice',
+    equipment: 'Holy symbol, prayer book, 5 sticks of incense, vestments, common clothes, pouch with 15gp',
+    feature: 'Shelter of the Faithful',
+    featureDescription: 'As an acolyte, you command the respect of those who share your faith. You and your companions can expect free healing and care at temples, shrines, and other establishments of your faith. Those who share your religion will support you at a modest lifestyle.',
+  },
+  {
+    name: 'Criminal',
+    description: 'You are an experienced criminal with a history of breaking the law. You have spent a lot of time among other criminals and still have contacts within the criminal underworld.',
+    skillProficiencies: ['Deception', 'Stealth'],
+    languages: 'None',
+    equipment: 'Crowbar, dark common clothes with hood, pouch with 15gp',
+    feature: 'Criminal Contact',
+    featureDescription: 'You have a reliable and trustworthy contact who acts as your liaison to a network of other criminals. You know how to get messages to and from your contact, even over great distances.',
+  },
+  {
+    name: 'Folk Hero',
+    description: 'You come from a humble social rank, but you are destined for so much more. Already the people of your home village regard you as their champion, and your destiny calls you to stand against the tyrants and monsters that threaten the common folk.',
+    skillProficiencies: ['AnimalHandling', 'Survival'],
+    languages: 'None',
+    equipment: 'Artisan\'s tools, shovel, iron pot, common clothes, pouch with 10gp',
+    feature: 'Rustic Hospitality',
+    featureDescription: 'Since you come from the ranks of the common folk, you fit in among them with ease. You can find a place to hide, rest, or recuperate among other commoners, unless you have shown yourself to be a danger to them.',
+  },
+  {
+    name: 'Noble',
+    description: 'You understand wealth, power, and privilege. You carry a noble title, and your family owns land, collects taxes, and wields significant political influence.',
+    skillProficiencies: ['History', 'Persuasion'],
+    languages: 'One of your choice',
+    equipment: 'Fine clothes, signet ring, scroll of pedigree, purse with 25gp',
+    feature: 'Position of Privilege',
+    featureDescription: 'Thanks to your noble birth, people are inclined to think the best of you. You are welcome in high society, and people assume you have the right to be wherever you are. The common folk make every effort to accommodate you and avoid your displeasure.',
+  },
+  {
+    name: 'Sage',
+    description: 'You spent years learning the lore of the multiverse. You scoured manuscripts, studied scrolls, and listened to the greatest experts on the subjects that interest you.',
+    skillProficiencies: ['Arcana', 'History'],
+    languages: 'Two of your choice',
+    equipment: 'Bottle of ink, quill, small knife, letter from dead colleague, common clothes, pouch with 10gp',
+    feature: 'Researcher',
+    featureDescription: 'When you attempt to learn or recall a piece of lore, if you do not know that information, you often know where and from whom you can obtain it. Usually, this comes from a library, scriptorium, university, or a sage or other learned person.',
+  },
+  {
+    name: 'Soldier',
+    description: 'War has been your life for as long as you care to remember. You trained as a youth, studied the use of weapons and armor, learned basic survival techniques, and eventually took up arms to defend your people.',
+    skillProficiencies: ['Athletics', 'Intimidation'],
+    languages: 'None',
+    equipment: 'Rank insignia, trophy from fallen enemy, bone dice set, common clothes, pouch with 10gp',
+    feature: 'Military Rank',
+    featureDescription: 'You have a military rank from your career as a soldier. Soldiers loyal to your former military organization still recognize your authority and influence, and they defer to you if they are of a lower rank.',
+  },
+];
+
 const SKILL_TO_ABILITY: Record<SkillName, AbilityName> = {
     Acrobatics: 'DEX', AnimalHandling: 'WIS', Arcana: 'INT', Athletics: 'STR', Deception: 'CHA', History: 'INT', Insight: 'WIS', Intimidation: 'CHA', Investigation: 'INT', Medicine: 'WIS', Nature: 'INT', Perception: 'WIS', Performance: 'CHA', Persuasion: 'CHA', Religion: 'INT', SleightOfHand: 'DEX', Stealth: 'DEX', Survival: 'WIS',
 };
@@ -398,39 +467,87 @@ interface StepProps {
     stepIndex: number;
 }
 
-const Step1Details: React.FC<StepProps> = ({ data, updateData, nextStep }) => (
-    <div className='space-y-4'>
-        <h3 className='text-xl font-bold text-red-300'>Basic Identity</h3>
-        <input
-            type="text"
-            placeholder="Character Name (e.g., Elara Windwalker)"
-            value={data.name}
-            onChange={(e) => updateData({ name: e.target.value })}
-            className="w-full p-3 bg-gray-700 text-white rounded-lg focus:ring-red-500 focus:border-red-500"
-        />
-        <input
-            type="text"
-            placeholder="Background (e.g., Soldier)"
-            value={data.background}
-            onChange={(e) => updateData({ background: e.target.value })}
-            className="w-full p-3 bg-gray-700 text-white rounded-lg focus:ring-red-500 focus:border-red-500"
-        />
-        <input
-            type="text"
-            placeholder="Alignment (e.g., Lawful Good)"
-            value={data.alignment}
-            onChange={(e) => updateData({ alignment: e.target.value })}
-            className="w-full p-3 bg-gray-700 text-white rounded-lg focus:ring-red-500 focus:border-red-500"
-        />
-        <button
-            onClick={nextStep}
-            disabled={!data.name}
-            className="w-full py-3 bg-red-600 hover:bg-red-500 rounded-xl text-white font-bold transition-colors disabled:bg-gray-600"
-        >
-            Next: Choose Race
-        </button>
-    </div>
-);
+const Step1Details: React.FC<StepProps> = ({ data, updateData, nextStep }) => {
+    const selectedBackground = BACKGROUNDS.find(bg => bg.name === data.background);
+
+    return (
+        <div className='space-y-4'>
+            <h3 className='text-xl font-bold text-red-300'>Basic Identity</h3>
+            <input
+                type="text"
+                placeholder="Character Name (e.g., Elara Windwalker)"
+                value={data.name}
+                onChange={(e) => updateData({ name: e.target.value })}
+                className="w-full p-3 bg-gray-700 text-white rounded-lg focus:ring-red-500 focus:border-red-500"
+            />
+
+            <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Alignment</label>
+                <select
+                    value={data.alignment}
+                    onChange={(e) => updateData({ alignment: e.target.value })}
+                    className="w-full p-3 bg-gray-700 text-white rounded-lg focus:ring-red-500 focus:border-red-500"
+                >
+                    <option value="">Select Alignment</option>
+                    {ALIGNMENTS.map(alignment => (
+                        <option key={alignment} value={alignment}>{alignment}</option>
+                    ))}
+                </select>
+            </div>
+
+            <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Background</label>
+                <select
+                    value={data.background}
+                    onChange={(e) => updateData({ background: e.target.value })}
+                    className="w-full p-3 bg-gray-700 text-white rounded-lg focus:ring-red-500 focus:border-red-500"
+                >
+                    <option value="">Select Background</option>
+                    {BACKGROUNDS.map(bg => (
+                        <option key={bg.name} value={bg.name}>{bg.name}</option>
+                    ))}
+                </select>
+            </div>
+
+            {selectedBackground && (
+                <div className="bg-gray-700/50 border border-gray-600 rounded-lg p-4 space-y-3">
+                    <h4 className="text-lg font-bold text-yellow-300">{selectedBackground.name}</h4>
+                    <p className="text-sm text-gray-300">{selectedBackground.description}</p>
+
+                    <div className="space-y-2 text-sm">
+                        <div>
+                            <span className="font-semibold text-red-400">Skill Proficiencies: </span>
+                            <span className="text-gray-300">{selectedBackground.skillProficiencies.join(', ')}</span>
+                        </div>
+
+                        <div>
+                            <span className="font-semibold text-red-400">Languages: </span>
+                            <span className="text-gray-300">{selectedBackground.languages}</span>
+                        </div>
+
+                        <div>
+                            <span className="font-semibold text-red-400">Equipment: </span>
+                            <span className="text-gray-300">{selectedBackground.equipment}</span>
+                        </div>
+
+                        <div className="pt-2 border-t border-gray-600">
+                            <div className="font-semibold text-yellow-400 mb-1">Feature: {selectedBackground.feature}</div>
+                            <p className="text-xs text-gray-400">{selectedBackground.featureDescription}</p>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            <button
+                onClick={nextStep}
+                disabled={!data.name || !data.alignment || !data.background}
+                className="w-full py-3 bg-red-600 hover:bg-red-500 rounded-xl text-white font-bold transition-colors disabled:bg-gray-600"
+            >
+                Next: Choose Race
+            </button>
+        </div>
+    );
+};
 
 const Step2Race: React.FC<StepProps> = ({ data, updateData, nextStep, prevStep }) => (
     <div className='space-y-6'>
