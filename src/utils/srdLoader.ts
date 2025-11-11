@@ -1,10 +1,12 @@
 // SRD Data Loader and Transformer
 // Transforms 5e SRD JSON format to our app's format
+// Supports both 2014 and 2024 editions with 'year' field to distinguish
 
 import srdSpells2014 from '../data/srd/2014/5e-SRD-Spells.json';
 import srdRaces2014 from '../data/srd/2014/5e-SRD-Races.json';
 import srdClasses2014 from '../data/srd/2014/5e-SRD-Classes.json';
 import srdEquipment2014 from '../data/srd/2014/5e-SRD-Equipment.json';
+import srdEquipment2024 from '../data/srd/2024/5e-SRD-Equipment.json';
 
 // --- SRD Type Definitions ---
 interface SRDSpell {
@@ -221,4 +223,4 @@ export function loadClasses(): AppClass[] {
 }
 
 // Export raw data for reference
-export { srdSpells2014, srdRaces2014, srdClasses2014, srdEquipment2014 };
+export { srdSpells2014, srdRaces2014, srdClasses2014, srdEquipment2014, srdEquipment2024 };

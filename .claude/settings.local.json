@@ -11,9 +11,18 @@
       "Bash(npm install)",
       "Bash(npm run lint)",
       "Bash(npm run build:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(for file in /Users/JoelN/Coding/5e-SRD-database/src/2014/5e-SRD-{Classes,Spells,Feats,Races,Subclasses,Backgrounds}.json)",
+      "Bash(done)",
+      "Bash(tree:*)",
+      "Bash(xargs:*)",
+      "Bash(git checkout:*)",
+      "Bash(python3:*)"
     ],
     "deny": [],
-    "ask": []
+    "ask": [],
+    "additionalDirectories": [
+      "/Users/JoelN/Coding/5e-SRD-database/"
+    ]
   }
 }
