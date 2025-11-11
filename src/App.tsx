@@ -114,6 +114,16 @@ interface Character {
     classFeatures: string[];
     racialTraits: string[];
   };
+
+  // Sprint 2: Spellcasting data
+  spellcasting?: {
+    ability: 'INT' | 'WIS' | 'CHA';
+    spellSaveDC: number;
+    spellAttackBonus: number;
+    cantripsKnown: string[]; // Spell slugs
+    spellsKnown: string[]; // Spell slugs for known/prepared spells
+    spellSlots: number[]; // Available spell slots by level
+  };
 }
 
 // --- Intermediate Wizard Data Structure ---
@@ -135,6 +145,37 @@ interface EquipmentChoice {
   selected: number | null; // Index of selected option
 }
 
+// Sprint 2: Spell system interfaces
+interface Spell {
+  slug: string;
+  name: string;
+  level: number; // 0 = cantrip, 1-9 = spell level
+  school: 'Abjuration' | 'Conjuration' | 'Divination' | 'Enchantment' | 'Evocation' | 'Illusion' | 'Necromancy' | 'Transmutation';
+  castingTime: string; // "1 action", "1 bonus action", "1 minute", etc.
+  range: string; // "Self", "Touch", "30 feet", etc.
+  components: {
+    verbal: boolean;
+    somatic: boolean;
+    material: boolean;
+    materialDescription?: string; // e.g., "a piece of cured leather"
+  };
+  duration: string; // "Instantaneous", "1 minute", "Concentration, up to 1 hour", etc.
+  concentration: boolean;
+  ritual: boolean;
+  description: string;
+  atHigherLevels?: string;
+  damageType?: string;
+  saveType?: 'STR' | 'DEX' | 'CON' | 'INT' | 'WIS' | 'CHA';
+  classes: string[]; // Which classes can learn this spell
+}
+
+interface SpellSelectionData {
+  selectedCantrips: string[]; // Spell slugs
+  selectedSpells: string[]; // Spell slugs for leveled spells
+  spellbook?: string[]; // Only for wizards - spells in spellbook
+  preparedSpells?: string[]; // Only for prepared casters (clerics, druids, paladins)
+}
+
 interface CharacterCreationData {
   name: string;
   level: number;
@@ -150,6 +191,9 @@ interface CharacterCreationData {
   equipmentChoices: EquipmentChoice[]; // Equipment selection choices
   hpCalculationMethod: 'max' | 'rolled';
   rolledHP?: number; // If rolled, store the result
+
+  // Sprint 2: Spell selection
+  spellSelection: SpellSelectionData;
 
   // Custom text for traits
   personality: string;
@@ -171,6 +215,10 @@ const initialCreationData: CharacterCreationData = {
   selectedSkills: [],
   equipmentChoices: [],
   hpCalculationMethod: 'max',
+  spellSelection: {
+    selectedCantrips: [],
+    selectedSpells: [],
+  },
   personality: "I'm quiet until I have something important to say.",
   ideals: "Honesty. The truth must be preserved.",
   bonds: "I owe my life to the individual who saved me.",
@@ -511,6 +559,396 @@ const getAllRaces = (): Race[] => {
   return RACE_CATEGORIES.flatMap(category => category.races);
 };
 
+// --- Sprint 2: Spell Database ---
+const SPELL_DATABASE: Spell[] = [
+  // === CANTRIPS (Level 0) ===
+  {
+    slug: 'fire-bolt',
+    name: 'Fire Bolt',
+    level: 0,
+    school: 'Evocation',
+    castingTime: '1 action',
+    range: '120 feet',
+    components: { verbal: true, somatic: true, material: false },
+    duration: 'Instantaneous',
+    concentration: false,
+    ritual: false,
+    description: 'You hurl a mote of fire at a creature or object within range. Make a ranged spell attack. On a hit, the target takes 1d10 fire damage.',
+    atHigherLevels: 'This spell\'s damage increases by 1d10 when you reach 5th level (2d10), 11th level (3d10), and 17th level (4d10).',
+    damageType: 'fire',
+    classes: ['wizard', 'sorcerer', 'artificer'],
+  },
+  {
+    slug: 'mage-hand',
+    name: 'Mage Hand',
+    level: 0,
+    school: 'Conjuration',
+    castingTime: '1 action',
+    range: '30 feet',
+    components: { verbal: true, somatic: true, material: false },
+    duration: '1 minute',
+    concentration: false,
+    ritual: false,
+    description: 'A spectral, floating hand appears at a point you choose within range. The hand lasts for the duration or until you dismiss it. You can use your action to control the hand and manipulate objects, open unlocked doors/containers, or retrieve objects.',
+    classes: ['wizard', 'sorcerer', 'warlock', 'bard', 'artificer'],
+  },
+  {
+    slug: 'prestidigitation',
+    name: 'Prestidigitation',
+    level: 0,
+    school: 'Transmutation',
+    castingTime: '1 action',
+    range: '10 feet',
+    components: { verbal: true, somatic: true, material: false },
+    duration: 'Up to 1 hour',
+    concentration: false,
+    ritual: false,
+    description: 'A minor magical trick that novice spellcasters use for practice. You create one of several minor effects: a harmless sensory effect, light or snuff out a candle/torch/small campfire, clean or soil an object, chill/warm/flavor up to 1 cubic foot of nonliving material, create a color/mark/symbol on an object or surface, or create a nonmagical trinket or illusion.',
+    classes: ['wizard', 'sorcerer', 'warlock', 'bard', 'artificer'],
+  },
+  {
+    slug: 'light',
+    name: 'Light',
+    level: 0,
+    school: 'Evocation',
+    castingTime: '1 action',
+    range: 'Touch',
+    components: { verbal: true, somatic: false, material: true, materialDescription: 'a firefly or phosphorescent moss' },
+    duration: '1 hour',
+    concentration: false,
+    ritual: false,
+    description: 'You touch one object that is no larger than 10 feet in any dimension. Until the spell ends, the object sheds bright light in a 20-foot radius and dim light for an additional 20 feet.',
+    classes: ['wizard', 'sorcerer', 'bard', 'cleric', 'artificer'],
+  },
+  {
+    slug: 'sacred-flame',
+    name: 'Sacred Flame',
+    level: 0,
+    school: 'Evocation',
+    castingTime: '1 action',
+    range: '60 feet',
+    components: { verbal: true, somatic: true, material: false },
+    duration: 'Instantaneous',
+    concentration: false,
+    ritual: false,
+    description: 'Flame-like radiance descends on a creature you can see within range. The target must succeed on a Dexterity saving throw or take 1d8 radiant damage. Gains no benefit from cover.',
+    atHigherLevels: 'This spell\'s damage increases by 1d8 when you reach 5th level (2d8), 11th level (3d8), and 17th level (4d8).',
+    damageType: 'radiant',
+    saveType: 'DEX',
+    classes: ['cleric'],
+  },
+  {
+    slug: 'guidance',
+    name: 'Guidance',
+    level: 0,
+    school: 'Divination',
+    castingTime: '1 action',
+    range: 'Touch',
+    components: { verbal: true, somatic: true, material: false },
+    duration: 'Concentration, up to 1 minute',
+    concentration: true,
+    ritual: false,
+    description: 'You touch one willing creature. Once before the spell ends, the target can roll a d4 and add the number rolled to one ability check of its choice.',
+    classes: ['cleric', 'druid', 'artificer'],
+  },
+  {
+    slug: 'thorn-whip',
+    name: 'Thorn Whip',
+    level: 0,
+    school: 'Transmutation',
+    castingTime: '1 action',
+    range: '30 feet',
+    components: { verbal: true, somatic: true, material: true, materialDescription: 'the stem of a plant with thorns' },
+    duration: 'Instantaneous',
+    concentration: false,
+    ritual: false,
+    description: 'You create a long, vine-like whip covered in thorns that lashes out at your command toward a creature in range. Make a melee spell attack. If it hits, the creature takes 1d6 piercing damage, and you can pull it up to 10 feet closer.',
+    atHigherLevels: 'This spell\'s damage increases by 1d6 when you reach 5th level (2d6), 11th level (3d6), and 17th level (4d6).',
+    damageType: 'piercing',
+    classes: ['druid', 'artificer'],
+  },
+  {
+    slug: 'produce-flame',
+    name: 'Produce Flame',
+    level: 0,
+    school: 'Conjuration',
+    castingTime: '1 action',
+    range: 'Self',
+    components: { verbal: true, somatic: true, material: false },
+    duration: '10 minutes',
+    concentration: false,
+    ritual: false,
+    description: 'A flickering flame appears in your hand and remains there for the duration. The flame sheds bright light in a 10-foot radius and dim light for an additional 10 feet. You can also attack with the flame or use it as a light source.',
+    atHigherLevels: 'This spell\'s damage increases by 1d8 when you reach 5th level (2d8), 11th level (3d8), and 17th level (4d8).',
+    damageType: 'fire',
+    classes: ['druid'],
+  },
+  {
+    slug: 'eldritch-blast',
+    name: 'Eldritch Blast',
+    level: 0,
+    school: 'Evocation',
+    castingTime: '1 action',
+    range: '120 feet',
+    components: { verbal: true, somatic: true, material: false },
+    duration: 'Instantaneous',
+    concentration: false,
+    ritual: false,
+    description: 'A beam of crackling energy streaks toward a creature within range. Make a ranged spell attack. On a hit, the target takes 1d10 force damage.',
+    atHigherLevels: 'The spell creates more than one beam when you reach higher levels: two beams at 5th level, three beams at 11th level, and four beams at 17th level.',
+    damageType: 'force',
+    classes: ['warlock'],
+  },
+  {
+    slug: 'vicious-mockery',
+    name: 'Vicious Mockery',
+    level: 0,
+    school: 'Enchantment',
+    castingTime: '1 action',
+    range: '60 feet',
+    components: { verbal: true, somatic: false, material: false },
+    duration: 'Instantaneous',
+    concentration: false,
+    ritual: false,
+    description: 'You unleash a string of insults laced with subtle enchantments at a creature you can see within range. If the target can hear you, it must succeed on a Wisdom saving throw or take 1d4 psychic damage and have disadvantage on the next attack roll it makes before the end of its next turn.',
+    atHigherLevels: 'This spell\'s damage increases by 1d4 when you reach 5th level (2d4), 11th level (3d4), and 17th level (4d4).',
+    damageType: 'psychic',
+    saveType: 'WIS',
+    classes: ['bard'],
+  },
+
+  // === 1ST LEVEL SPELLS ===
+  {
+    slug: 'magic-missile',
+    name: 'Magic Missile',
+    level: 1,
+    school: 'Evocation',
+    castingTime: '1 action',
+    range: '120 feet',
+    components: { verbal: true, somatic: true, material: false },
+    duration: 'Instantaneous',
+    concentration: false,
+    ritual: false,
+    description: 'You create three glowing darts of magical force. Each dart hits a creature of your choice that you can see within range. A dart deals 1d4 + 1 force damage to its target. The darts all strike simultaneously.',
+    atHigherLevels: 'When you cast this spell using a spell slot of 2nd level or higher, the spell creates one more dart for each slot level above 1st.',
+    damageType: 'force',
+    classes: ['wizard', 'sorcerer'],
+  },
+  {
+    slug: 'shield',
+    name: 'Shield',
+    level: 1,
+    school: 'Abjuration',
+    castingTime: '1 reaction',
+    range: 'Self',
+    components: { verbal: true, somatic: true, material: false },
+    duration: '1 round',
+    concentration: false,
+    ritual: false,
+    description: 'An invisible barrier of magical force appears and protects you. Until the start of your next turn, you have a +5 bonus to AC, including against the triggering attack, and you take no damage from magic missile.',
+    classes: ['wizard', 'sorcerer', 'warlock'],
+  },
+  {
+    slug: 'mage-armor',
+    name: 'Mage Armor',
+    level: 1,
+    school: 'Abjuration',
+    castingTime: '1 action',
+    range: 'Touch',
+    components: { verbal: true, somatic: true, material: true, materialDescription: 'a piece of cured leather' },
+    duration: '8 hours',
+    concentration: false,
+    ritual: false,
+    description: 'You touch a willing creature who isn\'t wearing armor, and a protective magical force surrounds it until the spell ends. The target\'s base AC becomes 13 + its Dexterity modifier.',
+    classes: ['wizard', 'sorcerer', 'warlock'],
+  },
+  {
+    slug: 'detect-magic',
+    name: 'Detect Magic',
+    level: 1,
+    school: 'Divination',
+    castingTime: '1 action',
+    range: 'Self',
+    components: { verbal: true, somatic: true, material: false },
+    duration: 'Concentration, up to 10 minutes',
+    concentration: true,
+    ritual: true,
+    description: 'For the duration, you sense the presence of magic within 30 feet of you. If you sense magic, you can use your action to see a faint aura around any visible creature or object that bears magic, and you learn its school of magic, if any.',
+    classes: ['wizard', 'sorcerer', 'bard', 'cleric', 'druid', 'paladin', 'ranger', 'artificer'],
+  },
+  {
+    slug: 'burning-hands',
+    name: 'Burning Hands',
+    level: 1,
+    school: 'Evocation',
+    castingTime: '1 action',
+    range: 'Self (15-foot cone)',
+    components: { verbal: true, somatic: true, material: false },
+    duration: 'Instantaneous',
+    concentration: false,
+    ritual: false,
+    description: 'As you hold your hands with thumbs touching and fingers spread, a thin sheet of flames shoots forth. Each creature in a 15-foot cone must make a Dexterity saving throw. A creature takes 3d6 fire damage on a failed save, or half as much on a success.',
+    atHigherLevels: 'When you cast this spell using a spell slot of 2nd level or higher, the damage increases by 1d6 for each slot level above 1st.',
+    damageType: 'fire',
+    saveType: 'DEX',
+    classes: ['wizard', 'sorcerer'],
+  },
+  {
+    slug: 'cure-wounds',
+    name: 'Cure Wounds',
+    level: 1,
+    school: 'Evocation',
+    castingTime: '1 action',
+    range: 'Touch',
+    components: { verbal: true, somatic: true, material: false },
+    duration: 'Instantaneous',
+    concentration: false,
+    ritual: false,
+    description: 'A creature you touch regains a number of hit points equal to 1d8 + your spellcasting ability modifier.',
+    atHigherLevels: 'When you cast this spell using a spell slot of 2nd level or higher, the healing increases by 1d8 for each slot level above 1st.',
+    classes: ['cleric', 'bard', 'druid', 'paladin', 'ranger', 'artificer'],
+  },
+  {
+    slug: 'bless',
+    name: 'Bless',
+    level: 1,
+    school: 'Enchantment',
+    castingTime: '1 action',
+    range: '30 feet',
+    components: { verbal: true, somatic: true, material: true, materialDescription: 'a sprinkling of holy water' },
+    duration: 'Concentration, up to 1 minute',
+    concentration: true,
+    ritual: false,
+    description: 'You bless up to three creatures of your choice within range. Whenever a target makes an attack roll or a saving throw before the spell ends, the target can roll a d4 and add the number rolled to the attack roll or saving throw.',
+    atHigherLevels: 'When you cast this spell using a spell slot of 2nd level or higher, you can target one additional creature for each slot level above 1st.',
+    classes: ['cleric', 'paladin'],
+  },
+  {
+    slug: 'healing-word',
+    name: 'Healing Word',
+    level: 1,
+    school: 'Evocation',
+    castingTime: '1 bonus action',
+    range: '60 feet',
+    components: { verbal: true, somatic: false, material: false },
+    duration: 'Instantaneous',
+    concentration: false,
+    ritual: false,
+    description: 'A creature of your choice that you can see within range regains hit points equal to 1d4 + your spellcasting ability modifier.',
+    atHigherLevels: 'When you cast this spell using a spell slot of 2nd level or higher, the healing increases by 1d4 for each slot level above 1st.',
+    classes: ['cleric', 'bard', 'druid'],
+  },
+  {
+    slug: 'entangle',
+    name: 'Entangle',
+    level: 1,
+    school: 'Conjuration',
+    castingTime: '1 action',
+    range: '90 feet',
+    components: { verbal: true, somatic: true, material: false },
+    duration: 'Concentration, up to 1 minute',
+    concentration: true,
+    ritual: false,
+    description: 'Grasping weeds and vines sprout from the ground in a 20-foot square starting from a point within range. For the duration, these plants turn the ground in the area into difficult terrain. A creature in the area must succeed on a Strength saving throw or be restrained.',
+    saveType: 'STR',
+    classes: ['druid', 'ranger'],
+  },
+  {
+    slug: 'goodberry',
+    name: 'Goodberry',
+    level: 1,
+    school: 'Transmutation',
+    castingTime: '1 action',
+    range: 'Touch',
+    components: { verbal: true, somatic: true, material: true, materialDescription: 'a sprig of mistletoe' },
+    duration: 'Instantaneous',
+    concentration: false,
+    ritual: false,
+    description: 'Up to ten berries appear in your hand and are infused with magic. A creature can use its action to eat one berry. Eating a berry restores 1 hit point, and the berry provides enough nourishment to sustain a creature for one day.',
+    classes: ['druid', 'ranger'],
+  },
+  {
+    slug: 'hex',
+    name: 'Hex',
+    level: 1,
+    school: 'Enchantment',
+    castingTime: '1 bonus action',
+    range: '90 feet',
+    components: { verbal: true, somatic: true, material: true, materialDescription: 'the petrified eye of a newt' },
+    duration: 'Concentration, up to 1 hour',
+    concentration: true,
+    ritual: false,
+    description: 'You place a curse on a creature you can see within range. Until the spell ends, you deal an extra 1d6 necrotic damage to the target whenever you hit it with an attack. Also, choose one ability when you cast the spell. The target has disadvantage on ability checks made with the chosen ability.',
+    atHigherLevels: 'When you cast this spell using a spell slot of 3rd or 4th level, you can maintain concentration for up to 8 hours. When you use a spell slot of 5th level or higher, you can maintain concentration for up to 24 hours.',
+    damageType: 'necrotic',
+    classes: ['warlock'],
+  },
+  {
+    slug: 'armor-of-agathys',
+    name: 'Armor of Agathys',
+    level: 1,
+    school: 'Abjuration',
+    castingTime: '1 action',
+    range: 'Self',
+    components: { verbal: true, somatic: true, material: true, materialDescription: 'a cup of water' },
+    duration: '1 hour',
+    concentration: false,
+    ritual: false,
+    description: 'A protective magical force surrounds you, manifesting as spectral frost. You gain 5 temporary hit points. If a creature hits you with a melee attack while you have these hit points, the creature takes 5 cold damage.',
+    atHigherLevels: 'When you cast this spell using a spell slot of 2nd level or higher, both the temporary hit points and the cold damage increase by 5 for each slot level above 1st.',
+    damageType: 'cold',
+    classes: ['warlock'],
+  },
+  {
+    slug: 'thunderwave',
+    name: 'Thunderwave',
+    level: 1,
+    school: 'Evocation',
+    castingTime: '1 action',
+    range: 'Self (15-foot cube)',
+    components: { verbal: true, somatic: true, material: false },
+    duration: 'Instantaneous',
+    concentration: false,
+    ritual: false,
+    description: 'A wave of thunderous force sweeps out from you. Each creature in a 15-foot cube originating from you must make a Constitution saving throw. On a failed save, a creature takes 2d8 thunder damage and is pushed 10 feet away. On a success, the creature takes half damage and isn\'t pushed.',
+    atHigherLevels: 'When you cast this spell using a spell slot of 2nd level or higher, the damage increases by 1d8 for each slot level above 1st.',
+    damageType: 'thunder',
+    saveType: 'CON',
+    classes: ['wizard', 'sorcerer', 'bard', 'druid'],
+  },
+  {
+    slug: 'charm-person',
+    name: 'Charm Person',
+    level: 1,
+    school: 'Enchantment',
+    castingTime: '1 action',
+    range: '30 feet',
+    components: { verbal: true, somatic: true, material: false },
+    duration: '1 hour',
+    concentration: false,
+    ritual: false,
+    description: 'You attempt to charm a humanoid you can see within range. It must make a Wisdom saving throw, and does so with advantage if you or your companions are fighting it. If it fails, it is charmed by you until the spell ends or until you or your companions do anything harmful to it.',
+    atHigherLevels: 'When you cast this spell using a spell slot of 2nd level or higher, you can target one additional creature for each slot level above 1st.',
+    saveType: 'WIS',
+    classes: ['wizard', 'sorcerer', 'bard', 'druid', 'warlock'],
+  },
+  {
+    slug: 'sleep',
+    name: 'Sleep',
+    level: 1,
+    school: 'Enchantment',
+    castingTime: '1 action',
+    range: '90 feet',
+    components: { verbal: true, somatic: true, material: true, materialDescription: 'a pinch of sand or rose petals' },
+    duration: '1 minute',
+    concentration: false,
+    ritual: false,
+    description: 'This spell sends creatures into a magical slumber. Roll 5d8; the total is how many hit points of creatures this spell can affect. Creatures within 20 feet of a point you choose are affected in ascending order of their current hit points.',
+    atHigherLevels: 'When you cast this spell using a spell slot of 2nd level or higher, roll an additional 2d8 for each slot level above 1st.',
+    classes: ['wizard', 'sorcerer', 'bard'],
+  },
+];
+
 interface Class {
   slug: string;
   name: string;
@@ -524,6 +962,15 @@ interface Class {
   description: string;
   keyRole: string;
   equipment_choices?: EquipmentChoice[]; // Starting equipment options (filled by helper if missing)
+
+  // Sprint 2: Spellcasting configuration
+  spellcasting?: {
+    ability: 'INT' | 'WIS' | 'CHA'; // Spellcasting ability modifier
+    mode: 'known' | 'prepared' | 'book'; // How spells are learned/prepared
+    cantripsKnown: number; // Number of cantrips at level 1
+    spellsKnownOrPrepared: number; // Number of spells known (sorcerer/bard) or can prepare (cleric/druid)
+    spellSlots: number[]; // Spell slots by level [0, 2, 0, 0...] means 2 1st-level slots
+  };
 }
 
 interface ClassCategory {
@@ -600,6 +1047,13 @@ const CLASS_CATEGORIES: ClassCategory[] = [
             selected: null,
           },
         ],
+        spellcasting: {
+          ability: 'CHA',
+          mode: 'known',
+          cantripsKnown: 2,
+          spellsKnownOrPrepared: 4, // Spells known at level 1
+          spellSlots: [0, 2, 0, 0, 0, 0, 0, 0, 0, 0],
+        },
       },
       {
         slug: 'cleric',
@@ -612,6 +1066,13 @@ const CLASS_CATEGORIES: ClassCategory[] = [
         class_features: ['Divine Domain', 'Channel Divinity', 'Destroy Undead', 'Divine Intervention'],
         description: 'The priest of a god; a versatile magical and martial healer and divine caster. Clerics channel the power of their deity.',
         keyRole: 'Healer/Support - Primary healer with strong combat and utility spells',
+        spellcasting: {
+          ability: 'WIS',
+          mode: 'prepared',
+          cantripsKnown: 3,
+          spellsKnownOrPrepared: 4, // Can prepare WIS mod + level (default 4 for level 1)
+          spellSlots: [0, 2, 0, 0, 0, 0, 0, 0, 0, 0],
+        },
       },
       {
         slug: 'druid',
@@ -624,6 +1085,13 @@ const CLASS_CATEGORIES: ClassCategory[] = [
         class_features: ['Wild Shape', 'Druidic Circle', 'Timeless Body', 'Beast Spells'],
         description: 'The keeper of nature; harnesses primal magic and can transform into beasts. Druids are guardians of the wilderness.',
         keyRole: 'Controller/Shapeshifter - Versatile caster who can become powerful beasts',
+        spellcasting: {
+          ability: 'WIS',
+          mode: 'prepared',
+          cantripsKnown: 2,
+          spellsKnownOrPrepared: 4, // Can prepare WIS mod + level (default 4 for level 1)
+          spellSlots: [0, 2, 0, 0, 0, 0, 0, 0, 0, 0],
+        },
       },
       {
         slug: 'fighter',
@@ -696,6 +1164,13 @@ const CLASS_CATEGORIES: ClassCategory[] = [
         class_features: ['Sorcerous Origin', 'Font of Magic', 'Metamagic', 'Sorcery Points'],
         description: 'The innate spellcaster; magic flows through their bloodline, giving them unique ways to manipulate spells. Sorcerers shape magic itself.',
         keyRole: 'Blaster/Controller - Flexible spellcaster who modifies spell effects',
+        spellcasting: {
+          ability: 'CHA',
+          mode: 'known',
+          cantripsKnown: 4,
+          spellsKnownOrPrepared: 2, // Spells known at level 1
+          spellSlots: [0, 2, 0, 0, 0, 0, 0, 0, 0, 0],
+        },
       },
       {
         slug: 'warlock',
@@ -708,6 +1183,13 @@ const CLASS_CATEGORIES: ClassCategory[] = [
         class_features: ['Otherworldly Patron', 'Pact Magic', 'Eldritch Invocations', 'Pact Boon'],
         description: 'The dark pact master; draws powerful, focused magic from an otherworldly patron. Warlocks gain power through supernatural bargains.',
         keyRole: 'Blaster/Utility - Consistent damage with customizable magical abilities',
+        spellcasting: {
+          ability: 'CHA',
+          mode: 'known',
+          cantripsKnown: 2,
+          spellsKnownOrPrepared: 2, // Spells known at level 1
+          spellSlots: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0], // Pact Magic: 1 slot at level 1
+        },
       },
       {
         slug: 'wizard',
@@ -720,6 +1202,13 @@ const CLASS_CATEGORIES: ClassCategory[] = [
         class_features: ['Arcane Recovery', 'Arcane Tradition', 'Spell Mastery', 'Signature Spells'],
         description: 'The scholarly archmage; masters the widest variety of spells through study and spellbooks. Wizards are the ultimate magical specialists.',
         keyRole: 'Controller/Utility - Largest spell list with solutions for every problem',
+        spellcasting: {
+          ability: 'INT',
+          mode: 'book',
+          cantripsKnown: 3,
+          spellsKnownOrPrepared: 6, // Spells in spellbook at level 1
+          spellSlots: [0, 2, 0, 0, 0, 0, 0, 0, 0, 0], // 2 1st-level slots
+        },
       },
       {
         slug: 'artificer',
@@ -959,6 +1448,25 @@ const getAllClasses = (): ClassWithDefaults[] => {
   });
 };
 
+// Sprint 2: Spell helper functions
+const getSpellsForClass = (classSlug: string): Spell[] => {
+  // Extract base class name from slug (e.g., 'wizard-evocation' -> 'wizard')
+  const baseClass = classSlug.split('-')[0];
+  return SPELL_DATABASE.filter(spell => spell.classes.includes(baseClass));
+};
+
+const getCantripsByClass = (classSlug: string): Spell[] => {
+  return getSpellsForClass(classSlug).filter(spell => spell.level === 0);
+};
+
+const getLeveledSpellsByClass = (classSlug: string, level: number = 1): Spell[] => {
+  return getSpellsForClass(classSlug).filter(spell => spell.level === level);
+};
+
+const isSpellcaster = (classData: ClassWithDefaults): boolean => {
+  return classData.spellcasting !== undefined;
+};
+
 const ALIGNMENTS = [
   'Lawful Good',
   'Neutral Good',
@@ -1160,7 +1668,23 @@ const calculateCharacterStats = (data: CharacterCreationData): Character => {
     };
   });
 
-  // 4. Construct Final Character Object
+  // 4. Calculate Spellcasting Stats (if applicable)
+  let spellcastingData: Character['spellcasting'] = undefined;
+  if (isSpellcaster(classData) && classData.spellcasting) {
+    const spellAbility = classData.spellcasting.ability;
+    const spellModifier = finalAbilities[spellAbility].modifier;
+
+    spellcastingData = {
+      ability: spellAbility,
+      spellSaveDC: 8 + pb + spellModifier,
+      spellAttackBonus: pb + spellModifier,
+      cantripsKnown: data.spellSelection.selectedCantrips,
+      spellsKnown: data.spellSelection.selectedSpells,
+      spellSlots: classData.spellcasting.spellSlots,
+    };
+  }
+
+  // 5. Construct Final Character Object
   return {
     id: generateUUID(), // Generate UUID for IndexedDB
     name: data.name || "Unnamed Hero",
@@ -1185,7 +1709,8 @@ const calculateCharacterStats = (data: CharacterCreationData): Character => {
       flaws: data.flaws,
       classFeatures: classData.class_features,
       racialTraits: raceData.racial_traits,
-    }
+    },
+    spellcasting: spellcastingData, // Sprint 2: Include spell data
   };
 };
 
@@ -1369,6 +1894,7 @@ const STEP_TITLES = [
     'Character Details',
     'Choose Race',
     'Choose Class & Skills',
+    'Select Spells',        // Sprint 2: New step
     'Determine Abilities',
     'Select Equipment',
     'Finalize Background'
@@ -1855,6 +2381,213 @@ const Step3Class: React.FC<StepProps> = ({ data, updateData, nextStep, prevStep 
                     className="px-4 py-2 bg-red-600 hover:bg-red-500 rounded-lg text-white flex items-center disabled:bg-gray-600 disabled:cursor-not-allowed"
                 >
                     Next: Abilities <ArrowRight className="w-4 h-4 ml-2" />
+                </button>
+            </div>
+        </div>
+    );
+};
+
+// Sprint 2: Spell Selection Step
+const Step3point5Spells: React.FC<StepProps> = ({ data, updateData, nextStep, prevStep }) => {
+    const allClasses = getAllClasses();
+    const selectedClass = allClasses.find(c => c.slug === data.classSlug);
+
+    // If not a spellcaster, skip this step
+    if (!selectedClass || !isSpellcaster(selectedClass)) {
+        // Auto-advance to next step if not a spellcaster
+        React.useEffect(() => {
+            nextStep();
+        }, []);
+        return <div className='text-center text-gray-400'>This class doesn't have spellcasting. Advancing...</div>;
+    }
+
+    const spellcasting = selectedClass.spellcasting!;
+    const availableCantrips = getCantripsByClass(data.classSlug);
+    const availableSpells = getLeveledSpellsByClass(data.classSlug, 1);
+
+    const handleCantripToggle = (spellSlug: string) => {
+        const current = data.spellSelection.selectedCantrips;
+        const isSelected = current.includes(spellSlug);
+
+        if (isSelected) {
+            // Deselect
+            updateData({
+                spellSelection: {
+                    ...data.spellSelection,
+                    selectedCantrips: current.filter(s => s !== spellSlug),
+                },
+            });
+        } else if (current.length < spellcasting.cantripsKnown) {
+            // Select (if under limit)
+            updateData({
+                spellSelection: {
+                    ...data.spellSelection,
+                    selectedCantrips: [...current, spellSlug],
+                },
+            });
+        }
+    };
+
+    const handleSpellToggle = (spellSlug: string) => {
+        const current = data.spellSelection.selectedSpells;
+        const isSelected = current.includes(spellSlug);
+
+        if (isSelected) {
+            // Deselect
+            updateData({
+                spellSelection: {
+                    ...data.spellSelection,
+                    selectedSpells: current.filter(s => s !== spellSlug),
+                },
+            });
+        } else if (current.length < spellcasting.spellsKnownOrPrepared) {
+            // Select (if under limit)
+            updateData({
+                spellSelection: {
+                    ...data.spellSelection,
+                    selectedSpells: [...current, spellSlug],
+                },
+            });
+        }
+    };
+
+    const cantripsComplete = data.spellSelection.selectedCantrips.length === spellcasting.cantripsKnown;
+    const spellsComplete = data.spellSelection.selectedSpells.length === spellcasting.spellsKnownOrPrepared;
+    const allSelectionsComplete = cantripsComplete && spellsComplete;
+
+    // Spell mode description
+    const modeDescription = spellcasting.mode === 'book'
+        ? 'Choose spells for your spellbook. You can prepare a subset of these each day.'
+        : spellcasting.mode === 'prepared'
+        ? 'Choose spells to prepare. You can change your prepared spells after a long rest.'
+        : 'Choose spells your character knows. These are permanent until you level up.';
+
+    return (
+        <div className='space-y-6'>
+            <div>
+                <h3 className='text-xl font-bold text-red-300'>Select Your Spells</h3>
+                <p className='text-sm text-gray-400 mt-1'>
+                    {selectedClass.name} - {modeDescription}
+                </p>
+                <p className='text-xs text-purple-300 mt-1'>
+                    Spellcasting Ability: <span className='font-bold'>{spellcasting.ability}</span>
+                </p>
+            </div>
+
+            {/* Cantrips Section */}
+            <div className="bg-gray-700/50 border border-gray-600 rounded-lg p-4 space-y-3">
+                <h4 className="text-lg font-bold text-yellow-300">
+                    Cantrips ({data.spellSelection.selectedCantrips.length} / {spellcasting.cantripsKnown} selected)
+                </h4>
+                <p className="text-xs text-gray-400">
+                    Cantrips are 0-level spells that can be cast at will, without expending spell slots.
+                </p>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {availableCantrips.map(spell => {
+                        const isSelected = data.spellSelection.selectedCantrips.includes(spell.slug);
+                        const canSelect = data.spellSelection.selectedCantrips.length < spellcasting.cantripsKnown;
+
+                        return (
+                            <button
+                                key={spell.slug}
+                                onClick={() => handleCantripToggle(spell.slug)}
+                                disabled={!isSelected && !canSelect}
+                                className={`p-3 rounded-lg border-2 text-left transition-all ${
+                                    isSelected
+                                        ? 'bg-blue-900 border-blue-500'
+                                        : canSelect
+                                        ? 'bg-gray-700 border-gray-600 hover:border-blue-400'
+                                        : 'bg-gray-800 border-gray-700 opacity-50 cursor-not-allowed'
+                                }`}
+                            >
+                                <div className="flex items-start justify-between">
+                                    <div className="flex-1">
+                                        <div className="font-semibold text-white">{spell.name}</div>
+                                        <div className="text-xs text-purple-300">{spell.school}</div>
+                                    </div>
+                                    {isSelected && <Check className="w-5 h-5 text-green-400" />}
+                                </div>
+                                <div className="text-xs text-gray-400 mt-2 line-clamp-2">
+                                    {spell.description}
+                                </div>
+                                <div className="text-xs text-gray-500 mt-1">
+                                    {spell.castingTime} • {spell.range}
+                                    {spell.concentration && ' • Concentration'}
+                                </div>
+                            </button>
+                        );
+                    })}
+                </div>
+            </div>
+
+            {/* 1st Level Spells Section */}
+            <div className="bg-gray-700/50 border border-gray-600 rounded-lg p-4 space-y-3">
+                <h4 className="text-lg font-bold text-yellow-300">
+                    1st Level Spells ({data.spellSelection.selectedSpells.length} / {spellcasting.spellsKnownOrPrepared} selected)
+                </h4>
+                <p className="text-xs text-gray-400">
+                    {spellcasting.mode === 'book' && 'These spells will be in your spellbook at 1st level.'}
+                    {spellcasting.mode === 'prepared' && 'You can prepare these spells from the full list.'}
+                    {spellcasting.mode === 'known' && 'These are the spells your character knows permanently.'}
+                </p>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {availableSpells.map(spell => {
+                        const isSelected = data.spellSelection.selectedSpells.includes(spell.slug);
+                        const canSelect = data.spellSelection.selectedSpells.length < spellcasting.spellsKnownOrPrepared;
+
+                        return (
+                            <button
+                                key={spell.slug}
+                                onClick={() => handleSpellToggle(spell.slug)}
+                                disabled={!isSelected && !canSelect}
+                                className={`p-3 rounded-lg border-2 text-left transition-all ${
+                                    isSelected
+                                        ? 'bg-blue-900 border-blue-500'
+                                        : canSelect
+                                        ? 'bg-gray-700 border-gray-600 hover:border-blue-400'
+                                        : 'bg-gray-800 border-gray-700 opacity-50 cursor-not-allowed'
+                                }`}
+                            >
+                                <div className="flex items-start justify-between">
+                                    <div className="flex-1">
+                                        <div className="font-semibold text-white">{spell.name}</div>
+                                        <div className="text-xs text-purple-300">{spell.school}</div>
+                                    </div>
+                                    {isSelected && <Check className="w-5 h-5 text-green-400" />}
+                                </div>
+                                <div className="text-xs text-gray-400 mt-2 line-clamp-2">
+                                    {spell.description}
+                                </div>
+                                <div className="text-xs text-gray-500 mt-1">
+                                    {spell.castingTime} • {spell.range}
+                                    {spell.concentration && ' • Concentration'}
+                                    {spell.ritual && ' • Ritual'}
+                                </div>
+                            </button>
+                        );
+                    })}
+                </div>
+            </div>
+
+            {/* Navigation */}
+            <div className='flex justify-between'>
+                <button onClick={prevStep} className='px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-500 flex items-center gap-2'>
+                    <ArrowLeft className='w-4 h-4' />
+                    Back
+                </button>
+                <button
+                    onClick={nextStep}
+                    disabled={!allSelectionsComplete}
+                    className={`px-4 py-2 rounded-lg flex items-center gap-2 ${
+                        allSelectionsComplete
+                            ? 'bg-red-700 text-white hover:bg-red-600'
+                            : 'bg-gray-700 text-gray-500 cursor-not-allowed'
+                    }`}
+                >
+                    Next: Abilities
+                    <ArrowRight className='w-4 h-4' />
                 </button>
             </div>
         </div>
@@ -2558,9 +3291,10 @@ const CharacterCreationWizard: React.FC<WizardProps> = ({ isOpen, onClose, onCha
             case 0: return <Step1Details {...commonProps} />;
             case 1: return <Step2Race {...commonProps} />;
             case 2: return <Step3Class {...commonProps} />;
-            case 3: return <Step4Abilities {...commonProps} />;
-            case 4: return <Step5Equipment {...commonProps} />;
-            case 5: return <Step6Traits {...commonProps} onSubmit={handleSubmit} />;
+            case 3: return <Step3point5Spells {...commonProps} />; // Sprint 2: Spell selection
+            case 4: return <Step4Abilities {...commonProps} />;
+            case 5: return <Step5Equipment {...commonProps} />;
+            case 6: return <Step6Traits {...commonProps} onSubmit={handleSubmit} />;
             default: return <p>Unknown step.</p>;
         }
     };
