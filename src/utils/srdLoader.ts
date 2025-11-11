@@ -178,16 +178,18 @@ export function transformRace(srdRace: SRDRace, year: number = 2014): AppRace {
 }
 
 export function transformClass(srdClass: SRDClass, year: number = 2014): AppClass {
-  // Extract skill proficiencies from proficiency_choices
-  const skillProficiencies = srdClass.proficiency_choices
-    .filter(choice => choice.type === 'proficiencies')
+  // Extract skill proficiencies from proficiency_choices (with safety checks)
+  const skillProficiencies = (srdClass.proficiency_choices || [])
+    .filter(choice => choice && choice.type === 'proficiencies')
     .flatMap(choice =>
-      choice.from.options.map(opt => opt.item.name)
+      (choice.from?.options || [])
+        .filter(opt => opt && opt.item && opt.item.name)
+        .map(opt => opt.item.name)
     );
 
-  const numSkillChoices = srdClass.proficiency_choices
-    .filter(choice => choice.type === 'proficiencies')
-    .reduce((sum, choice) => sum + choice.choose, 0);
+  const numSkillChoices = (srdClass.proficiency_choices || [])
+    .filter(choice => choice && choice.type === 'proficiencies')
+    .reduce((sum, choice) => sum + (choice.choose || 0), 0);
 
   return {
     slug: srdClass.index,
