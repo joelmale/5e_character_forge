@@ -3,10 +3,11 @@ import { Dice6, Plus, Trash2, Loader2, BookOpen, User as UserIcon, Shield, Zap, 
 import { DiceBox3D } from './components/DiceBox3D';
 import { RollHistoryModal, RollHistoryTicker } from './components/RollHistory';
 import { FeatureModal } from './components/FeatureModal';
+import { EquipmentDetailModal } from './components/EquipmentDetailModal';
 import { createAbilityRoll, createSkillRoll, createInitiativeRoll, getRollHistory, addRollToHistory, clearRollHistory, rollDice, generateUUID, type DiceRoll as DiceRollType } from './utils/diceRoller';
 import { diceSounds } from './utils/diceSounds';
 import { featureDescriptions } from './utils/featureDescriptions';
-import { loadSpells, loadRaces, loadClasses } from './utils/srdLoader';
+import { loadSpells, loadRaces, loadClasses, loadEquipment, FEAT_DATABASE as loadedFeats, getSubclassesByClass, getFeaturesByClass, getFeaturesBySubclass } from './utils/srdLoader';
 import alignmentsData from './data/alignments.json';
 
 // --- IndexedDB Configuration ---
@@ -99,6 +100,10 @@ interface Character {
   armorClass: number;
   hitPoints: number;
   maxHitPoints: number;
+  hitDice: {
+    current: number;
+    max: number;
+  };
   speed: number;
   initiative: number;
   abilities: {
@@ -124,13 +129,33 @@ interface Character {
     spellAttackBonus: number;
     cantripsKnown: string[]; // Spell slugs
     spellsKnown: string[]; // Spell slugs for known/prepared spells
-    spellSlots: number[]; // Available spell slots by level
+    spellSlots: number[]; // Maximum spell slots by level
+    usedSpellSlots?: number[]; // Used spell slots by level (for tracking)
   };
 
   // Sprint 3: Character advancement
-  subclass?: string; // Subclass name (e.g., "School of Evocation")
+  subclass?: string; // Subclass slug (e.g., "berserker")
   experiencePoints?: number; // Current XP
-  feats?: string[]; // Feat slugs
+  feats?: string[]; // Feat slugs (deprecated - use selectedFeats)
+  selectedFightingStyle?: string; // Fighting Style name (Fighter/Paladin/Ranger)
+
+  // Sprint 5: Features, Subclasses, and Feats
+  srdFeatures?: {
+    classFeatures: Array<{ name: string; slug: string; level: number; source: 'class' }>;
+    subclassFeatures: Array<{ name: string; slug: string; level: number; source: 'subclass' }>;
+  };
+  selectedFeats?: string[]; // Feat slugs selected during character creation
+
+  // Sprint 4: Equipment and inventory
+  inventory?: EquippedItem[]; // All carried items
+  currency?: {
+    cp: number;
+    sp: number;
+    gp: number;
+    pp: number;
+  };
+  equippedArmor?: string; // Equipment slug of equipped armor
+  equippedWeapons?: string[]; // Equipment slugs of equipped weapons (primary, offhand, etc.)
 }
 
 // --- Intermediate Wizard Data Structure ---
@@ -183,18 +208,103 @@ interface SpellSelectionData {
   preparedSpells?: string[]; // Only for prepared casters (clerics, druids, paladins)
 }
 
-// Sprint 3: Feat system
-interface Feat {
+// Sprint 3: Feat system (interface moved to Sprint 5 section below)
+
+// Sprint 4: Equipment system
+interface Equipment {
   slug: string;
   name: string;
-  source: string;
-  description: string;
-  prerequisites?: string; // e.g., "Strength 13 or higher"
-  abilityScoreIncrease?: {
-    choices: number; // Number of ability scores to increase
-    amount: number; // Amount to increase each (usually 1)
+  year: number; // 2014 or 2024
+  equipment_category: string; // 'Weapon', 'Armor', 'Adventuring Gear', 'Tools', etc.
+  cost: {
+    quantity: number;
+    unit: 'cp' | 'sp' | 'gp' | 'pp';
   };
-  benefits: string[]; // List of mechanical benefits
+  weight: number;
+  description?: string;
+
+  // Weapon-specific fields
+  weapon_category?: 'Simple' | 'Martial';
+  weapon_range?: 'Melee' | 'Ranged';
+  damage?: {
+    damage_dice: string;
+    damage_type: string;
+  };
+  range?: {
+    normal: number;
+    long?: number;
+  };
+  properties?: string[]; // 'Light', 'Finesse', 'Thrown', 'Versatile', etc.
+  two_handed_damage?: {
+    damage_dice: string;
+    damage_type: string;
+  };
+  mastery?: string; // 2024 only: weapon mastery property
+
+  // Armor-specific fields
+  armor_category?: 'Light' | 'Medium' | 'Heavy' | 'Shield';
+  armor_class?: {
+    base: number;
+    dex_bonus: boolean;
+    max_bonus?: number; // For medium armor
+  };
+  str_minimum?: number;
+  stealth_disadvantage?: boolean;
+  don_time?: string; // 2024 only
+  doff_time?: string; // 2024 only
+
+  // Tool/Gear-specific fields
+  tool_category?: string;
+  gear_category?: string;
+  contents?: Array<{ item_index: string; item_name: string; quantity: number }>; // For containers
+  capacity?: string; // For containers
+}
+
+interface EquippedItem {
+  equipmentSlug: string; // Reference to Equipment slug
+  quantity: number;
+  equipped: boolean; // Is this item currently equipped?
+  notes?: string; // Player notes about the item
+}
+
+// Sprint 5: Class Features, Subclasses, and Feats
+export interface Feature {
+  slug: string;
+  name: string;
+  class: string; // 'barbarian', 'fighter', etc.
+  subclass?: string; // Optional for subclass-specific features
+  level: number; // Level when feature is gained
+  desc: string[]; // Array of description paragraphs
+  featureSpecific?: {
+    subfeatureOptions?: {
+      choose: number;
+      type: string;
+      from: { options: any[] };
+    };
+  };
+}
+
+export interface Subclass {
+  slug: string;
+  name: string;
+  class: string; // Parent class slug
+  desc: string[];
+  subclassFlavor: string; // e.g., "Path of the Berserker"
+}
+
+export interface Feat {
+  slug: string;
+  name: string;
+  source: string; // 'PHB', 'XGtE', 'TCoE', 'FToD', 'SRD'
+  year: number; // 2014 or 2024
+  prerequisite: string | null;
+  abilityScoreIncrease?: {
+    choices: number;
+    options: AbilityName[];
+    amount: number;
+  };
+  benefits: string[];
+  description: string;
 }
 
 interface CharacterCreationData {
@@ -215,6 +325,14 @@ interface CharacterCreationData {
 
   // Sprint 2: Spell selection
   spellSelection: SpellSelectionData;
+
+  // Sprint 4: Custom equipment additions
+  startingInventory?: EquippedItem[];
+
+  // Sprint 5: Subclass, Fighting Style, and Feats
+  subclassSlug?: string;
+  selectedFightingStyle?: string;
+  selectedFeats?: string[]; // Array of feat slugs
 
   // Custom text for traits
   personality: string;
@@ -240,6 +358,10 @@ const initialCreationData: CharacterCreationData = {
     selectedCantrips: [],
     selectedSpells: [],
   },
+  startingInventory: [],
+  subclassSlug: undefined,
+  selectedFightingStyle: undefined,
+  selectedFeats: [],
   personality: "I'm quiet until I have something important to say.",
   ideals: "Honesty. The truth must be preserved.",
   bonds: "I owe my life to the individual who saved me.",
@@ -592,169 +714,104 @@ const getAllRaces = (): Race[] => {
 // --- Sprint 2: Spell Database ---
 // --- Sprint 2: Spell Database (loaded from SRD - replaces ~25 hardcoded with 1,804 spells) ---
 const SPELL_DATABASE: Spell[] = loadSpells();
+const EQUIPMENT_DATABASE: Equipment[] = loadEquipment();
 
 
-// Sprint 3: Feat Database (exported for future use)
-export const FEAT_DATABASE: Feat[] = [
+// Sprint 3: Feat Database (loaded from JSON and SRD)
+export const FEAT_DATABASE: Feat[] = loadedFeats;
+
+// Sprint 4: Level-based Equipment Packages
+// Based on DMG "Starting at Higher Levels" wealth guidelines
+interface EquipmentPackage {
+  level: number;
+  description: string;
+  startingGold: number; // in gp
+  items: Array<{ slug: string; quantity: number; equipped?: boolean }>;
+  recommendedItems: string[]; // Text descriptions for DM to add
+}
+
+const EQUIPMENT_PACKAGES: EquipmentPackage[] = [
   {
-    slug: 'alert',
-    name: 'Alert',
-    source: 'Player\'s Handbook',
-    description: 'Always on the lookout for danger, you gain the following benefits:',
-    benefits: [
-      '+5 bonus to initiative',
-      'You can\'t be surprised while conscious',
-      'Other creatures don\'t gain advantage on attack rolls against you as a result of being unseen by you',
-    ],
+    level: 1,
+    description: 'Standard starting equipment for a 1st-level character',
+    startingGold: 0, // Uses class starting equipment
+    items: [], // Will be populated from class choices
+    recommendedItems: ['Class starting equipment', 'Background equipment'],
   },
   {
-    slug: 'athlete',
-    name: 'Athlete',
-    source: 'Player\'s Handbook',
-    description: 'You have undergone extensive physical training to gain the following benefits:',
-    abilityScoreIncrease: { choices: 1, amount: 1 },
-    benefits: [
-      'Increase your Strength or Dexterity score by 1, to a maximum of 20',
-      'When prone, standing up uses only 5 feet of movement',
-      'Climbing doesn\'t cost you extra movement',
-      'You can make a running long jump or running high jump after moving only 5 feet',
+    level: 3,
+    description: 'Equipment for a 3rd-level character (Normal campaign starting level)',
+    startingGold: 100,
+    items: [
+      { slug: 'chain-mail', quantity: 1, equipped: true }, // Armor
+      { slug: 'longsword', quantity: 1, equipped: true }, // Primary weapon
+      { slug: 'shield', quantity: 1, equipped: true }, // Shield
+      { slug: 'explorers-pack', quantity: 1 },
+      { slug: 'rope-hempen', quantity: 1 },
+      { slug: 'torch', quantity: 10 },
+      { slug: 'rations', quantity: 10 },
     ],
+    recommendedItems: ['Possibly one uncommon magic item', 'Healing potions (2d4+2)', 'Scroll of 1st-level spell'],
   },
   {
-    slug: 'dual-wielder',
-    name: 'Dual Wielder',
-    source: 'Player\'s Handbook',
-    description: 'You master fighting with two weapons, gaining the following benefits:',
-    benefits: [
-      '+1 bonus to AC while wielding a separate melee weapon in each hand',
-      'You can use two-weapon fighting even when the one-handed melee weapons you are wielding aren\'t light',
-      'You can draw or stow two one-handed weapons when you would normally be able to draw or stow only one',
+    level: 5,
+    description: 'Equipment for a 5th-level character (Tier 2 start)',
+    startingGold: 500,
+    items: [
+      { slug: 'plate-armor', quantity: 1, equipped: true }, // Better armor
+      { slug: 'longsword', quantity: 1, equipped: true },
+      { slug: 'shield', quantity: 1, equipped: true },
+      { slug: 'explorers-pack', quantity: 1 },
+      { slug: 'rope-hempen', quantity: 2 },
+      { slug: 'torch', quantity: 20 },
+      { slug: 'rations', quantity: 20 },
     ],
+    recommendedItems: ['1 uncommon magic item', '1-2 common magic items', 'Healing potions (3d4+3)', 'Scrolls of various levels'],
   },
   {
-    slug: 'great-weapon-master',
-    name: 'Great Weapon Master',
-    source: 'Player\'s Handbook',
-    description: 'You\'ve learned to put the weight of a weapon to your advantage. You gain the following benefits:',
-    benefits: [
-      'On your turn, when you score a critical hit or reduce a creature to 0 HP with a melee weapon, you can make one melee weapon attack as a bonus action',
-      'Before you make a melee attack with a heavy weapon, you can choose to take a -5 penalty to the attack roll. If the attack hits, you add +10 to the attack\'s damage',
+    level: 10,
+    description: 'Equipment for a 10th-level character (Mid-Tier 2)',
+    startingGold: 5000,
+    items: [
+      { slug: 'plate-armor', quantity: 1, equipped: true },
+      { slug: 'longsword', quantity: 1, equipped: true },
+      { slug: 'shield', quantity: 1, equipped: true },
+      { slug: 'explorers-pack', quantity: 1 },
+      { slug: 'rope-hempen', quantity: 2 },
+      { slug: 'torch', quantity: 30 },
+      { slug: 'rations', quantity: 30 },
     ],
+    recommendedItems: ['2 uncommon magic items', '1 rare magic item', 'Healing potions (5d4+5)', 'Scrolls up to 3rd level', 'Potions of various types'],
   },
   {
-    slug: 'lucky',
-    name: 'Lucky',
-    source: 'Player\'s Handbook',
-    description: 'You have inexplicable luck that seems to kick in at just the right moment. You have 3 luck points. You gain the following benefits:',
-    benefits: [
-      'Whenever you make an attack roll, ability check, or saving throw, you can spend one luck point to roll an additional d20',
-      'You can choose to spend one of your luck points after you roll the die, but before the outcome is determined',
-      'You choose which of the d20s is used for the attack roll, ability check, or saving throw',
-      'You can also spend one luck point when an attack roll is made against you',
-      'You regain expended luck points when you finish a long rest',
+    level: 15,
+    description: 'Equipment for a 15th-level character (Tier 3 veteran)',
+    startingGold: 20000,
+    items: [
+      { slug: 'plate-armor', quantity: 1, equipped: true },
+      { slug: 'longsword', quantity: 1, equipped: true },
+      { slug: 'shield', quantity: 1, equipped: true },
+      { slug: 'explorers-pack', quantity: 1 },
+      { slug: 'rope-hempen', quantity: 3 },
+      { slug: 'torch', quantity: 40 },
+      { slug: 'rations', quantity: 40 },
     ],
+    recommendedItems: ['3 uncommon magic items', '2 rare magic items', '1 very rare magic item', 'Healing potions (7d4+7)', 'Scrolls up to 5th level', 'Various potions and consumables'],
   },
   {
-    slug: 'magic-initiate',
-    name: 'Magic Initiate',
-    source: 'Player\'s Handbook',
-    description: 'Choose a class: bard, cleric, druid, sorcerer, warlock, or wizard. You learn two cantrips of your choice from that class\'s spell list. In addition, choose one 1st-level spell from that same list. You learn that spell and can cast it at its lowest level. Once you cast it, you must finish a long rest before you can cast it again using this feat.',
-    benefits: [
-      'Learn two cantrips from one class',
-      'Learn one 1st-level spell from that class',
-      'Can cast the 1st-level spell once per long rest',
-      'Your spellcasting ability for these spells depends on the class you chose',
+    level: 20,
+    description: 'Equipment for a 20th-level character (Epic hero)',
+    startingGold: 50000,
+    items: [
+      { slug: 'plate-armor', quantity: 1, equipped: true },
+      { slug: 'longsword', quantity: 1, equipped: true },
+      { slug: 'shield', quantity: 1, equipped: true },
+      { slug: 'explorers-pack', quantity: 1 },
+      { slug: 'rope-hempen', quantity: 5 },
+      { slug: 'torch', quantity: 50 },
+      { slug: 'rations', quantity: 50 },
     ],
-  },
-  {
-    slug: 'mobile',
-    name: 'Mobile',
-    source: 'Player\'s Handbook',
-    description: 'You are exceptionally speedy and agile. You gain the following benefits:',
-    benefits: [
-      'Your speed increases by 10 feet',
-      'When you use the Dash action, difficult terrain doesn\'t cost you extra movement on that turn',
-      'When you make a melee attack against a creature, you don\'t provoke opportunity attacks from that creature for the rest of the turn',
-    ],
-  },
-  {
-    slug: 'resilient',
-    name: 'Resilient',
-    source: 'Player\'s Handbook',
-    description: 'Choose one ability score. You gain the following benefits:',
-    abilityScoreIncrease: { choices: 1, amount: 1 },
-    benefits: [
-      'Increase the chosen ability score by 1, to a maximum of 20',
-      'You gain proficiency in saving throws using the chosen ability',
-    ],
-  },
-  {
-    slug: 'sentinel',
-    name: 'Sentinel',
-    source: 'Player\'s Handbook',
-    description: 'You have mastered techniques to take advantage of every drop in any enemy\'s guard. You gain the following benefits:',
-    benefits: [
-      'When you hit a creature with an opportunity attack, the creature\'s speed becomes 0 for the rest of the turn',
-      'Creatures provoke opportunity attacks from you even if they take the Disengage action before leaving your reach',
-      'When a creature makes an attack against a target other than you, you can use your reaction to make a melee weapon attack against the attacking creature',
-    ],
-  },
-  {
-    slug: 'sharpshooter',
-    name: 'Sharpshooter',
-    source: 'Player\'s Handbook',
-    description: 'You have mastered ranged weapons and can make shots that others find impossible. You gain the following benefits:',
-    benefits: [
-      'Attacking at long range doesn\'t impose disadvantage on your ranged weapon attack rolls',
-      'Your ranged weapon attacks ignore half cover and three-quarters cover',
-      'Before you make an attack with a ranged weapon, you can choose to take a -5 penalty to the attack roll. If the attack hits, you add +10 to the attack\'s damage',
-    ],
-  },
-  {
-    slug: 'spell-sniper',
-    name: 'Spell Sniper',
-    source: 'Player\'s Handbook',
-    description: 'You have learned techniques to enhance your attacks with certain kinds of spells. You gain the following benefits:',
-    prerequisites: 'The ability to cast at least one spell',
-    benefits: [
-      'When you cast a spell that requires you to make an attack roll, the spell\'s range is doubled',
-      'Your ranged spell attacks ignore half cover and three-quarters cover',
-      'You learn one cantrip that requires an attack roll. Choose the cantrip from the bard, cleric, druid, sorcerer, warlock, or wizard spell list',
-    ],
-  },
-  {
-    slug: 'tavern-brawler',
-    name: 'Tavern Brawler',
-    source: 'Player\'s Handbook',
-    description: 'Accustomed to rough-and-tumble fighting using whatever weapons happen to be at hand, you gain the following benefits:',
-    abilityScoreIncrease: { choices: 1, amount: 1 },
-    benefits: [
-      'Increase your Strength or Constitution score by 1, to a maximum of 20',
-      'You are proficient with improvised weapons',
-      'Your unarmed strike uses a d4 for damage',
-      'When you hit a creature with an unarmed strike or improvised weapon on your turn, you can use a bonus action to attempt to grapple the target',
-    ],
-  },
-  {
-    slug: 'tough',
-    name: 'Tough',
-    source: 'Player\'s Handbook',
-    description: 'Your hit point maximum increases by an amount equal to twice your level when you gain this feat. Whenever you gain a level thereafter, your hit point maximum increases by an additional 2 hit points.',
-    benefits: [
-      'Hit point maximum increases by 2 per level (including past levels)',
-    ],
-  },
-  {
-    slug: 'war-caster',
-    name: 'War Caster',
-    source: 'Player\'s Handbook',
-    description: 'You have practiced casting spells in the midst of combat. You gain the following benefits:',
-    prerequisites: 'The ability to cast at least one spell',
-    benefits: [
-      'You have advantage on Constitution saving throws to maintain concentration on a spell when you take damage',
-      'You can perform the somatic components of spells even when you have weapons or a shield in one or both hands',
-      'When a hostile creature\'s movement provokes an opportunity attack from you, you can use your reaction to cast a spell at the creature, rather than making an opportunity attack',
-    ],
+    recommendedItems: ['4 uncommon magic items', '3 rare magic items', '2 very rare magic items', '1 legendary magic item', 'Healing potions (10d4+10)', 'High-level scrolls', 'Extensive consumables collection'],
   },
 ];
 
@@ -1268,7 +1325,7 @@ const getAllClasses = (): ClassWithDefaults[] => {
           selected: null,
         },
       ],
-    };
+    } as ClassWithDefaults;
   });
 };
 
@@ -1449,20 +1506,129 @@ const calculateCharacterStats = (data: CharacterCreationData): Character => {
     };
   }
 
-  // 5. Construct Final Character Object
+  // 5. Build Equipment Inventory
+  const inventory: EquippedItem[] = [];
+  let equippedArmor: string | undefined;
+  const equippedWeapons: string[] = [];
+
+  // Get equipment package for the character's level
+  const equipmentPackage = EQUIPMENT_PACKAGES.find(pkg => pkg.level === level) || EQUIPMENT_PACKAGES[0];
+
+  // Add items from equipment package
+  equipmentPackage.items.forEach(item => {
+    inventory.push({
+      equipmentSlug: item.slug,
+      quantity: item.quantity,
+      equipped: item.equipped || false,
+    });
+
+    // Track equipped items
+    const equipment = EQUIPMENT_DATABASE.find(eq => eq.slug === item.slug);
+    if (item.equipped && equipment) {
+      if (equipment.armor_category) {
+        equippedArmor = item.slug;
+      } else if (equipment.weapon_category) {
+        equippedWeapons.push(item.slug);
+      }
+    }
+  });
+
+  // Add items from class equipment choices
+  data.equipmentChoices.forEach(choice => {
+    if (choice.selected !== null) {
+      const selectedBundle = choice.options[choice.selected];
+      selectedBundle.forEach(item => {
+        // Try to find matching equipment in database
+        const equipmentSlug = item.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+        const foundEquipment = EQUIPMENT_DATABASE.find(eq =>
+          eq.slug === equipmentSlug || eq.name.toLowerCase() === item.name.toLowerCase()
+        );
+
+        if (foundEquipment) {
+          inventory.push({
+            equipmentSlug: foundEquipment.slug,
+            quantity: item.quantity,
+            equipped: false, // Will be equipped manually by player
+          });
+        }
+      });
+    }
+  });
+
+  // Add custom starting inventory from equipment browser (Sprint 4)
+  if (data.startingInventory) {
+    data.startingInventory.forEach(item => {
+      // Check if item already exists in inventory
+      const existingItem = inventory.find(inv => inv.equipmentSlug === item.equipmentSlug);
+      if (existingItem) {
+        existingItem.quantity += item.quantity;
+      } else {
+        inventory.push({
+          equipmentSlug: item.equipmentSlug,
+          quantity: item.quantity,
+          equipped: item.equipped || false,
+        });
+      }
+    });
+  }
+
+  // 6. Calculate AC based on equipped armor
+  let armorClass = 10 + finalAbilities.DEX.modifier; // Default unarmored
+  if (equippedArmor) {
+    const armor = EQUIPMENT_DATABASE.find(eq => eq.slug === equippedArmor);
+    if (armor?.armor_class) {
+      if (armor.armor_category === 'Light') {
+        // Light armor: base + full DEX
+        armorClass = armor.armor_class.base + finalAbilities.DEX.modifier;
+      } else if (armor.armor_category === 'Medium') {
+        // Medium armor: base + DEX (max +2)
+        const dexBonus = Math.min(finalAbilities.DEX.modifier, armor.armor_class.max_bonus || 2);
+        armorClass = armor.armor_class.base + dexBonus;
+      } else if (armor.armor_category === 'Heavy') {
+        // Heavy armor: base only
+        armorClass = armor.armor_class.base;
+      } else if (armor.armor_category === 'Shield') {
+        // Shield adds +2 to current AC
+        armorClass += 2;
+      }
+    }
+  }
+
+  // 7. Load Class Features from SRD (Sprint 5)
+  const classFeatures = getFeaturesByClass(data.classSlug, level);
+
+  // 8. Load Subclass Features from SRD (Sprint 5)
+  let subclassFeatures: typeof classFeatures = [];
+  if (data.subclassSlug) {
+    subclassFeatures = getFeaturesBySubclass(data.classSlug, data.subclassSlug, level);
+  }
+
+  // 9. Build complete class features list (Sprint 5)
+  // Include Fighting Style if selected
+  const allClassFeatures = [...classData.class_features];
+  if (data.selectedFightingStyle) {
+    allClassFeatures.push(`Fighting Style: ${data.selectedFightingStyle}`);
+  }
+
+  // 10. Construct Final Character Object
   return {
     id: generateUUID(), // Generate UUID for IndexedDB
     name: data.name || "Unnamed Hero",
     race: raceData.name,
     class: classData.name,
+    subclass: data.subclassSlug, // Sprint 5: Store subclass slug
     level,
     alignment: data.alignment,
     background: data.background,
     inspiration: false,
     proficiencyBonus: pb,
-    armorClass: 10 + finalAbilities.DEX.modifier,
+    armorClass,
     hitPoints: maxHitPoints,
     maxHitPoints,
+    hitDice: {
+      current: level,
+      max: level,
+    },
     speed: 30,
     initiative: finalAbilities.DEX.modifier,
     abilities: finalAbilities,
@@ -1472,10 +1638,27 @@ const calculateCharacterStats = (data: CharacterCreationData): Character => {
       ideals: data.ideals,
       bonds: data.bonds,
       flaws: data.flaws,
-      classFeatures: classData.class_features,
+      classFeatures: allClassFeatures, // Includes fighting style if applicable
       racialTraits: raceData.racial_traits,
     },
     spellcasting: spellcastingData, // Sprint 2: Include spell data
+    // Sprint 4: Equipment and inventory
+    inventory,
+    currency: {
+      cp: 0,
+      sp: 0,
+      gp: equipmentPackage.startingGold,
+      pp: 0,
+    },
+    equippedArmor,
+    equippedWeapons,
+    selectedFightingStyle: data.selectedFightingStyle, // Sprint 5: Store fighting style
+    // Sprint 5: Store SRD features and selected feats
+    srdFeatures: {
+      classFeatures: classFeatures.map(f => ({ name: f.name, slug: f.slug, level: f.level, source: 'class' as const })),
+      subclassFeatures: subclassFeatures.map(f => ({ name: f.name, slug: f.slug, level: f.level, source: 'subclass' as const })),
+    },
+    selectedFeats: data.selectedFeats || [],
   };
 };
 
@@ -1488,6 +1671,16 @@ interface CharacterSheetProps {
   onDiceRoll: (roll: DiceRollType) => void;
   onToggleInspiration: (id: string) => void;
   onFeatureClick: (featureName: string) => void;
+  onLongRest: (id: string) => void;
+  onShortRest: (id: string) => void;
+  onLevelUp: (id: string) => void;
+  onUpdateCharacter: (character: Character) => void;
+  onEquipArmor: (characterId: string, armorSlug: string) => void;
+  onEquipWeapon: (characterId: string, weaponSlug: string) => void;
+  onUnequipItem: (characterId: string, itemSlug: string) => void;
+  onAddItem: (characterId: string, equipmentSlug: string, quantity?: number) => void;
+  onRemoveItem: (characterId: string, equipmentSlug: string, quantity?: number) => void;
+  setEquipmentModal: (equipment: Equipment | null) => void;
 }
 
 interface WizardProps {
@@ -1544,7 +1737,11 @@ const SkillEntry: React.FC<{ name: SkillName; skill: Skill; setRollResult: Chara
   );
 };
 
-const CharacterSheet: React.FC<CharacterSheetProps> = ({ character, onClose, onDelete, setRollResult, onDiceRoll, onToggleInspiration, onFeatureClick }) => {
+const CharacterSheet: React.FC<CharacterSheetProps> = ({
+  character, onClose, onDelete, setRollResult, onDiceRoll, onToggleInspiration, onFeatureClick,
+  onLongRest, onShortRest, onLevelUp, onUpdateCharacter, onEquipArmor, onEquipWeapon, onUnequipItem,
+  onAddItem, onRemoveItem, setEquipmentModal
+}) => {
   const abilities = Object.entries(character.abilities) as [AbilityName, AbilityScore][];
   const skills = Object.entries(character.skills) as [SkillName, Skill][];
   const passivePerception = (character.skills.Perception.value + 10);
@@ -1563,6 +1760,27 @@ const CharacterSheet: React.FC<CharacterSheetProps> = ({ character, onClose, onD
         <div className="flex justify-between items-center border-b border-red-700 pb-3">
           <h1 className="text-3xl font-serif font-bold text-red-500 truncate">{character.name}</h1>
           <div className="flex space-x-3">
+            <button
+              onClick={() => onShortRest(character.id)}
+              className="px-3 py-2 text-sm bg-blue-600 hover:bg-blue-500 rounded-lg transition-colors font-medium"
+              title="Take a Short Rest (recover HP with hit dice)"
+            >
+              Short Rest
+            </button>
+            <button
+              onClick={() => onLongRest(character.id)}
+              className="px-3 py-2 text-sm bg-green-600 hover:bg-green-500 rounded-lg transition-colors font-medium"
+              title="Take a Long Rest (recover all HP and spell slots)"
+            >
+              Long Rest
+            </button>
+            <button
+              onClick={() => onLevelUp(character.id)}
+              className="px-3 py-2 text-sm bg-purple-600 hover:bg-purple-500 rounded-lg transition-colors font-medium"
+              title="Level up your character"
+            >
+              Level Up
+            </button>
             <button onClick={onClose} className="px-4 py-2 text-sm bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors font-medium">Back to List</button>
             <button onClick={() => onDelete(character.id)} className="p-2 bg-red-800 hover:bg-red-700 rounded-lg transition-colors" title="Delete Character"><Trash2 className="w-5 h-5 text-white" /></button>
           </div>
@@ -1583,7 +1801,7 @@ const CharacterSheet: React.FC<CharacterSheetProps> = ({ character, onClose, onD
           <div className="col-span-2 flex flex-col items-center"><Zap className="w-6 h-6 text-red-500 mb-1" /><span className="text-sm font-semibold text-gray-400">HP (Max)</span><div className="text-4xl font-extrabold text-green-400">{character.hitPoints} <span className="text-gray-400">/</span> {character.maxHitPoints}</div></div>
           <button onClick={handleInitiativeRoll} className="col-span-1 flex flex-col items-center bg-gray-700/50 p-2 rounded-lg hover:bg-red-700/70 transition-colors cursor-pointer" title="Roll Initiative"><Dice6 className="w-6 h-6 text-red-500 mb-1" /><span className="text-sm font-semibold text-gray-400">Initiative</span><div className="text-4xl font-extrabold text-yellow-300">{formatModifier(character.initiative)}</div></button>
           <div className="col-span-1 flex flex-col items-center"><BookOpen className="w-6 h-6 text-red-500 mb-1" /><span className="text-sm font-semibold text-gray-400">Prof.</span><div className="text-4xl font-extrabold text-yellow-300">{formatModifier(character.proficiencyBonus)}</div></div>
-          <div className="col-span-1 flex flex-col items-center"><UserIcon className="w-6 h-6 text-red-500 mb-1" /><span className="text-sm font-semibold text-gray-400">P.Perc</span><div className="text-4xl font-extrabold text-white">{passivePerception}</div></div>
+          <div className="col-span-1 flex flex-col items-center"><UserIcon className="w-6 h-6 text-red-500 mb-1" /><span className="text-sm font-semibold text-gray-400">Pass Perc</span><div className="text-4xl font-extrabold text-white">{passivePerception}</div></div>
         </div>
 
         {/* Abilities and Skills Section */}
@@ -1614,7 +1832,7 @@ const CharacterSheet: React.FC<CharacterSheetProps> = ({ character, onClose, onD
         </div>
 
         {/* Spellcasting Section */}
-        {character.spellcasting && (
+        {character.spellcasting ? (
           <div className="space-y-4">
             <h2 className="text-xl font-bold text-purple-500 border-b border-purple-800 pb-1">Spellcasting</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -1640,13 +1858,51 @@ const CharacterSheet: React.FC<CharacterSheetProps> = ({ character, onClose, onD
               {/* Spell Slots */}
               <div className="p-4 bg-gray-800 rounded-xl shadow-lg border-l-4 border-blue-500">
                 <h3 className="text-lg font-bold text-blue-400 mb-3">Spell Slots</h3>
-                <div className="space-y-1 text-sm">
-                  {character.spellcasting.spellSlots.map((slots, level) => {
-                    if (level === 0 || slots === 0) return null;
+                <div className="space-y-2 text-sm">
+                  {character.spellcasting.spellSlots.map((maxSlots, level) => {
+                    if (level === 0 || maxSlots === 0) return null;
+                    const usedSlots = character.spellcasting?.usedSpellSlots?.[level] || 0;
+                    const availableSlots = maxSlots - usedSlots;
+
                     return (
-                      <div key={level} className="flex justify-between">
-                        <span className="text-gray-400">Level {level}:</span>
-                        <span className="font-bold text-white">{slots} {slots === 1 ? 'slot' : 'slots'}</span>
+                      <div key={level} className="space-y-1">
+                        <div className="flex justify-between items-center">
+                          <span className="text-gray-400">Level {level}:</span>
+                          <span className="font-bold text-white">{availableSlots}/{maxSlots}</span>
+                        </div>
+                        <div className="flex gap-1">
+                          {Array.from({ length: maxSlots }).map((_, slotIndex) => {
+                            const isUsed = slotIndex < usedSlots;
+                            return (
+                              <button
+                                key={slotIndex}
+                                onClick={() => {
+                                  const newUsedSlots = [...(character.spellcasting?.usedSpellSlots || Array(10).fill(0))];
+                                  if (isUsed) {
+                                    // Uncheck this slot
+                                    newUsedSlots[level] = Math.max(0, (newUsedSlots[level] || 0) - 1);
+                                  } else {
+                                    // Check this slot
+                                    newUsedSlots[level] = (newUsedSlots[level] || 0) + 1;
+                                  }
+                                  onUpdateCharacter({
+                                    ...character,
+                                    spellcasting: {
+                                      ...character.spellcasting!,
+                                      usedSpellSlots: newUsedSlots
+                                    }
+                                  });
+                                }}
+                                className={`w-6 h-6 rounded border-2 transition-colors ${
+                                  isUsed
+                                    ? 'bg-gray-600 border-gray-500'
+                                    : 'bg-blue-500 border-blue-400 hover:bg-blue-400'
+                                }`}
+                                title={isUsed ? 'Click to restore slot' : 'Click to use slot'}
+                              />
+                            );
+                          })}
+                        </div>
                       </div>
                     );
                   })}
@@ -1679,6 +1935,339 @@ const CharacterSheet: React.FC<CharacterSheetProps> = ({ character, onClose, onD
               </div>
             </div>
           </div>
+        ) : (
+          <div className="space-y-4">
+            <h2 className="text-xl font-bold text-purple-500 border-b border-purple-800 pb-1">Spellcasting</h2>
+            <div className="p-4 bg-gray-800 rounded-xl shadow-lg border-l-4 border-gray-600 text-center">
+              <p className="text-gray-400 text-sm">No spellcasting abilities available for this character.</p>
+            </div>
+          </div>
+        )}
+
+        {/* Equipment & Inventory Section */}
+        {character.inventory && character.inventory.length > 0 && (
+          <div className="space-y-4">
+            <h2 className="text-xl font-bold text-orange-500 border-b border-orange-800 pb-1">Equipment & Inventory</h2>
+
+            {/* Combat Equipment - Equipped Weapons and Armor */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Equipped Armor */}
+              {character.equippedArmor && (() => {
+                const armor = EQUIPMENT_DATABASE.find(eq => eq.slug === character.equippedArmor);
+                if (!armor) return null;
+
+                return (
+                  <div className="p-4 bg-gray-800 rounded-xl shadow-lg border-l-4 border-blue-500">
+                    <h3 className="text-lg font-bold text-blue-400 mb-3 flex items-center justify-between">
+                      <span>Equipped Armor</span>
+                      <span className="text-xs text-gray-400">{armor.year === 2024 ? '2024' : '2014'}</span>
+                    </h3>
+                    <div className="space-y-2">
+                      <div className="font-bold text-white text-lg">{armor.name}</div>
+                      <div className="text-sm text-gray-300">
+                        <span className="text-gray-400">Type:</span> {armor.armor_category} Armor
+                      </div>
+                      <div className="text-sm text-gray-300">
+                        <span className="text-gray-400">AC:</span> {armor.armor_class?.base}
+                        {armor.armor_class?.dex_bonus && (
+                          <span> + DEX {armor.armor_class.max_bonus ? `(max +${armor.armor_class.max_bonus})` : ''}</span>
+                        )}
+                      </div>
+                      {armor.str_minimum && armor.str_minimum > 0 && (
+                        <div className="text-sm text-yellow-300">
+                          <span className="text-gray-400">STR Required:</span> {armor.str_minimum}
+                        </div>
+                      )}
+                      {armor.stealth_disadvantage && (
+                        <div className="text-xs text-red-400">Stealth Disadvantage</div>
+                      )}
+                      {armor.don_time && (
+                        <div className="text-xs text-gray-400">Don: {armor.don_time} | Doff: {armor.doff_time}</div>
+                      )}
+                      <div className="text-xs text-gray-500">Weight: {armor.weight} lb</div>
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* Equipped Weapons */}
+              {character.equippedWeapons && character.equippedWeapons.length > 0 && (
+                <div className="p-4 bg-gray-800 rounded-xl shadow-lg border-l-4 border-red-500">
+                  <h3 className="text-lg font-bold text-red-400 mb-3">Equipped Weapons</h3>
+                  <div className="space-y-3">
+                    {character.equippedWeapons.map((weaponSlug, idx) => {
+                      const weapon = EQUIPMENT_DATABASE.find(eq => eq.slug === weaponSlug);
+                      if (!weapon) return null;
+
+                      // Calculate attack bonus: prof + STR/DEX modifier
+                      const useDex = weapon.properties?.includes('Finesse') || weapon.weapon_range === 'Ranged';
+                      const attackMod = useDex ? character.abilities.DEX.modifier : character.abilities.STR.modifier;
+                      const attackBonus = character.proficiencyBonus + attackMod;
+
+                      return (
+                        <div key={idx} className="bg-gray-700/50 p-3 rounded-lg">
+                          <div className="flex items-center justify-between mb-1">
+                            <div className="font-bold text-white">{weapon.name}</div>
+                            <span className="text-xs text-gray-400">{weapon.year === 2024 ? '2024' : '2014'}</span>
+                          </div>
+                          <div className="text-sm space-y-1">
+                            <div className="text-green-300">
+                              <span className="text-gray-400">Attack:</span> {formatModifier(attackBonus)} |
+                              <span className="text-gray-400"> Damage:</span> {weapon.damage?.damage_dice} {weapon.damage?.damage_type}
+                            </div>
+                            {weapon.two_handed_damage && (
+                              <div className="text-blue-300 text-xs">
+                                Versatile: {weapon.two_handed_damage.damage_dice} {weapon.two_handed_damage.damage_type}
+                              </div>
+                            )}
+                            <div className="text-xs text-gray-400">
+                              {weapon.weapon_category} {weapon.weapon_range} | Range: {weapon.range?.normal}
+                              {weapon.range?.long && `/${weapon.range.long}`} ft
+                            </div>
+                            {weapon.properties && weapon.properties.length > 0 && (
+                              <div className="text-xs text-gray-500">
+                                Properties: {weapon.properties.join(', ')}
+                              </div>
+                            )}
+                            {weapon.mastery && (
+                              <div className="text-xs text-purple-400">Mastery: {weapon.mastery}</div>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Inventory Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Inventory List */}
+              <div className="md:col-span-2 p-4 bg-gray-800 rounded-xl shadow-lg border-l-4 border-yellow-500">
+                <div className="flex justify-between items-center mb-3">
+                  <h3 className="text-lg font-bold text-yellow-400">Inventory ({character.inventory.length} items)</h3>
+                  <button
+                    onClick={() => {
+                      // Show equipment browser modal
+                      const randomItem = EQUIPMENT_DATABASE[Math.floor(Math.random() * EQUIPMENT_DATABASE.length)];
+                      onAddItem(character.id, randomItem.slug, 1);
+                    }}
+                    className="px-3 py-1 bg-yellow-600 hover:bg-yellow-500 rounded text-xs transition-colors flex items-center gap-1"
+                    title="Add item from equipment database"
+                  >
+                    <Plus className="w-3 h-3" />
+                    Add Item
+                  </button>
+                </div>
+                <div className="space-y-2 max-h-[400px] overflow-y-auto">
+                  {character.inventory.map((item, idx) => {
+                    const equipment = EQUIPMENT_DATABASE.find(eq => eq.slug === item.equipmentSlug);
+                    if (!equipment) return null;
+
+                    const canEquip = equipment.weapon_category || equipment.armor_category;
+                    const isEquippable = canEquip && !item.equipped;
+                    const isUnequippable = canEquip && item.equipped;
+
+                    return (
+                      <div key={idx} className="bg-gray-700/50 p-2 rounded hover:bg-gray-700 transition-colors">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex-grow min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <button
+                                onClick={() => setEquipmentModal(equipment)}
+                                className="font-semibold text-white hover:text-orange-300 transition-colors text-left"
+                              >
+                                {equipment.name}
+                              </button>
+                              {item.equipped && <span className="text-xs bg-green-600 px-2 py-0.5 rounded">Equipped</span>}
+                              <span className="text-xs text-gray-400">{equipment.year === 2024 ? '2024' : '2014'}</span>
+                            </div>
+                            <div className="text-xs text-gray-400">
+                              {equipment.equipment_category}
+                              {equipment.weight && ` | ${equipment.weight * item.quantity} lb`}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2 flex-shrink-0">
+                            <span className="font-mono text-sm text-gray-300">×{item.quantity}</span>
+                            <div className="flex gap-1">
+                              {isEquippable && (
+                                <button
+                                  onClick={() => {
+                                    if (equipment.armor_category) {
+                                      onEquipArmor(character.id, item.equipmentSlug);
+                                    } else if (equipment.weapon_category) {
+                                      onEquipWeapon(character.id, item.equipmentSlug);
+                                    }
+                                  }}
+                                  className="px-2 py-1 bg-green-600 hover:bg-green-500 rounded text-xs transition-colors"
+                                  title="Equip item"
+                                >
+                                  Equip
+                                </button>
+                              )}
+                              {isUnequippable && (
+                                <button
+                                  onClick={() => onUnequipItem(character.id, item.equipmentSlug)}
+                                  className="px-2 py-1 bg-gray-600 hover:bg-gray-500 rounded text-xs transition-colors"
+                                  title="Unequip item"
+                                >
+                                  Unequip
+                                </button>
+                              )}
+                              <button
+                                onClick={() => onRemoveItem(character.id, item.equipmentSlug, 1)}
+                                className="px-2 py-1 bg-red-600 hover:bg-red-500 rounded text-xs transition-colors"
+                                title="Remove 1 from inventory"
+                              >
+                                −
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Currency and Encumbrance */}
+              <div className="space-y-4">
+                {/* Currency */}
+                {character.currency && (
+                  <div className="p-4 bg-gray-800 rounded-xl shadow-lg border-l-4 border-yellow-600">
+                    <h3 className="text-lg font-bold text-yellow-500 mb-3">Currency</h3>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between items-center">
+                        <span className="text-yellow-200">Platinum (pp):</span>
+                        <input
+                          type="number"
+                          min="0"
+                          value={character.currency.pp}
+                          onChange={(e) => {
+                            const updatedCharacter = {
+                              ...character,
+                              currency: { ...character.currency!, pp: Math.max(0, parseInt(e.target.value) || 0) }
+                            };
+                            onUpdateCharacter(updatedCharacter);
+                          }}
+                          className="w-20 px-2 py-1 bg-gray-700 text-white rounded border border-gray-600 focus:border-yellow-500 focus:outline-none text-right"
+                        />
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-yellow-300">Gold (gp):</span>
+                        <input
+                          type="number"
+                          min="0"
+                          value={character.currency.gp}
+                          onChange={(e) => {
+                            const updatedCharacter = {
+                              ...character,
+                              currency: { ...character.currency!, gp: Math.max(0, parseInt(e.target.value) || 0) }
+                            };
+                            onUpdateCharacter(updatedCharacter);
+                          }}
+                          className="w-20 px-2 py-1 bg-gray-700 text-white rounded border border-gray-600 focus:border-yellow-500 focus:outline-none text-right"
+                        />
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-300">Silver (sp):</span>
+                        <input
+                          type="number"
+                          min="0"
+                          value={character.currency.sp}
+                          onChange={(e) => {
+                            const updatedCharacter = {
+                              ...character,
+                              currency: { ...character.currency!, sp: Math.max(0, parseInt(e.target.value) || 0) }
+                            };
+                            onUpdateCharacter(updatedCharacter);
+                          }}
+                          className="w-20 px-2 py-1 bg-gray-700 text-white rounded border border-gray-600 focus:border-yellow-500 focus:outline-none text-right"
+                        />
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-orange-400">Copper (cp):</span>
+                        <input
+                          type="number"
+                          min="0"
+                          value={character.currency.cp}
+                          onChange={(e) => {
+                            const updatedCharacter = {
+                              ...character,
+                              currency: { ...character.currency!, cp: Math.max(0, parseInt(e.target.value) || 0) }
+                            };
+                            onUpdateCharacter(updatedCharacter);
+                          }}
+                          className="w-20 px-2 py-1 bg-gray-700 text-white rounded border border-gray-600 focus:border-yellow-500 focus:outline-none text-right"
+                        />
+                      </div>
+                      <div className="border-t border-gray-600 pt-2 mt-2">
+                        <div className="flex justify-between font-semibold">
+                          <span className="text-gray-400">Total Value:</span>
+                          <span className="text-yellow-300">
+                            {(character.currency.pp * 10 + character.currency.gp + character.currency.sp / 10 + character.currency.cp / 100).toFixed(2)} gp
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Encumbrance */}
+                <div className="p-4 bg-gray-800 rounded-xl shadow-lg border-l-4 border-orange-500">
+                  <h3 className="text-lg font-bold text-orange-400 mb-3">Encumbrance</h3>
+                  {(() => {
+                    const totalWeight = character.inventory.reduce((sum, item) => {
+                      const equipment = EQUIPMENT_DATABASE.find(eq => eq.slug === item.equipmentSlug);
+                      return sum + (equipment?.weight || 0) * item.quantity;
+                    }, 0);
+                    const capacity = character.abilities.STR.score * 15;
+                    const heavyLoad = character.abilities.STR.score * 10;
+                    const encumbered = totalWeight > heavyLoad;
+                    const overCapacity = totalWeight > capacity;
+
+                    let statusColor = 'text-green-400';
+                    let statusText = 'Normal';
+                    if (overCapacity) {
+                      statusColor = 'text-red-400';
+                      statusText = 'Over Capacity!';
+                    } else if (encumbered) {
+                      statusColor = 'text-yellow-400';
+                      statusText = 'Encumbered';
+                    }
+
+                    return (
+                      <div className="space-y-2 text-sm">
+                        <div className="flex justify-between">
+                          <span className="text-gray-400">Carrying:</span>
+                          <span className="font-bold text-white">{totalWeight.toFixed(1)} lb</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-400">Capacity:</span>
+                          <span className="font-bold text-white">{capacity} lb</span>
+                        </div>
+                        <div className="w-full bg-gray-700 rounded-full h-2.5">
+                          <div
+                            className={`h-2.5 rounded-full ${overCapacity ? 'bg-red-500' : encumbered ? 'bg-yellow-500' : 'bg-green-500'}`}
+                            style={{ width: `${Math.min((totalWeight / capacity) * 100, 100)}%` }}
+                          ></div>
+                        </div>
+                        <div className={`text-center font-semibold ${statusColor}`}>
+                          {statusText}
+                        </div>
+                        {encumbered && (
+                          <div className="text-xs text-gray-400 text-center">
+                            {overCapacity ? 'Cannot carry more!' : 'Speed -10 ft'}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
+                </div>
+              </div>
+            </div>
+          </div>
         )}
 
         {/* Traits and Features Section */}
@@ -1695,25 +2284,121 @@ const CharacterSheet: React.FC<CharacterSheetProps> = ({ character, onClose, onD
               </ul>
             </div>
             <div className="p-4 bg-gray-800 rounded-xl shadow-lg border-l-4 border-green-500">
-              <h3 className="text-lg font-bold text-green-400 mb-2">Racial & Class Features</h3>
+              <h3 className="text-lg font-bold text-green-400 mb-2">Racial Traits</h3>
               <ul className="list-disc list-inside space-y-1 text-sm text-gray-300">
                 {character.featuresAndTraits.racialTraits.map((trait, index) => (
                   <li key={`r-${index}`}>
                     <button onClick={() => onFeatureClick(trait)} className="text-left hover:text-yellow-300 transition-colors cursor-pointer">
-                      <span className="font-semibold text-white">[Racial]</span> {trait}
-                    </button>
-                  </li>
-                ))}
-                {character.featuresAndTraits.classFeatures.map((feature, index) => (
-                  <li key={`c-${index}`}>
-                    <button onClick={() => onFeatureClick(feature)} className="text-left hover:text-yellow-300 transition-colors cursor-pointer">
-                      <span className="font-semibold text-white">[Class]</span> {feature}
+                      {trait}
                     </button>
                   </li>
                 ))}
               </ul>
             </div>
           </div>
+
+          {/* Sprint 5: SRD Features Display */}
+          {character.srdFeatures && (character.srdFeatures.classFeatures.length > 0 || character.srdFeatures.subclassFeatures.length > 0) && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Class Features */}
+              {character.srdFeatures.classFeatures.length > 0 && (
+                <div className="p-4 bg-gray-800 rounded-xl shadow-lg border-l-4 border-orange-500">
+                  <h3 className="text-lg font-bold text-orange-400 mb-2">Class Features</h3>
+                  <div className="space-y-2 text-sm text-gray-300 max-h-60 overflow-y-auto">
+                    {character.srdFeatures.classFeatures.map((feature, index) => (
+                      <div key={`cf-${index}`} className="flex items-start gap-2">
+                        <span className="text-xs bg-orange-700 text-white px-1.5 py-0.5 rounded font-mono">
+                          L{feature.level}
+                        </span>
+                        <button
+                          onClick={() => onFeatureClick(feature.name)}
+                          className="text-left hover:text-yellow-300 transition-colors cursor-pointer flex-1"
+                        >
+                          {feature.name}
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Subclass Features */}
+              {character.srdFeatures.subclassFeatures.length > 0 && (
+                <div className="p-4 bg-gray-800 rounded-xl shadow-lg border-l-4 border-purple-500">
+                  <h3 className="text-lg font-bold text-purple-400 mb-2">Subclass Features</h3>
+                  <div className="space-y-2 text-sm text-gray-300 max-h-60 overflow-y-auto">
+                    {character.srdFeatures.subclassFeatures.map((feature, index) => (
+                      <div key={`scf-${index}`} className="flex items-start gap-2">
+                        <span className="text-xs bg-purple-700 text-white px-1.5 py-0.5 rounded font-mono">
+                          L{feature.level}
+                        </span>
+                        <button
+                          onClick={() => onFeatureClick(feature.name)}
+                          className="text-left hover:text-yellow-300 transition-colors cursor-pointer flex-1"
+                        >
+                          {feature.name}
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Legacy Class Features (for backward compatibility) */}
+          {character.featuresAndTraits.classFeatures && character.featuresAndTraits.classFeatures.length > 0 && (
+            <div className="p-4 bg-gray-800 rounded-xl shadow-lg border-l-4 border-yellow-500">
+              <h3 className="text-lg font-bold text-yellow-400 mb-2">Other Class Features</h3>
+              <ul className="list-disc list-inside space-y-1 text-sm text-gray-300">
+                {character.featuresAndTraits.classFeatures.map((feature, index) => (
+                  <li key={`lcf-${index}`}>
+                    <button onClick={() => onFeatureClick(feature)} className="text-left hover:text-yellow-300 transition-colors cursor-pointer">
+                      {feature}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* Sprint 5: Selected Feats Display */}
+          {character.selectedFeats && character.selectedFeats.length > 0 && (
+            <div className="p-4 bg-gray-800 rounded-xl shadow-lg border-l-4 border-cyan-500">
+              <h3 className="text-lg font-bold text-cyan-400 mb-2">Feats</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                {character.selectedFeats.map((featSlug, index) => {
+                  const feat = FEAT_DATABASE.find(f => f.slug === featSlug);
+                  if (!feat) return null;
+
+                  return (
+                    <div key={`feat-${index}`} className="p-2 bg-gray-700 rounded border border-cyan-700">
+                      <div className="flex items-start justify-between">
+                        <div className="font-semibold text-cyan-300 text-sm">{feat.name}</div>
+                        {feat.abilityScoreIncrease && (
+                          <span className="text-xs bg-blue-600 text-white px-1.5 py-0.5 rounded ml-2">
+                            +ASI
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-gray-400 mt-1">{feat.source} {feat.year}</p>
+                      {feat.prerequisite && (
+                        <p className="text-xs text-yellow-400 mt-1">Req: {feat.prerequisite}</p>
+                      )}
+                      <ul className="list-disc list-inside text-xs text-gray-300 mt-1 space-y-0.5">
+                        {feat.benefits.slice(0, 2).map((benefit, idx) => (
+                          <li key={idx}>{benefit}</li>
+                        ))}
+                        {feat.benefits.length > 2 && (
+                          <li className="text-gray-500">...and {feat.benefits.length - 2} more</li>
+                        )}
+                      </ul>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -1724,13 +2409,16 @@ const CharacterSheet: React.FC<CharacterSheetProps> = ({ character, onClose, onD
 // --- Character Creation Wizard Steps ---
 
 const STEP_TITLES = [
-    'Character Details',
-    'Choose Race',
-    'Choose Class & Skills',
-    'Select Spells',        // Sprint 2: New step
-    'Determine Abilities',
-    'Select Equipment',
-    'Finalize Background'
+    'Character Details',        // 0
+    'Choose Race',              // 1
+    'Choose Class & Subclass',  // 2 - Sprint 5: Updated to include subclass
+    'Choose Fighting Style',    // 3 - Sprint 5: Conditional for Fighter/Paladin/Ranger
+    'Select Spells',            // 4 - Sprint 2: Conditional for spellcasters
+    'Determine Abilities',      // 5
+    'Choose Feats',             // 6 - Sprint 5: Optional feat selection
+    'Select Equipment',         // 7
+    'Customize Equipment',      // 8 - Sprint 4: Equipment browser
+    'Finalize Background'       // 9
 ];
 
 interface StepProps {
@@ -2204,13 +2892,64 @@ const Step3Class: React.FC<StepProps> = ({ data, updateData, nextStep, prevStep 
                 </div>
             )}
 
+            {/* Subclass Selection */}
+            {selectedClass && (() => {
+                const availableSubclasses = getSubclassesByClass(data.classSlug);
+
+                if (availableSubclasses.length === 0) return null;
+
+                return (
+                    <div className="bg-gray-700/50 border border-gray-600 rounded-lg p-4 space-y-3">
+                        <div>
+                            <h4 className="text-lg font-bold text-yellow-300">Choose Subclass</h4>
+                            <p className="text-xs text-gray-400 mt-1">
+                                Select your {selectedClass.name} subclass specialization
+                            </p>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            {availableSubclasses.map(subclass => (
+                                <button
+                                    key={subclass.slug}
+                                    onClick={() => updateData({ subclassSlug: subclass.slug })}
+                                    className={`p-3 rounded-lg text-left border-2 transition-all ${
+                                        data.subclassSlug === subclass.slug
+                                            ? 'bg-purple-800 border-purple-500 shadow-md'
+                                            : 'bg-gray-700 border-gray-600 hover:bg-gray-600'
+                                    }`}
+                                >
+                                    <p className="text-sm font-bold text-yellow-300">{subclass.name}</p>
+                                    <p className="text-xs text-gray-400 mt-1">{subclass.subclassFlavor}</p>
+                                    {subclass.desc && subclass.desc.length > 0 && (
+                                        <p className="text-xs text-gray-500 mt-2 line-clamp-2">
+                                            {subclass.desc[0]}
+                                        </p>
+                                    )}
+                                </button>
+                            ))}
+                        </div>
+
+                        {!data.subclassSlug && (
+                            <div className="text-xs text-yellow-400 mt-2">
+                                ⚠️ Please select a subclass
+                            </div>
+                        )}
+                    </div>
+                );
+            })()}
+
             <div className='flex justify-between'>
                 <button onClick={prevStep} className="px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded-lg text-white flex items-center">
                     <ArrowLeft className="w-4 h-4 mr-2" /> Back
                 </button>
                 <button
                     onClick={nextStep}
-                    disabled={!data.classSlug || !selectedClass || data.selectedSkills.length < selectedClass.num_skill_choices}
+                    disabled={
+                        !data.classSlug ||
+                        !selectedClass ||
+                        data.selectedSkills.length < selectedClass.num_skill_choices ||
+                        (getSubclassesByClass(data.classSlug).length > 0 && !data.subclassSlug)
+                    }
                     className="px-4 py-2 bg-red-600 hover:bg-red-500 rounded-lg text-white flex items-center disabled:bg-gray-600 disabled:cursor-not-allowed"
                 >
                     Next: Abilities <ArrowRight className="w-4 h-4 ml-2" />
@@ -2220,8 +2959,136 @@ const Step3Class: React.FC<StepProps> = ({ data, updateData, nextStep, prevStep 
     );
 };
 
+// Sprint 5: Fighting Style Selection Step (for Fighter, Paladin, Ranger)
+const Step3point5FightingStyle: React.FC<StepProps> = ({ data, updateData, nextStep, prevStep }) => {
+    const allClasses = getAllClasses();
+    const selectedClass = allClasses.find(c => c.slug === data.classSlug);
+
+    // Define fighting styles available in SRD
+    const FIGHTING_STYLES = [
+        {
+            name: 'Archery',
+            description: 'You gain a +2 bonus to attack rolls you make with ranged weapons.',
+            recommendedFor: ['ranger']
+        },
+        {
+            name: 'Defense',
+            description: 'While you are wearing armor, you gain a +1 bonus to AC.',
+            recommendedFor: ['paladin']
+        },
+        {
+            name: 'Dueling',
+            description: 'When you are wielding a melee weapon in one hand and no other weapons, you gain a +2 bonus to damage rolls with that weapon.',
+            recommendedFor: ['fighter']
+        },
+        {
+            name: 'Great Weapon Fighting',
+            description: 'When you roll a 1 or 2 on a damage die for an attack you make with a melee weapon that you are wielding with two hands, you can reroll the die and must use the new roll. The weapon must have the two-handed or versatile property.',
+            recommendedFor: ['fighter']
+        },
+        {
+            name: 'Protection',
+            description: 'When a creature you can see attacks a target other than you that is within 5 feet of you, you can use your reaction to impose disadvantage on the attack roll. You must be wielding a shield.',
+            recommendedFor: ['paladin']
+        },
+        {
+            name: 'Two-Weapon Fighting',
+            description: 'When you engage in two-weapon fighting, you can add your ability modifier to the damage of the second attack.',
+            recommendedFor: ['ranger']
+        }
+    ];
+
+    // Check if this class gets a fighting style
+    const hasFightingStyle = selectedClass && ['fighter', 'paladin', 'ranger'].includes(selectedClass.slug);
+
+    // Auto-skip if class doesn't get fighting style
+    if (!hasFightingStyle) {
+        React.useEffect(() => {
+            nextStep();
+        }, []);
+        return <div className='text-center text-gray-400'>This class doesn't have Fighting Styles. Advancing...</div>;
+    }
+
+    // Get recommended style for this class
+    const recommendedStyle = FIGHTING_STYLES.find(style =>
+        style.recommendedFor.includes(selectedClass.slug)
+    );
+
+    // Set default if not already selected
+    React.useEffect(() => {
+        if (!data.selectedFightingStyle && recommendedStyle) {
+            updateData({ selectedFightingStyle: recommendedStyle.name });
+        }
+    }, [recommendedStyle, data.selectedFightingStyle]);
+
+    return (
+        <div className='space-y-6'>
+            <div>
+                <h3 className='text-xl font-bold text-red-300'>Choose Fighting Style</h3>
+                <p className='text-sm text-gray-400 mt-2'>
+                    As a {selectedClass.name}, you learn a particular style of fighting. Select one Fighting Style option.
+                </p>
+            </div>
+
+            {recommendedStyle && (
+                <div className="bg-blue-900/30 border border-blue-700 rounded-lg p-3">
+                    <div className="text-sm text-blue-300">
+                        💡 <strong>Recommended for {selectedClass.name}:</strong> {recommendedStyle.name}
+                        <br />
+                        <span className="text-xs text-gray-400">
+                            (This is a smart default, but you can choose any style below)
+                        </span>
+                    </div>
+                </div>
+            )}
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {FIGHTING_STYLES.map(style => {
+                    const isSelected = data.selectedFightingStyle === style.name;
+                    const isRecommended = style.recommendedFor.includes(selectedClass.slug);
+
+                    return (
+                        <button
+                            key={style.name}
+                            onClick={() => updateData({ selectedFightingStyle: style.name })}
+                            className={`p-4 rounded-lg text-left border-2 transition-all ${
+                                isSelected
+                                    ? 'bg-orange-800 border-orange-500 shadow-md'
+                                    : 'bg-gray-700 border-gray-600 hover:bg-gray-600'
+                            }`}
+                        >
+                            <div className="flex items-start justify-between">
+                                <p className="text-base font-bold text-yellow-300">{style.name}</p>
+                                {isRecommended && (
+                                    <span className="text-xs bg-blue-600 text-white px-2 py-1 rounded ml-2">
+                                        Recommended
+                                    </span>
+                                )}
+                            </div>
+                            <p className="text-sm text-gray-300 mt-2">{style.description}</p>
+                        </button>
+                    );
+                })}
+            </div>
+
+            <div className='flex justify-between'>
+                <button onClick={prevStep} className="px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded-lg text-white flex items-center">
+                    <ArrowLeft className="w-4 h-4 mr-2" /> Back
+                </button>
+                <button
+                    onClick={nextStep}
+                    disabled={!data.selectedFightingStyle}
+                    className="px-4 py-2 bg-red-600 hover:bg-red-500 rounded-lg text-white flex items-center disabled:bg-gray-600 disabled:cursor-not-allowed"
+                >
+                    Next: {isSpellcaster(selectedClass) ? 'Spells' : 'Abilities'} <ArrowRight className="w-4 h-4 ml-2" />
+                </button>
+            </div>
+        </div>
+    );
+};
+
 // Sprint 2: Spell Selection Step
-const Step3point5Spells: React.FC<StepProps> = ({ data, updateData, nextStep, prevStep }) => {
+const Step4Spells: React.FC<StepProps> = ({ data, updateData, nextStep, prevStep }) => {
     const allClasses = getAllClasses();
     const selectedClass = allClasses.find(c => c.slug === data.classSlug);
 
@@ -2839,7 +3706,159 @@ const Step4Abilities: React.FC<StepProps> = ({ data, updateData, nextStep, prevS
     );
 };
 
-const Step5Equipment: React.FC<StepProps> = ({ data, updateData, nextStep, prevStep }) => {
+// Sprint 5: Feats Selection Step
+const Step5point5Feats: React.FC<StepProps> = ({ data, updateData, nextStep, prevStep }) => {
+    const [showFeatDetails, setShowFeatDetails] = useState<string | null>(null);
+
+    // Calculate how many feats the character can take
+    const maxFeats = Math.floor((data.level - 1) / 4); // 0 at levels 1-3, 1 at 4-7, 2 at 8-11, etc.
+    const selectedFeats = data.selectedFeats || [];
+
+    // For now, all feats are available (prerequisite checking can be enhanced later)
+    const availableFeats = FEAT_DATABASE;
+
+    const handleFeatToggle = (featSlug: string) => {
+        const isSelected = selectedFeats.includes(featSlug);
+
+        if (isSelected) {
+            // Deselect
+            updateData({
+                selectedFeats: selectedFeats.filter(s => s !== featSlug)
+            });
+        } else if (selectedFeats.length < maxFeats) {
+            // Select
+            updateData({
+                selectedFeats: [...selectedFeats, featSlug]
+            });
+        }
+    };
+
+    return (
+        <div className='space-y-6'>
+            <div>
+                <h3 className='text-xl font-bold text-red-300'>Choose Feats (Optional)</h3>
+                <p className='text-sm text-gray-400 mt-2'>
+                    Feats represent special talents or areas of expertise. At certain levels, you can choose to take a feat instead of an Ability Score Improvement.
+                </p>
+                <div className="mt-2 p-3 bg-blue-900/30 border border-blue-700 rounded-lg">
+                    <div className="text-sm text-blue-300">
+                        <strong>Level {data.level}:</strong> You can select up to {maxFeats} feat{maxFeats !== 1 ? 's' : ''}
+                        {maxFeats === 0 && <span> (Feats are available starting at level 4)</span>}
+                    </div>
+                    <div className="text-xs text-gray-400 mt-1">
+                        ℹ️ Feats are optional. You can also choose Ability Score Improvements at these levels instead.
+                    </div>
+                </div>
+            </div>
+
+            {selectedFeats.length > 0 && (
+                <div className="bg-green-900/20 border border-green-700 rounded-lg p-3">
+                    <div className="text-sm font-semibold text-green-400 mb-2">
+                        Selected Feats ({selectedFeats.length} / {maxFeats}):
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                        {selectedFeats.map(slug => {
+                            const feat = FEAT_DATABASE.find(f => f.slug === slug);
+                            return (
+                                <span key={slug} className="px-2 py-1 bg-green-700 text-white text-xs rounded">
+                                    {feat?.name}
+                                </span>
+                            );
+                        })}
+                    </div>
+                </div>
+            )}
+
+            {maxFeats > 0 && (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 max-h-96 overflow-y-auto p-2">
+                    {availableFeats.map(feat => {
+                        const isSelected = selectedFeats.includes(feat.slug);
+                        const canSelect = selectedFeats.length < maxFeats;
+
+                        return (
+                            <div key={feat.slug} className="relative">
+                                <button
+                                    onClick={() => handleFeatToggle(feat.slug)}
+                                    disabled={!canSelect && !isSelected}
+                                    className={`w-full p-3 rounded-lg text-left border-2 transition-all ${
+                                        isSelected
+                                            ? 'bg-green-800 border-green-500 shadow-md'
+                                            : canSelect
+                                            ? 'bg-gray-700 border-gray-600 hover:bg-gray-600'
+                                            : 'bg-gray-800 border-gray-700 text-gray-500 cursor-not-allowed'
+                                    }`}
+                                >
+                                    <div className="flex items-start justify-between">
+                                        <p className="text-sm font-bold text-yellow-300">{feat.name}</p>
+                                        {feat.abilityScoreIncrease && (
+                                            <span className="text-xs bg-blue-600 text-white px-1 py-0.5 rounded ml-2">
+                                                +ASI
+                                            </span>
+                                        )}
+                                    </div>
+                                    <p className="text-xs text-gray-500 mt-1">{feat.source} {feat.year}</p>
+                                    {feat.prerequisite && (
+                                        <p className="text-xs text-yellow-400 mt-1">
+                                            Requires: {feat.prerequisite}
+                                        </p>
+                                    )}
+                                    <p className="text-xs text-gray-400 mt-2 line-clamp-2">
+                                        {feat.description}
+                                    </p>
+                                </button>
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setShowFeatDetails(showFeatDetails === feat.slug ? null : feat.slug);
+                                    }}
+                                    className="absolute top-2 right-2 text-xs text-blue-400 hover:text-blue-300"
+                                    title="View details"
+                                >
+                                    {showFeatDetails === feat.slug ? '✕' : 'ℹ️'}
+                                </button>
+                                {showFeatDetails === feat.slug && (
+                                    <div className="absolute z-10 mt-2 p-3 bg-gray-900 border border-gray-600 rounded-lg shadow-xl w-80 left-0">
+                                        <h5 className="font-bold text-yellow-300 text-sm mb-2">{feat.name}</h5>
+                                        <p className="text-xs text-gray-300 mb-2">{feat.description}</p>
+                                        <div className="text-xs text-gray-400">
+                                            <strong className="text-gray-300">Benefits:</strong>
+                                            <ul className="list-disc list-inside mt-1 space-y-1">
+                                                {feat.benefits.map((benefit, idx) => (
+                                                    <li key={idx}>{benefit}</li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    })}
+                </div>
+            )}
+
+            {maxFeats === 0 && (
+                <div className="text-center text-gray-400 py-8">
+                    <p>Feats become available starting at level 4.</p>
+                    <p className="text-sm mt-2">Your character is currently level {data.level}.</p>
+                </div>
+            )}
+
+            <div className='flex justify-between'>
+                <button onClick={prevStep} className="px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded-lg text-white flex items-center">
+                    <ArrowLeft className="w-4 h-4 mr-2" /> Back
+                </button>
+                <button
+                    onClick={nextStep}
+                    className="px-4 py-2 bg-red-600 hover:bg-red-500 rounded-lg text-white flex items-center"
+                >
+                    Next: Equipment <ArrowRight className="w-4 h-4 ml-2" />
+                </button>
+            </div>
+        </div>
+    );
+};
+
+const Step6Equipment: React.FC<StepProps & { skipToStep?: (step: number) => void }> = ({ data, updateData, nextStep, prevStep, skipToStep }) => {
     const allClasses = getAllClasses();
     const selectedClass = allClasses.find(c => c.slug === data.classSlug);
 
@@ -2927,23 +3946,35 @@ const Step5Equipment: React.FC<StepProps> = ({ data, updateData, nextStep, prevS
                 </div>
             )}
 
-            <div className='flex justify-between'>
+            <div className='flex justify-between items-center gap-3'>
                 <button onClick={prevStep} className="px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded-lg text-white flex items-center">
                     <ArrowLeft className="w-4 h-4 mr-2" /> Back
                 </button>
                 <button
                     onClick={nextStep}
                     disabled={!allChoicesMade}
+                    className="px-4 py-2 bg-yellow-600 hover:bg-yellow-500 rounded-lg text-white flex items-center disabled:bg-gray-600 disabled:cursor-not-allowed"
+                >
+                    Custom Equipment <ArrowRight className="w-4 h-4 ml-2" />
+                </button>
+                <button
+                    onClick={() => {
+                        // Skip custom equipment step, go directly to traits (step 7)
+                        if (allChoicesMade && skipToStep) {
+                            skipToStep(9); // Sprint 5: Updated to step 9 (Finalize Background step)
+                        }
+                    }}
+                    disabled={!allChoicesMade}
                     className="px-4 py-2 bg-red-600 hover:bg-red-500 rounded-lg text-white flex items-center disabled:bg-gray-600 disabled:cursor-not-allowed"
                 >
-                    Next: Traits <ArrowRight className="w-4 h-4 ml-2" />
+                    Skip to Traits <ArrowRight className="w-4 h-4 ml-2" />
                 </button>
             </div>
         </div>
     );
 };
 
-const Step6Traits: React.FC<StepProps & { onSubmit: (data: CharacterCreationData) => void }> = ({ data, updateData, prevStep, onSubmit }) => {
+const Step8Traits: React.FC<StepProps & { onSubmit: (data: CharacterCreationData) => void }> = ({ data, updateData, prevStep, onSubmit }) => {
     return (
         <div className='space-y-6'>
             <h3 className='text-xl font-bold text-red-300'>Final Details & Personality</h3>
@@ -3078,6 +4109,218 @@ const Step6Traits: React.FC<StepProps & { onSubmit: (data: CharacterCreationData
     );
 };
 
+const Step7EquipmentBrowser: React.FC<StepProps> = ({ data, updateData, nextStep, prevStep }) => {
+    const [searchQuery, setSearchQuery] = useState('');
+    const [categoryFilter, setCategoryFilter] = useState<string>('All');
+    const [yearFilter, setYearFilter] = useState<number | 'all'>('all');
+    const [selectedEquipment, setSelectedEquipment] = useState<Equipment | null>(null);
+
+    // Get all equipment categories
+    const categories = ['All', ...Array.from(new Set(EQUIPMENT_DATABASE.map(eq => eq.equipment_category)))];
+
+    // Filter equipment
+    const filteredEquipment = EQUIPMENT_DATABASE.filter(eq => {
+        const matchesSearch = eq.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                             eq.equipment_category.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesCategory = categoryFilter === 'All' || eq.equipment_category === categoryFilter;
+        const matchesYear = yearFilter === 'all' || eq.year === yearFilter;
+        return matchesSearch && matchesCategory && matchesYear;
+    });
+
+    // Check if item is already in starting inventory
+    const isInInventory = (equipmentSlug: string): number => {
+        return data.startingInventory?.filter(item => item.equipmentSlug === equipmentSlug)
+                                      .reduce((sum, item) => sum + item.quantity, 0) || 0;
+    };
+
+    // Add item to starting inventory
+    const addToInventory = (equipmentSlug: string) => {
+        const currentInventory = data.startingInventory || [];
+        const existingItem = currentInventory.find(item => item.equipmentSlug === equipmentSlug);
+
+        if (existingItem) {
+            updateData({
+                startingInventory: currentInventory.map(item =>
+                    item.equipmentSlug === equipmentSlug
+                        ? { ...item, quantity: item.quantity + 1 }
+                        : item
+                )
+            });
+        } else {
+            updateData({
+                startingInventory: [...currentInventory, {
+                    equipmentSlug,
+                    quantity: 1,
+                    equipped: false
+                }]
+            });
+        }
+    };
+
+    // Remove item from starting inventory
+    const removeFromInventory = (equipmentSlug: string) => {
+        const currentInventory = data.startingInventory || [];
+        const existingItem = currentInventory.find(item => item.equipmentSlug === equipmentSlug);
+
+        if (existingItem && existingItem.quantity > 1) {
+            updateData({
+                startingInventory: currentInventory.map(item =>
+                    item.equipmentSlug === equipmentSlug
+                        ? { ...item, quantity: item.quantity - 1 }
+                        : item
+                )
+            });
+        } else {
+            updateData({
+                startingInventory: currentInventory.filter(item => item.equipmentSlug !== equipmentSlug)
+            });
+        }
+    };
+
+    return (
+        <div className="space-y-4">
+            <div>
+                <h3 className="text-xl font-bold text-yellow-300 mb-2">Customize Starting Equipment</h3>
+                <p className="text-sm text-gray-400">
+                    Browse and add additional equipment to your starting inventory. You already have your class equipment package.
+                </p>
+            </div>
+
+            {/* Search and Filters */}
+            <div className="space-y-3">
+                <input
+                    type="text"
+                    placeholder="Search equipment..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-yellow-500 focus:outline-none"
+                />
+
+                <div className="flex gap-2 flex-wrap">
+                    <select
+                        value={categoryFilter}
+                        onChange={(e) => setCategoryFilter(e.target.value)}
+                        className="px-3 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-yellow-500 focus:outline-none"
+                    >
+                        {categories.map(cat => (
+                            <option key={cat} value={cat}>{cat}</option>
+                        ))}
+                    </select>
+
+                    <select
+                        value={yearFilter}
+                        onChange={(e) => setYearFilter(e.target.value === 'all' ? 'all' : parseInt(e.target.value))}
+                        className="px-3 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-yellow-500 focus:outline-none"
+                    >
+                        <option value="all">All Editions</option>
+                        <option value="2014">2014 SRD</option>
+                        <option value="2024">2024 SRD</option>
+                    </select>
+                </div>
+            </div>
+
+            {/* Equipment List */}
+            <div className="bg-gray-700/30 rounded-lg p-4 max-h-[400px] overflow-y-auto">
+                <div className="grid grid-cols-1 gap-2">
+                    {filteredEquipment.slice(0, 50).map(eq => {
+                        const inInventory = isInInventory(eq.slug);
+                        return (
+                            <div
+                                key={eq.slug}
+                                className="bg-gray-700/50 p-3 rounded-lg hover:bg-gray-700 transition-colors"
+                            >
+                                <div className="flex items-center justify-between gap-3">
+                                    <div className="flex-grow min-w-0">
+                                        <button
+                                            onClick={() => setSelectedEquipment(eq)}
+                                            className="text-left hover:text-yellow-300 transition-colors"
+                                        >
+                                            <div className="font-semibold text-white">{eq.name}</div>
+                                            <div className="text-xs text-gray-400 flex items-center gap-2 flex-wrap">
+                                                <span>{eq.equipment_category}</span>
+                                                <span>•</span>
+                                                <span>{eq.cost.quantity} {eq.cost.unit}</span>
+                                                <span>•</span>
+                                                <span>{eq.weight} lb</span>
+                                                <span className="bg-gray-600 px-2 py-0.5 rounded">{eq.year === 2024 ? '2024' : '2014'}</span>
+                                            </div>
+                                        </button>
+                                    </div>
+                                    <div className="flex items-center gap-2 flex-shrink-0">
+                                        {inInventory > 0 && (
+                                            <span className="text-sm font-mono text-yellow-300">×{inInventory}</span>
+                                        )}
+                                        <div className="flex gap-1">
+                                            <button
+                                                onClick={() => addToInventory(eq.slug)}
+                                                className="px-3 py-1 bg-green-600 hover:bg-green-500 rounded text-sm"
+                                            >
+                                                +
+                                            </button>
+                                            {inInventory > 0 && (
+                                                <button
+                                                    onClick={() => removeFromInventory(eq.slug)}
+                                                    className="px-3 py-1 bg-red-600 hover:bg-red-500 rounded text-sm"
+                                                >
+                                                    −
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+                {filteredEquipment.length > 50 && (
+                    <p className="text-center text-xs text-gray-400 mt-3">
+                        Showing first 50 results. Refine your search to see more.
+                    </p>
+                )}
+                {filteredEquipment.length === 0 && (
+                    <p className="text-center text-gray-400 py-8">No equipment found matching your filters.</p>
+                )}
+            </div>
+
+            {/* Current Custom Additions */}
+            {data.startingInventory && data.startingInventory.length > 0 && (
+                <div className="bg-yellow-900/20 border border-yellow-700 rounded-lg p-4">
+                    <h4 className="text-sm font-semibold text-yellow-400 mb-2">
+                        Custom Equipment Added ({data.startingInventory.length} items)
+                    </h4>
+                    <div className="text-xs text-gray-400">
+                        These items will be added to your starting inventory along with your class equipment package.
+                    </div>
+                </div>
+            )}
+
+            {/* Navigation */}
+            <div className="flex justify-between pt-4">
+                <button
+                    onClick={prevStep}
+                    className="px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded-lg text-white flex items-center"
+                >
+                    <ArrowLeft className="w-4 h-4 mr-2" /> Back
+                </button>
+                <button
+                    onClick={nextStep}
+                    className="px-4 py-2 bg-red-600 hover:bg-red-500 rounded-lg text-white flex items-center"
+                >
+                    Next: Background <ArrowRight className="w-4 h-4 ml-2" />
+                </button>
+            </div>
+
+            {/* Equipment Detail Modal */}
+            {selectedEquipment && (
+                <EquipmentDetailModal
+                    equipment={selectedEquipment}
+                    onClose={() => setSelectedEquipment(null)}
+                />
+            )}
+        </div>
+    );
+};
+
 // --- Main Wizard Component ---
 
 const CharacterCreationWizard: React.FC<WizardProps> = ({ isOpen, onClose, onCharacterCreated, setRollResult }) => {
@@ -3094,6 +4337,7 @@ const CharacterCreationWizard: React.FC<WizardProps> = ({ isOpen, onClose, onCha
 
     const nextStep = () => setCurrentStep(prev => Math.min(prev + 1, STEP_TITLES.length - 1));
     const prevStep = () => setCurrentStep(prev => Math.max(prev - 1, 0));
+    const skipToStep = (step: number) => setCurrentStep(Math.min(Math.max(step, 0), STEP_TITLES.length - 1));
 
     const handleSubmit = async (data: CharacterCreationData) => {
         setIsLoading(true);
@@ -3124,10 +4368,13 @@ const CharacterCreationWizard: React.FC<WizardProps> = ({ isOpen, onClose, onCha
             case 0: return <Step1Details {...commonProps} />;
             case 1: return <Step2Race {...commonProps} />;
             case 2: return <Step3Class {...commonProps} />;
-            case 3: return <Step3point5Spells {...commonProps} />; // Sprint 2: Spell selection
-            case 4: return <Step4Abilities {...commonProps} />;
-            case 5: return <Step5Equipment {...commonProps} />;
-            case 6: return <Step6Traits {...commonProps} onSubmit={handleSubmit} />;
+            case 3: return <Step3point5FightingStyle {...commonProps} />; // Sprint 5: Fighting Style (Fighter/Paladin/Ranger)
+            case 4: return <Step4Spells {...commonProps} />; // Sprint 2: Spell selection
+            case 5: return <Step4Abilities {...commonProps} />;
+            case 6: return <Step5point5Feats {...commonProps} />; // Sprint 5: Feats selection
+            case 7: return <Step6Equipment {...commonProps} skipToStep={skipToStep} />;
+            case 8: return <Step7EquipmentBrowser {...commonProps} />; // Sprint 4: Equipment browser
+            case 9: return <Step8Traits {...commonProps} onSubmit={handleSubmit} />;
             default: return <p>Unknown step.</p>;
         }
     };
@@ -3189,6 +4436,7 @@ const App: React.FC = () => {
   const [rollHistory, setRollHistory] = useState<DiceRollType[]>([]);
   const [latestRoll, setLatestRoll] = useState<DiceRollType | null>(null);
   const [featureModal, setFeatureModal] = useState<{name: string, description: string, source?: string} | null>(null);
+  const [equipmentModal, setEquipmentModal] = useState<Equipment | null>(null);
 
   const selectedCharacter = useMemo(() => {
     return characters.find(c => c.id === selectedCharacterId);
@@ -3262,6 +4510,13 @@ const App: React.FC = () => {
 
   // CRUD Operations
   const handleDeleteCharacter = useCallback(async (id: string) => {
+    const character = characters.find(c => c.id === id);
+    const characterName = character?.name || 'this character';
+
+    if (!window.confirm(`Are you sure you want to delete ${characterName}? This action cannot be undone.`)) {
+      return;
+    }
+
     try {
       await deleteCharacter(id);
       setSelectedCharacterId(null);
@@ -3271,7 +4526,7 @@ const App: React.FC = () => {
       console.error("Error deleting character:", e);
       setRollResult({ text: 'Error deleting character.', value: null });
     }
-  }, [loadCharacters]);
+  }, [characters, loadCharacters]);
 
   // Export selected characters (or all if none selected) as JSON
   const handleExportData = useCallback(() => {
@@ -3343,6 +4598,324 @@ const App: React.FC = () => {
     }
   }, [characters]);
 
+  const handleLongRest = useCallback(async (characterId: string) => {
+    const character = characters.find(c => c.id === characterId);
+    if (!character) return;
+
+    // Long rest: restore HP to max, restore all spell slots, restore all hit dice
+    const updatedCharacter = { ...character };
+    updatedCharacter.hitPoints = character.maxHitPoints;
+    updatedCharacter.hitDice = {
+      ...updatedCharacter.hitDice,
+      current: updatedCharacter.hitDice.max,
+    };
+
+    // Restore spell slots
+    if (updatedCharacter.spellcasting) {
+      updatedCharacter.spellcasting = {
+        ...updatedCharacter.spellcasting,
+        usedSpellSlots: Array(10).fill(0) // Reset all used spell slots to 0
+      };
+    }
+
+    try {
+      await updateCharacter(updatedCharacter);
+      setCharacters(prev => prev.map(c => c.id === characterId ? updatedCharacter : c));
+      console.log('Long rest completed! HP and spell slots restored.');
+    } catch (e) {
+      console.error("Error taking long rest:", e);
+    }
+  }, [characters]);
+
+  const handleShortRest = useCallback(async (characterId: string) => {
+    const character = characters.find(c => c.id === characterId);
+    if (!character) return;
+
+    if (character.hitDice.current <= 0) {
+      setRollResult({ text: "No hit dice remaining!", value: null });
+      return;
+    }
+
+    const diceToSpendStr = prompt(`How many hit dice to spend? (Available: ${character.hitDice.current}/${character.hitDice.max})`);
+    if (!diceToSpendStr) return;
+
+    const diceToSpend = parseInt(diceToSpendStr, 10);
+    if (isNaN(diceToSpend) || diceToSpend <= 0 || diceToSpend > character.hitDice.current) {
+      setRollResult({ text: "Invalid number of hit dice.", value: null });
+      return;
+    }
+
+    const allClasses = getAllClasses();
+    const classData = allClasses.find(c => c.name === character.class);
+    if (!classData) return;
+
+    const hitDie = classData.hit_die;
+    const conModifier = character.abilities.CON.modifier;
+    let hpRecovered = 0;
+    for (let i = 0; i < diceToSpend; i++) {
+      hpRecovered += Math.max(1, Math.floor(Math.random() * hitDie) + 1 + conModifier);
+    }
+
+    const newHP = Math.min(character.maxHitPoints, character.hitPoints + hpRecovered);
+    const updatedCharacter = {
+      ...character,
+      hitPoints: newHP,
+      hitDice: {
+        ...character.hitDice,
+        current: character.hitDice.current - diceToSpend,
+      },
+    };
+
+    try {
+      await updateCharacter(updatedCharacter);
+      setCharacters(prev => prev.map(c => c.id === characterId ? updatedCharacter : c));
+      setRollResult({ text: `Recovered ${hpRecovered} HP.`, value: newHP });
+      console.log(`Short rest: Spent ${diceToSpend}d${hitDie}. Recovered ${hpRecovered} HP.`);
+    } catch (e) {
+      console.error("Error taking short rest:", e);
+    }
+  }, [characters]);
+
+  const handleLevelUp = useCallback(async (characterId: string) => {
+    const character = characters.find(c => c.id === characterId);
+    if (!character) return;
+
+    if (character.level >= 20) {
+      setRollResult({ text: `${character.name} is already at max level!`, value: null });
+      return;
+    }
+
+    const newLevel = character.level + 1;
+    const newProficiencyBonus = PROFICIENCY_BONUSES[newLevel as keyof typeof PROFICIENCY_BONUSES] || character.proficiencyBonus;
+
+    const allClasses = getAllClasses();
+    const classData = allClasses.find(c => c.name === character.class);
+    if (!classData) {
+      console.error(`Could not find class data for ${character.class}`);
+      return;
+    }
+
+    const hitDie = classData.hit_die;
+    const conModifier = character.abilities.CON.modifier;
+    const hpIncrease = Math.max(1, Math.floor(hitDie / 2) + 1 + conModifier);
+
+    const updatedCharacter = {
+      ...character,
+      level: newLevel,
+      proficiencyBonus: newProficiencyBonus,
+      maxHitPoints: character.maxHitPoints + hpIncrease,
+      hitPoints: character.maxHitPoints + hpIncrease, // Also heal to full on level up
+    };
+
+    try {
+      await updateCharacter(updatedCharacter);
+      setCharacters(prev => prev.map(c => c.id === characterId ? updatedCharacter : c));
+      setRollResult({ text: `${character.name} is now level ${newLevel}!`, value: null });
+      console.log(`${character.name} leveled up to ${newLevel}. HP increased by ${hpIncrease}. PB is now ${newProficiencyBonus}.`);
+    } catch (e) {
+      console.error("Error leveling up character:", e);
+    }
+  }, [characters]);
+
+  const handleUpdateCharacter = useCallback(async (updatedCharacter: Character) => {
+    try {
+      await updateCharacter(updatedCharacter);
+      setCharacters(prev => prev.map(c => c.id === updatedCharacter.id ? updatedCharacter : c));
+    } catch (e) {
+      console.error("Error updating character:", e);
+    }
+  }, []);
+
+  // Equipment management handlers
+  const recalculateAC = useCallback((character: Character): number => {
+    let armorClass = 10 + character.abilities.DEX.modifier; // Default unarmored
+
+    if (character.equippedArmor) {
+      const armor = EQUIPMENT_DATABASE.find(eq => eq.slug === character.equippedArmor);
+      if (armor?.armor_class) {
+        if (armor.armor_category === 'Light') {
+          armorClass = armor.armor_class.base + character.abilities.DEX.modifier;
+        } else if (armor.armor_category === 'Medium') {
+          const dexBonus = Math.min(character.abilities.DEX.modifier, armor.armor_class.max_bonus || 2);
+          armorClass = armor.armor_class.base + dexBonus;
+        } else if (armor.armor_category === 'Heavy') {
+          armorClass = armor.armor_class.base;
+        }
+      }
+    }
+
+    // Add shield bonus if equipped
+    if (character.equippedWeapons?.some(slug => {
+      const item = EQUIPMENT_DATABASE.find(eq => eq.slug === slug);
+      return item?.armor_category === 'Shield';
+    })) {
+      armorClass += 2;
+    }
+
+    return armorClass;
+  }, []);
+
+  const handleEquipArmor = useCallback(async (characterId: string, armorSlug: string) => {
+    const character = characters.find(c => c.id === characterId);
+    if (!character) return;
+
+    const armor = EQUIPMENT_DATABASE.find(eq => eq.slug === armorSlug);
+    if (!armor?.armor_category) return;
+
+    // Update character with new equipped armor
+    const updatedCharacter = {
+      ...character,
+      equippedArmor: armorSlug,
+      inventory: character.inventory?.map(item =>
+        item.equipmentSlug === armorSlug
+          ? { ...item, equipped: true }
+          : { ...item, equipped: item.equipped && EQUIPMENT_DATABASE.find(eq => eq.slug === item.equipmentSlug)?.armor_category !== armor.armor_category ? item.equipped : false }
+      ),
+    };
+
+    // Recalculate AC
+    updatedCharacter.armorClass = recalculateAC(updatedCharacter);
+
+    try {
+      await updateCharacter(updatedCharacter);
+      setCharacters(prev => prev.map(c => c.id === characterId ? updatedCharacter : c));
+      console.log(`Equipped ${armor.name}. New AC: ${updatedCharacter.armorClass}`);
+    } catch (e) {
+      console.error("Error equipping armor:", e);
+    }
+  }, [characters, recalculateAC]);
+
+  const handleEquipWeapon = useCallback(async (characterId: string, weaponSlug: string) => {
+    const character = characters.find(c => c.id === characterId);
+    if (!character) return;
+
+    const weapon = EQUIPMENT_DATABASE.find(eq => eq.slug === weaponSlug);
+    if (!weapon?.weapon_category) return;
+
+    // Add weapon to equipped weapons (max 2)
+    const equippedWeapons = character.equippedWeapons || [];
+    if (!equippedWeapons.includes(weaponSlug)) {
+      const updatedWeapons = [...equippedWeapons, weaponSlug].slice(0, 2); // Max 2 weapons
+
+      const updatedCharacter = {
+        ...character,
+        equippedWeapons: updatedWeapons,
+        inventory: character.inventory?.map(item =>
+          item.equipmentSlug === weaponSlug ? { ...item, equipped: true } : item
+        ),
+      };
+
+      try {
+        await updateCharacter(updatedCharacter);
+        setCharacters(prev => prev.map(c => c.id === characterId ? updatedCharacter : c));
+        console.log(`Equipped ${weapon.name}`);
+      } catch (e) {
+        console.error("Error equipping weapon:", e);
+      }
+    }
+  }, [characters]);
+
+  const handleUnequipItem = useCallback(async (characterId: string, itemSlug: string) => {
+    const character = characters.find(c => c.id === characterId);
+    if (!character) return;
+
+    const updatedCharacter = { ...character };
+
+    // Check if it's armor
+    if (character.equippedArmor === itemSlug) {
+      updatedCharacter.equippedArmor = undefined;
+      updatedCharacter.armorClass = recalculateAC(updatedCharacter);
+    }
+
+    // Check if it's a weapon
+    if (character.equippedWeapons?.includes(itemSlug)) {
+      updatedCharacter.equippedWeapons = character.equippedWeapons.filter(slug => slug !== itemSlug);
+    }
+
+    // Update inventory
+    updatedCharacter.inventory = character.inventory?.map(item =>
+      item.equipmentSlug === itemSlug ? { ...item, equipped: false } : item
+    );
+
+    try {
+      await updateCharacter(updatedCharacter);
+      setCharacters(prev => prev.map(c => c.id === characterId ? updatedCharacter : c));
+      console.log(`Unequipped item`);
+    } catch (e) {
+      console.error("Error unequipping item:", e);
+    }
+  }, [characters, recalculateAC]);
+
+  const handleAddItem = useCallback(async (characterId: string, equipmentSlug: string, quantity: number = 1) => {
+    const character = characters.find(c => c.id === characterId);
+    if (!character) return;
+
+    const equipment = EQUIPMENT_DATABASE.find(eq => eq.slug === equipmentSlug);
+    if (!equipment) return;
+
+    // Check if item already in inventory
+    const existingItem = character.inventory?.find(item => item.equipmentSlug === equipmentSlug);
+
+    let updatedInventory: EquippedItem[];
+    if (existingItem) {
+      // Increase quantity
+      updatedInventory = character.inventory!.map(item =>
+        item.equipmentSlug === equipmentSlug ? { ...item, quantity: item.quantity + quantity } : item
+      );
+    } else {
+      // Add new item
+      updatedInventory = [...(character.inventory || []), { equipmentSlug, quantity, equipped: false }];
+    }
+
+    const updatedCharacter = { ...character, inventory: updatedInventory };
+
+    try {
+      await updateCharacter(updatedCharacter);
+      setCharacters(prev => prev.map(c => c.id === characterId ? updatedCharacter : c));
+      console.log(`Added ${quantity}x ${equipment.name} to inventory`);
+    } catch (e) {
+      console.error("Error adding item:", e);
+    }
+  }, [characters]);
+
+  const handleRemoveItem = useCallback(async (characterId: string, equipmentSlug: string, quantity: number = 1) => {
+    const character = characters.find(c => c.id === characterId);
+    if (!character) return;
+
+    const existingItem = character.inventory?.find(item => item.equipmentSlug === equipmentSlug);
+    if (!existingItem) return;
+
+    let updatedInventory: EquippedItem[];
+    if (existingItem.quantity <= quantity) {
+      // Remove item entirely
+      updatedInventory = character.inventory!.filter(item => item.equipmentSlug !== equipmentSlug);
+
+      // Unequip if equipped
+      if (character.equippedArmor === equipmentSlug) {
+        character.equippedArmor = undefined;
+      }
+      if (character.equippedWeapons?.includes(equipmentSlug)) {
+        character.equippedWeapons = character.equippedWeapons.filter(slug => slug !== equipmentSlug);
+      }
+    } else {
+      // Decrease quantity
+      updatedInventory = character.inventory!.map(item =>
+        item.equipmentSlug === equipmentSlug ? { ...item, quantity: item.quantity - quantity } : item
+      );
+    }
+
+    const updatedCharacter = { ...character, inventory: updatedInventory };
+    updatedCharacter.armorClass = recalculateAC(updatedCharacter);
+
+    try {
+      await updateCharacter(updatedCharacter);
+      setCharacters(prev => prev.map(c => c.id === characterId ? updatedCharacter : c));
+      console.log(`Removed ${quantity}x item from inventory`);
+    } catch (e) {
+      console.error("Error removing item:", e);
+    }
+  }, [characters, recalculateAC]);
+
   if (selectedCharacter) {
     return (
       <>
@@ -3354,11 +4927,22 @@ const App: React.FC = () => {
           onDiceRoll={handleDiceRoll}
           onToggleInspiration={handleToggleInspiration}
           onFeatureClick={handleFeatureClick}
+          onLongRest={handleLongRest}
+          onShortRest={handleShortRest}
+          onLevelUp={handleLevelUp}
+          onUpdateCharacter={handleUpdateCharacter}
+          onEquipArmor={handleEquipArmor}
+          onEquipWeapon={handleEquipWeapon}
+          onUnequipItem={handleUnequipItem}
+          onAddItem={handleAddItem}
+          onRemoveItem={handleRemoveItem}
+          setEquipmentModal={setEquipmentModal}
         />
         <DiceBox3D latestRoll={latestRoll} />
         <RollHistoryTicker rolls={rollHistory} />
         <RollHistoryModal rolls={rollHistory} onClear={handleClearHistory} />
         <FeatureModal feature={featureModal} onClose={() => setFeatureModal(null)} />
+        <EquipmentDetailModal equipment={equipmentModal} onClose={() => setEquipmentModal(null)} />
       </>
     );
   }
