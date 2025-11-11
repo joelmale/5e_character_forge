@@ -6,7 +6,7 @@ import { FeatureModal } from './components/FeatureModal';
 import { createAbilityRoll, createSkillRoll, createInitiativeRoll, getRollHistory, addRollToHistory, clearRollHistory, rollDice, generateUUID, type DiceRoll as DiceRollType } from './utils/diceRoller';
 import { diceSounds } from './utils/diceSounds';
 import { featureDescriptions } from './utils/featureDescriptions';
-import { loadSpells } from './utils/srdLoader';
+import { loadSpells, loadRaces, loadClasses } from './utils/srdLoader';
 
 // --- IndexedDB Configuration ---
 const DB_NAME = '5e_character_forge';
@@ -264,11 +264,20 @@ interface RaceCategory {
   races: Race[];
 }
 
+// Load races from SRD
+const SRD_RACES = loadRaces();
+
 const RACE_CATEGORIES: RaceCategory[] = [
   {
-    name: 'Core Races',
+    name: 'SRD Races (2014)',
     icon: '📖',
-    description: 'The most common and essential races from the Player\'s Handbook',
+    description: 'Races from the System Reference Document',
+    races: SRD_RACES,
+  },
+  {
+    name: 'Original Hardcoded Races',
+    icon: '📚',
+    description: 'The most common and essential races from the Player\'s Handbook (backup)',
     races: [
       {
         slug: 'human',
@@ -785,11 +794,20 @@ interface ClassCategory {
   classes: Class[];
 }
 
+// Load classes from SRD
+const SRD_CLASSES = loadClasses();
+
 const CLASS_CATEGORIES: ClassCategory[] = [
   {
-    name: 'Core Classes',
+    name: 'SRD Classes (2014)',
     icon: '📚',
-    description: 'The 13 essential D&D 5e classes from the Player\'s Handbook',
+    description: 'Classes from the System Reference Document',
+    classes: SRD_CLASSES,
+  },
+  {
+    name: 'Original Hardcoded Classes',
+    icon: '📖',
+    description: 'The 13 essential D&D 5e classes from the Player\'s Handbook (backup)',
     classes: [
       {
         slug: 'barbarian',
