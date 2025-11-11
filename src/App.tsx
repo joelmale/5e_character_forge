@@ -1296,9 +1296,9 @@ interface AlignmentData {
   index: string;
   name: string;
   abbreviation: string;
-  desc: string;
+  short_desc: string;  // SRD creature examples
+  long_desc: string;   // Our detailed character descriptions
   category: string;
-  description: string;
   examples: string[];
 }
 
@@ -1307,12 +1307,12 @@ const ALIGNMENTS_DATA: AlignmentData[] = alignmentsData as AlignmentData[];
 // Extract alignment names for the dropdown
 const ALIGNMENTS = ALIGNMENTS_DATA.map(a => a.name);
 
-// Convert to lookup map for easy access
+// Convert to lookup map for easy access (using long_desc for description)
 const ALIGNMENT_INFO: Record<string, { category: string; description: string; examples: string[] }> =
   ALIGNMENTS_DATA.reduce((acc, alignment) => {
     acc[alignment.name] = {
       category: alignment.category,
-      description: alignment.description,
+      description: alignment.long_desc,  // Use our detailed description
       examples: alignment.examples,
     };
     return acc;
