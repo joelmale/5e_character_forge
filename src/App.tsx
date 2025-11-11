@@ -1848,6 +1848,74 @@ const CharacterSheet: React.FC<CharacterSheetProps> = ({ character, onClose, onD
           </div>
         </div>
 
+        {/* Spellcasting Section */}
+        {character.spellcasting && (
+          <div className="space-y-4">
+            <h2 className="text-xl font-bold text-purple-500 border-b border-purple-800 pb-1">Spellcasting</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Spellcasting Stats */}
+              <div className="p-4 bg-gray-800 rounded-xl shadow-lg border-l-4 border-purple-500">
+                <h3 className="text-lg font-bold text-purple-400 mb-3">Spell Stats</h3>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">Spellcasting Ability:</span>
+                    <span className="font-bold text-white">{character.spellcasting.ability}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">Spell Save DC:</span>
+                    <span className="font-bold text-yellow-300">{character.spellcasting.spellSaveDC}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">Spell Attack:</span>
+                    <span className="font-bold text-yellow-300">{formatModifier(character.spellcasting.spellAttackBonus)}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Spell Slots */}
+              <div className="p-4 bg-gray-800 rounded-xl shadow-lg border-l-4 border-blue-500">
+                <h3 className="text-lg font-bold text-blue-400 mb-3">Spell Slots</h3>
+                <div className="space-y-1 text-sm">
+                  {character.spellcasting.spellSlots.map((slots, level) => {
+                    if (level === 0 || slots === 0) return null;
+                    return (
+                      <div key={level} className="flex justify-between">
+                        <span className="text-gray-400">Level {level}:</span>
+                        <span className="font-bold text-white">{slots} {slots === 1 ? 'slot' : 'slots'}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Cantrips & Spells */}
+              <div className="p-4 bg-gray-800 rounded-xl shadow-lg border-l-4 border-green-500">
+                <h3 className="text-lg font-bold text-green-400 mb-3">Known Spells</h3>
+                <div className="space-y-3 text-sm">
+                  <div>
+                    <div className="font-semibold text-gray-300 mb-1">Cantrips ({character.spellcasting.cantripsKnown.length})</div>
+                    <ul className="list-disc list-inside space-y-0.5 text-xs text-gray-400">
+                      {character.spellcasting.cantripsKnown.map((spellSlug) => {
+                        const spell = SPELL_DATABASE.find(s => s.slug === spellSlug);
+                        return <li key={spellSlug}>{spell?.name || spellSlug}</li>;
+                      })}
+                    </ul>
+                  </div>
+                  <div>
+                    <div className="font-semibold text-gray-300 mb-1">1st Level ({character.spellcasting.spellsKnown.length})</div>
+                    <ul className="list-disc list-inside space-y-0.5 text-xs text-gray-400">
+                      {character.spellcasting.spellsKnown.map((spellSlug) => {
+                        const spell = SPELL_DATABASE.find(s => s.slug === spellSlug);
+                        return <li key={spellSlug}>{spell?.name || spellSlug}</li>;
+                      })}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Traits and Features Section */}
         <div className="space-y-4">
           <h2 className="text-xl font-bold text-red-500 border-b border-red-800 pb-1">Features & Traits</h2>
