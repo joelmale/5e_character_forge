@@ -3183,6 +3183,7 @@ const CharacterCreationWizard: React.FC<WizardProps> = ({ isOpen, onClose, onCha
 const App: React.FC = () => {
   const [characters, setCharacters] = useState<Character[]>([]);
   const [selectedCharacterId, setSelectedCharacterId] = useState<string | null>(null);
+  const [selectedCharacterIds, setSelectedCharacterIds] = useState<Set<string>>(new Set());
   const [isWizardOpen, setIsWizardOpen] = useState<boolean>(false);
   const [rollResult, setRollResult] = useState<{ text: string; value: number | null }>({ text: 'Ready to Roll!', value: null });
   const [rollHistory, setRollHistory] = useState<DiceRollType[]>([]);
@@ -3246,6 +3247,19 @@ const App: React.FC = () => {
     loadCharacters();
   }, [loadCharacters]);
 
+  // Toggle character selection for export
+  const toggleCharacterSelection = useCallback((id: string) => {
+    setSelectedCharacterIds(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(id)) {
+        newSet.delete(id);
+      } else {
+        newSet.add(id);
+      }
+      return newSet;
+    });
+  }, []);
+
   // CRUD Operations
   const handleDeleteCharacter = useCallback(async (id: string) => {
     try {
@@ -3259,9 +3273,13 @@ const App: React.FC = () => {
     }
   }, [loadCharacters]);
 
-  // Export all characters as JSON
+  // Export selected characters (or all if none selected) as JSON
   const handleExportData = useCallback(() => {
-    const dataStr = JSON.stringify(characters, null, 2);
+    const charactersToExport = selectedCharacterIds.size > 0
+      ? characters.filter(c => selectedCharacterIds.has(c.id))
+      : characters;
+
+    const dataStr = JSON.stringify(charactersToExport, null, 2);
     const dataBlob = new Blob([dataStr], { type: 'application/json' });
     const url = URL.createObjectURL(dataBlob);
     const link = document.createElement('a');
@@ -3269,8 +3287,13 @@ const App: React.FC = () => {
     link.download = `5e_characters_backup_${new Date().toISOString().split('T')[0]}.json`;
     link.click();
     URL.revokeObjectURL(url);
-    setRollResult({ text: 'Characters exported successfully!', value: null });
-  }, [characters]);
+
+    const exportCount = charactersToExport.length;
+    const message = selectedCharacterIds.size > 0
+      ? `${exportCount} selected character${exportCount !== 1 ? 's' : ''} exported successfully!`
+      : `All ${exportCount} character${exportCount !== 1 ? 's' : ''} exported successfully!`;
+    setRollResult({ text: message, value: null });
+  }, [characters, selectedCharacterIds]);
 
   // Import characters from JSON
   const handleImportData = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
@@ -3404,8 +3427,21 @@ const App: React.FC = () => {
               {characters.map((char) => (
                 <div key={char.id} className="bg-gray-800 rounded-xl shadow-xl hover:shadow-red-700/30 transition-shadow duration-300 overflow-hidden">
                   <div className="p-5">
-                    <h3 className="text-2xl font-bold text-red-400 truncate">{char.name}</h3>
-                    <p className="text-sm text-gray-400 mb-3">{char.race} | {char.class} (Level {char.level})</p>
+                    {/* Checkbox for selection */}
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="flex-grow">
+                        <h3 className="text-2xl font-bold text-red-400 truncate">{char.name}</h3>
+                        <p className="text-sm text-gray-400 mb-3">{char.race} | {char.class} (Level {char.level})</p>
+                      </div>
+                      <label className="flex items-center cursor-pointer ml-2" title="Select for export">
+                        <input
+                          type="checkbox"
+                          checked={selectedCharacterIds.has(char.id)}
+                          onChange={() => toggleCharacterSelection(char.id)}
+                          className="w-5 h-5 text-red-600 bg-gray-700 border-gray-600 rounded focus:ring-red-500 focus:ring-2 cursor-pointer"
+                        />
+                      </label>
+                    </div>
 
                     {/* Quick Stats Grid */}
                     <div className="grid grid-cols-3 gap-2 text-center text-xs font-medium bg-gray-700/50 p-3 rounded-lg">
