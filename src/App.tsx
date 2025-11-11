@@ -124,6 +124,11 @@ interface Character {
     spellsKnown: string[]; // Spell slugs for known/prepared spells
     spellSlots: number[]; // Available spell slots by level
   };
+
+  // Sprint 3: Character advancement
+  subclass?: string; // Subclass name (e.g., "School of Evocation")
+  experiencePoints?: number; // Current XP
+  feats?: string[]; // Feat slugs
 }
 
 // --- Intermediate Wizard Data Structure ---
@@ -174,6 +179,20 @@ interface SpellSelectionData {
   selectedSpells: string[]; // Spell slugs for leveled spells
   spellbook?: string[]; // Only for wizards - spells in spellbook
   preparedSpells?: string[]; // Only for prepared casters (clerics, druids, paladins)
+}
+
+// Sprint 3: Feat system
+interface Feat {
+  slug: string;
+  name: string;
+  source: string;
+  description: string;
+  prerequisites?: string; // e.g., "Strength 13 or higher"
+  abilityScoreIncrease?: {
+    choices: number; // Number of ability scores to increase
+    amount: number; // Amount to increase each (usually 1)
+  };
+  benefits: string[]; // List of mechanical benefits
 }
 
 interface CharacterCreationData {
@@ -949,6 +968,170 @@ const SPELL_DATABASE: Spell[] = [
   },
 ];
 
+// Sprint 3: Feat Database (exported for future use)
+export const FEAT_DATABASE: Feat[] = [
+  {
+    slug: 'alert',
+    name: 'Alert',
+    source: 'Player\'s Handbook',
+    description: 'Always on the lookout for danger, you gain the following benefits:',
+    benefits: [
+      '+5 bonus to initiative',
+      'You can\'t be surprised while conscious',
+      'Other creatures don\'t gain advantage on attack rolls against you as a result of being unseen by you',
+    ],
+  },
+  {
+    slug: 'athlete',
+    name: 'Athlete',
+    source: 'Player\'s Handbook',
+    description: 'You have undergone extensive physical training to gain the following benefits:',
+    abilityScoreIncrease: { choices: 1, amount: 1 },
+    benefits: [
+      'Increase your Strength or Dexterity score by 1, to a maximum of 20',
+      'When prone, standing up uses only 5 feet of movement',
+      'Climbing doesn\'t cost you extra movement',
+      'You can make a running long jump or running high jump after moving only 5 feet',
+    ],
+  },
+  {
+    slug: 'dual-wielder',
+    name: 'Dual Wielder',
+    source: 'Player\'s Handbook',
+    description: 'You master fighting with two weapons, gaining the following benefits:',
+    benefits: [
+      '+1 bonus to AC while wielding a separate melee weapon in each hand',
+      'You can use two-weapon fighting even when the one-handed melee weapons you are wielding aren\'t light',
+      'You can draw or stow two one-handed weapons when you would normally be able to draw or stow only one',
+    ],
+  },
+  {
+    slug: 'great-weapon-master',
+    name: 'Great Weapon Master',
+    source: 'Player\'s Handbook',
+    description: 'You\'ve learned to put the weight of a weapon to your advantage. You gain the following benefits:',
+    benefits: [
+      'On your turn, when you score a critical hit or reduce a creature to 0 HP with a melee weapon, you can make one melee weapon attack as a bonus action',
+      'Before you make a melee attack with a heavy weapon, you can choose to take a -5 penalty to the attack roll. If the attack hits, you add +10 to the attack\'s damage',
+    ],
+  },
+  {
+    slug: 'lucky',
+    name: 'Lucky',
+    source: 'Player\'s Handbook',
+    description: 'You have inexplicable luck that seems to kick in at just the right moment. You have 3 luck points. You gain the following benefits:',
+    benefits: [
+      'Whenever you make an attack roll, ability check, or saving throw, you can spend one luck point to roll an additional d20',
+      'You can choose to spend one of your luck points after you roll the die, but before the outcome is determined',
+      'You choose which of the d20s is used for the attack roll, ability check, or saving throw',
+      'You can also spend one luck point when an attack roll is made against you',
+      'You regain expended luck points when you finish a long rest',
+    ],
+  },
+  {
+    slug: 'magic-initiate',
+    name: 'Magic Initiate',
+    source: 'Player\'s Handbook',
+    description: 'Choose a class: bard, cleric, druid, sorcerer, warlock, or wizard. You learn two cantrips of your choice from that class\'s spell list. In addition, choose one 1st-level spell from that same list. You learn that spell and can cast it at its lowest level. Once you cast it, you must finish a long rest before you can cast it again using this feat.',
+    benefits: [
+      'Learn two cantrips from one class',
+      'Learn one 1st-level spell from that class',
+      'Can cast the 1st-level spell once per long rest',
+      'Your spellcasting ability for these spells depends on the class you chose',
+    ],
+  },
+  {
+    slug: 'mobile',
+    name: 'Mobile',
+    source: 'Player\'s Handbook',
+    description: 'You are exceptionally speedy and agile. You gain the following benefits:',
+    benefits: [
+      'Your speed increases by 10 feet',
+      'When you use the Dash action, difficult terrain doesn\'t cost you extra movement on that turn',
+      'When you make a melee attack against a creature, you don\'t provoke opportunity attacks from that creature for the rest of the turn',
+    ],
+  },
+  {
+    slug: 'resilient',
+    name: 'Resilient',
+    source: 'Player\'s Handbook',
+    description: 'Choose one ability score. You gain the following benefits:',
+    abilityScoreIncrease: { choices: 1, amount: 1 },
+    benefits: [
+      'Increase the chosen ability score by 1, to a maximum of 20',
+      'You gain proficiency in saving throws using the chosen ability',
+    ],
+  },
+  {
+    slug: 'sentinel',
+    name: 'Sentinel',
+    source: 'Player\'s Handbook',
+    description: 'You have mastered techniques to take advantage of every drop in any enemy\'s guard. You gain the following benefits:',
+    benefits: [
+      'When you hit a creature with an opportunity attack, the creature\'s speed becomes 0 for the rest of the turn',
+      'Creatures provoke opportunity attacks from you even if they take the Disengage action before leaving your reach',
+      'When a creature makes an attack against a target other than you, you can use your reaction to make a melee weapon attack against the attacking creature',
+    ],
+  },
+  {
+    slug: 'sharpshooter',
+    name: 'Sharpshooter',
+    source: 'Player\'s Handbook',
+    description: 'You have mastered ranged weapons and can make shots that others find impossible. You gain the following benefits:',
+    benefits: [
+      'Attacking at long range doesn\'t impose disadvantage on your ranged weapon attack rolls',
+      'Your ranged weapon attacks ignore half cover and three-quarters cover',
+      'Before you make an attack with a ranged weapon, you can choose to take a -5 penalty to the attack roll. If the attack hits, you add +10 to the attack\'s damage',
+    ],
+  },
+  {
+    slug: 'spell-sniper',
+    name: 'Spell Sniper',
+    source: 'Player\'s Handbook',
+    description: 'You have learned techniques to enhance your attacks with certain kinds of spells. You gain the following benefits:',
+    prerequisites: 'The ability to cast at least one spell',
+    benefits: [
+      'When you cast a spell that requires you to make an attack roll, the spell\'s range is doubled',
+      'Your ranged spell attacks ignore half cover and three-quarters cover',
+      'You learn one cantrip that requires an attack roll. Choose the cantrip from the bard, cleric, druid, sorcerer, warlock, or wizard spell list',
+    ],
+  },
+  {
+    slug: 'tavern-brawler',
+    name: 'Tavern Brawler',
+    source: 'Player\'s Handbook',
+    description: 'Accustomed to rough-and-tumble fighting using whatever weapons happen to be at hand, you gain the following benefits:',
+    abilityScoreIncrease: { choices: 1, amount: 1 },
+    benefits: [
+      'Increase your Strength or Constitution score by 1, to a maximum of 20',
+      'You are proficient with improvised weapons',
+      'Your unarmed strike uses a d4 for damage',
+      'When you hit a creature with an unarmed strike or improvised weapon on your turn, you can use a bonus action to attempt to grapple the target',
+    ],
+  },
+  {
+    slug: 'tough',
+    name: 'Tough',
+    source: 'Player\'s Handbook',
+    description: 'Your hit point maximum increases by an amount equal to twice your level when you gain this feat. Whenever you gain a level thereafter, your hit point maximum increases by an additional 2 hit points.',
+    benefits: [
+      'Hit point maximum increases by 2 per level (including past levels)',
+    ],
+  },
+  {
+    slug: 'war-caster',
+    name: 'War Caster',
+    source: 'Player\'s Handbook',
+    description: 'You have practiced casting spells in the midst of combat. You gain the following benefits:',
+    prerequisites: 'The ability to cast at least one spell',
+    benefits: [
+      'You have advantage on Constitution saving throws to maintain concentration on a spell when you take damage',
+      'You can perform the somatic components of spells even when you have weapons or a shield in one or both hands',
+      'When a hostile creature\'s movement provokes an opportunity attack from you, you can use your reaction to cast a spell at the creature, rather than making an opportunity attack',
+    ],
+  },
+];
+
 interface Class {
   slug: string;
   name: string;
@@ -971,6 +1154,12 @@ interface Class {
     spellsKnownOrPrepared: number; // Number of spells known (sorcerer/bard) or can prepare (cleric/druid)
     spellSlots: number[]; // Spell slots by level [0, 2, 0, 0...] means 2 1st-level slots
   };
+
+  // Sprint 3: Subclass support
+  isSubclass?: boolean; // True if this is a subclass (archetype)
+  parentClass?: string; // Parent class slug (e.g., 'wizard' for 'wizard-evocation')
+  subclassLevel?: number; // Level at which this subclass is chosen (usually 3)
+  subclassFeatures?: Record<number, string[]>; // Features gained at specific levels
 }
 
 interface ClassCategory {
