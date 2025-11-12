@@ -108,6 +108,11 @@ docker stack deploy -c docker-compose.yml character-forge
 
 **Live Demo:** https://character.nexusvtt.com
 
+## Documentation
+
+- [Character Sheet Guide](./docs/character-sheet.md)
+- [Character Creation Wizard Guide](./docs/character-creation.md)
+
 ## Usage
 
 ### Creating a Character

@@ -4,11 +4,20 @@ import { DiceBox3D } from './components/DiceBox3D';
 import { RollHistoryModal, RollHistoryTicker } from './components/RollHistory';
 import { FeatureModal } from './components/FeatureModal';
 import { EquipmentDetailModal } from './components/EquipmentDetailModal';
-import { createAbilityRoll, createSkillRoll, createInitiativeRoll, getRollHistory, addRollToHistory, clearRollHistory, rollDice, generateUUID, type DiceRoll as DiceRollType } from './utils/diceRoller';
+import { ChooseCantripModal } from './components/ChooseCantripModal';
+import ChooseSubclassModal from './components/ChooseSubclassModal';
+import AbilityScoreIncreaseModal from './components/AbilityScoreIncreaseModal';
+import { createAbilityRoll, createSkillRoll, createInitiativeRoll, getRollHistory, addRollToHistory, clearRollHistory, rollDice, generateUUID, DiceRoll } from './services/diceService';
 import { diceSounds } from './utils/diceSounds';
 import { featureDescriptions } from './utils/featureDescriptions';
-import { loadSpells, loadRaces, loadClasses, loadEquipment, FEAT_DATABASE as loadedFeats, getSubclassesByClass, getFeaturesByClass, getFeaturesBySubclass } from './utils/srdLoader';
+import { loadRaces, loadClasses, loadEquipment, FEAT_DATABASE as loadedFeats, getSubclassesByClass, getFeaturesByClass, getFeaturesBySubclass, SPELL_DATABASE, getCantripsByClass, getLeveledSpellsByClass, AppSpell, PROFICIENCY_BONUSES, getModifier, SKILL_TO_ABILITY, ALL_SKILLS, ALIGNMENTS_DATA, ALIGNMENTS, ALIGNMENT_INFO, BACKGROUNDS, RACE_CATEGORIES, CLASS_CATEGORIES, EQUIPMENT_PACKAGES, FIGHTING_STYLES, getAllRaces, getAllClasses, isSpellcaster } from './services/dataService';
+import { SPELL_SLOTS_BY_CLASS } from './data/spellSlots';
+import { CANTRIPS_KNOWN_BY_CLASS } from './data/cantrips';
 import alignmentsData from './data/alignments.json';
+import { Ability, Character, AbilityScore, Skill, AbilityName, SkillName, EquipmentItem, EquipmentChoice, SpellSelectionData, Equipment, EquippedItem, Feature, Subclass, Feat, CharacterCreationData, Race, RaceCategory, EquipmentPackage, Class, ClassCategory, ClassWithDefaults, AlignmentData } from './types/dnd';
+import { AppSubclass } from './services/dataService';
+
+const DEBUG_MODE = true;
 
 // --- IndexedDB Configuration ---
 const DB_NAME = '5e_character_forge';
@@ -87,259 +96,9 @@ const updateCharacter = async (character: Character): Promise<void> => {
 interface AbilityScore { score: number; modifier: number; }
 interface Skill { value: number; proficient: boolean; }
 
-interface Character {
-  id: string;
-  name: string;
-  race: string;
-  class: string;
-  level: number;
-  alignment: string;
-  background: string;
-  inspiration: boolean;
-  proficiencyBonus: number;
-  armorClass: number;
-  hitPoints: number;
-  maxHitPoints: number;
-  hitDice: {
-    current: number;
-    max: number;
-  };
-  speed: number;
-  initiative: number;
-  abilities: {
-    STR: AbilityScore; DEX: AbilityScore; CON: AbilityScore;
-    INT: AbilityScore; WIS: AbilityScore; CHA: AbilityScore;
-  };
-  skills: {
-    Acrobatics: Skill; AnimalHandling: Skill; Arcana: Skill; Athletics: Skill; Deception: Skill; History: Skill; Insight: Skill; Intimidation: Skill; Investigation: Skill; Medicine: Skill; Nature: Skill; Perception: Skill; Performance: Skill; Persuasion: Skill; Religion: Skill; SleightOfHand: Skill; Stealth: Skill; Survival: Skill;
-  };
-  featuresAndTraits: {
-    personality: string;
-    ideals: string;
-    bonds: string;
-    flaws: string;
-    classFeatures: string[];
-    racialTraits: string[];
-  };
 
-  // Sprint 2: Spellcasting data
-  spellcasting?: {
-    ability: 'INT' | 'WIS' | 'CHA';
-    spellSaveDC: number;
-    spellAttackBonus: number;
-    cantripsKnown: string[]; // Spell slugs
-    spellsKnown: string[]; // Spell slugs for known/prepared spells
-    spellSlots: number[]; // Maximum spell slots by level
-    usedSpellSlots?: number[]; // Used spell slots by level (for tracking)
-  };
 
-  // Sprint 3: Character advancement
-  subclass?: string; // Subclass slug (e.g., "berserker")
-  experiencePoints?: number; // Current XP
-  feats?: string[]; // Feat slugs (deprecated - use selectedFeats)
-  selectedFightingStyle?: string; // Fighting Style name (Fighter/Paladin/Ranger)
 
-  // Sprint 5: Features, Subclasses, and Feats
-  srdFeatures?: {
-    classFeatures: Array<{ name: string; slug: string; level: number; source: 'class' }>;
-    subclassFeatures: Array<{ name: string; slug: string; level: number; source: 'subclass' }>;
-  };
-  selectedFeats?: string[]; // Feat slugs selected during character creation
-
-  // Sprint 4: Equipment and inventory
-  inventory?: EquippedItem[]; // All carried items
-  currency?: {
-    cp: number;
-    sp: number;
-    gp: number;
-    pp: number;
-  };
-  equippedArmor?: string; // Equipment slug of equipped armor
-  equippedWeapons?: string[]; // Equipment slugs of equipped weapons (primary, offhand, etc.)
-}
-
-// --- Intermediate Wizard Data Structure ---
-type AbilityName = keyof Character['abilities'];
-type SkillName = keyof Character['skills'];
-
-// Equipment and Skill interfaces for character creation
-interface EquipmentItem {
-  name: string;
-  type: 'weapon' | 'armor' | 'gear' | 'tool';
-  quantity: number;
-  weight?: number;
-}
-
-interface EquipmentChoice {
-  choiceId: string;
-  description: string;
-  options: EquipmentItem[][];
-  selected: number | null; // Index of selected option
-}
-
-// Sprint 2: Spell system interfaces
-interface Spell {
-  slug: string;
-  name: string;
-  level: number; // 0 = cantrip, 1-9 = spell level
-  school: 'Abjuration' | 'Conjuration' | 'Divination' | 'Enchantment' | 'Evocation' | 'Illusion' | 'Necromancy' | 'Transmutation';
-  castingTime: string; // "1 action", "1 bonus action", "1 minute", etc.
-  range: string; // "Self", "Touch", "30 feet", etc.
-  components: {
-    verbal: boolean;
-    somatic: boolean;
-    material: boolean;
-    materialDescription?: string; // e.g., "a piece of cured leather"
-  };
-  duration: string; // "Instantaneous", "1 minute", "Concentration, up to 1 hour", etc.
-  concentration: boolean;
-  ritual: boolean;
-  description: string;
-  atHigherLevels?: string;
-  damageType?: string;
-  saveType?: 'STR' | 'DEX' | 'CON' | 'INT' | 'WIS' | 'CHA';
-  classes: string[]; // Which classes can learn this spell
-}
-
-interface SpellSelectionData {
-  selectedCantrips: string[]; // Spell slugs
-  selectedSpells: string[]; // Spell slugs for leveled spells
-  spellbook?: string[]; // Only for wizards - spells in spellbook
-  preparedSpells?: string[]; // Only for prepared casters (clerics, druids, paladins)
-}
-
-// Sprint 3: Feat system (interface moved to Sprint 5 section below)
-
-// Sprint 4: Equipment system
-interface Equipment {
-  slug: string;
-  name: string;
-  year: number; // 2014 or 2024
-  equipment_category: string; // 'Weapon', 'Armor', 'Adventuring Gear', 'Tools', etc.
-  cost: {
-    quantity: number;
-    unit: 'cp' | 'sp' | 'gp' | 'pp';
-  };
-  weight: number;
-  description?: string;
-
-  // Weapon-specific fields
-  weapon_category?: 'Simple' | 'Martial';
-  weapon_range?: 'Melee' | 'Ranged';
-  damage?: {
-    damage_dice: string;
-    damage_type: string;
-  };
-  range?: {
-    normal: number;
-    long?: number;
-  };
-  properties?: string[]; // 'Light', 'Finesse', 'Thrown', 'Versatile', etc.
-  two_handed_damage?: {
-    damage_dice: string;
-    damage_type: string;
-  };
-  mastery?: string; // 2024 only: weapon mastery property
-
-  // Armor-specific fields
-  armor_category?: 'Light' | 'Medium' | 'Heavy' | 'Shield';
-  armor_class?: {
-    base: number;
-    dex_bonus: boolean;
-    max_bonus?: number; // For medium armor
-  };
-  str_minimum?: number;
-  stealth_disadvantage?: boolean;
-  don_time?: string; // 2024 only
-  doff_time?: string; // 2024 only
-
-  // Tool/Gear-specific fields
-  tool_category?: string;
-  gear_category?: string;
-  contents?: Array<{ item_index: string; item_name: string; quantity: number }>; // For containers
-  capacity?: string; // For containers
-}
-
-interface EquippedItem {
-  equipmentSlug: string; // Reference to Equipment slug
-  quantity: number;
-  equipped: boolean; // Is this item currently equipped?
-  notes?: string; // Player notes about the item
-}
-
-// Sprint 5: Class Features, Subclasses, and Feats
-export interface Feature {
-  slug: string;
-  name: string;
-  class: string; // 'barbarian', 'fighter', etc.
-  subclass?: string; // Optional for subclass-specific features
-  level: number; // Level when feature is gained
-  desc: string[]; // Array of description paragraphs
-  featureSpecific?: {
-    subfeatureOptions?: {
-      choose: number;
-      type: string;
-      from: { options: any[] };
-    };
-  };
-}
-
-export interface Subclass {
-  slug: string;
-  name: string;
-  class: string; // Parent class slug
-  desc: string[];
-  subclassFlavor: string; // e.g., "Path of the Berserker"
-}
-
-export interface Feat {
-  slug: string;
-  name: string;
-  source: string; // 'PHB', 'XGtE', 'TCoE', 'FToD', 'SRD'
-  year: number; // 2014 or 2024
-  prerequisite: string | null;
-  abilityScoreIncrease?: {
-    choices: number;
-    options: AbilityName[];
-    amount: number;
-  };
-  benefits: string[];
-  description: string;
-}
-
-interface CharacterCreationData {
-  name: string;
-  level: number;
-  raceSlug: string;
-  classSlug: string;
-  abilities: Record<AbilityName, number>; // Raw scores only during creation
-  abilityScoreMethod: 'standard-array' | 'standard-roll' | 'classic-roll' | '5d6-drop-2' | 'point-buy' | 'custom';
-  background: string;
-  alignment: string;
-
-  // Sprint 1 additions
-  selectedSkills: SkillName[]; // Skills chosen from class options
-  equipmentChoices: EquipmentChoice[]; // Equipment selection choices
-  hpCalculationMethod: 'max' | 'rolled';
-  rolledHP?: number; // If rolled, store the result
-
-  // Sprint 2: Spell selection
-  spellSelection: SpellSelectionData;
-
-  // Sprint 4: Custom equipment additions
-  startingInventory?: EquippedItem[];
-
-  // Sprint 5: Subclass, Fighting Style, and Feats
-  subclassSlug?: string;
-  selectedFightingStyle?: string;
-  selectedFeats?: string[]; // Array of feat slugs
-
-  // Custom text for traits
-  personality: string;
-  ideals: string;
-  bonds: string;
-  flaws: string;
-}
 
 // Initial state for the creation process
 const initialCreationData: CharacterCreationData = {
@@ -370,350 +129,10 @@ const initialCreationData: CharacterCreationData = {
 
 // --- Mock API Data and Ruleset Functions (Simulating dnd5eapi.co) ---
 
-interface Race {
-  slug: string;
-  name: string;
-  source: string;
-  ability_bonuses: Partial<Record<AbilityName, number>>;
-  racial_traits: string[];
-  description: string;
-  typicalRoles: string[];
-}
 
-interface RaceCategory {
-  name: string;
-  icon: string;
-  description: string;
-  races: Race[];
-}
 
-// Load races from SRD
-const SRD_RACES = loadRaces();
 
-const RACE_CATEGORIES: RaceCategory[] = [
-  {
-    name: 'SRD Races (2014)',
-    icon: '📖',
-    description: 'Races from the System Reference Document',
-    races: SRD_RACES,
-  },
-  {
-    name: 'Original Hardcoded Races',
-    icon: '📚',
-    description: 'The most common and essential races from the Player\'s Handbook (backup)',
-    races: [
-      {
-        slug: 'human',
-        name: 'Human',
-        source: 'Player\'s Handbook',
-        ability_bonuses: { STR: 1, DEX: 1, CON: 1, INT: 1, WIS: 1, CHA: 1 },
-        racial_traits: ['Ability Score Increase (+1 to all)', 'Speed 30ft', 'Extra Language'],
-        description: 'Humans are the most adaptable and ambitious people among the common races. Whatever drives them, humans are the innovators, the achievers, and the pioneers of the worlds.',
-        typicalRoles: ['Any class - extremely versatile'],
-      },
-      {
-        slug: 'dwarf-mountain',
-        name: 'Dwarf (Mountain)',
-        source: 'Player\'s Handbook',
-        ability_bonuses: { STR: 2, CON: 2 },
-        racial_traits: ['Dwarven Armor Training', 'Speed 25ft', 'Darkvision', 'Dwarven Resilience'],
-        description: 'Strong and hardy, mountain dwarves are well-suited for lives of adventuring. Taller than hill dwarves, they tend to have lighter coloration.',
-        typicalRoles: ['Fighter', 'Paladin', 'Cleric'],
-      },
-      {
-        slug: 'dwarf-hill',
-        name: 'Dwarf (Hill)',
-        source: 'Player\'s Handbook',
-        ability_bonuses: { CON: 2, WIS: 1 },
-        racial_traits: ['Dwarven Toughness (+1 HP/level)', 'Speed 25ft', 'Darkvision', 'Dwarven Resilience'],
-        description: 'As a hill dwarf, you have keen senses, deep intuition, and remarkable resilience. Known for their wisdom and toughness.',
-        typicalRoles: ['Cleric', 'Fighter', 'Barbarian'],
-      },
-      {
-        slug: 'elf-high',
-        name: 'Elf (High)',
-        source: 'Player\'s Handbook',
-        ability_bonuses: { DEX: 2, INT: 1 },
-        racial_traits: ['Cantrip', 'Extra Language', 'Speed 30ft', 'Darkvision', 'Fey Ancestry'],
-        description: 'High elves value magic in all its forms and even the warriors among them learn to use it.',
-        typicalRoles: ['Wizard', 'Fighter', 'Ranger'],
-      },
-      {
-        slug: 'elf-wood',
-        name: 'Elf (Wood)',
-        source: 'Player\'s Handbook',
-        ability_bonuses: { DEX: 2, WIS: 1 },
-        racial_traits: ['Fleet of Foot (35ft speed)', 'Mask of the Wild', 'Darkvision', 'Fey Ancestry'],
-        description: 'Wood elves have keen senses and intuition, and their fleet feet carry them quickly through their forest homes.',
-        typicalRoles: ['Ranger', 'Druid', 'Rogue', 'Monk'],
-      },
-      {
-        slug: 'elf-drow',
-        name: 'Elf (Drow)',
-        source: 'Player\'s Handbook',
-        ability_bonuses: { DEX: 2, CHA: 1 },
-        racial_traits: ['Superior Darkvision (120ft)', 'Sunlight Sensitivity', 'Drow Magic', 'Fey Ancestry'],
-        description: 'Descended from an earlier subrace of dark-skinned elves, the drow were banished from the surface world for their worship of evil gods.',
-        typicalRoles: ['Warlock', 'Sorcerer', 'Rogue', 'Bard'],
-      },
-      {
-        slug: 'halfling-lightfoot',
-        name: 'Halfling (Lightfoot)',
-        source: 'Player\'s Handbook',
-        ability_bonuses: { DEX: 2, CHA: 1 },
-        racial_traits: ['Naturally Stealthy', 'Lucky', 'Brave', 'Speed 25ft'],
-        description: 'Lightfoot halflings can easily hide from notice, even using other people as cover. They\'re inclined to get along with others.',
-        typicalRoles: ['Rogue', 'Bard', 'Warlock'],
-      },
-      {
-        slug: 'halfling-stout',
-        name: 'Halfling (Stout)',
-        source: 'Player\'s Handbook',
-        ability_bonuses: { DEX: 2, CON: 1 },
-        racial_traits: ['Stout Resilience (poison advantage)', 'Lucky', 'Brave', 'Speed 25ft'],
-        description: 'Stout halflings are hardier than average and have some resistance to poison. Some say they have dwarven blood.',
-        typicalRoles: ['Fighter', 'Barbarian', 'Monk'],
-      },
-      {
-        slug: 'gnome-forest',
-        name: 'Gnome (Forest)',
-        source: 'Player\'s Handbook',
-        ability_bonuses: { INT: 2, DEX: 1 },
-        racial_traits: ['Speak with Small Beasts', 'Minor Illusion cantrip', 'Darkvision', 'Gnome Cunning'],
-        description: 'Forest gnomes have a natural knack for illusion and inherent quickness. They gather in hidden communities in sylvan forests.',
-        typicalRoles: ['Wizard', 'Rogue', 'Ranger'],
-      },
-      {
-        slug: 'gnome-rock',
-        name: 'Gnome (Rock)',
-        source: 'Player\'s Handbook',
-        ability_bonuses: { INT: 2, CON: 1 },
-        racial_traits: ['Artificer\'s Lore', 'Tinker', 'Darkvision', 'Gnome Cunning'],
-        description: 'Rock gnomes are the most common gnomes, known for their inventiveness and hardy nature.',
-        typicalRoles: ['Artificer', 'Wizard', 'Cleric'],
-      },
-      {
-        slug: 'tiefling',
-        name: 'Tiefling',
-        source: 'Player\'s Handbook',
-        ability_bonuses: { CHA: 2, INT: 1 },
-        racial_traits: ['Hellish Resistance (fire)', 'Infernal Legacy spells', 'Darkvision'],
-        description: 'Tieflings are derived from human bloodlines touched by infernal heritage. They tend to be shunned and meet suspicion from others.',
-        typicalRoles: ['Warlock', 'Sorcerer', 'Bard', 'Paladin'],
-      },
-      {
-        slug: 'dragonborn',
-        name: 'Dragonborn',
-        source: 'Player\'s Handbook',
-        ability_bonuses: { STR: 2, CHA: 1 },
-        racial_traits: ['Draconic Ancestry', 'Breath Weapon', 'Damage Resistance', 'Speed 30ft'],
-        description: 'Born of dragons, dragonborn walk proudly through a world that greets them with fearful incomprehension.',
-        typicalRoles: ['Fighter', 'Paladin', 'Sorcerer', 'Barbarian'],
-      },
-      {
-        slug: 'half-elf',
-        name: 'Half-Elf',
-        source: 'Player\'s Handbook',
-        ability_bonuses: { CHA: 2, STR: 1, DEX: 1 },
-        racial_traits: ['Skill Versatility (2 skills)', 'Darkvision', 'Fey Ancestry', 'Speed 30ft'],
-        description: 'Walking in two worlds but truly belonging to neither, half-elves combine the best qualities of their elf and human parents.',
-        typicalRoles: ['Bard', 'Warlock', 'Sorcerer', 'Paladin'],
-      },
-      {
-        slug: 'half-orc',
-        name: 'Half-Orc',
-        source: 'Player\'s Handbook',
-        ability_bonuses: { STR: 2, CON: 1 },
-        racial_traits: ['Savage Attacks', 'Relentless Endurance', 'Menacing (Intimidation)', 'Darkvision'],
-        description: 'Half-orcs combine the best and worst qualities of their orc and human ancestry, with immense strength and physical prowess.',
-        typicalRoles: ['Barbarian', 'Fighter', 'Paladin'],
-      },
-    ],
-  },
-  {
-    name: 'Exotic Races',
-    icon: '🗺️',
-    description: 'Unique races from Volo\'s Guide and other expanded sources',
-    races: [
-      {
-        slug: 'goliath',
-        name: 'Goliath',
-        source: 'Volo\'s Guide to Monsters',
-        ability_bonuses: { STR: 2, CON: 1 },
-        racial_traits: ['Powerful Build', 'Stone\'s Endurance', 'Mountain Born', 'Natural Athlete'],
-        description: 'At the highest mountain peaks dwell the reclusive goliaths, wandering a bleak realm of rock, wind, and cold.',
-        typicalRoles: ['Barbarian', 'Fighter', 'Monk', 'Ranger'],
-      },
-      {
-        slug: 'kenku',
-        name: 'Kenku',
-        source: 'Volo\'s Guide to Monsters',
-        ability_bonuses: { DEX: 2, WIS: 1 },
-        racial_traits: ['Expert Forgery', 'Mimicry', 'Expert Duplication', 'Speed 30ft'],
-        description: 'Kenku are cursed with the inability to fly or speak in their own voices, forced to mimic the sounds they hear.',
-        typicalRoles: ['Rogue', 'Bard', 'Ranger', 'Monk'],
-      },
-      {
-        slug: 'aasimar',
-        name: 'Aasimar',
-        source: 'Volo\'s Guide to Monsters',
-        ability_bonuses: { CHA: 2 },
-        racial_traits: ['Healing Hands', 'Celestial Resistance', 'Darkvision', 'Light cantrip'],
-        description: 'Aasimar bear within their souls the light of the heavens. They are descended from humans with a touch of celestial power.',
-        typicalRoles: ['Paladin', 'Cleric', 'Sorcerer', 'Warlock'],
-      },
-      {
-        slug: 'tabaxi',
-        name: 'Tabaxi',
-        source: 'Volo\'s Guide to Monsters',
-        ability_bonuses: { DEX: 2, CHA: 1 },
-        racial_traits: ['Feline Agility', 'Cat\'s Claws', 'Cat\'s Talent (Perception/Stealth)', 'Speed 30ft'],
-        description: 'Hailing from a strange and distant land, tabaxi are catlike humanoids driven by curiosity to collect interesting artifacts and stories.',
-        typicalRoles: ['Rogue', 'Monk', 'Ranger', 'Bard'],
-      },
-      {
-        slug: 'firbolg',
-        name: 'Firbolg',
-        source: 'Volo\'s Guide to Monsters',
-        ability_bonuses: { WIS: 2, STR: 1 },
-        racial_traits: ['Firbolg Magic', 'Hidden Step (invisibility)', 'Powerful Build', 'Speech of Beast and Leaf'],
-        description: 'Firbolg are humble guardians of the forest, living in harmony with nature and avoiding contact with other races.',
-        typicalRoles: ['Druid', 'Ranger', 'Cleric'],
-      },
-      {
-        slug: 'triton',
-        name: 'Triton',
-        source: 'Volo\'s Guide to Monsters',
-        ability_bonuses: { STR: 1, CON: 1, CHA: 1 },
-        racial_traits: ['Amphibious', 'Control Air and Water spells', 'Guardians of the Depths', 'Emissary of the Sea'],
-        description: 'Tritons guard the ocean depths, building small settlements and waging war against their enemies in defense of their ocean home.',
-        typicalRoles: ['Paladin', 'Fighter', 'Cleric'],
-      },
-    ],
-  },
-  {
-    name: 'Monstrous Races',
-    icon: '🚀',
-    description: 'Playable monster races for unique and challenging characters',
-    races: [
-      {
-        slug: 'goblin',
-        name: 'Goblin',
-        source: 'Volo\'s Guide to Monsters',
-        ability_bonuses: { DEX: 2, CON: 1 },
-        racial_traits: ['Fury of the Small', 'Nimble Escape', 'Darkvision', 'Speed 30ft'],
-        description: 'Goblins occupy an uneasy place in a dangerous world, relying on their speed and cunning to survive.',
-        typicalRoles: ['Rogue', 'Ranger', 'Artificer'],
-      },
-      {
-        slug: 'kobold',
-        name: 'Kobold',
-        source: 'Volo\'s Guide to Monsters',
-        ability_bonuses: { DEX: 2, STR: -2 },
-        racial_traits: ['Pack Tactics', 'Grovel, Cower, and Beg', 'Sunlight Sensitivity', 'Darkvision'],
-        description: 'Kobolds are small, reptilian humanoids who believe themselves to be descended from dragons.',
-        typicalRoles: ['Rogue', 'Sorcerer', 'Wizard'],
-      },
-      {
-        slug: 'bugbear',
-        name: 'Bugbear',
-        source: 'Volo\'s Guide to Monsters',
-        ability_bonuses: { STR: 2, DEX: 1 },
-        racial_traits: ['Surprise Attack', 'Long-Limbed (reach +5ft)', 'Powerful Build', 'Darkvision'],
-        description: 'Bugbears are born for battle and mayhem, relying on brute strength and stealth to surprise enemies.',
-        typicalRoles: ['Barbarian', 'Fighter', 'Rogue'],
-      },
-      {
-        slug: 'orc',
-        name: 'Orc',
-        source: 'Volo\'s Guide to Monsters',
-        ability_bonuses: { STR: 2, CON: 1, INT: -2 },
-        racial_traits: ['Aggressive (bonus action dash)', 'Menacing', 'Powerful Build', 'Darkvision'],
-        description: 'Orcs are savage raiders and pillagers, with a culture built on strength and conquest.',
-        typicalRoles: ['Barbarian', 'Fighter'],
-      },
-      {
-        slug: 'yuan-ti-pureblood',
-        name: 'Yuan-Ti Pureblood',
-        source: 'Volo\'s Guide to Monsters',
-        ability_bonuses: { CHA: 2, INT: 1 },
-        racial_traits: ['Magic Resistance', 'Poison Immunity', 'Innate Spellcasting', 'Darkvision'],
-        description: 'The serpent creatures known as yuan-ti are all that remains of an ancient, decadent human empire.',
-        typicalRoles: ['Warlock', 'Sorcerer', 'Bard'],
-      },
-    ],
-  },
-  {
-    name: 'Planar Races',
-    icon: '✨',
-    description: 'Races from other planes and magical settings',
-    races: [
-      {
-        slug: 'loxodon',
-        name: 'Loxodon',
-        source: 'Guildmasters\' Guide to Ravnica',
-        ability_bonuses: { CON: 2, WIS: 1 },
-        racial_traits: ['Powerful Build', 'Natural Armor', 'Trunk (extra appendage)', 'Keen Smell'],
-        description: 'Loxodons are humanoid elephants, known for their wisdom, loyalty, and unshakeable calm.',
-        typicalRoles: ['Cleric', 'Paladin', 'Monk', 'Druid'],
-      },
-      {
-        slug: 'owlin',
-        name: 'Owlin',
-        source: 'Strixhaven: A Curriculum of Chaos',
-        ability_bonuses: { DEX: 1, WIS: 2 },
-        racial_traits: ['Flight', 'Darkvision', 'Silent Feathers (Stealth prof)', 'Speed 30ft'],
-        description: 'Owlin are owl-like humanoids with a keen intellect and the ability to fly through the night sky.',
-        typicalRoles: ['Ranger', 'Druid', 'Rogue', 'Wizard'],
-      },
-      {
-        slug: 'fairy',
-        name: 'Fairy',
-        source: 'The Wild Beyond the Witchlight',
-        ability_bonuses: { DEX: 2, WIS: 1 },
-        racial_traits: ['Flight', 'Fairy Magic', 'Small size', 'Speed 30ft'],
-        description: 'Fairies are tiny magical beings from the Feywild, filled with mirth and mischief.',
-        typicalRoles: ['Druid', 'Wizard', 'Bard', 'Rogue'],
-      },
-      {
-        slug: 'harengon',
-        name: 'Harengon',
-        source: 'The Wild Beyond the Witchlight',
-        ability_bonuses: { DEX: 2, WIS: 1 },
-        racial_traits: ['Hare-Trigger (add proficiency to initiative)', 'Leporine Senses', 'Lucky Footwork', 'Rabbit Hop'],
-        description: 'Harengon are rabbit-folk who embody the spirit of freedom and travel from the Feywild.',
-        typicalRoles: ['Monk', 'Ranger', 'Rogue', 'Fighter'],
-      },
-      {
-        slug: 'gith',
-        name: 'Githyanki',
-        source: 'Mordenkainen\'s Tome of Foes',
-        ability_bonuses: { STR: 2, INT: 1 },
-        racial_traits: ['Decadent Mastery (skill prof)', 'Martial Prodigy (armor prof)', 'Githyanki Psionics'],
-        description: 'The brutal githyanki are trained from birth as warriors, riding red dragons into battle.',
-        typicalRoles: ['Fighter', 'Wizard', 'Paladin'],
-      },
-      {
-        slug: 'genasi-fire',
-        name: 'Genasi (Fire)',
-        source: 'Elemental Evil Player\'s Companion',
-        ability_bonuses: { CON: 2, INT: 1 },
-        racial_traits: ['Darkvision', 'Fire Resistance', 'Reach to the Blaze (fire spells)', 'Speed 30ft'],
-        description: 'Fire genasi channel the flamboyant and often destructive nature of flame, with skin that burns to the touch.',
-        typicalRoles: ['Sorcerer', 'Wizard', 'Warlock'],
-      },
-    ],
-  },
-];
 
-// Helper to get all races from categories
-const getAllRaces = (): Race[] => {
-  return RACE_CATEGORIES.flatMap(category => category.races);
-};
-
-// --- Sprint 2: Spell Database ---
-// --- Sprint 2: Spell Database (loaded from SRD - replaces ~25 hardcoded with 1,804 spells) ---
-const SPELL_DATABASE: Spell[] = loadSpells();
 const EQUIPMENT_DATABASE: Equipment[] = loadEquipment();
 
 
@@ -730,90 +149,7 @@ interface EquipmentPackage {
   recommendedItems: string[]; // Text descriptions for DM to add
 }
 
-const EQUIPMENT_PACKAGES: EquipmentPackage[] = [
-  {
-    level: 1,
-    description: 'Standard starting equipment for a 1st-level character',
-    startingGold: 0, // Uses class starting equipment
-    items: [], // Will be populated from class choices
-    recommendedItems: ['Class starting equipment', 'Background equipment'],
-  },
-  {
-    level: 3,
-    description: 'Equipment for a 3rd-level character (Normal campaign starting level)',
-    startingGold: 100,
-    items: [
-      { slug: 'chain-mail', quantity: 1, equipped: true }, // Armor
-      { slug: 'longsword', quantity: 1, equipped: true }, // Primary weapon
-      { slug: 'shield', quantity: 1, equipped: true }, // Shield
-      { slug: 'explorers-pack', quantity: 1 },
-      { slug: 'rope-hempen', quantity: 1 },
-      { slug: 'torch', quantity: 10 },
-      { slug: 'rations', quantity: 10 },
-    ],
-    recommendedItems: ['Possibly one uncommon magic item', 'Healing potions (2d4+2)', 'Scroll of 1st-level spell'],
-  },
-  {
-    level: 5,
-    description: 'Equipment for a 5th-level character (Tier 2 start)',
-    startingGold: 500,
-    items: [
-      { slug: 'plate-armor', quantity: 1, equipped: true }, // Better armor
-      { slug: 'longsword', quantity: 1, equipped: true },
-      { slug: 'shield', quantity: 1, equipped: true },
-      { slug: 'explorers-pack', quantity: 1 },
-      { slug: 'rope-hempen', quantity: 2 },
-      { slug: 'torch', quantity: 20 },
-      { slug: 'rations', quantity: 20 },
-    ],
-    recommendedItems: ['1 uncommon magic item', '1-2 common magic items', 'Healing potions (3d4+3)', 'Scrolls of various levels'],
-  },
-  {
-    level: 10,
-    description: 'Equipment for a 10th-level character (Mid-Tier 2)',
-    startingGold: 5000,
-    items: [
-      { slug: 'plate-armor', quantity: 1, equipped: true },
-      { slug: 'longsword', quantity: 1, equipped: true },
-      { slug: 'shield', quantity: 1, equipped: true },
-      { slug: 'explorers-pack', quantity: 1 },
-      { slug: 'rope-hempen', quantity: 2 },
-      { slug: 'torch', quantity: 30 },
-      { slug: 'rations', quantity: 30 },
-    ],
-    recommendedItems: ['2 uncommon magic items', '1 rare magic item', 'Healing potions (5d4+5)', 'Scrolls up to 3rd level', 'Potions of various types'],
-  },
-  {
-    level: 15,
-    description: 'Equipment for a 15th-level character (Tier 3 veteran)',
-    startingGold: 20000,
-    items: [
-      { slug: 'plate-armor', quantity: 1, equipped: true },
-      { slug: 'longsword', quantity: 1, equipped: true },
-      { slug: 'shield', quantity: 1, equipped: true },
-      { slug: 'explorers-pack', quantity: 1 },
-      { slug: 'rope-hempen', quantity: 3 },
-      { slug: 'torch', quantity: 40 },
-      { slug: 'rations', quantity: 40 },
-    ],
-    recommendedItems: ['3 uncommon magic items', '2 rare magic items', '1 very rare magic item', 'Healing potions (7d4+7)', 'Scrolls up to 5th level', 'Various potions and consumables'],
-  },
-  {
-    level: 20,
-    description: 'Equipment for a 20th-level character (Epic hero)',
-    startingGold: 50000,
-    items: [
-      { slug: 'plate-armor', quantity: 1, equipped: true },
-      { slug: 'longsword', quantity: 1, equipped: true },
-      { slug: 'shield', quantity: 1, equipped: true },
-      { slug: 'explorers-pack', quantity: 1 },
-      { slug: 'rope-hempen', quantity: 5 },
-      { slug: 'torch', quantity: 50 },
-      { slug: 'rations', quantity: 50 },
-    ],
-    recommendedItems: ['4 uncommon magic items', '3 rare magic items', '2 very rare magic items', '1 legendary magic item', 'Healing potions (10d4+10)', 'High-level scrolls', 'Extensive consumables collection'],
-  },
-];
+
 
 interface Class {
   slug: string;
@@ -855,434 +191,7 @@ interface ClassCategory {
 // Load classes from SRD
 const SRD_CLASSES = loadClasses();
 
-const CLASS_CATEGORIES: ClassCategory[] = [
-  {
-    name: 'SRD Classes (2014)',
-    icon: '📚',
-    description: 'Classes from the System Reference Document',
-    classes: SRD_CLASSES,
-  },
-  {
-    name: 'Original Hardcoded Classes',
-    icon: '📖',
-    description: 'The 13 essential D&D 5e classes from the Player\'s Handbook (backup)',
-    classes: [
-      {
-        slug: 'barbarian',
-        name: 'Barbarian',
-        source: 'Player\'s Handbook',
-        hit_die: 12,
-        primary_stat: 'Strength, Constitution',
-        save_throws: ['STR', 'CON'],
-        skill_proficiencies: ['AnimalHandling', 'Athletics', 'Intimidation', 'Nature', 'Perception', 'Survival'],
-        num_skill_choices: 2,
-        class_features: ['Rage', 'Unarmored Defense', 'Reckless Attack', 'Danger Sense'],
-        description: 'The primal warrior; fueled by Rage to ignore pain and deal massive damage. Barbarians are fierce combatants who draw strength from their anger.',
-        keyRole: 'Tank/Damage Dealer - Frontline warrior with high HP and damage resistance',
-        equipment_choices: [
-          {
-            choiceId: 'barbarian-weapon-1',
-            description: 'Choose your primary weapon',
-            options: [
-              [{ name: 'Greataxe', type: 'weapon', quantity: 1, weight: 7 }],
-              [{ name: 'Martial Melee Weapon', type: 'weapon', quantity: 1, weight: 0 }],
-            ],
-            selected: null,
-          },
-          {
-            choiceId: 'barbarian-weapon-2',
-            description: 'Choose your secondary weapons',
-            options: [
-              [{ name: 'Handaxe', type: 'weapon', quantity: 2, weight: 2 }],
-              [{ name: 'Simple Weapon', type: 'weapon', quantity: 1, weight: 0 }],
-            ],
-            selected: null,
-          },
-          {
-            choiceId: 'barbarian-pack',
-            description: 'Choose your equipment pack',
-            options: [
-              [{ name: "Explorer's Pack", type: 'gear', quantity: 1, weight: 59 }],
-            ],
-            selected: null,
-          },
-        ],
-      },
-      {
-        slug: 'bard',
-        name: 'Bard',
-        source: 'Player\'s Handbook',
-        hit_die: 8,
-        primary_stat: 'Charisma',
-        save_throws: ['DEX', 'CHA'],
-        skill_proficiencies: ['Acrobatics', 'AnimalHandling', 'Arcana', 'Athletics', 'Deception', 'History', 'Insight', 'Intimidation', 'Investigation', 'Medicine', 'Nature', 'Perception', 'Performance', 'Persuasion', 'Religion', 'SleightOfHand', 'Stealth', 'Survival'],
-        num_skill_choices: 3,
-        class_features: ['Bardic Inspiration', 'Jack of All Trades', 'Song of Rest', 'Magical Secrets'],
-        description: 'The inspiring musician and speaker; uses magic to charm, perform, and support allies. Bards are versatile spellcasters and skill masters.',
-        keyRole: 'Support/Utility - Buffs allies, debuffs enemies, and provides magical versatility',
-        equipment_choices: [
-          {
-            choiceId: 'bard-pack',
-            description: 'Choose your equipment pack',
-            options: [[{ name: "Entertainer's Pack", type: 'gear', quantity: 1, weight: 40 }]],
-            selected: null,
-          },
-        ],
-        spellcasting: {
-          ability: 'CHA',
-          mode: 'known',
-          cantripsKnown: 2,
-          spellsKnownOrPrepared: 4, // Spells known at level 1
-          spellSlots: [0, 2, 0, 0, 0, 0, 0, 0, 0, 0],
-        },
-      },
-      {
-        slug: 'cleric',
-        name: 'Cleric',
-        source: 'Player\'s Handbook',
-        hit_die: 8,
-        primary_stat: 'Wisdom',
-        save_throws: ['WIS', 'CHA'],
-        skill_proficiencies: ['History', 'Insight', 'Medicine', 'Persuasion', 'Religion'],
-        class_features: ['Divine Domain', 'Channel Divinity', 'Destroy Undead', 'Divine Intervention'],
-        description: 'The priest of a god; a versatile magical and martial healer and divine caster. Clerics channel the power of their deity.',
-        keyRole: 'Healer/Support - Primary healer with strong combat and utility spells',
-        spellcasting: {
-          ability: 'WIS',
-          mode: 'prepared',
-          cantripsKnown: 3,
-          spellsKnownOrPrepared: 4, // Can prepare WIS mod + level (default 4 for level 1)
-          spellSlots: [0, 2, 0, 0, 0, 0, 0, 0, 0, 0],
-        },
-      },
-      {
-        slug: 'druid',
-        name: 'Druid',
-        source: 'Player\'s Handbook',
-        hit_die: 8,
-        primary_stat: 'Wisdom',
-        save_throws: ['INT', 'WIS'],
-        skill_proficiencies: ['Arcana', 'AnimalHandling', 'Insight', 'Medicine', 'Nature', 'Perception', 'Religion', 'Survival'],
-        class_features: ['Wild Shape', 'Druidic Circle', 'Timeless Body', 'Beast Spells'],
-        description: 'The keeper of nature; harnesses primal magic and can transform into beasts. Druids are guardians of the wilderness.',
-        keyRole: 'Controller/Shapeshifter - Versatile caster who can become powerful beasts',
-        spellcasting: {
-          ability: 'WIS',
-          mode: 'prepared',
-          cantripsKnown: 2,
-          spellsKnownOrPrepared: 4, // Can prepare WIS mod + level (default 4 for level 1)
-          spellSlots: [0, 2, 0, 0, 0, 0, 0, 0, 0, 0],
-        },
-      },
-      {
-        slug: 'fighter',
-        name: 'Fighter',
-        source: 'Player\'s Handbook',
-        hit_die: 10,
-        primary_stat: 'Strength or Dexterity',
-        save_throws: ['STR', 'CON'],
-        skill_proficiencies: ['Acrobatics', 'Athletics', 'History', 'Insight', 'Intimidation', 'Perception', 'Survival'],
-        class_features: ['Fighting Style', 'Second Wind', 'Action Surge', 'Extra Attack'],
-        description: 'The master of all weapons and armor; a versatile combat specialist. Fighters are unmatched in physical combat prowess.',
-        keyRole: 'Damage Dealer/Tank - Consistent damage output with excellent survivability',
-      },
-      {
-        slug: 'monk',
-        name: 'Monk',
-        source: 'Player\'s Handbook',
-        hit_die: 8,
-        primary_stat: 'Dexterity, Wisdom',
-        save_throws: ['STR', 'DEX'],
-        skill_proficiencies: ['Acrobatics', 'Athletics', 'History', 'Insight', 'Religion', 'Stealth'],
-        class_features: ['Martial Arts', 'Ki', 'Unarmored Defense', 'Flurry of Blows', 'Stunning Strike'],
-        description: 'The martial artist; uses internal energy (Ki) to perform stunning physical feats. Monks are mobile melee fighters.',
-        keyRole: 'Striker/Controller - High mobility with crowd control abilities',
-      },
-      {
-        slug: 'paladin',
-        name: 'Paladin',
-        source: 'Player\'s Handbook',
-        hit_die: 10,
-        primary_stat: 'Strength, Charisma',
-        save_throws: ['WIS', 'CHA'],
-        skill_proficiencies: ['Athletics', 'Insight', 'Intimidation', 'Medicine', 'Persuasion', 'Religion'],
-        class_features: ['Divine Sense', 'Lay on Hands', 'Divine Smite', 'Aura of Protection'],
-        description: 'The sworn champion of an ideal; uses martial prowess and divine Smites in combat. Paladins are holy warriors bound by oath.',
-        keyRole: 'Tank/Burst Damage - Durable frontliner with powerful single-target damage',
-      },
-      {
-        slug: 'ranger',
-        name: 'Ranger',
-        source: 'Player\'s Handbook',
-        hit_die: 10,
-        primary_stat: 'Dexterity, Wisdom',
-        save_throws: ['STR', 'DEX'],
-        skill_proficiencies: ['AnimalHandling', 'Athletics', 'Insight', 'Investigation', 'Nature', 'Perception', 'Stealth', 'Survival'],
-        class_features: ['Favored Enemy', 'Natural Explorer', 'Hunter\'s Mark', 'Extra Attack'],
-        description: 'The wilderness warrior and tracker; excels at hunting specific foes and navigating terrain. Rangers blend martial and magical abilities.',
-        keyRole: 'Striker/Scout - Damage dealer with tracking and exploration expertise',
-      },
-      {
-        slug: 'rogue',
-        name: 'Rogue',
-        source: 'Player\'s Handbook',
-        hit_die: 8,
-        primary_stat: 'Dexterity',
-        save_throws: ['DEX', 'INT'],
-        skill_proficiencies: ['Acrobatics', 'Athletics', 'Deception', 'Insight', 'Intimidation', 'Investigation', 'Perception', 'Performance', 'Persuasion', 'SleightOfHand', 'Stealth'],
-        class_features: ['Expertise', 'Sneak Attack', 'Cunning Action', 'Uncanny Dodge', 'Evasion'],
-        description: 'The specialist in stealth, deception, and precise Sneak Attack damage. Rogues are masters of skills and deadly precision.',
-        keyRole: 'Striker/Skill Monkey - High single-target damage with unmatched skill proficiency',
-      },
-      {
-        slug: 'sorcerer',
-        name: 'Sorcerer',
-        source: 'Player\'s Handbook',
-        hit_die: 6,
-        primary_stat: 'Charisma',
-        save_throws: ['CON', 'CHA'],
-        skill_proficiencies: ['Arcana', 'Deception', 'Insight', 'Intimidation', 'Persuasion', 'Religion'],
-        class_features: ['Sorcerous Origin', 'Font of Magic', 'Metamagic', 'Sorcery Points'],
-        description: 'The innate spellcaster; magic flows through their bloodline, giving them unique ways to manipulate spells. Sorcerers shape magic itself.',
-        keyRole: 'Blaster/Controller - Flexible spellcaster who modifies spell effects',
-        spellcasting: {
-          ability: 'CHA',
-          mode: 'known',
-          cantripsKnown: 4,
-          spellsKnownOrPrepared: 2, // Spells known at level 1
-          spellSlots: [0, 2, 0, 0, 0, 0, 0, 0, 0, 0],
-        },
-      },
-      {
-        slug: 'warlock',
-        name: 'Warlock',
-        source: 'Player\'s Handbook',
-        hit_die: 8,
-        primary_stat: 'Charisma',
-        save_throws: ['WIS', 'CHA'],
-        skill_proficiencies: ['Arcana', 'Deception', 'History', 'Intimidation', 'Investigation', 'Nature', 'Religion'],
-        class_features: ['Otherworldly Patron', 'Pact Magic', 'Eldritch Invocations', 'Pact Boon'],
-        description: 'The dark pact master; draws powerful, focused magic from an otherworldly patron. Warlocks gain power through supernatural bargains.',
-        keyRole: 'Blaster/Utility - Consistent damage with customizable magical abilities',
-        spellcasting: {
-          ability: 'CHA',
-          mode: 'known',
-          cantripsKnown: 2,
-          spellsKnownOrPrepared: 2, // Spells known at level 1
-          spellSlots: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0], // Pact Magic: 1 slot at level 1
-        },
-      },
-      {
-        slug: 'wizard',
-        name: 'Wizard',
-        source: 'Player\'s Handbook',
-        hit_die: 6,
-        primary_stat: 'Intelligence',
-        save_throws: ['INT', 'WIS'],
-        skill_proficiencies: ['Arcana', 'History', 'Insight', 'Investigation', 'Medicine', 'Religion'],
-        class_features: ['Arcane Recovery', 'Arcane Tradition', 'Spell Mastery', 'Signature Spells'],
-        description: 'The scholarly archmage; masters the widest variety of spells through study and spellbooks. Wizards are the ultimate magical specialists.',
-        keyRole: 'Controller/Utility - Largest spell list with solutions for every problem',
-        spellcasting: {
-          ability: 'INT',
-          mode: 'book',
-          cantripsKnown: 3,
-          spellsKnownOrPrepared: 6, // Spells in spellbook at level 1
-          spellSlots: [0, 2, 0, 0, 0, 0, 0, 0, 0, 0], // 2 1st-level slots
-        },
-      },
-      {
-        slug: 'artificer',
-        name: 'Artificer',
-        source: 'Tasha\'s Cauldron of Everything',
-        hit_die: 8,
-        primary_stat: 'Intelligence',
-        save_throws: ['CON', 'INT'],
-        skill_proficiencies: ['Arcana', 'History', 'Investigation', 'Medicine', 'Nature', 'Perception', 'SleightOfHand'],
-        class_features: ['Magical Tinkering', 'Infuse Item', 'The Right Tool for the Job', 'Flash of Genius'],
-        description: 'The magical inventor; creates and infuses wondrous items and gadgets to augment combat and utility. Artificers blend magic and technology.',
-        keyRole: 'Support/Utility - Enhances allies with magical items and versatile spells',
-      },
-    ],
-  },
-  {
-    name: 'Martial & Skill Specialists',
-    icon: '⚔️',
-    description: 'Subclasses focused on physical prowess and specialized techniques',
-    classes: [
-      {
-        slug: 'fighter-battle-master',
-        name: 'Fighter (Battle Master)',
-        source: 'Player\'s Handbook - Subclass',
-        hit_die: 10,
-        primary_stat: 'Strength or Dexterity',
-        save_throws: ['STR', 'CON'],
-        skill_proficiencies: ['Acrobatics', 'Athletics', 'History', 'Insight', 'Intimidation', 'Perception', 'Survival'],
-        class_features: ['Combat Superiority', 'Maneuvers', 'Student of War', 'Know Your Enemy'],
-        description: 'The tactical genius who uses special combat Maneuvers to control the battlefield. Battle Masters are strategic fighters.',
-        keyRole: 'Controller/Tactician - Uses maneuvers to disrupt enemies and support allies',
-      },
-      {
-        slug: 'rogue-arcane-trickster',
-        name: 'Rogue (Arcane Trickster)',
-        source: 'Player\'s Handbook - Subclass',
-        hit_die: 8,
-        primary_stat: 'Dexterity, Intelligence',
-        save_throws: ['DEX', 'INT'],
-        skill_proficiencies: ['Acrobatics', 'Athletics', 'Deception', 'Insight', 'Intimidation', 'Investigation', 'Perception', 'Performance'],
-        class_features: ['Spellcasting', 'Mage Hand Legerdemain', 'Magical Ambush', 'Versatile Trickster'],
-        description: 'The sneaky thief who uses Illusion and Enchantment magic for infiltration and escape. Magic enhances their roguish tricks.',
-        keyRole: 'Striker/Utility - Combines stealth with magical deception',
-      },
-      {
-        slug: 'rogue-swashbuckler',
-        name: 'Rogue (Swashbuckler)',
-        source: 'Xanathar\'s Guide to Everything - Subclass',
-        hit_die: 8,
-        primary_stat: 'Dexterity, Charisma',
-        save_throws: ['DEX', 'INT'],
-        skill_proficiencies: ['Acrobatics', 'Athletics', 'Deception', 'Insight', 'Intimidation', 'Investigation', 'Perception', 'Performance', 'Persuasion'],
-        class_features: ['Fancy Footwork', 'Rakish Audacity', 'Panache', 'Master Duelist'],
-        description: 'The charming, daring duelist who excels at one-on-one combat and social encounters. Swashbucklers are charismatic fighters.',
-        keyRole: 'Striker/Face - Mobile damage dealer with social prowess',
-      },
-      {
-        slug: 'barbarian-zealot',
-        name: 'Barbarian (Path of the Zealot)',
-        source: 'Xanathar\'s Guide to Everything - Subclass',
-        hit_die: 12,
-        primary_stat: 'Strength, Constitution',
-        save_throws: ['STR', 'CON'],
-        skill_proficiencies: ['AnimalHandling', 'Athletics', 'Intimidation', 'Nature', 'Perception', 'Survival'],
-        class_features: ['Divine Fury', 'Warrior of the Gods', 'Fanatical Focus', 'Rage Beyond Death'],
-        description: 'A divinely-inspired warrior whose Rage is so strong they are nearly impossible to kill. Zealots fight with religious fervor.',
-        keyRole: 'Tank/Damage Dealer - Unkillable warrior with bonus radiant/necrotic damage',
-      },
-    ],
-  },
-  {
-    name: 'Divine & Primal Casters',
-    icon: '🌿',
-    description: 'Subclasses drawing power from gods, nature, and sacred oaths',
-    classes: [
-      {
-        slug: 'cleric-life',
-        name: 'Cleric (Life Domain)',
-        source: 'Player\'s Handbook - Subclass',
-        hit_die: 8,
-        primary_stat: 'Wisdom',
-        save_throws: ['WIS', 'CHA'],
-        skill_proficiencies: ['History', 'Insight', 'Medicine', 'Persuasion', 'Religion'],
-        class_features: ['Disciple of Life', 'Channel Divinity: Preserve Life', 'Blessed Healer', 'Supreme Healing'],
-        description: 'The ultimate healer; maximizes the power of healing spells and keeps allies alive. Life Clerics are unmatched in restorative magic.',
-        keyRole: 'Healer - The best healing in the game with enhanced healing spells',
-      },
-      {
-        slug: 'druid-moon',
-        name: 'Druid (Circle of the Moon)',
-        source: 'Player\'s Handbook - Subclass',
-        hit_die: 8,
-        primary_stat: 'Wisdom',
-        save_throws: ['INT', 'WIS'],
-        skill_proficiencies: ['Arcana', 'AnimalHandling', 'Insight', 'Medicine', 'Nature', 'Perception', 'Religion', 'Survival'],
-        class_features: ['Combat Wild Shape', 'Circle Forms', 'Primal Strike', 'Elemental Wild Shape'],
-        description: 'The combat shapeshifter; focuses on using Wild Shape to turn into powerful combat beasts. Moon Druids are frontline transformers.',
-        keyRole: 'Tank/Shapeshifter - Transforms into powerful beasts for combat',
-      },
-      {
-        slug: 'paladin-devotion',
-        name: 'Paladin (Oath of Devotion)',
-        source: 'Player\'s Handbook - Subclass',
-        hit_die: 10,
-        primary_stat: 'Strength, Charisma',
-        save_throws: ['WIS', 'CHA'],
-        skill_proficiencies: ['Athletics', 'Insight', 'Intimidation', 'Medicine', 'Persuasion', 'Religion'],
-        class_features: ['Sacred Weapon', 'Turn the Unholy', 'Aura of Devotion', 'Purity of Spirit'],
-        description: 'The classic, honorable knight; upholds the highest ideals of justice, courage, and duty. Devotion Paladins are paragons of virtue.',
-        keyRole: 'Tank/Support - Protects allies with auras and channels justice',
-      },
-      {
-        slug: 'paladin-vengeance',
-        name: 'Paladin (Oath of Vengeance)',
-        source: 'Player\'s Handbook - Subclass',
-        hit_die: 10,
-        primary_stat: 'Strength, Charisma',
-        save_throws: ['WIS', 'CHA'],
-        skill_proficiencies: ['Athletics', 'Insight', 'Intimidation', 'Medicine', 'Persuasion', 'Religion'],
-        class_features: ['Abjure Enemy', 'Vow of Enmity', 'Relentless Avenger', 'Soul of Vengeance'],
-        description: 'A dark knight driven by an unyielding need for retribution against evildoers. Vengeance Paladins hunt their sworn enemies.',
-        keyRole: 'Striker - Focused damage dealer hunting specific foes',
-      },
-      {
-        slug: 'ranger-gloom-stalker',
-        name: 'Ranger (Gloom Stalker)',
-        source: 'Xanathar\'s Guide to Everything - Subclass',
-        hit_die: 10,
-        primary_stat: 'Dexterity, Wisdom',
-        save_throws: ['STR', 'DEX'],
-        skill_proficiencies: ['AnimalHandling', 'Athletics', 'Insight', 'Investigation', 'Nature', 'Perception', 'Stealth', 'Survival'],
-        class_features: ['Dread Ambusher', 'Umbral Sight', 'Iron Mind', 'Stalker\'s Flurry'],
-        description: 'The master of darkness and ambushes; excels at fighting in the dark and making powerful first strikes. Gloom Stalkers are shadow hunters.',
-        keyRole: 'Striker/Ambusher - Devastating first-round damage in darkness',
-      },
-    ],
-  },
-  {
-    name: 'Arcane & Occult Casters',
-    icon: '✨',
-    description: 'Subclasses mastering magic through study, talent, or dark pacts',
-    classes: [
-      {
-        slug: 'wizard-evocation',
-        name: 'Wizard (School of Evocation)',
-        source: 'Player\'s Handbook - Subclass',
-        hit_die: 6,
-        primary_stat: 'Intelligence',
-        save_throws: ['INT', 'WIS'],
-        skill_proficiencies: ['Arcana', 'History', 'Insight', 'Investigation', 'Medicine', 'Religion'],
-        class_features: ['Sculpt Spells', 'Potent Cantrip', 'Empowered Evocation', 'Overchannel'],
-        description: 'The master of destructive magic, specializing in dealing massive damage with fire, lightning, and force spells. Evocation Wizards are blasters.',
-        keyRole: 'Blaster - Maximum spell damage without harming allies',
-      },
-      {
-        slug: 'sorcerer-draconic',
-        name: 'Sorcerer (Draconic Bloodline)',
-        source: 'Player\'s Handbook - Subclass',
-        hit_die: 6,
-        primary_stat: 'Charisma',
-        save_throws: ['CON', 'CHA'],
-        skill_proficiencies: ['Arcana', 'Deception', 'Insight', 'Intimidation', 'Persuasion', 'Religion'],
-        class_features: ['Dragon Ancestor', 'Draconic Resilience', 'Elemental Affinity', 'Dragon Wings'],
-        description: 'Magic comes from a dragon ancestor, giving them scales for defense and power over a specific element. Draconic Sorcerers embody draconic might.',
-        keyRole: 'Blaster - Enhanced elemental damage with improved survivability',
-      },
-      {
-        slug: 'warlock-hexblade',
-        name: 'Warlock (Hexblade Patron)',
-        source: 'Xanathar\'s Guide to Everything - Subclass',
-        hit_die: 8,
-        primary_stat: 'Charisma',
-        save_throws: ['WIS', 'CHA'],
-        skill_proficiencies: ['Arcana', 'Deception', 'History', 'Intimidation', 'Investigation', 'Nature', 'Religion'],
-        class_features: ['Hexblade\'s Curse', 'Hex Warrior', 'Accursed Specter', 'Master of Hexes'],
-        description: 'The mysterious warrior; uses their charisma to fight with weapons granted by a sentient weapon or entity. Hexblades are martial spellcasters.',
-        keyRole: 'Striker/Gish - Melee-focused warlock with cursed weapon attacks',
-      },
-      {
-        slug: 'bard-lore',
-        name: 'Bard (College of Lore)',
-        source: 'Player\'s Handbook - Subclass',
-        hit_die: 8,
-        primary_stat: 'Charisma',
-        save_throws: ['DEX', 'CHA'],
-        skill_proficiencies: ['Any three skills'],
-        class_features: ['Bonus Proficiencies', 'Cutting Words', 'Additional Magical Secrets', 'Peerless Skill'],
-        description: 'The scholarly raconteur; learns extra spells from any class and uses cutting words to debuff enemies. Lore Bards are knowledge masters.',
-        keyRole: 'Support/Utility - Ultimate support with spells from any class',
-      },
-    ],
-  },
-];
+
 
 // Type for class with guaranteed Sprint 1 fields
 type ClassWithDefaults = Omit<Class, 'num_skill_choices' | 'equipment_choices'> & {
@@ -1291,161 +200,27 @@ type ClassWithDefaults = Omit<Class, 'num_skill_choices' | 'equipment_choices'> 
 };
 
 // Helper to get all classes from categories and fill in defaults
-const getAllClasses = (): ClassWithDefaults[] => {
-  const classes = CLASS_CATEGORIES.flatMap(category => category.classes);
 
-  // Default skill list for classes that don't have specific skills defined
-  const allSkillNames = ['Acrobatics', 'AnimalHandling', 'Arcana', 'Athletics', 'Deception', 'History',
-    'Insight', 'Intimidation', 'Investigation', 'Medicine', 'Nature', 'Perception', 'Performance',
-    'Persuasion', 'Religion', 'SleightOfHand', 'Stealth', 'Survival'];
-
-  // Add defaults for classes missing new Sprint 1 fields
-  return classes.map(cls => {
-    // Ensure skill_proficiencies is always an array
-    let skillProfs = cls.skill_proficiencies;
-    if (!Array.isArray(skillProfs) || skillProfs.length === 0 || skillProfs[0] === 'Any three skills') {
-      // If it's not a valid array, use all skills
-      skillProfs = allSkillNames;
-    }
-
-    return {
-      ...cls,
-      skill_proficiencies: skillProfs,
-      num_skill_choices: cls.num_skill_choices ?? (
-        cls.slug.includes('rogue') ? 4 :
-        cls.slug.includes('bard') ? 3 :
-        cls.slug.includes('ranger') ? 3 :
-        2
-      ),
-      equipment_choices: cls.equipment_choices ?? [
-        {
-          choiceId: `${cls.slug}-default-pack`,
-          description: 'Starting equipment pack',
-          options: [[{ name: "Adventurer's Pack", type: 'gear', quantity: 1, weight: 30 }]],
-          selected: null,
-        },
-      ],
-    } as ClassWithDefaults;
-  });
-};
 
 // Sprint 2: Spell helper functions
-const getSpellsForClass = (classSlug: string): Spell[] => {
-  // Extract base class name from slug (e.g., 'wizard-evocation' -> 'wizard')
-  const baseClass = classSlug.split('-')[0];
-  return SPELL_DATABASE.filter(spell => spell.classes.includes(baseClass));
-};
 
-const getCantripsByClass = (classSlug: string): Spell[] => {
-  return getSpellsForClass(classSlug).filter(spell => spell.level === 0);
-};
-
-const getLeveledSpellsByClass = (classSlug: string, level: number = 1): Spell[] => {
-  return getSpellsForClass(classSlug).filter(spell => spell.level === level);
-};
-
-const isSpellcaster = (classData: ClassWithDefaults): boolean => {
-  return classData.spellcasting !== undefined;
-};
 
 // Load alignment data from JSON (combines SRD data with custom examples)
-interface AlignmentData {
-  index: string;
-  name: string;
-  abbreviation: string;
-  short_desc: string;  // SRD creature examples
-  long_desc: string;   // Our detailed character descriptions
-  category: string;
-  examples: string[];
-}
-
-const ALIGNMENTS_DATA: AlignmentData[] = alignmentsData as AlignmentData[];
-
-// Extract alignment names for the dropdown
-const ALIGNMENTS = ALIGNMENTS_DATA.map(a => a.name);
-
-// Convert to lookup map for easy access (using long_desc for description)
-const ALIGNMENT_INFO: Record<string, { category: string; description: string; examples: string[] }> =
-  ALIGNMENTS_DATA.reduce((acc, alignment) => {
-    acc[alignment.name] = {
-      category: alignment.category,
-      description: alignment.long_desc,  // Use our detailed description
-      examples: alignment.examples,
-    };
-    return acc;
-  }, {} as Record<string, { category: string; description: string; examples: string[] }>);
 
 
-const BACKGROUNDS = [
-  {
-    name: 'Acolyte',
-    description: 'You have spent your life in the service of a temple to a specific god or pantheon of gods. You act as an intermediary between the realm of the holy and the mortal world, performing sacred rites and offering sacrifices.',
-    skillProficiencies: ['Insight', 'Religion'],
-    languages: 'Two of your choice',
-    equipment: 'Holy symbol, prayer book, 5 sticks of incense, vestments, common clothes, pouch with 15gp',
-    feature: 'Shelter of the Faithful',
-    featureDescription: 'As an acolyte, you command the respect of those who share your faith. You and your companions can expect free healing and care at temples, shrines, and other establishments of your faith. Those who share your religion will support you at a modest lifestyle.',
-  },
-  {
-    name: 'Criminal',
-    description: 'You are an experienced criminal with a history of breaking the law. You have spent a lot of time among other criminals and still have contacts within the criminal underworld.',
-    skillProficiencies: ['Deception', 'Stealth'],
-    languages: 'None',
-    equipment: 'Crowbar, dark common clothes with hood, pouch with 15gp',
-    feature: 'Criminal Contact',
-    featureDescription: 'You have a reliable and trustworthy contact who acts as your liaison to a network of other criminals. You know how to get messages to and from your contact, even over great distances.',
-  },
-  {
-    name: 'Folk Hero',
-    description: 'You come from a humble social rank, but you are destined for so much more. Already the people of your home village regard you as their champion, and your destiny calls you to stand against the tyrants and monsters that threaten the common folk.',
-    skillProficiencies: ['AnimalHandling', 'Survival'],
-    languages: 'None',
-    equipment: 'Artisan\'s tools, shovel, iron pot, common clothes, pouch with 10gp',
-    feature: 'Rustic Hospitality',
-    featureDescription: 'Since you come from the ranks of the common folk, you fit in among them with ease. You can find a place to hide, rest, or recuperate among other commoners, unless you have shown yourself to be a danger to them.',
-  },
-  {
-    name: 'Noble',
-    description: 'You understand wealth, power, and privilege. You carry a noble title, and your family owns land, collects taxes, and wields significant political influence.',
-    skillProficiencies: ['History', 'Persuasion'],
-    languages: 'One of your choice',
-    equipment: 'Fine clothes, signet ring, scroll of pedigree, purse with 25gp',
-    feature: 'Position of Privilege',
-    featureDescription: 'Thanks to your noble birth, people are inclined to think the best of you. You are welcome in high society, and people assume you have the right to be wherever you are. The common folk make every effort to accommodate you and avoid your displeasure.',
-  },
-  {
-    name: 'Sage',
-    description: 'You spent years learning the lore of the multiverse. You scoured manuscripts, studied scrolls, and listened to the greatest experts on the subjects that interest you.',
-    skillProficiencies: ['Arcana', 'History'],
-    languages: 'Two of your choice',
-    equipment: 'Bottle of ink, quill, small knife, letter from dead colleague, common clothes, pouch with 10gp',
-    feature: 'Researcher',
-    featureDescription: 'When you attempt to learn or recall a piece of lore, if you do not know that information, you often know where and from whom you can obtain it. Usually, this comes from a library, scriptorium, university, or a sage or other learned person.',
-  },
-  {
-    name: 'Soldier',
-    description: 'War has been your life for as long as you care to remember. You trained as a youth, studied the use of weapons and armor, learned basic survival techniques, and eventually took up arms to defend your people.',
-    skillProficiencies: ['Athletics', 'Intimidation'],
-    languages: 'None',
-    equipment: 'Rank insignia, trophy from fallen enemy, bone dice set, common clothes, pouch with 10gp',
-    feature: 'Military Rank',
-    featureDescription: 'You have a military rank from your career as a soldier. Soldiers loyal to your former military organization still recognize your authority and influence, and they defer to you if they are of a lower rank.',
-  },
-];
 
-const SKILL_TO_ABILITY: Record<SkillName, AbilityName> = {
-    Acrobatics: 'DEX', AnimalHandling: 'WIS', Arcana: 'INT', Athletics: 'STR', Deception: 'CHA', History: 'INT', Insight: 'WIS', Intimidation: 'CHA', Investigation: 'INT', Medicine: 'WIS', Nature: 'INT', Perception: 'WIS', Performance: 'CHA', Persuasion: 'CHA', Religion: 'INT', SleightOfHand: 'DEX', Stealth: 'DEX', Survival: 'WIS',
-};
-const ALL_SKILLS = Object.keys(SKILL_TO_ABILITY) as SkillName[];
-const PROFICIENCY_BONUSES = { 1: 2, 2: 2, 3: 2, 4: 2, 5: 3, 6: 3, 7: 3, 8: 3, 9: 4, 10: 4 };
 
-const getModifier = (score: number): number => Math.floor((score - 10) / 2);
+
+
+
+
+
+
+
 
 const calculateCharacterStats = (data: CharacterCreationData): Character => {
-  const allRaces = getAllRaces();
-  const raceData = allRaces.find(r => r.slug === data.raceSlug);
-  const allClasses = getAllClasses();
-  const classData = allClasses.find(c => c.slug === data.classSlug);
+  const raceData = getAllRaces().find(r => r.slug === data.raceSlug);
+  const classData = getAllClasses().find(c => c.slug === data.classSlug);
 
   if (!raceData || !classData) {
     throw new Error("Incomplete creation data.");
@@ -1495,6 +270,7 @@ const calculateCharacterStats = (data: CharacterCreationData): Character => {
   if (isSpellcaster(classData) && classData.spellcasting) {
     const spellAbility = classData.spellcasting.ability;
     const spellModifier = finalAbilities[spellAbility].modifier;
+    const classSpellSlots = SPELL_SLOTS_BY_CLASS[classData.slug]?.[level] || [0, 0, 0, 0, 0, 0, 0, 0, 0];
 
     spellcastingData = {
       ability: spellAbility,
@@ -1502,7 +278,9 @@ const calculateCharacterStats = (data: CharacterCreationData): Character => {
       spellAttackBonus: pb + spellModifier,
       cantripsKnown: data.spellSelection.selectedCantrips,
       spellsKnown: data.spellSelection.selectedSpells,
-      spellSlots: classData.spellcasting.spellSlots,
+      spellSlots: classSpellSlots,
+      usedSpellSlots: [0, 0, 0, 0, 0, 0, 0, 0, 0],
+      cantripChoicesByLevel: {},
     };
   }
 
@@ -1523,7 +301,7 @@ const calculateCharacterStats = (data: CharacterCreationData): Character => {
     });
 
     // Track equipped items
-    const equipment = EQUIPMENT_DATABASE.find(eq => eq.slug === item.slug);
+    const equipment = loadEquipment().find(eq => eq.slug === item.slug);
     if (item.equipped && equipment) {
       if (equipment.armor_category) {
         equippedArmor = item.slug;
@@ -1540,7 +318,7 @@ const calculateCharacterStats = (data: CharacterCreationData): Character => {
       selectedBundle.forEach(item => {
         // Try to find matching equipment in database
         const equipmentSlug = item.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-        const foundEquipment = EQUIPMENT_DATABASE.find(eq =>
+        const foundEquipment = loadEquipment().find(eq =>
           eq.slug === equipmentSlug || eq.name.toLowerCase() === item.name.toLowerCase()
         );
 
@@ -1575,7 +353,7 @@ const calculateCharacterStats = (data: CharacterCreationData): Character => {
   // 6. Calculate AC based on equipped armor
   let armorClass = 10 + finalAbilities.DEX.modifier; // Default unarmored
   if (equippedArmor) {
-    const armor = EQUIPMENT_DATABASE.find(eq => eq.slug === equippedArmor);
+    const armor = loadEquipment().find(eq => eq.slug === equippedArmor);
     if (armor?.armor_class) {
       if (armor.armor_category === 'Light') {
         // Light armor: base + full DEX
@@ -1662,33 +440,7 @@ const calculateCharacterStats = (data: CharacterCreationData): Character => {
   };
 };
 
-// --- Component Props Interfaces ---
-interface CharacterSheetProps {
-  character: Character;
-  onClose: () => void;
-  onDelete: (id: string) => void;
-  setRollResult: React.Dispatch<React.SetStateAction<{ text: string; value: number | null }>>;
-  onDiceRoll: (roll: DiceRollType) => void;
-  onToggleInspiration: (id: string) => void;
-  onFeatureClick: (featureName: string) => void;
-  onLongRest: (id: string) => void;
-  onShortRest: (id: string) => void;
-  onLevelUp: (id: string) => void;
-  onUpdateCharacter: (character: Character) => void;
-  onEquipArmor: (characterId: string, armorSlug: string) => void;
-  onEquipWeapon: (characterId: string, weaponSlug: string) => void;
-  onUnequipItem: (characterId: string, itemSlug: string) => void;
-  onAddItem: (characterId: string, equipmentSlug: string, quantity?: number) => void;
-  onRemoveItem: (characterId: string, equipmentSlug: string, quantity?: number) => void;
-  setEquipmentModal: (equipment: Equipment | null) => void;
-}
 
-interface WizardProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onCharacterCreated: () => void;
-  setRollResult: React.Dispatch<React.SetStateAction<{ text: string; value: number | null }>>;
-}
 
 // --- Utility Functions ---
 
@@ -1739,7 +491,7 @@ const SkillEntry: React.FC<{ name: SkillName; skill: Skill; setRollResult: Chara
 
 const CharacterSheet: React.FC<CharacterSheetProps> = ({
   character, onClose, onDelete, setRollResult, onDiceRoll, onToggleInspiration, onFeatureClick,
-  onLongRest, onShortRest, onLevelUp, onUpdateCharacter, onEquipArmor, onEquipWeapon, onUnequipItem,
+  onLongRest, onShortRest, onLevelUp, onLevelDown, onUpdateCharacter, onEquipArmor, onEquipWeapon, onUnequipItem,
   onAddItem, onRemoveItem, setEquipmentModal
 }) => {
   const abilities = Object.entries(character.abilities) as [AbilityName, AbilityScore][];
@@ -1781,6 +533,15 @@ const CharacterSheet: React.FC<CharacterSheetProps> = ({
             >
               Level Up
             </button>
+            {DEBUG_MODE && (
+              <button
+                onClick={() => onLevelDown && onLevelDown(character.id)}
+                className="px-3 py-2 text-sm bg-orange-600 hover:bg-orange-500 rounded-lg transition-colors font-medium"
+                title="Level down your character (debug)"
+              >
+                Level Down
+              </button>
+            )}
             <button onClick={onClose} className="px-4 py-2 text-sm bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors font-medium">Back to List</button>
             <button onClick={() => onDelete(character.id)} className="p-2 bg-red-800 hover:bg-red-700 rounded-lg transition-colors" title="Delete Character"><Trash2 className="w-5 h-5 text-white" /></button>
           </div>
@@ -1859,15 +620,16 @@ const CharacterSheet: React.FC<CharacterSheetProps> = ({
               <div className="p-4 bg-gray-800 rounded-xl shadow-lg border-l-4 border-blue-500">
                 <h3 className="text-lg font-bold text-blue-400 mb-3">Spell Slots</h3>
                 <div className="space-y-2 text-sm">
-                  {character.spellcasting.spellSlots.map((maxSlots, level) => {
-                    if (level === 0 || maxSlots === 0) return null;
-                    const usedSlots = character.spellcasting?.usedSpellSlots?.[level] || 0;
+                  {character.spellcasting.spellSlots.map((maxSlots, index) => {
+                    if (maxSlots === 0) return null;
+                    const spellLevel = index + 1;
+                    const usedSlots = character.spellcasting?.usedSpellSlots?.[index] || 0;
                     const availableSlots = maxSlots - usedSlots;
 
                     return (
-                      <div key={level} className="space-y-1">
+                      <div key={spellLevel} className="space-y-1">
                         <div className="flex justify-between items-center">
-                          <span className="text-gray-400">Level {level}:</span>
+                          <span className="text-gray-400">Level {spellLevel}:</span>
                           <span className="font-bold text-white">{availableSlots}/{maxSlots}</span>
                         </div>
                         <div className="flex gap-1">
@@ -1877,13 +639,13 @@ const CharacterSheet: React.FC<CharacterSheetProps> = ({
                               <button
                                 key={slotIndex}
                                 onClick={() => {
-                                  const newUsedSlots = [...(character.spellcasting?.usedSpellSlots || Array(10).fill(0))];
+                                  const newUsedSlots = [...(character.spellcasting?.usedSpellSlots || Array(9).fill(0))];
                                   if (isUsed) {
                                     // Uncheck this slot
-                                    newUsedSlots[level] = Math.max(0, (newUsedSlots[level] || 0) - 1);
+                                    newUsedSlots[index] = Math.max(0, (newUsedSlots[index] || 0) - 1);
                                   } else {
                                     // Check this slot
-                                    newUsedSlots[level] = (newUsedSlots[level] || 0) + 1;
+                                    newUsedSlots[index] = (newUsedSlots[index] || 0) + 1;
                                   }
                                   onUpdateCharacter({
                                     ...character,
@@ -2433,7 +1195,7 @@ const Step1Details: React.FC<StepProps> = ({ data, updateData, nextStep }) => {
     const [showAlignmentInfo, setShowAlignmentInfo] = useState(true);
     const [showBackgroundInfo, setShowBackgroundInfo] = useState(true);
 
-    const selectedAlignment = data.alignment ? ALIGNMENT_INFO[data.alignment] : null;
+    const selectedAlignmentData = ALIGNMENTS_DATA.find(a => a.name === data.alignment);
     const selectedBackground = BACKGROUNDS.find(bg => bg.name === data.background);
 
     return (
@@ -2461,7 +1223,7 @@ const Step1Details: React.FC<StepProps> = ({ data, updateData, nextStep }) => {
                 </select>
             </div>
 
-            {selectedAlignment && showAlignmentInfo && (
+            {selectedAlignmentData && showAlignmentInfo && (
                 <div className="bg-gray-700/50 border border-gray-600 rounded-lg p-4 space-y-3 relative">
                     <button
                         onClick={() => setShowAlignmentInfo(false)}
@@ -2471,18 +1233,8 @@ const Step1Details: React.FC<StepProps> = ({ data, updateData, nextStep }) => {
                         <XCircle className="w-5 h-5" />
                     </button>
 
-                    <div className="text-sm font-semibold text-purple-400">{selectedAlignment.category}</div>
-                    <h4 className="text-lg font-bold text-yellow-300">{data.alignment}</h4>
-                    <p className="text-sm text-gray-300">{selectedAlignment.description}</p>
-
-                    <div className="pt-2 border-t border-gray-600">
-                        <div className="font-semibold text-yellow-400 mb-2">Examples:</div>
-                        <ul className="space-y-2 text-xs text-gray-400">
-                            {selectedAlignment.examples.map((example, idx) => (
-                                <li key={idx} className="pl-3 border-l-2 border-gray-600">{example}</li>
-                            ))}
-                        </ul>
-                    </div>
+                    <h4 className="text-lg font-bold text-yellow-300">{selectedAlignmentData.name}</h4>
+                    <p className="text-sm text-gray-300">{selectedAlignmentData.description}</p>
                 </div>
             )}
 
@@ -2512,28 +1264,6 @@ const Step1Details: React.FC<StepProps> = ({ data, updateData, nextStep }) => {
 
                     <h4 className="text-lg font-bold text-yellow-300">{selectedBackground.name}</h4>
                     <p className="text-sm text-gray-300">{selectedBackground.description}</p>
-
-                    <div className="space-y-2 text-sm">
-                        <div>
-                            <span className="font-semibold text-red-400">Skill Proficiencies: </span>
-                            <span className="text-gray-300">{selectedBackground.skillProficiencies.join(', ')}</span>
-                        </div>
-
-                        <div>
-                            <span className="font-semibold text-red-400">Languages: </span>
-                            <span className="text-gray-300">{selectedBackground.languages}</span>
-                        </div>
-
-                        <div>
-                            <span className="font-semibold text-red-400">Equipment: </span>
-                            <span className="text-gray-300">{selectedBackground.equipment}</span>
-                        </div>
-
-                        <div className="pt-2 border-t border-gray-600">
-                            <div className="font-semibold text-yellow-400 mb-1">Feature: {selectedBackground.feature}</div>
-                            <p className="text-xs text-gray-400">{selectedBackground.featureDescription}</p>
-                        </div>
-                    </div>
                 </div>
             )}
 
@@ -2552,8 +1282,7 @@ const Step2Race: React.FC<StepProps> = ({ data, updateData, nextStep, prevStep }
     const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set(['Core Races']));
     const [showRaceInfo, setShowRaceInfo] = useState(true);
 
-    const allRaces = getAllRaces();
-    const selectedRace = allRaces.find(r => r.slug === data.raceSlug);
+    const selectedRace = getAllRaces().find(r => r.slug === data.raceSlug);
 
     const toggleCategory = (categoryName: string) => {
         setExpandedCategories(prev => {
@@ -3184,7 +1913,7 @@ const Step4Spells: React.FC<StepProps> = ({ data, updateData, nextStep, prevStep
                 </p>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {availableCantrips.map(spell => {
+                    {availableCantrips.map((spell: AppSpell) => {
                         const isSelected = data.spellSelection.selectedCantrips.includes(spell.slug);
                         const canSelect = data.spellSelection.selectedCantrips.length < spellcasting.cantripsKnown;
 
@@ -3233,7 +1962,7 @@ const Step4Spells: React.FC<StepProps> = ({ data, updateData, nextStep, prevStep
                 </p>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {availableSpells.map(spell => {
+                    {availableSpells.map((spell: AppSpell) => {
                         const isSelected = data.spellSelection.selectedSpells.includes(spell.slug);
                         const canSelect = data.spellSelection.selectedSpells.length < spellcasting.spellsKnownOrPrepared;
 
@@ -4437,6 +3166,9 @@ const App: React.FC = () => {
   const [latestRoll, setLatestRoll] = useState<DiceRollType | null>(null);
   const [featureModal, setFeatureModal] = useState<{name: string, description: string, source?: string} | null>(null);
   const [equipmentModal, setEquipmentModal] = useState<Equipment | null>(null);
+  const [cantripModalState, setCantripModalState] = useState<{isOpen: boolean, characterId: string | null, characterClass: string | null}>({ isOpen: false, characterId: null, characterClass: null });
+  const [subclassModalState, setSubclassModalState] = useState<{isOpen: boolean, characterId: string | null, characterClass: string | null}>({ isOpen: false, characterId: null, characterClass: null });
+  const [asiModalState, setAsiModalState] = useState<{isOpen: boolean, characterId: string | null}>({ isOpen: false, characterId: null });
 
   const selectedCharacter = useMemo(() => {
     return characters.find(c => c.id === selectedCharacterId);
@@ -4707,6 +3439,37 @@ const App: React.FC = () => {
       hitPoints: character.maxHitPoints + hpIncrease, // Also heal to full on level up
     };
 
+    if (updatedCharacter.spellcasting) {
+      const classSpellSlots = SPELL_SLOTS_BY_CLASS[classData.slug]?.[newLevel];
+      if (classSpellSlots) {
+        updatedCharacter.spellcasting = {
+          ...updatedCharacter.spellcasting,
+          spellSlots: classSpellSlots,
+        };
+      }
+    }
+
+    const asiLevels = [4, 8, 12, 16, 19];
+    if (asiLevels.includes(newLevel)) {
+      setAsiModalState({ isOpen: true, characterId: characterId });
+    }
+
+    if (classData.slug === 'wizard' && newLevel === 2) {
+      setSubclassModalState({ isOpen: true, characterId: characterId, characterClass: classData.slug });
+    }
+
+    if (updatedCharacter.spellcasting) {
+      const cantripsKnownAtNewLevel = CANTRIPS_KNOWN_BY_CLASS[classData.slug]?.[newLevel];
+      if (cantripsKnownAtNewLevel && cantripsKnownAtNewLevel > updatedCharacter.spellcasting.cantripsKnown.length) {
+        // Open modal to choose cantrip instead of adding a placeholder
+        setCantripModalState({
+          isOpen: true,
+          characterId: characterId,
+          characterClass: classData.slug,
+        });
+      }
+    }
+
     try {
       await updateCharacter(updatedCharacter);
       setCharacters(prev => prev.map(c => c.id === characterId ? updatedCharacter : c));
@@ -4714,6 +3477,66 @@ const App: React.FC = () => {
       console.log(`${character.name} leveled up to ${newLevel}. HP increased by ${hpIncrease}. PB is now ${newProficiencyBonus}.`);
     } catch (e) {
       console.error("Error leveling up character:", e);
+    }
+  }, [characters]);
+
+  const handleLevelDown = useCallback(async (characterId: string) => {
+    const character = characters.find(c => c.id === characterId);
+    if (!character) return;
+
+    if (character.level <= 1) {
+      setRollResult({ text: `${character.name} is already at level 1.`, value: null });
+      return;
+    }
+
+    const newLevel = character.level - 1;
+    const newProficiencyBonus = PROFICIENCY_BONUSES[newLevel as keyof typeof PROFICIENCY_BONUSES] || character.proficiencyBonus;
+
+    const allClasses = getAllClasses();
+    const classData = allClasses.find(c => c.name === character.class);
+    if (!classData) {
+      console.error(`Could not find class data for ${character.class}`);
+      return;
+    }
+
+    const hitDie = classData.hit_die;
+    const conModifier = character.abilities.CON.modifier;
+    const hpReduction = Math.max(1, Math.floor(hitDie / 2) + 1 + conModifier);
+
+    const updatedCharacter = {
+      ...character,
+      level: newLevel,
+      proficiencyBonus: newProficiencyBonus,
+      maxHitPoints: Math.max(1, character.maxHitPoints - hpReduction),
+      hitPoints: Math.max(1, character.maxHitPoints - hpReduction),
+    };
+
+    if (updatedCharacter.spellcasting) {
+      const classSpellSlots = SPELL_SLOTS_BY_CLASS[classData.slug]?.[newLevel];
+      if (classSpellSlots) {
+        updatedCharacter.spellcasting = {
+          ...updatedCharacter.spellcasting,
+          spellSlots: classSpellSlots,
+        };
+      }
+
+      const cantripChoiceAtLevel = updatedCharacter.spellcasting.cantripChoicesByLevel?.[character.level];
+      if (cantripChoiceAtLevel) {
+        updatedCharacter.spellcasting = {
+          ...updatedCharacter.spellcasting,
+          cantripsKnown: updatedCharacter.spellcasting.cantripsKnown.filter(c => c !== cantripChoiceAtLevel),
+        };
+        delete updatedCharacter.spellcasting.cantripChoicesByLevel?.[character.level];
+      }
+    }
+
+    try {
+      await updateCharacter(updatedCharacter);
+      setCharacters(prev => prev.map(c => c.id === characterId ? updatedCharacter : c));
+      setRollResult({ text: `${character.name} is now level ${newLevel}.`, value: null });
+      console.log(`${character.name} leveled down to ${newLevel}.`);
+    } catch (e) {
+      console.error("Error leveling down character:", e);
     }
   }, [characters]);
 
@@ -4916,6 +3739,84 @@ const App: React.FC = () => {
     }
   }, [characters, recalculateAC]);
 
+  const handleCantripSelected = useCallback(async (cantripSlug: string) => {
+    const { characterId } = cantripModalState;
+    if (!characterId) return;
+
+    const character = characters.find(c => c.id === characterId);
+    if (!character || !character.spellcasting) return;
+
+    const updatedCharacter = {
+      ...character,
+      spellcasting: {
+        ...character.spellcasting,
+        cantripsKnown: [...character.spellcasting.cantripsKnown, cantripSlug],
+        cantripChoicesByLevel: {
+          ...character.spellcasting.cantripChoicesByLevel,
+          [character.level]: cantripSlug,
+        },
+      },
+    };
+
+    try {
+      await updateCharacter(updatedCharacter);
+      setCharacters(prev => prev.map(c => c.id === characterId ? updatedCharacter : c));
+      setCantripModalState({ isOpen: false, characterId: null, characterClass: null });
+    } catch (e) {
+      console.error("Error selecting cantrip:", e);
+    }
+  }, [characters, cantripModalState]);
+
+  const handleSubclassSelected = useCallback(async (subclass: AppSubclass) => {
+    const { characterId } = subclassModalState;
+    if (!characterId) return;
+
+    const character = characters.find(c => c.id === characterId);
+    if (!character) return;
+
+    const updatedCharacter = {
+      ...character,
+      subclass: subclass.slug,
+    };
+
+    try {
+      await updateCharacter(updatedCharacter);
+      setCharacters(prev => prev.map(c => c.id === characterId ? updatedCharacter : c));
+      setSubclassModalState({ isOpen: false, characterId: null, characterClass: null });
+    } catch (e) {
+      console.error("Error selecting subclass:", e);
+    }
+  }, [characters, subclassModalState]);
+
+  const handleAsiApply = useCallback(async (increases: Partial<Record<Ability, number>>) => {
+    const { characterId } = asiModalState;
+    if (!characterId) return;
+
+    const character = characters.find(c => c.id === characterId);
+    if (!character) return;
+
+    const updatedAbilities = { ...character.abilities };
+    for (const key in increases) {
+      const ability = key as Ability;
+      const increase = increases[ability] || 0;
+      updatedAbilities[ability].score += increase;
+      updatedAbilities[ability].modifier = getModifier(updatedAbilities[ability].score);
+    }
+
+    const updatedCharacter = {
+      ...character,
+      abilities: updatedAbilities,
+    };
+
+    try {
+      await updateCharacter(updatedCharacter);
+      setCharacters(prev => prev.map(c => c.id === characterId ? updatedCharacter : c));
+      setAsiModalState({ isOpen: false, characterId: null });
+    } catch (e) {
+      console.error("Error applying ASI:", e);
+    }
+  }, [characters, asiModalState]);
+
   if (selectedCharacter) {
     return (
       <>
@@ -4930,6 +3831,7 @@ const App: React.FC = () => {
           onLongRest={handleLongRest}
           onShortRest={handleShortRest}
           onLevelUp={handleLevelUp}
+          onLevelDown={handleLevelDown}
           onUpdateCharacter={handleUpdateCharacter}
           onEquipArmor={handleEquipArmor}
           onEquipWeapon={handleEquipWeapon}
@@ -5064,6 +3966,47 @@ const App: React.FC = () => {
           onCharacterCreated={loadCharacters}
           setRollResult={setRollResult}
         />
+
+        {cantripModalState.isOpen && (() => {
+          const character = characters.find(c => c.id === cantripModalState.characterId);
+          if (!character || !character.spellcasting) return null;
+          return (
+            <ChooseCantripModal
+              isOpen={cantripModalState.isOpen}
+              onClose={() => setCantripModalState({ isOpen: false, characterId: null, characterClass: null })}
+              characterClass={cantripModalState.characterClass!}
+              knownCantrips={character.spellcasting.cantripsKnown}
+              onCantripSelected={handleCantripSelected}
+            />
+          );
+        })()}
+
+        {subclassModalState.isOpen && (() => {
+          const character = characters.find(c => c.id === subclassModalState.characterId);
+          if (!character) return null;
+          const subclasses = getSubclassesByClass(subclassModalState.characterClass!);
+          return (
+            <ChooseSubclassModal
+              isOpen={subclassModalState.isOpen}
+              onClose={() => setSubclassModalState({ isOpen: false, characterId: null, characterClass: null })}
+              subclasses={subclasses}
+              onSelect={handleSubclassSelected}
+              characterClass={character.class}
+            />
+          );
+        })()}
+
+        {asiModalState.isOpen && (() => {
+          const character = characters.find(c => c.id === asiModalState.characterId);
+          if (!character) return null;
+          return (
+            <AbilityScoreIncreaseModal
+              isOpen={asiModalState.isOpen}
+              onClose={() => setAsiModalState({ isOpen: false, characterId: null })}
+              onApply={handleAsiApply}
+            />
+          );
+        })()}
       </div>
     </div>
   );

@@ -1,0 +1,32 @@
+[
+  {
+    "index": "order-of-scribes",
+    "class": {
+      "index": "wizard",
+      "name": "Wizard",
+      "url": "/api/2014/classes/wizard"
+    },
+    "name": "Order of Scribes",
+    "subclass_flavor": "Arcane Tradition",
+    "desc": [
+      "Magic of the book—that’s what many folk call the work of wizards. The name is apt, given how much time wizards spend poring over tomes and penning theories about the nature of the multiverse. It’s rare to see a wizard without a book in hand. For a member of the Order of Scribes, a book is an object of power, a thing of beauty, and a gateway to the great mysteries of the cosmos."
+    ],
+    "subclass_levels": "/api/2020/subclasses/order-of-scribes/levels",
+    "url": "/api/2020/subclasses/order-of-scribes"
+  },
+  {
+    "index": "bladesinging",
+    "class": {
+      "index": "wizard",
+      "name": "Wizard",
+      "url": "/api/2014/classes/wizard"
+    },
+    "name": "Bladesinging",
+    "subclass_flavor": "Arcane Tradition",
+    "desc": [
+      "Bladesingers are elves who bravely defend their people and lands. They are wizard-warriors who master a tradition of sword fighting grounded in a mastery of arcane magic. In combat, a bladesinger uses a series of intricate, elegant maneuvers that fend off harm and allow the bladesinger to channel magic into devastating attacks and cunning defenses."
+    ],
+    "subclass_levels": "/api/2020/subclasses/bladesinging/levels",
+    "url": "/api/2020/subclasses/bladesinging"
+  }
+]

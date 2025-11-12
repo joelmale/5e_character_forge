@@ -4640,6 +4640,41 @@
         "index": "evocation",
         "name": "Evocation",
         "url": "/api/2014/subclasses/evocation"
+      },
+      {
+        "index": "abjuration",
+        "name": "Abjuration",
+        "url": "/api/2014/subclasses/abjuration"
+      },
+      {
+        "index": "conjuration",
+        "name": "Conjuration",
+        "url": "/api/2014/subclasses/conjuration"
+      },
+      {
+        "index": "divination",
+        "name": "Divination",
+        "url": "/api/2014/subclasses/divination"
+      },
+      {
+        "index": "enchantment",
+        "name": "Enchantment",
+        "url": "/api/2014/subclasses/enchantment"
+      },
+      {
+        "index": "illusion",
+        "name": "Illusion",
+        "url": "/api/2014/subclasses/illusion"
+      },
+      {
+        "index": "necromancy",
+        "name": "Necromancy",
+        "url": "/api/2014/subclasses/necromancy"
+      },
+      {
+        "index": "transmutation",
+        "name": "Transmutation",
+        "url": "/api/2014/subclasses/transmutation"
       }
     ],
     "spellcasting": {

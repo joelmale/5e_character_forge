@@ -17,7 +17,8 @@
       "Bash(tree:*)",
       "Bash(xargs:*)",
       "Bash(git checkout:*)",
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "Bash(cat:*)"
     ],
     "deny": [],
     "ask": [],

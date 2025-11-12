@@ -1,0 +1,17 @@
+[
+  {
+    "index": "war-magic",
+    "class": {
+      "index": "wizard",
+      "name": "Wizard",
+      "url": "/api/2014/classes/wizard"
+    },
+    "name": "War Magic",
+    "subclass_flavor": "Arcane Tradition",
+    "desc": [
+      "A variety of arcane colleges specialize in training wizards for the perils of war. The tradition of War Magic blends principles of evocation and abjuration, teaching wizards to turn spells into weapons and to use their magic to bolster their own defenses."
+    ],
+    "subclass_levels": "/api/2018/subclasses/war-magic/levels",
+    "url": "/api/2018/subclasses/war-magic"
+  }
+]
