@@ -16,7 +16,7 @@ import srdSubclasses2020egtw from '../data/srd/2020-egtw/5e-SRD-Subclasses.json'
 import srdFeats2014 from '../data/srd/2014/5e-SRD-Feats.json';
 import featsData from '../data/feats.json';
 import alignmentsData from '../data/alignments.json';
-import { AbilityName, Race, Class, Equipment, Feature, Subclass, Feat, RaceCategory, ClassCategory, EquipmentPackage, EquipmentChoice, EquippedItem } from '../types/dnd';
+import { AbilityName, Race, Class, Equipment, Feature, Subclass, Feat, RaceCategory, ClassCategory, EquipmentPackage, EquipmentChoice, EquipmentItem, EquippedItem } from '../types/dnd';
 
 // Local type definitions for dataService
 interface Alignment {
@@ -106,15 +106,37 @@ interface SRDClass {
   index: string;
   name: string;
   hit_die: number;
-  proficiency_choices: Array<{ 
+  proficiency_choices: Array<{
     choose: number;
     type: string;
     from: { options: Array<{ item: { index: string; name: string } }> };
   }>;
   proficiencies: Array<{ index: string; name: string }>;
   saving_throws: Array<{ index: string; name: string }>;
+  starting_equipment?: Array<{
+    equipment: { index: string; name: string; url: string };
+    quantity: number;
+  }>;
+  starting_equipment_options?: Array<{
+    desc: string;
+    choose: number;
+    type: string;
+    from: {
+      option_set_type: string;
+      options: Array<{
+        option_type?: string;
+        equipment?: { index: string; name: string; url: string };
+        equipment_category?: { index: string; name: string };
+      }>;
+    };
+  }>;
   spellcasting?: {
+    level?: number;
     spellcasting_ability: { index: string; name: string };
+    info?: Array<{
+      name: string;
+      desc: string[];
+    }>;
   };
 }
 
@@ -356,6 +378,44 @@ export function transformClass(srdClass: SRDClass, year: number = 2014): Class {
       spellsKnownOrPrepared,
       spellSlots: defaultSpellSlots,
     };
+  }
+
+  // Process starting equipment options
+  const equipment_choices: EquipmentChoice[] = [];
+  if (srdClass.starting_equipment_options) {
+    srdClass.starting_equipment_options.forEach((option, index) => {
+      const choiceId = `${srdClass.index}-choice-${index}`;
+
+      // Convert SRD options to EquipmentItem format
+      const options: EquipmentItem[][] = option.from.options.map(opt => {
+        if (opt.equipment) {
+          // Simple equipment reference
+          return [{
+            name: opt.equipment.name,
+            type: 'gear' as const, // Default type, could be enhanced
+            quantity: 1
+          }];
+        } else if (opt.equipment_category) {
+          // Equipment category - for now, return a placeholder
+          // This would need expansion to actual items in the category
+          return [{
+            name: `${opt.equipment_category.name} (choose one)`,
+            type: 'gear' as const,
+            quantity: 1
+          }];
+        }
+        return [];
+      }).filter(arr => arr.length > 0);
+
+      if (options.length > 0) {
+        equipment_choices.push({
+          choiceId,
+          description: option.desc,
+          options,
+          selected: null
+        });
+      }
+    });
   }
 
   return {

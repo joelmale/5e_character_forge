@@ -3120,7 +3120,14 @@ const Step6Equipment: React.FC<StepProps & { skipToStep?: (step: number) => void
                             <div className="text-xs font-semibold text-green-400 mb-2">
                                 Background Equipment (Auto-granted from {data.background}):
                             </div>
-                            <p className="text-sm text-gray-300">{backgroundData.equipment}</p>
+                            <div className="space-y-1">
+                                {Array.isArray(backgroundData.equipment)
+                                    ? backgroundData.equipment.map((item, index) => (
+                                        <div key={index} className="text-sm text-gray-300">• {item}</div>
+                                      ))
+                                    : <p className="text-sm text-gray-300">{backgroundData.equipment}</p>
+                                }
+                            </div>
                         </div>
                     );
                 }
