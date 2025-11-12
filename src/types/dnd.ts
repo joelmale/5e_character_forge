@@ -9,24 +9,33 @@ export interface Alignment {
 export interface Background {
   name: string;
   description: string;
+  skill_proficiencies: string[];
+  languages?: string[];
+  equipment: string[];
+  feature: string;
+  feature_description: string;
+  personality_traits: string[];
+  ideals: string[];
+  bonds: string[];
+  flaws: string[];
+  roleplaying_suggestions?: string;
 }
 
-export interface RaceCategory {
-  name: string;
-  description: string;
-}
 
-export interface ClassCategory {
-  name: string;
-  description: string;
-}
 
 export interface EquipmentPackage {
   name: string;
+  level?: number;
+  startingGold?: number; // in gp
   items: Array<{
     name: string;
     quantity: number;
+    slug?: string;
+    equipped?: boolean;
   }>;
+  recommendedItems?: string[]; // Text descriptions for DM to add
+  recommendedFor?: string[]; // Array of class slugs this pack is recommended for
+  description?: string; // Optional description of the pack
 }
 
 export interface FightingStyle {
@@ -68,6 +77,7 @@ export interface Character {
   skills: {
     Acrobatics: Skill; AnimalHandling: Skill; Arcana: Skill; Athletics: Skill; Deception: Skill; History: Skill; Insight: Skill; Intimidation: Skill; Investigation: Skill; Medicine: Skill; Nature: Skill; Perception: Skill; Performance: Skill; Persuasion: Skill; Religion: Skill; SleightOfHand: Skill; Stealth: Skill; Survival: Skill;
   };
+  languages?: string[]; // Known languages
   featuresAndTraits: {
     personality: string;
     ideals: string;
@@ -212,7 +222,7 @@ export interface Feature {
     subfeatureOptions?: {
       choose: number;
       type: string;
-      from: { options: any[] };
+      from: { options: Array<{ option_type?: string; item?: { index: string; name: string; url: string }; ability_score?: { index: string; name: string; url: string } }> };
     };
   };
 }
@@ -223,6 +233,14 @@ export interface Subclass {
   class: string; // Parent class slug
   desc: string[];
   subclassFlavor: string; // e.g., "Path of the Berserker"
+
+  // Enhanced subclass data
+  detailedDescription?: string;
+  keyFeatures?: string[];
+  roleplayingTips?: string[];
+  source?: string;
+  icon?: string;
+  themeColor?: string;
 }
 
 export interface Feat {
@@ -267,6 +285,9 @@ export interface CharacterCreationData {
   selectedFightingStyle?: string;
   selectedFeats?: string[]; // Array of feat slugs
 
+  // Language selection
+  knownLanguages?: string[]; // Array of selected language names
+
   // Custom text for traits
   personality: string;
   ideals: string;
@@ -291,7 +312,7 @@ export interface RaceCategory {
   races: Race[];
 }
 
-export interface EquipmentPackage {
+export interface StartingEquipmentPackage {
   level: number;
   description: string;
   startingGold: number; // in gp
@@ -327,6 +348,14 @@ export interface Class {
   parentClass?: string; // Parent class slug (e.g., 'wizard' for 'wizard-evocation')
   subclassLevel?: number; // Level at which this subclass is chosen (usually 3)
   subclassFeatures?: Record<number, string[]>; // Features gained at specific levels
+
+  // Enhanced class data for rich selection experience
+  category: 'Martial' | 'Arcane' | 'Divine' | 'Primal';
+  detailedDescription: string;
+  roleplayingTips: string[];
+  keyFeatures: string[];
+  icon: string;
+  themeColor: string;
 }
 
 export interface ClassCategory {

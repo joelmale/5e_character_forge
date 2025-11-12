@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Dice6, Plus, Trash2, Loader2, BookOpen, User as UserIcon, Shield, Zap, ArrowLeft, ArrowRight, Check, Download, Upload, XCircle, ChevronDown, ChevronUp } from 'lucide-react';
+import { Dice6, Plus, Trash2, Loader2, BookOpen, User as UserIcon, Shield, Zap, ArrowLeft, ArrowRight, Check, Download, Upload, XCircle, ChevronDown, ChevronUp, Shuffle } from 'lucide-react';
 import { DiceBox3D } from './components/DiceBox3D';
 import { RollHistoryModal, RollHistoryTicker } from './components/RollHistory';
 import { FeatureModal } from './components/FeatureModal';
@@ -10,14 +10,172 @@ import AbilityScoreIncreaseModal from './components/AbilityScoreIncreaseModal';
 import { createAbilityRoll, createSkillRoll, createInitiativeRoll, getRollHistory, addRollToHistory, clearRollHistory, rollDice, generateUUID, DiceRoll } from './services/diceService';
 import { diceSounds } from './utils/diceSounds';
 import { featureDescriptions } from './utils/featureDescriptions';
-import { loadRaces, loadClasses, loadEquipment, FEAT_DATABASE as loadedFeats, getSubclassesByClass, getFeaturesByClass, getFeaturesBySubclass, SPELL_DATABASE, getCantripsByClass, getLeveledSpellsByClass, AppSpell, PROFICIENCY_BONUSES, getModifier, SKILL_TO_ABILITY, ALL_SKILLS, ALIGNMENTS_DATA, ALIGNMENTS, ALIGNMENT_INFO, BACKGROUNDS, RACE_CATEGORIES, CLASS_CATEGORIES, EQUIPMENT_PACKAGES, FIGHTING_STYLES, getAllRaces, getAllClasses, isSpellcaster } from './services/dataService';
+import { loadClasses, loadEquipment, FEAT_DATABASE as loadedFeats, getSubclassesByClass, getFeaturesByClass, getFeaturesBySubclass, SPELL_DATABASE, getCantripsByClass, getLeveledSpellsByClass, AppSpell, PROFICIENCY_BONUSES, getModifier, SKILL_TO_ABILITY, ALL_SKILLS, ALIGNMENTS_DATA, ALIGNMENTS, BACKGROUNDS, RACE_CATEGORIES, CLASS_CATEGORIES, EQUIPMENT_PACKAGES, getAllRaces, randomizeLevel, randomizeIdentity, randomizeRace, randomizeClassAndSkills, randomizeFightingStyle, randomizeSpells, randomizeAbilities, randomizeFeats, randomizeEquipmentChoices, randomizeAdditionalEquipment, randomizeLanguages, randomizePersonality } from './services/dataService';
+import { calculateKnownLanguages, getMaxLanguages, parseBackgroundLanguageChoices, getRacialLanguages, getClassLanguages } from './utils/languageUtils';
+import { getLanguagesByCategory } from './data/languages';
 import { SPELL_SLOTS_BY_CLASS } from './data/spellSlots';
 import { CANTRIPS_KNOWN_BY_CLASS } from './data/cantrips';
-import alignmentsData from './data/alignments.json';
-import { Ability, Character, AbilityScore, Skill, AbilityName, SkillName, EquipmentItem, EquipmentChoice, SpellSelectionData, Equipment, EquippedItem, Feature, Subclass, Feat, CharacterCreationData, Race, RaceCategory, EquipmentPackage, Class, ClassCategory, ClassWithDefaults, AlignmentData } from './types/dnd';
+// import alignmentsData from './data/alignments.json';
+import { Ability, Character, AbilityScore, Skill, AbilityName, SkillName, Equipment, EquippedItem, Feat, CharacterCreationData, EquipmentPackage, Feature } from './types/dnd';
 import { AppSubclass } from './services/dataService';
 
+// Missing type definitions
+type DiceRollType = DiceRoll;
+
+interface CharacterSheetProps {
+  character: Character;
+  onClose: () => void;
+  onDelete: (id: string) => void;
+  setRollResult: (result: { text: string; value: number | null }) => void;
+  onDiceRoll: (roll: DiceRollType) => void;
+  onToggleInspiration: (characterId: string) => void;
+  onFeatureClick: (feature: string | Feature) => void;
+  onLongRest: (characterId: string) => void;
+  onShortRest: (characterId: string) => void;
+  onLevelUp: (characterId: string) => void;
+  onLevelDown: (characterId: string) => void;
+  onUpdateCharacter: (character: Character) => void;
+  onEquipArmor: (characterId: string, armorSlug: string) => void;
+  onEquipWeapon: (characterId: string, weaponSlug: string) => void;
+  onUnequipItem: (characterId: string, itemSlug: string) => void;
+  onAddItem: (characterId: string, equipmentSlug: string, quantity?: number) => void;
+  onRemoveItem: (characterId: string, equipmentSlug: string, quantity?: number) => void;
+  setEquipmentModal: (item: Equipment | null) => void;
+}
+
+interface WizardProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onCharacterCreated: () => void;
+  setRollResult: (result: { text: string; value: number | null }) => void;
+}
+
 const DEBUG_MODE = true;
+
+// Equipment Pack Display Component
+interface EquipmentPackDisplayProps {
+  pack: EquipmentPackage;
+  isSelected?: boolean;
+  onClick?: () => void;
+  showRecommendation?: boolean;
+  characterClass?: string;
+}
+
+// Randomize Button Component
+interface RandomizeButtonProps {
+  onClick: () => void;
+  title?: string;
+  className?: string;
+}
+
+const RandomizeButton: React.FC<RandomizeButtonProps> = ({
+  onClick,
+  title = "Randomize this section",
+  className = ""
+}) => {
+  return (
+    <button
+      onClick={onClick}
+      className={`px-3 py-2 bg-purple-600 hover:bg-purple-500 rounded-lg text-white text-sm font-medium transition-colors flex items-center gap-2 ${className}`}
+      title={title}
+    >
+      <Shuffle className="w-4 h-4" />
+      Randomize
+    </button>
+  );
+};
+
+// Randomize All Button Component
+interface RandomizeAllButtonProps {
+  onClick: () => void;
+  className?: string;
+}
+
+const RandomizeAllButton: React.FC<RandomizeAllButtonProps> = ({
+  onClick,
+  className = ""
+}) => {
+  return (
+    <button
+      onClick={onClick}
+      className={`px-4 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 rounded-lg text-white font-bold transition-all flex items-center gap-2 shadow-lg ${className}`}
+      title="Randomize the entire character"
+    >
+      <Shuffle className="w-5 h-5" />
+      Randomize Everything
+    </button>
+  );
+};
+
+const EquipmentPackDisplay: React.FC<EquipmentPackDisplayProps> = ({
+  pack,
+  isSelected = false,
+  onClick,
+  showRecommendation = false,
+  characterClass
+}) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const isRecommended = characterClass && pack.recommendedFor?.includes(characterClass);
+
+  return (
+    <div className={`border-2 rounded-lg transition-all ${
+      isSelected
+        ? 'bg-blue-800 border-blue-500'
+        : 'bg-gray-700 border-gray-600 hover:bg-gray-600'
+    }`}>
+      <button
+        onClick={onClick}
+        className="w-full p-3 text-left"
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <span className="text-white font-medium">{pack.name}</span>
+            {pack.startingGold && pack.startingGold > 0 && (
+              <span className="text-yellow-400 text-sm">({pack.startingGold} gp)</span>
+            )}
+            {showRecommendation && isRecommended && (
+              <span className="px-2 py-1 text-xs bg-green-700 text-green-200 rounded">
+                Recommended
+              </span>
+            )}
+          </div>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsExpanded(!isExpanded);
+            }}
+            className="p-1 hover:bg-gray-600 rounded"
+          >
+            <ChevronDown className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+          </button>
+        </div>
+      </button>
+
+      {isExpanded && (
+        <div className="px-3 pb-3 border-t border-gray-600 mt-2 pt-2">
+          <div className="text-xs text-gray-400 mb-2">Contents:</div>
+          <ul className="text-sm space-y-1">
+            {pack.items.map((item, idx) => (
+              <li key={idx} className="flex items-center justify-between">
+                <span className="text-gray-300">
+                  • {item.name}
+                  {item.quantity > 1 && <span className="text-gray-400 ml-1">x{item.quantity}</span>}
+                </span>
+                {item.equipped && (
+                  <span className="text-xs text-green-400">(equipped)</span>
+                )}
+              </li>
+            ))}
+          </ul>
+          {pack.description && (
+            <p className="text-xs text-gray-500 mt-2 italic">{pack.description}</p>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
 
 // --- IndexedDB Configuration ---
 const DB_NAME = '5e_character_forge';
@@ -93,8 +251,6 @@ const updateCharacter = async (character: Character): Promise<void> => {
 };
 
 // --- D&D 5e Character Interface (Must be adhered to) ---
-interface AbilityScore { score: number; modifier: number; }
-interface Skill { value: number; proficient: boolean; }
 
 
 
@@ -121,6 +277,7 @@ const initialCreationData: CharacterCreationData = {
   subclassSlug: undefined,
   selectedFightingStyle: undefined,
   selectedFeats: [],
+  knownLanguages: [],
   personality: "I'm quiet until I have something important to say.",
   ideals: "Honesty. The truth must be preserved.",
   bonds: "I owe my life to the individual who saved me.",
@@ -141,63 +298,19 @@ export const FEAT_DATABASE: Feat[] = loadedFeats;
 
 // Sprint 4: Level-based Equipment Packages
 // Based on DMG "Starting at Higher Levels" wealth guidelines
-interface EquipmentPackage {
-  level: number;
-  description: string;
-  startingGold: number; // in gp
-  items: Array<{ slug: string; quantity: number; equipped?: boolean }>;
-  recommendedItems: string[]; // Text descriptions for DM to add
-}
 
 
 
-interface Class {
-  slug: string;
-  name: string;
-  source: string;
-  hit_die: number;
-  primary_stat: string;
-  save_throws: string[];
-  skill_proficiencies: string[]; // Available skill choices
-  num_skill_choices?: number; // How many skills to choose (filled by helper if missing)
-  class_features: string[];
-  description: string;
-  keyRole: string;
-  equipment_choices?: EquipmentChoice[]; // Starting equipment options (filled by helper if missing)
 
-  // Sprint 2: Spellcasting configuration
-  spellcasting?: {
-    ability: 'INT' | 'WIS' | 'CHA'; // Spellcasting ability modifier
-    mode: 'known' | 'prepared' | 'book'; // How spells are learned/prepared
-    cantripsKnown: number; // Number of cantrips at level 1
-    spellsKnownOrPrepared: number; // Number of spells known (sorcerer/bard) or can prepare (cleric/druid)
-    spellSlots: number[]; // Spell slots by level [0, 2, 0, 0...] means 2 1st-level slots
-  };
-
-  // Sprint 3: Subclass support
-  isSubclass?: boolean; // True if this is a subclass (archetype)
-  parentClass?: string; // Parent class slug (e.g., 'wizard' for 'wizard-evocation')
-  subclassLevel?: number; // Level at which this subclass is chosen (usually 3)
-  subclassFeatures?: Record<number, string[]>; // Features gained at specific levels
-}
-
-interface ClassCategory {
-  name: string;
-  icon: string;
-  description: string;
-  classes: Class[];
-}
-
-// Load classes from SRD
-const SRD_CLASSES = loadClasses();
 
 
 
-// Type for class with guaranteed Sprint 1 fields
-type ClassWithDefaults = Omit<Class, 'num_skill_choices' | 'equipment_choices'> & {
-  num_skill_choices: number;
-  equipment_choices: EquipmentChoice[];
-};
+// Load classes from SRD
+// const SRD_CLASSES = loadClasses();
+
+
+
+
 
 // Helper to get all classes from categories and fill in defaults
 
@@ -220,7 +333,7 @@ type ClassWithDefaults = Omit<Class, 'num_skill_choices' | 'equipment_choices'> 
 
 const calculateCharacterStats = (data: CharacterCreationData): Character => {
   const raceData = getAllRaces().find(r => r.slug === data.raceSlug);
-  const classData = getAllClasses().find(c => c.slug === data.classSlug);
+  const classData = loadClasses().find(c => c.slug === data.classSlug);
 
   if (!raceData || !classData) {
     throw new Error("Incomplete creation data.");
@@ -236,7 +349,7 @@ const calculateCharacterStats = (data: CharacterCreationData): Character => {
   });
 
   const level = data.level;
-  const pb = PROFICIENCY_BONUSES[level as keyof typeof PROFICIENCY_BONUSES] || 2;
+  const pb = PROFICIENCY_BONUSES[level - 1] || 2;
 
   // 2. Calculate Hit Points (Based on chosen method)
   let hitDieValue: number;
@@ -249,8 +362,8 @@ const calculateCharacterStats = (data: CharacterCreationData): Character => {
   const maxHitPoints = hitDieValue + finalAbilities.CON.modifier + (raceData.slug === 'dwarf' ? level : 0);
 
   // 3. Calculate Skills (from selected skills + background skills)
-  const backgroundData = BACKGROUNDS.find(bg => bg.name === data.background);
-  const backgroundSkills = backgroundData?.skillProficiencies || [];
+   const backgroundData = BACKGROUNDS.find(bg => bg.name === data.background);
+   const backgroundSkills = backgroundData?.skill_proficiencies || [];
   const allProficientSkills = [...data.selectedSkills, ...backgroundSkills.map(s => s as SkillName)];
 
   const finalSkills: Character['skills'] = {} as Character['skills'];
@@ -267,7 +380,7 @@ const calculateCharacterStats = (data: CharacterCreationData): Character => {
 
   // 4. Calculate Spellcasting Stats (if applicable)
   let spellcastingData: Character['spellcasting'] = undefined;
-  if (isSpellcaster(classData) && classData.spellcasting) {
+  if (classData.spellcasting) {
     const spellAbility = classData.spellcasting.ability;
     const spellModifier = finalAbilities[spellAbility].modifier;
     const classSpellSlots = SPELL_SLOTS_BY_CLASS[classData.slug]?.[level] || [0, 0, 0, 0, 0, 0, 0, 0, 0];
@@ -294,19 +407,20 @@ const calculateCharacterStats = (data: CharacterCreationData): Character => {
 
   // Add items from equipment package
   equipmentPackage.items.forEach(item => {
+    const itemSlug = item.slug || item.name.toLowerCase().replace(/[^a-z0-9]/g, '-');
     inventory.push({
-      equipmentSlug: item.slug,
+      equipmentSlug: itemSlug,
       quantity: item.quantity,
       equipped: item.equipped || false,
     });
 
     // Track equipped items
-    const equipment = loadEquipment().find(eq => eq.slug === item.slug);
+    const equipment = loadEquipment().find(eq => eq.slug === itemSlug);
     if (item.equipped && equipment) {
       if (equipment.armor_category) {
-        equippedArmor = item.slug;
+        equippedArmor = itemSlug;
       } else if (equipment.weapon_category) {
-        equippedWeapons.push(item.slug);
+        equippedWeapons.push(itemSlug);
       }
     }
   });
@@ -388,7 +502,10 @@ const calculateCharacterStats = (data: CharacterCreationData): Character => {
     allClassFeatures.push(`Fighting Style: ${data.selectedFightingStyle}`);
   }
 
-  // 10. Construct Final Character Object
+  // 10. Calculate Known Languages
+  const knownLanguages = calculateKnownLanguages(data);
+
+  // 11. Construct Final Character Object
   return {
     id: generateUUID(), // Generate UUID for IndexedDB
     name: data.name || "Unnamed Hero",
@@ -398,6 +515,7 @@ const calculateCharacterStats = (data: CharacterCreationData): Character => {
     level,
     alignment: data.alignment,
     background: data.background,
+    languages: knownLanguages,
     inspiration: false,
     proficiencyBonus: pb,
     armorClass,
@@ -425,7 +543,7 @@ const calculateCharacterStats = (data: CharacterCreationData): Character => {
     currency: {
       cp: 0,
       sp: 0,
-      gp: equipmentPackage.startingGold,
+      gp: equipmentPackage.startingGold || 0,
       pp: 0,
     },
     equippedArmor,
@@ -1160,12 +1278,12 @@ const CharacterSheet: React.FC<CharacterSheetProps> = ({
                 })}
               </div>
             </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-};
+           )}
+                 </div>
+             </div>
+     </div>
+   );
+ };
 
 
 // --- Character Creation Wizard Steps ---
@@ -1180,7 +1298,8 @@ const STEP_TITLES = [
     'Choose Feats',             // 6 - Sprint 5: Optional feat selection
     'Select Equipment',         // 7
     'Customize Equipment',      // 8 - Sprint 4: Equipment browser
-    'Finalize Background'       // 9
+    'Select Languages',         // 9
+    'Finalize Background'       // 10
 ];
 
 interface StepProps {
@@ -1191,6 +1310,127 @@ interface StepProps {
     stepIndex: number;
 }
 
+const Step0Level: React.FC<StepProps> = ({ data, updateData, nextStep }) => {
+    const milestoneLevels = [2, 3, 4, 5, 6, 8, 11, 12, 14, 16, 17, 19, 20];
+
+    const getMilestoneIcon = (level: number) => {
+        const icons = {
+            2: '🎯', 3: '🛡️', 4: '💪', 5: '⚔️', 6: '🛡️',
+            8: '💪', 11: '💪', 12: '🛡️', 14: '💪', 16: '💪',
+            17: '🛡️', 19: '💪', 20: '👑'
+        };
+        return icons[level as keyof typeof icons] || '⚡';
+    };
+
+    const getLevelDescription = (level: number) => {
+        const descriptions = {
+            1: "Fresh adventurer, just starting your journey",
+            2: "Gain your class's signature feature (Fighting Style, Spellcasting, etc.)",
+            3: "Choose your subclass to specialize your abilities",
+            4: "Ability Score Improvement (+2) or take a Feat",
+            5: "Extra Attack - make two attacks per turn",
+            6: "Enhanced subclass features and abilities",
+            7: "Growing in power and reputation",
+            8: "Ability Score Improvement (+2) or take a Feat",
+            9: "Enhanced subclass features and abilities",
+            10: "Experienced hero with significant capabilities",
+            11: "Ability Score Improvement (+2) or take a Feat",
+            12: "Enhanced subclass features and abilities",
+            13: "Master level with exceptional power",
+            14: "Ability Score Improvement (+2) or take a Feat",
+            15: "Enhanced subclass features and abilities",
+            16: "Ability Score Improvement (+2) or take a Feat",
+            17: "Enhanced subclass features and abilities",
+            18: "Growing legendary status and power",
+            19: "Ability Score Improvement (+2) or take a Feat",
+            20: "Epic capstone features and legendary abilities"
+        };
+        return descriptions[level as keyof typeof descriptions] || `Level ${level} adventurer`;
+    };
+
+    return (
+        <div className='space-y-6'>
+            <div className='text-center relative'>
+                <div className='absolute top-0 right-0'>
+                    <RandomizeButton
+                        onClick={() => updateData({ level: randomizeLevel() })}
+                        title="Randomize character level"
+                    />
+                </div>
+                <h3 className='text-2xl font-bold text-yellow-300 mb-2'>Choose Your Level</h3>
+                <p className='text-gray-300'>Select your character's starting level (1-20)</p>
+            </div>
+
+            <div className='grid grid-cols-5 md:grid-cols-10 gap-3 max-w-4xl mx-auto'>
+                {Array.from({ length: 20 }, (_, i) => i + 1).map(level => {
+                    const isMilestone = milestoneLevels.includes(level);
+                    const isSelected = data.level === level;
+
+                    return (
+                        <button
+                            key={level}
+                            onClick={() => updateData({ level })}
+                            className={`relative p-3 rounded-lg border-2 transition-all duration-200 ${
+                                isSelected
+                                    ? 'bg-red-600 border-red-400 shadow-lg shadow-red-500/25'
+                                    : isMilestone
+                                        ? 'bg-yellow-600/20 border-yellow-500 hover:bg-yellow-600/30'
+                                        : 'bg-gray-700 border-gray-600 hover:bg-gray-600'
+                            }`}
+                        >
+                            <div className={`text-center ${isSelected ? 'text-white' : isMilestone ? 'text-yellow-300' : 'text-gray-300'}`}>
+                                <div className='font-bold text-lg'>{level}</div>
+                                {isMilestone && (
+                                    <div className='text-xs mt-1 opacity-75'>{getMilestoneIcon(level)}</div>
+                                )}
+                            </div>
+                        </button>
+                    );
+                })}
+            </div>
+
+            {data.level && (
+                <div className='bg-gray-700/50 border border-gray-600 rounded-lg p-4 max-w-2xl mx-auto'>
+                    <div className='text-center'>
+                        <h4 className='text-lg font-bold text-yellow-300 mb-2'>Level {data.level}</h4>
+                        <p className='text-gray-300'>{getLevelDescription(data.level)}</p>
+                        {milestoneLevels.includes(data.level) && (
+                            <div className='mt-3 p-2 bg-yellow-600/20 border border-yellow-500 rounded'>
+                                <p className='text-yellow-300 text-sm font-semibold'>🎯 Milestone Level</p>
+                                <p className='text-yellow-200 text-xs mt-1'>
+                                    {data.level === 2 && "Gain your class's signature feature (Fighting Style, Spellcasting, etc.)"}
+                                    {data.level === 3 && "Choose your subclass to specialize your abilities"}
+                                    {data.level === 4 && "Ability Score Improvement (+2) or take a Feat"}
+                                    {data.level === 5 && "Extra Attack - make two attacks per turn"}
+                                    {data.level === 6 && "Enhanced subclass features and abilities"}
+                                    {data.level === 8 && "Ability Score Improvement (+2) or take a Feat"}
+                                    {data.level === 11 && "Ability Score Improvement (+2) or take a Feat"}
+                                    {data.level === 12 && "Enhanced subclass features and abilities"}
+                                    {data.level === 14 && "Ability Score Improvement (+2) or take a Feat"}
+                                    {data.level === 16 && "Ability Score Improvement (+2) or take a Feat"}
+                                    {data.level === 17 && "Enhanced subclass features and abilities"}
+                                    {data.level === 19 && "Ability Score Improvement (+2) or take a Feat"}
+                                    {data.level === 20 && "Epic capstone features and legendary abilities"}
+                                </p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
+
+            <div className='flex justify-end'>
+                <button
+                    onClick={nextStep}
+                    disabled={!data.level}
+                    className="px-6 py-3 bg-red-600 hover:bg-red-500 rounded-lg text-white flex items-center disabled:bg-gray-600 disabled:cursor-not-allowed transition-colors"
+                >
+                    Next: Basic Identity <ArrowRight className="w-5 h-5 ml-2" />
+                </button>
+            </div>
+        </div>
+    );
+};
+
 const Step1Details: React.FC<StepProps> = ({ data, updateData, nextStep }) => {
     const [showAlignmentInfo, setShowAlignmentInfo] = useState(true);
     const [showBackgroundInfo, setShowBackgroundInfo] = useState(true);
@@ -1200,7 +1440,50 @@ const Step1Details: React.FC<StepProps> = ({ data, updateData, nextStep }) => {
 
     return (
         <div className='space-y-4'>
-            <h3 className='text-xl font-bold text-red-300'>Basic Identity</h3>
+            <div className='flex justify-between items-center'>
+                <h3 className='text-xl font-bold text-red-300'>Basic Identity</h3>
+                <div className='flex gap-2'>
+                    <RandomizeButton
+                        onClick={() => {
+                            const identity = randomizeIdentity();
+                            updateData(identity);
+                        }}
+                        title="Randomize name, alignment, and background"
+                    />
+                    <RandomizeAllButton
+                        onClick={() => {
+                            // Randomize the entire character
+                            const level = randomizeLevel();
+                            const identity = randomizeIdentity();
+                            const race = randomizeRace();
+                            const classAndSkills = randomizeClassAndSkills();
+                            const fightingStyle = randomizeFightingStyle(classAndSkills.classSlug);
+                            const spells = randomizeSpells(classAndSkills.classSlug, level);
+                            const abilities = randomizeAbilities();
+                            const feats = randomizeFeats();
+                            const equipmentChoices = randomizeEquipmentChoices(classAndSkills.classSlug);
+                            const additionalEquipment = randomizeAdditionalEquipment();
+                            const languages = randomizeLanguages(race, identity.background);
+                            const personality = randomizePersonality();
+
+                            updateData({
+                                level,
+                                ...identity,
+                                raceSlug: race,
+                                ...classAndSkills,
+                                selectedFightingStyle: fightingStyle,
+                                spellSelection: spells,
+                                ...abilities,
+                                selectedFeats: feats,
+                                equipmentChoices,
+                                startingInventory: additionalEquipment,
+                                knownLanguages: languages,
+                                ...personality
+                            });
+                        }}
+                    />
+                </div>
+            </div>
             <input
                 type="text"
                 placeholder="Character Name (e.g., Elara Windwalker)"
@@ -1234,7 +1517,25 @@ const Step1Details: React.FC<StepProps> = ({ data, updateData, nextStep }) => {
                     </button>
 
                     <h4 className="text-lg font-bold text-yellow-300">{selectedAlignmentData.name}</h4>
-                    <p className="text-sm text-gray-300">{selectedAlignmentData.description}</p>
+                    <p className="text-sm text-gray-300 mb-3">{selectedAlignmentData.long_desc || selectedAlignmentData.short_desc}</p>
+
+                    {selectedAlignmentData.examples && selectedAlignmentData.examples.length > 0 && (
+                        <div className="mb-3">
+                            <h5 className="text-sm font-semibold text-yellow-200 mb-2">Examples:</h5>
+                            <ul className="text-xs text-gray-300 space-y-1">
+                                {selectedAlignmentData.examples.map((example, idx) => (
+                                    <li key={idx} className="flex items-start">
+                                        <span className="text-yellow-400 mr-2">•</span>
+                                        <span>{example}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
+
+                    <div className="text-xs text-gray-400 border-t border-gray-600 pt-2">
+                        <span className="font-semibold">Category:</span> {selectedAlignmentData.category}
+                    </div>
                 </div>
             )}
 
@@ -1253,7 +1554,7 @@ const Step1Details: React.FC<StepProps> = ({ data, updateData, nextStep }) => {
             </div>
 
             {selectedBackground && showBackgroundInfo && (
-                <div className="bg-gray-700/50 border border-gray-600 rounded-lg p-4 space-y-3 relative">
+                <div className="bg-gray-700/50 border border-gray-600 rounded-lg p-4 space-y-4 relative max-h-[70vh] overflow-y-auto">
                     <button
                         onClick={() => setShowBackgroundInfo(false)}
                         className="absolute top-2 right-2 text-gray-400 hover:text-white transition-colors"
@@ -1262,8 +1563,57 @@ const Step1Details: React.FC<StepProps> = ({ data, updateData, nextStep }) => {
                         <XCircle className="w-5 h-5" />
                     </button>
 
-                    <h4 className="text-lg font-bold text-yellow-300">{selectedBackground.name}</h4>
-                    <p className="text-sm text-gray-300">{selectedBackground.description}</p>
+                    <div>
+                        <h4 className="text-lg font-bold text-yellow-300">{selectedBackground.name}</h4>
+                        <p className="text-sm text-gray-300 mt-2">{selectedBackground.description}</p>
+                    </div>
+
+                    {/* Feature */}
+                    <div className="border-t border-gray-600 pt-3">
+                        <h5 className="text-sm font-semibold text-yellow-200 mb-2">Background Feature: {selectedBackground.feature}</h5>
+                        <p className="text-xs text-gray-300">{selectedBackground.feature_description}</p>
+                    </div>
+
+                    {/* Skill Proficiencies */}
+                    <div className="border-t border-gray-600 pt-3">
+                        <h5 className="text-sm font-semibold text-yellow-200 mb-2">Skill Proficiencies</h5>
+                        <div className="flex flex-wrap gap-2">
+                            {selectedBackground.skill_proficiencies.map(skill => (
+                                <span key={skill} className="px-2 py-1 bg-blue-700 text-white text-xs rounded">
+                                    {skill}
+                                </span>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Languages */}
+                    {selectedBackground.languages && selectedBackground.languages.length > 0 && (
+                        <div className="border-t border-gray-600 pt-3">
+                            <h5 className="text-sm font-semibold text-yellow-200 mb-2">Languages</h5>
+                            <div className="flex flex-wrap gap-2">
+                                {selectedBackground.languages.map(language => (
+                                    <span key={language} className="px-2 py-1 bg-green-700 text-white text-xs rounded">
+                                        {language}
+                                    </span>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Equipment */}
+                    <div className="border-t border-gray-600 pt-3">
+                        <h5 className="text-sm font-semibold text-yellow-200 mb-2">Starting Equipment</h5>
+                        <ul className="text-xs text-gray-300 space-y-1">
+                            {selectedBackground.equipment.map(item => (
+                                <li key={item} className="flex items-start">
+                                    <span className="text-yellow-400 mr-2">•</span>
+                                    <span>{item}</span>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+
+
                 </div>
             )}
 
@@ -1298,7 +1648,13 @@ const Step2Race: React.FC<StepProps> = ({ data, updateData, nextStep, prevStep }
 
     return (
         <div className='space-y-6'>
-            <h3 className='text-xl font-bold text-red-300'>Select Race (Racial Bonuses will be applied automatically)</h3>
+            <div className='flex justify-between items-center'>
+                <h3 className='text-xl font-bold text-red-300'>Select Race (Racial Bonuses will be applied automatically)</h3>
+                <RandomizeButton
+                    onClick={() => updateData({ raceSlug: randomizeRace() })}
+                    title="Randomize race selection"
+                />
+            </div>
 
             {/* Race Categories */}
             <div className='space-y-3'>
@@ -1413,7 +1769,7 @@ const Step3Class: React.FC<StepProps> = ({ data, updateData, nextStep, prevStep 
     const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set(['Core Classes']));
     const [showClassInfo, setShowClassInfo] = useState(true);
 
-    const allClasses = getAllClasses();
+    const allClasses = loadClasses();
     const selectedClass = allClasses.find(c => c.slug === data.classSlug);
 
     const toggleCategory = (categoryName: string) => {
@@ -1430,7 +1786,20 @@ const Step3Class: React.FC<StepProps> = ({ data, updateData, nextStep, prevStep 
 
     return (
         <div className='space-y-6'>
-            <h3 className='text-xl font-bold text-red-300'>Select Class (Hit Die and Starting Proficiencies)</h3>
+            <div className='flex justify-between items-center'>
+                <h3 className='text-xl font-bold text-red-300'>Select Class (Hit Die and Starting Proficiencies)</h3>
+                <RandomizeButton
+                    onClick={() => {
+                        const classAndSkills = randomizeClassAndSkills();
+                        updateData({
+                            classSlug: classAndSkills.classSlug,
+                            selectedSkills: classAndSkills.selectedSkills,
+                            subclassSlug: classAndSkills.subclassSlug
+                        });
+                    }}
+                    title="Randomize class, skills, and subclass"
+                />
+            </div>
 
             {/* Class Categories */}
             <div className='space-y-3'>
@@ -1536,19 +1905,19 @@ const Step3Class: React.FC<StepProps> = ({ data, updateData, nextStep, prevStep 
             {selectedClass && (
                 <div className="bg-gray-700/50 border border-gray-600 rounded-lg p-4 space-y-3">
                     <h4 className="text-lg font-bold text-yellow-300">
-                        Choose Skills ({data.selectedSkills.length} / {selectedClass.num_skill_choices} selected)
+                        Choose Skills ({data.selectedSkills.length} / {(selectedClass.num_skill_choices || 0)} selected)
                     </h4>
                     <p className="text-xs text-gray-400">
-                        Select {selectedClass.num_skill_choices} skill{selectedClass.num_skill_choices !== 1 ? 's' : ''} from your class options.
+                        Select {(selectedClass.num_skill_choices || 0)} skill{(selectedClass.num_skill_choices || 0) !== 1 ? 's' : ''} from your class options.
                         Skills from your background are automatically granted.
                     </p>
 
-                    {/* Background Skills (Auto-granted) */}
-                    {(() => {
-                        const backgroundData = BACKGROUNDS.find(bg => bg.name === data.background);
-                        const backgroundSkills = backgroundData?.skillProficiencies || [];
+                     {/* Background Skills (Auto-granted) */}
+                     {(() => {
+                         const backgroundData = BACKGROUNDS.find(bg => bg.name === data.background);
+                         const backgroundSkills = backgroundData?.skill_proficiencies || [];
 
-                        if (backgroundSkills.length > 0) {
+                         if (backgroundSkills.length > 0) {
                             return (
                                 <div className="p-3 bg-green-900/20 border border-green-700 rounded-lg">
                                     <div className="text-xs font-semibold text-green-400 mb-2">
@@ -1571,10 +1940,10 @@ const Step3Class: React.FC<StepProps> = ({ data, updateData, nextStep, prevStep 
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                         {selectedClass.skill_proficiencies.map(skill => {
                             const backgroundData = BACKGROUNDS.find(bg => bg.name === data.background);
-                            const backgroundSkills = backgroundData?.skillProficiencies || [];
+                            const backgroundSkills = backgroundData?.skill_proficiencies || [];
                             const isBackgroundSkill = backgroundSkills.includes(skill);
                             const isSelected = data.selectedSkills.includes(skill as SkillName);
-                            const canSelect = data.selectedSkills.length < selectedClass.num_skill_choices;
+                            const canSelect = data.selectedSkills.length < (selectedClass.num_skill_choices || 0);
 
                             return (
                                 <button
@@ -1613,9 +1982,9 @@ const Step3Class: React.FC<StepProps> = ({ data, updateData, nextStep, prevStep 
                         })}
                     </div>
 
-                    {data.selectedSkills.length < selectedClass.num_skill_choices && (
+                    {data.selectedSkills.length < (selectedClass.num_skill_choices || 0) && (
                         <div className="text-xs text-yellow-400 mt-2">
-                            ⚠️ Please select {selectedClass.num_skill_choices - data.selectedSkills.length} more skill{selectedClass.num_skill_choices - data.selectedSkills.length !== 1 ? 's' : ''}
+                            ⚠️ Please select {((selectedClass.num_skill_choices || 0) - data.selectedSkills.length)} more skill{((selectedClass.num_skill_choices || 0) - data.selectedSkills.length) !== 1 ? 's' : ''}
                         </div>
                     )}
                 </div>
@@ -1676,7 +2045,7 @@ const Step3Class: React.FC<StepProps> = ({ data, updateData, nextStep, prevStep 
                     disabled={
                         !data.classSlug ||
                         !selectedClass ||
-                        data.selectedSkills.length < selectedClass.num_skill_choices ||
+                        data.selectedSkills.length < (selectedClass.num_skill_choices || 0) ||
                         (getSubclassesByClass(data.classSlug).length > 0 && !data.subclassSlug)
                     }
                     className="px-4 py-2 bg-red-600 hover:bg-red-500 rounded-lg text-white flex items-center disabled:bg-gray-600 disabled:cursor-not-allowed"
@@ -1690,7 +2059,7 @@ const Step3Class: React.FC<StepProps> = ({ data, updateData, nextStep, prevStep 
 
 // Sprint 5: Fighting Style Selection Step (for Fighter, Paladin, Ranger)
 const Step3point5FightingStyle: React.FC<StepProps> = ({ data, updateData, nextStep, prevStep }) => {
-    const allClasses = getAllClasses();
+    const allClasses = loadClasses();
     const selectedClass = allClasses.find(c => c.slug === data.classSlug);
 
     // Define fighting styles available in SRD
@@ -1730,33 +2099,45 @@ const Step3point5FightingStyle: React.FC<StepProps> = ({ data, updateData, nextS
     // Check if this class gets a fighting style
     const hasFightingStyle = selectedClass && ['fighter', 'paladin', 'ranger'].includes(selectedClass.slug);
 
-    // Auto-skip if class doesn't get fighting style
-    if (!hasFightingStyle) {
-        React.useEffect(() => {
-            nextStep();
-        }, []);
-        return <div className='text-center text-gray-400'>This class doesn't have Fighting Styles. Advancing...</div>;
-    }
-
     // Get recommended style for this class
-    const recommendedStyle = FIGHTING_STYLES.find(style =>
+    const recommendedStyle = selectedClass ? FIGHTING_STYLES.find(style =>
         style.recommendedFor.includes(selectedClass.slug)
-    );
+    ) : undefined;
 
     // Set default if not already selected
     React.useEffect(() => {
         if (!data.selectedFightingStyle && recommendedStyle) {
             updateData({ selectedFightingStyle: recommendedStyle.name });
         }
-    }, [recommendedStyle, data.selectedFightingStyle]);
+    }, [recommendedStyle, data.selectedFightingStyle, updateData]);
+
+    // Auto-skip if class doesn't get fighting style
+    React.useEffect(() => {
+        if (!hasFightingStyle) {
+            nextStep();
+        }
+    }, [hasFightingStyle, nextStep]);
+
+    if (!hasFightingStyle) {
+        return <div className='text-center text-gray-400'>This class doesn't have Fighting Styles. Advancing...</div>;
+    }
 
     return (
         <div className='space-y-6'>
-            <div>
-                <h3 className='text-xl font-bold text-red-300'>Choose Fighting Style</h3>
-                <p className='text-sm text-gray-400 mt-2'>
-                    As a {selectedClass.name}, you learn a particular style of fighting. Select one Fighting Style option.
-                </p>
+            <div className='flex justify-between items-start'>
+                <div>
+                    <h3 className='text-xl font-bold text-red-300'>Choose Fighting Style</h3>
+                    <p className='text-sm text-gray-400 mt-2'>
+                        As a {selectedClass.name}, you learn a particular style of fighting. Select one Fighting Style option.
+                    </p>
+                </div>
+                <RandomizeButton
+                    onClick={() => {
+                        const fightingStyle = randomizeFightingStyle(data.classSlug);
+                        updateData({ selectedFightingStyle: fightingStyle });
+                    }}
+                    title="Randomize fighting style"
+                />
             </div>
 
             {recommendedStyle && (
@@ -1809,7 +2190,7 @@ const Step3point5FightingStyle: React.FC<StepProps> = ({ data, updateData, nextS
                     disabled={!data.selectedFightingStyle}
                     className="px-4 py-2 bg-red-600 hover:bg-red-500 rounded-lg text-white flex items-center disabled:bg-gray-600 disabled:cursor-not-allowed"
                 >
-                    Next: {isSpellcaster(selectedClass) ? 'Spells' : 'Abilities'} <ArrowRight className="w-4 h-4 ml-2" />
+                    Next: {selectedClass.spellcasting ? 'Spells' : 'Abilities'} <ArrowRight className="w-4 h-4 ml-2" />
                 </button>
             </div>
         </div>
@@ -1818,15 +2199,18 @@ const Step3point5FightingStyle: React.FC<StepProps> = ({ data, updateData, nextS
 
 // Sprint 2: Spell Selection Step
 const Step4Spells: React.FC<StepProps> = ({ data, updateData, nextStep, prevStep }) => {
-    const allClasses = getAllClasses();
+    const allClasses = loadClasses();
     const selectedClass = allClasses.find(c => c.slug === data.classSlug);
 
-    // If not a spellcaster, skip this step
-    if (!selectedClass || !isSpellcaster(selectedClass)) {
-        // Auto-advance to next step if not a spellcaster
-        React.useEffect(() => {
+    // Auto-advance to next step if not a spellcaster
+    React.useEffect(() => {
+        if (!selectedClass || !selectedClass.spellcasting) {
             nextStep();
-        }, []);
+        }
+    }, [selectedClass, nextStep]);
+
+    // If not a spellcaster, skip this step
+    if (!selectedClass || !selectedClass.spellcasting) {
         return <div className='text-center text-gray-400'>This class doesn't have spellcasting. Advancing...</div>;
     }
 
@@ -1893,14 +2277,23 @@ const Step4Spells: React.FC<StepProps> = ({ data, updateData, nextStep, prevStep
 
     return (
         <div className='space-y-6'>
-            <div>
-                <h3 className='text-xl font-bold text-red-300'>Select Your Spells</h3>
-                <p className='text-sm text-gray-400 mt-1'>
-                    {selectedClass.name} - {modeDescription}
-                </p>
-                <p className='text-xs text-purple-300 mt-1'>
-                    Spellcasting Ability: <span className='font-bold'>{spellcasting.ability}</span>
-                </p>
+            <div className='flex justify-between items-start'>
+                <div>
+                    <h3 className='text-xl font-bold text-red-300'>Select Your Spells</h3>
+                    <p className='text-sm text-gray-400 mt-1'>
+                        {selectedClass.name} - {modeDescription}
+                    </p>
+                    <p className='text-xs text-purple-300 mt-1'>
+                        Spellcasting Ability: <span className='font-bold'>{spellcasting.ability}</span>
+                    </p>
+                </div>
+                <RandomizeButton
+                    onClick={() => {
+                        const spells = randomizeSpells(data.classSlug, data.level);
+                        updateData({ spellSelection: spells });
+                    }}
+                    title="Randomize spell selection"
+                />
             </div>
 
             {/* Cantrips Section */}
@@ -2190,9 +2583,18 @@ const Step4Abilities: React.FC<StepProps> = ({ data, updateData, nextStep, prevS
                 </select>
             </div>
 
-            <h3 className='text-xl font-bold text-red-300'>
-                Determine Ability Scores ({methodTitles[data.abilityScoreMethod]})
-            </h3>
+            <div className='flex justify-between items-center'>
+                <h3 className='text-xl font-bold text-red-300'>
+                    Determine Ability Scores ({methodTitles[data.abilityScoreMethod]})
+                </h3>
+                <RandomizeButton
+                    onClick={() => {
+                        const abilities = randomizeAbilities();
+                        updateData(abilities);
+                    }}
+                    title="Randomize ability scores and method"
+                />
+            </div>
 
             {/* Standard Array UI */}
             {data.abilityScoreMethod === 'standard-array' && (
@@ -2464,20 +2866,28 @@ const Step5point5Feats: React.FC<StepProps> = ({ data, updateData, nextStep, pre
 
     return (
         <div className='space-y-6'>
-            <div>
-                <h3 className='text-xl font-bold text-red-300'>Choose Feats (Optional)</h3>
-                <p className='text-sm text-gray-400 mt-2'>
-                    Feats represent special talents or areas of expertise. At certain levels, you can choose to take a feat instead of an Ability Score Improvement.
-                </p>
-                <div className="mt-2 p-3 bg-blue-900/30 border border-blue-700 rounded-lg">
-                    <div className="text-sm text-blue-300">
-                        <strong>Level {data.level}:</strong> You can select up to {maxFeats} feat{maxFeats !== 1 ? 's' : ''}
-                        {maxFeats === 0 && <span> (Feats are available starting at level 4)</span>}
+            <div className='flex justify-between items-start'>
+                <div className='flex-1'>
+                    <h3 className='text-xl font-bold text-red-300'>Choose Feats (Optional)</h3>
+                    <p className='text-sm text-gray-400 mt-2'>
+                        Feats represent special talents or areas of expertise. At certain levels, you can choose to take a feat instead of an Ability Score Improvement.
+                    </p>
+                    <div className="mt-2 p-3 bg-blue-900/30 border border-blue-700 rounded-lg">
+                        <div className="text-sm text-blue-300">
+                            <strong>Level {data.level}:</strong> You can select up to {maxFeats} feat{maxFeats !== 1 ? 's' : ''}
+                        </div>
                     </div>
                     <div className="text-xs text-gray-400 mt-1">
-                        ℹ️ Feats are optional. You can also choose Ability Score Improvements at these levels instead.
+                        ℹ️ Feats are optional. You can also choose Ability Score Improvements at these levels.
                     </div>
                 </div>
+                <RandomizeButton
+                    onClick={() => {
+                        const feats = randomizeFeats();
+                        updateData({ selectedFeats: feats });
+                    }}
+                    title="Randomize feat selection"
+                />
             </div>
 
             {selectedFeats.length > 0 && (
@@ -2588,7 +2998,7 @@ const Step5point5Feats: React.FC<StepProps> = ({ data, updateData, nextStep, pre
 };
 
 const Step6Equipment: React.FC<StepProps & { skipToStep?: (step: number) => void }> = ({ data, updateData, nextStep, prevStep, skipToStep }) => {
-    const allClasses = getAllClasses();
+    const allClasses = loadClasses();
     const selectedClass = allClasses.find(c => c.slug === data.classSlug);
 
     if (!selectedClass) {
@@ -2596,59 +3006,86 @@ const Step6Equipment: React.FC<StepProps & { skipToStep?: (step: number) => void
     }
 
     // Initialize equipment choices if not already set
-    if (data.equipmentChoices.length === 0 && selectedClass.equipment_choices.length > 0) {
+    const equipmentChoices = data.equipmentChoices || [];
+    if (equipmentChoices.length === 0 && Array.isArray(selectedClass.equipment_choices) && selectedClass.equipment_choices.length > 0) {
         updateData({ equipmentChoices: selectedClass.equipment_choices });
     }
 
     const handleEquipmentChoice = (choiceId: string, optionIndex: number) => {
-        const updatedChoices = data.equipmentChoices.map(choice =>
+        const currentChoices = data.equipmentChoices || [];
+        const updatedChoices = currentChoices.map(choice =>
             choice.choiceId === choiceId ? { ...choice, selected: optionIndex } : choice
         );
         updateData({ equipmentChoices: updatedChoices });
     };
 
-    const allChoicesMade = data.equipmentChoices.every(choice => choice.selected !== null);
+    const allChoicesMade = (data.equipmentChoices || []).every(choice => choice.selected !== null);
 
     return (
         <div className='space-y-6'>
-            <h3 className='text-xl font-bold text-red-300'>Select Starting Equipment</h3>
-            <p className="text-sm text-gray-400">
-                Choose your starting equipment based on your class. Your background will also grant additional items.
-            </p>
+            <div>
+                <h3 className='text-xl font-bold text-red-300'>Select Starting Equipment</h3>
+                <p className="text-sm text-gray-400 mt-1">
+                    Choose your starting equipment based on your class. Your background will also grant additional items.
+                </p>
+            </div>
 
             {/* Equipment Choices */}
-            {data.equipmentChoices.map((choice, idx) => (
+            {(data.equipmentChoices || []).map((choice, idx) => (
                 <div key={choice.choiceId} className="bg-gray-700/50 border border-gray-600 rounded-lg p-4 space-y-3">
                     <h4 className="font-semibold text-yellow-300">
                         {idx + 1}. {choice.description}
                     </h4>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        {choice.options.map((option, optionIdx) => (
-                            <button
-                                key={optionIdx}
-                                onClick={() => handleEquipmentChoice(choice.choiceId, optionIdx)}
-                                className={`p-3 rounded-lg border-2 text-left transition-all ${
-                                    choice.selected === optionIdx
-                                        ? 'bg-blue-800 border-blue-500'
-                                        : 'bg-gray-700 border-gray-600 hover:bg-gray-600'
-                                }`}
-                            >
-                                <div className="space-y-1">
-                                    {option.map((item, itemIdx) => (
-                                        <div key={itemIdx} className="text-sm">
-                                            <span className="text-white font-medium">{item.name}</span>
-                                            {item.quantity > 1 && (
-                                                <span className="text-gray-400 ml-1">x{item.quantity}</span>
-                                            )}
-                                            {item.weight && item.weight > 0 && (
-                                                <span className="text-gray-500 text-xs ml-2">({item.weight} lb)</span>
-                                            )}
-                                        </div>
-                                    ))}
-                                </div>
-                            </button>
-                        ))}
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                         {choice.options.map((option, optionIdx) => {
+                             // Check if this option contains an equipment pack
+                             const packOption = option.find(item =>
+                                 EQUIPMENT_PACKAGES.some(pack => pack.name === item.name)
+                             );
+                             const pack = packOption ? EQUIPMENT_PACKAGES.find(p => p.name === packOption.name) : null;
+
+                             if (pack) {
+                                 // Display as expandable pack
+                                 return (
+                                     <EquipmentPackDisplay
+                                         key={optionIdx}
+                                         pack={pack}
+                                         isSelected={choice.selected === optionIdx}
+                                         onClick={() => handleEquipmentChoice(choice.choiceId, optionIdx)}
+                                         showRecommendation={true}
+                                         characterClass={data.classSlug}
+                                     />
+                                 );
+                             } else {
+                                 // Display as regular equipment option
+                                 return (
+                                     <button
+                                         key={optionIdx}
+                                         onClick={() => handleEquipmentChoice(choice.choiceId, optionIdx)}
+                                         className={`p-3 rounded-lg border-2 text-left transition-all ${
+                                             choice.selected === optionIdx
+                                                 ? 'bg-blue-800 border-blue-500'
+                                                 : 'bg-gray-700 border-gray-600 hover:bg-gray-600'
+                                         }`}
+                                     >
+                                         <div className="space-y-1">
+                                             {option.map((item, itemIdx) => (
+                                                 <div key={itemIdx} className="text-sm">
+                                                     <span className="text-white font-medium">{item.name}</span>
+                                                     {item.quantity > 1 && (
+                                                         <span className="text-gray-400 ml-1">x{item.quantity}</span>
+                                                     )}
+                                                     {item.weight && item.weight > 0 && (
+                                                         <span className="text-gray-500 text-xs ml-2">({item.weight} lb)</span>
+                                                     )}
+                                                 </div>
+                                             ))}
+                                         </div>
+                                     </button>
+                                 );
+                             }
+                         })}
                     </div>
                 </div>
             ))}
@@ -2704,9 +3141,42 @@ const Step6Equipment: React.FC<StepProps & { skipToStep?: (step: number) => void
 };
 
 const Step8Traits: React.FC<StepProps & { onSubmit: (data: CharacterCreationData) => void }> = ({ data, updateData, prevStep, onSubmit }) => {
+    // Set default personality traits for Outlander background
+    React.useEffect(() => {
+        if (data.background === 'Outlander' && !data.personality) {
+            updateData({
+                personality: "I'm driven by a wanderlust that led me away from home. I watch over my friends as if they were a litter of newborn pups."
+            });
+        }
+        if (data.background === 'Outlander' && !data.ideals) {
+            updateData({
+                ideals: "Change: Life is like the seasons, in constant change, and we must change with it. (Chaotic)"
+            });
+        }
+        if (data.background === 'Outlander' && !data.bonds) {
+            updateData({
+                bonds: "My family, clan, or tribe is the most important thing in my life, even when they are far from me."
+            });
+        }
+        if (data.background === 'Outlander' && !data.flaws) {
+            updateData({
+                flaws: "I am too enamored of ale, wine, and other intoxicants."
+            });
+        }
+    }, [data.background, data.personality, data.ideals, data.bonds, data.flaws, updateData]);
+
     return (
         <div className='space-y-6'>
-            <h3 className='text-xl font-bold text-red-300'>Final Details & Personality</h3>
+            <div className='flex justify-between items-center'>
+                <h3 className='text-xl font-bold text-red-300'>Final Details & Personality</h3>
+                <RandomizeButton
+                    onClick={() => {
+                        const personality = randomizePersonality();
+                        updateData(personality);
+                    }}
+                    title="Randomize personality traits"
+                />
+            </div>
 
             <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -2759,7 +3229,7 @@ const Step8Traits: React.FC<StepProps & { onSubmit: (data: CharacterCreationData
 
             {/* Hit Points Calculation Method */}
             {(() => {
-                const allClasses = getAllClasses();
+                const allClasses = loadClasses();
                 const selectedClass = allClasses.find(c => c.slug === data.classSlug);
                 if (!selectedClass) return null;
 
@@ -2838,6 +3308,252 @@ const Step8Traits: React.FC<StepProps & { onSubmit: (data: CharacterCreationData
     );
 };
 
+const Step9Languages: React.FC<StepProps> = ({ data, updateData, nextStep, prevStep }) => {
+    const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set(['Standard']));
+    const [selectedLanguages, setSelectedLanguages] = useState<string[]>(data.knownLanguages || []);
+
+    // Calculate auto-included languages
+    const autoLanguages = new Set<string>();
+    autoLanguages.add('Common'); // Always included
+
+    // Add racial languages
+    getRacialLanguages(data.raceSlug).forEach((lang: string) => autoLanguages.add(lang));
+
+    // Add class languages
+    getClassLanguages(data.classSlug).forEach((lang: string) => autoLanguages.add(lang));
+
+    // Get background language choices
+    const background = BACKGROUNDS.find(bg => bg.name === data.background);
+    const backgroundChoices = background ? parseBackgroundLanguageChoices(background.languages || []) : { direct: [], choices: 0 };
+
+    // Add direct background languages
+    backgroundChoices.direct.forEach((lang: string) => autoLanguages.add(lang));
+
+    // Calculate remaining language slots
+    const intelligenceScore = data.abilities.INT;
+    const maxLanguages = getMaxLanguages(intelligenceScore);
+    const totalAvailableSlots = maxLanguages + backgroundChoices.choices;
+    const remainingSlots = Math.max(0, totalAvailableSlots - selectedLanguages.length);
+
+    const toggleCategory = (categoryName: string) => {
+        setExpandedCategories(prev => {
+            const newSet = new Set(prev);
+            if (newSet.has(categoryName)) {
+                newSet.delete(categoryName);
+            } else {
+                newSet.add(categoryName);
+            }
+            return newSet;
+        });
+    };
+
+    const handleLanguageToggle = (languageName: string) => {
+        setSelectedLanguages(prev => {
+            const newSelected = prev.includes(languageName)
+                ? prev.filter(lang => lang !== languageName)
+                : [...prev, languageName];
+
+            // Update the data
+            updateData({ knownLanguages: newSelected });
+            return newSelected;
+        });
+    };
+
+    // Validation for required background language selections
+    const hasRequiredBackgroundSelections = selectedLanguages.length >= backgroundChoices.choices;
+
+    const languageCategories = [
+        { name: 'Standard' as const, icon: '🏛️', description: 'Common languages of major civilizations' },
+        { name: 'Exotic' as const, icon: '✨', description: 'Rare and mystical languages' },
+        { name: 'Secret' as const, icon: '🔒', description: 'Hidden languages of specific groups' },
+        { name: 'Dialect' as const, icon: '💬', description: 'Specialized dialects and elemental tongues' }
+    ];
+
+    return (
+        <div className='space-y-6'>
+            <div className='flex justify-between items-center'>
+                <h3 className='text-xl font-bold text-red-300'>Select Languages</h3>
+                <RandomizeButton
+                    onClick={() => {
+                        const languages = randomizeLanguages(data.raceSlug, data.background);
+                        updateData({ knownLanguages: languages });
+                        setSelectedLanguages(languages);
+                    }}
+                    title="Randomize language selection"
+                />
+            </div>
+
+            {/* Language Limits Info */}
+            <div className="bg-gray-700/50 border border-gray-600 rounded-lg p-4">
+                <h4 className="text-lg font-bold text-yellow-300 mb-2">Language Proficiency</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                    <div>
+                        <span className="text-gray-300">Intelligence Score:</span>
+                        <span className="text-white font-bold ml-2">{intelligenceScore}</span>
+                    </div>
+                    <div>
+                        <span className="text-gray-300">Maximum Languages:</span>
+                        <span className="text-white font-bold ml-2">{maxLanguages}</span>
+                    </div>
+                    <div>
+                        <span className="text-gray-300">Languages Known:</span>
+                        <span className="text-white font-bold ml-2">{autoLanguages.size + selectedLanguages.length}</span>
+                    </div>
+                    <div>
+                        <span className="text-gray-300">Remaining Slots:</span>
+                        <span className={`font-bold ml-2 ${remainingSlots > 0 ? 'text-green-400' : 'text-red-400'}`}>
+                            {remainingSlots}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            {/* Auto-Included Languages */}
+            <div className="bg-blue-900/20 border border-blue-700 rounded-lg p-4">
+                <h4 className="text-lg font-bold text-blue-300 mb-3">Auto-Included Languages</h4>
+                <p className="text-sm text-gray-400 mb-3">
+                    These languages are automatically known based on your race, class, and background choices.
+                </p>
+                <div className="flex flex-wrap gap-2">
+                    {Array.from(autoLanguages).sort().map(language => (
+                        <span key={language} className="px-3 py-1 bg-blue-800 text-blue-100 rounded-full text-sm">
+                            {language}
+                        </span>
+                    ))}
+                </div>
+            </div>
+
+            {/* Background Language Choices */}
+            {backgroundChoices.choices > 0 && (
+                <div className="bg-purple-900/20 border border-purple-700 rounded-lg p-4">
+                    <h4 className="text-lg font-bold text-purple-300 mb-3">
+                        Background Choice: {backgroundChoices.choices} Language{backgroundChoices.choices > 1 ? 's' : ''} of Your Choice
+                    </h4>
+                    <p className="text-sm text-gray-400 mb-3">
+                        Your {data.background} background allows you to choose {backgroundChoices.choices} additional language{backgroundChoices.choices > 1 ? 's' : ''}.
+                    </p>
+                    <div className="text-sm text-yellow-300">
+                        Selected: {selectedLanguages.length} / {backgroundChoices.choices}
+                    </div>
+                </div>
+            )}
+
+            {/* Language Selection */}
+            <div className="space-y-3">
+                <h4 className="text-lg font-bold text-yellow-300">Choose Additional Languages</h4>
+                <p className="text-sm text-gray-400">
+                    Select languages from the categories below. You can learn additional languages through feats, magic items, or DM approval.
+                </p>
+
+                {languageCategories.map(category => {
+                    const categoryLanguages = getLanguagesByCategory(category.name);
+                    const availableInCategory = categoryLanguages.filter(lang =>
+                        !autoLanguages.has(lang.name) && !selectedLanguages.includes(lang.name)
+                    );
+
+                    return (
+                        <div key={category.name} className='border border-gray-600 rounded-lg overflow-hidden'>
+                            <button
+                                onClick={() => toggleCategory(category.name)}
+                                className='w-full p-4 bg-gray-700 hover:bg-gray-650 flex items-center justify-between transition-colors'
+                            >
+                                <div className='flex items-center gap-3'>
+                                    <span className='text-2xl'>{category.icon}</span>
+                                    <div className='text-left'>
+                                        <div className='font-bold text-yellow-300 text-lg'>{category.name} Languages</div>
+                                        <div className='text-xs text-gray-400'>{category.description}</div>
+                                    </div>
+                                </div>
+                                {expandedCategories.has(category.name) ? (
+                                    <ChevronUp className='w-5 h-5 text-gray-400' />
+                                ) : (
+                                    <ChevronDown className='w-5 h-5 text-gray-400' />
+                                )}
+                            </button>
+
+                            {expandedCategories.has(category.name) && (
+                                <div className='p-4 bg-gray-800/50'>
+                                    {availableInCategory.length === 0 ? (
+                                        <p className="text-gray-400 text-sm">No additional {category.name.toLowerCase()} languages available.</p>
+                                    ) : (
+                                        <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
+                                            {availableInCategory.map(language => {
+                                                const isSelected = selectedLanguages.includes(language.name);
+                                                const canSelect = remainingSlots > 0 || isSelected;
+
+                                                return (
+                                                    <button
+                                                        key={language.name}
+                                                        onClick={() => canSelect && handleLanguageToggle(language.name)}
+                                                        disabled={!canSelect && !isSelected}
+                                                        className={`p-3 rounded-lg border-2 text-left transition-all ${
+                                                            isSelected
+                                                                ? 'bg-green-800 border-green-500'
+                                                                : canSelect
+                                                                    ? 'bg-gray-700 border-gray-600 hover:bg-gray-600'
+                                                                    : 'bg-gray-800 border-gray-700 opacity-50 cursor-not-allowed'
+                                                        }`}
+                                                    >
+                                                        <div className="font-semibold text-white">{language.name}</div>
+                                                        <div className="text-xs text-gray-400 mt-1">
+                                                            {language.typicalSpeakers}
+                                                        </div>
+                                                        <div className="text-xs text-gray-500 mt-1 line-clamp-2">
+                                                            {language.description}
+                                                        </div>
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    );
+                })}
+            </div>
+
+            {/* Selected Languages Summary */}
+            {selectedLanguages.length > 0 && (
+                <div className="bg-green-900/20 border border-green-700 rounded-lg p-4">
+                    <h4 className="text-lg font-bold text-green-300 mb-3">Selected Languages</h4>
+                    <div className="flex flex-wrap gap-2">
+                        {selectedLanguages.map(language => (
+                            <div key={language} className="flex items-center gap-2 px-3 py-1 bg-green-800 text-green-100 rounded-full text-sm">
+                                <span>{language}</span>
+                                <button
+                                    onClick={() => handleLanguageToggle(language)}
+                                    className="text-green-300 hover:text-white ml-1"
+                                >
+                                    ×
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {/* Navigation */}
+            <div className='flex justify-between'>
+                <button onClick={prevStep} className="px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded-lg text-white flex items-center">
+                    <ArrowLeft className="w-4 h-4 mr-2" /> Back
+                </button>
+                <button
+                    onClick={nextStep}
+                    disabled={!hasRequiredBackgroundSelections}
+                    className={`px-4 py-2 rounded-lg text-white flex items-center ${
+                        hasRequiredBackgroundSelections
+                            ? 'bg-red-600 hover:bg-red-500'
+                            : 'bg-gray-500 cursor-not-allowed'
+                    }`}
+                >
+                    Next: Final Details <ArrowRight className="w-4 h-4 ml-2" />
+                </button>
+            </div>
+        </div>
+    );
+};
+
 const Step7EquipmentBrowser: React.FC<StepProps> = ({ data, updateData, nextStep, prevStep }) => {
     const [searchQuery, setSearchQuery] = useState('');
     const [categoryFilter, setCategoryFilter] = useState<string>('All');
@@ -2908,11 +3624,20 @@ const Step7EquipmentBrowser: React.FC<StepProps> = ({ data, updateData, nextStep
 
     return (
         <div className="space-y-4">
-            <div>
-                <h3 className="text-xl font-bold text-yellow-300 mb-2">Customize Starting Equipment</h3>
-                <p className="text-sm text-gray-400">
-                    Browse and add additional equipment to your starting inventory. You already have your class equipment package.
-                </p>
+            <div className='flex justify-between items-start'>
+                <div className='flex-1'>
+                    <h3 className="text-xl font-bold text-yellow-300 mb-2">Customize Starting Equipment</h3>
+                    <p className="text-sm text-gray-400">
+                        Browse and add additional equipment to your starting inventory. You already have your class equipment package.
+                    </p>
+                </div>
+                <RandomizeButton
+                    onClick={() => {
+                        const additionalEquipment = randomizeAdditionalEquipment();
+                        updateData({ startingInventory: additionalEquipment });
+                    }}
+                    title="Randomize additional equipment"
+                />
             </div>
 
             {/* Search and Filters */}
@@ -3071,13 +3796,13 @@ const CharacterCreationWizard: React.FC<WizardProps> = ({ isOpen, onClose, onCha
     const handleSubmit = async (data: CharacterCreationData) => {
         setIsLoading(true);
         setError(null);
-        setRollResult({ text: "Creating character sheet...", value: null });
+        setRollResult({ text: "Creating character sheet...", value: 0 });
 
         try {
             const finalCharacter = calculateCharacterStats(data);
             await addCharacter(finalCharacter);
 
-            setRollResult({ text: `Successfully created ${finalCharacter.name}!`, value: null });
+            setRollResult({ text: `Successfully created ${finalCharacter.name}!`, value: 0 });
             onCharacterCreated();
             onClose();
             setCreationData(initialCreationData);
@@ -3094,16 +3819,18 @@ const CharacterCreationWizard: React.FC<WizardProps> = ({ isOpen, onClose, onCha
     const renderStep = () => {
         const commonProps = { data: creationData, updateData, nextStep, prevStep, stepIndex: currentStep };
         switch (currentStep) {
-            case 0: return <Step1Details {...commonProps} />;
-            case 1: return <Step2Race {...commonProps} />;
-            case 2: return <Step3Class {...commonProps} />;
-            case 3: return <Step3point5FightingStyle {...commonProps} />; // Sprint 5: Fighting Style (Fighter/Paladin/Ranger)
-            case 4: return <Step4Spells {...commonProps} />; // Sprint 2: Spell selection
-            case 5: return <Step4Abilities {...commonProps} />;
-            case 6: return <Step5point5Feats {...commonProps} />; // Sprint 5: Feats selection
-            case 7: return <Step6Equipment {...commonProps} skipToStep={skipToStep} />;
-            case 8: return <Step7EquipmentBrowser {...commonProps} />; // Sprint 4: Equipment browser
-            case 9: return <Step8Traits {...commonProps} onSubmit={handleSubmit} />;
+            case 0: return <Step0Level {...commonProps} />;
+            case 1: return <Step1Details {...commonProps} />;
+            case 2: return <Step2Race {...commonProps} />;
+            case 3: return <Step3Class {...commonProps} />;
+            case 4: return <Step3point5FightingStyle {...commonProps} />; // Sprint 5: Fighting Style (Fighter/Paladin/Ranger)
+            case 5: return <Step4Spells {...commonProps} />; // Sprint 2: Spell selection
+            case 6: return <Step4Abilities {...commonProps} />;
+            case 7: return <Step5point5Feats {...commonProps} />; // Sprint 5: Feats selection
+            case 8: return <Step6Equipment {...commonProps} skipToStep={skipToStep} />;
+            case 9: return <Step7EquipmentBrowser {...commonProps} />; // Sprint 4: Equipment browser
+            case 10: return <Step9Languages {...commonProps} />; // Language selection
+            case 11: return <Step8Traits {...commonProps} onSubmit={handleSubmit} />;
             default: return <p>Unknown step.</p>;
         }
     };
@@ -3175,10 +3902,11 @@ const App: React.FC = () => {
   }, [characters, selectedCharacterId]);
 
   // Handle feature click
-  const handleFeatureClick = useCallback((featureName: string) => {
-    const feature = featureDescriptions[featureName];
-    if (feature) {
-      setFeatureModal({ name: featureName, ...feature });
+  const handleFeatureClick = useCallback((feature: string | Feature) => {
+    const featureName = typeof feature === 'string' ? feature : feature.name;
+    const featureDesc = featureDescriptions[featureName];
+    if (featureDesc) {
+      setFeatureModal({ name: featureName, ...featureDesc });
     } else {
       setFeatureModal({ name: featureName, description: 'No description available for this feature.' });
     }
@@ -3377,7 +4105,7 @@ const App: React.FC = () => {
       return;
     }
 
-    const allClasses = getAllClasses();
+    const allClasses = loadClasses();
     const classData = allClasses.find(c => c.name === character.class);
     if (!classData) return;
 
@@ -3418,9 +4146,9 @@ const App: React.FC = () => {
     }
 
     const newLevel = character.level + 1;
-    const newProficiencyBonus = PROFICIENCY_BONUSES[newLevel as keyof typeof PROFICIENCY_BONUSES] || character.proficiencyBonus;
+    const newProficiencyBonus = PROFICIENCY_BONUSES[newLevel - 1] || character.proficiencyBonus;
 
-    const allClasses = getAllClasses();
+    const allClasses = loadClasses();
     const classData = allClasses.find(c => c.name === character.class);
     if (!classData) {
       console.error(`Could not find class data for ${character.class}`);
@@ -3490,9 +4218,9 @@ const App: React.FC = () => {
     }
 
     const newLevel = character.level - 1;
-    const newProficiencyBonus = PROFICIENCY_BONUSES[newLevel as keyof typeof PROFICIENCY_BONUSES] || character.proficiencyBonus;
+    const newProficiencyBonus = PROFICIENCY_BONUSES[newLevel - 1] || character.proficiencyBonus;
 
-    const allClasses = getAllClasses();
+    const allClasses = loadClasses();
     const classData = allClasses.find(c => c.name === character.class);
     if (!classData) {
       console.error(`Could not find class data for ${character.class}`);

@@ -2,7 +2,7 @@
 
 export interface DiceRoll {
   id: string;
-  type: 'ability' | 'skill' | 'initiative';
+  type: 'ability' | 'skill' | 'initiative' | 'complex' | 'attack' | 'saving-throw';
   label: string;           // "STR Check" or "Acrobatics"
   notation: string;        // "1d20+3"
   diceResults: number[];   // [15]
@@ -10,6 +10,9 @@ export interface DiceRoll {
   total: number;          // 18
   critical?: 'success' | 'failure';
   timestamp: number;
+  // New fields for complex rolls
+  pools?: Array<{ count: number; sides: number; results: number[] }>;
+  expression?: string;
 }
 
 /**

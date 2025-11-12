@@ -112,10 +112,21 @@ export const DiceBox3D: React.FC<DiceBox3DProps> = ({
         const rollNotations: string[] = [];
         const rollValues: number[] = [];
 
-        // For single d20 roll (ability/skill checks)
-        for (const result of latestRoll.diceResults) {
-          rollNotations.push('1d20');
-          rollValues.push(result);
+        // Handle different roll types
+        if (latestRoll.pools && latestRoll.pools.length > 0) {
+          // Complex roll with multiple dice types
+          for (const pool of latestRoll.pools) {
+            for (const result of pool.results) {
+              rollNotations.push(`${pool.count}d${pool.sides}`);
+              rollValues.push(result);
+            }
+          }
+        } else {
+          // Simple d20 roll (backward compatibility)
+          for (const result of latestRoll.diceResults) {
+            rollNotations.push('1d20');
+            rollValues.push(result);
+          }
         }
 
         console.log('Rolling dice:', rollNotations, 'values:', rollValues);

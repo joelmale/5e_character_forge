@@ -1,5 +1,5 @@
 import React from 'react';
-import { AppSubclass } from '../utils/srdLoader';
+import { AppSubclass } from '../services/dataService';
 
 interface ChooseSubclassModalProps {
   isOpen: boolean;
@@ -26,7 +26,7 @@ const ChooseSubclassModal: React.FC<ChooseSubclassModalProps> = ({
           {subclasses.map(subclass => (
             <div key={subclass.slug} className="border p-4 rounded-lg hover:bg-gray-100 cursor-pointer" onClick={() => onSelect(subclass)}>
               <h3 className="text-lg font-semibold">{subclass.name}</h3>
-              <p className="text-sm text-gray-600">{subclass.desc.join(' ')}</p>
+               <p className="text-sm text-gray-600">{subclass.desc ? subclass.desc.join(' ') : 'No description available'}</p>
             </div>
           ))}
         </div>

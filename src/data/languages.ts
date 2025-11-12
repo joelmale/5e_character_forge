@@ -1,0 +1,270 @@
+export interface Language {
+  name: string;
+  category: 'Standard' | 'Exotic' | 'Secret' | 'Dialect';
+  typicalSpeakers: string;
+  description: string;
+  implementationNotes: string;
+}
+
+export const LANGUAGES: Language[] = [
+  // Standard Languages
+  {
+    name: 'Common',
+    category: 'Standard',
+    typicalSpeakers: 'Humans, Most Civilized Peoples',
+    description: 'The common tongue of most humanoid civilizations',
+    implementationNotes: 'Auto-Include: Every character knows this language.'
+  },
+  {
+    name: 'Dwarvish',
+    category: 'Standard',
+    typicalSpeakers: 'Dwarves',
+    description: 'The ancient language of dwarves',
+    implementationNotes: 'Racial Default/Choice Pool: Known automatically by Dwarves.'
+  },
+  {
+    name: 'Elvish',
+    category: 'Standard',
+    typicalSpeakers: 'Elves',
+    description: 'The melodic language of elves',
+    implementationNotes: 'Racial Default/Choice Pool: Known automatically by Elves.'
+  },
+  {
+    name: 'Giant',
+    category: 'Standard',
+    typicalSpeakers: 'Ogres, Trolls, Giants',
+    description: 'The booming language of giants and their kin',
+    implementationNotes: 'Choice Pool.'
+  },
+  {
+    name: 'Gnomish',
+    category: 'Standard',
+    typicalSpeakers: 'Gnomes',
+    description: 'The intricate language of gnomes',
+    implementationNotes: 'Racial Default/Choice Pool: Known automatically by Gnomes.'
+  },
+  {
+    name: 'Goblin',
+    category: 'Standard',
+    typicalSpeakers: 'Goblins, Hobgoblins, Bugbears',
+    description: 'The guttural language of goblinoids',
+    implementationNotes: 'Choice Pool.'
+  },
+  {
+    name: 'Halfling',
+    category: 'Standard',
+    typicalSpeakers: 'Halflings',
+    description: 'The cheerful language of halflings',
+    implementationNotes: 'Racial Default/Choice Pool: Known automatically by Halflings.'
+  },
+  {
+    name: 'Orc',
+    category: 'Standard',
+    typicalSpeakers: 'Orcs',
+    description: 'The harsh language of orcs',
+    implementationNotes: 'Racial Default/Choice Pool: Known automatically by Half-Orcs.'
+  },
+  {
+    name: 'Aarakocra',
+    category: 'Standard',
+    typicalSpeakers: 'Aarakocra',
+    description: 'The avian language of aarakocra',
+    implementationNotes: 'Racial Default/Choice Pool: Known automatically by Aarakocra. Includes a dialect of Auran (Primordial).'
+  },
+  {
+    name: 'Gith',
+    category: 'Standard',
+    typicalSpeakers: 'Githyanki, Githzerai',
+    description: 'The disciplined language of the gith',
+    implementationNotes: 'Racial Default/Choice Pool: Known automatically by Gith.'
+  },
+  {
+    name: 'Sahuagin',
+    category: 'Standard',
+    typicalSpeakers: 'Sahuagin (Sharkfolk)',
+    description: 'The aquatic language of sahuagin',
+    implementationNotes: 'Choice Pool: Specialized for aquatic/coastal campaigns.'
+  },
+  {
+    name: 'Modron',
+    category: 'Standard',
+    typicalSpeakers: 'Modrons',
+    description: 'The mechanical language of modrons',
+    implementationNotes: 'Choice Pool: Very specialized, often limited to the Outer Planes.'
+  },
+
+  // Exotic Languages
+  {
+    name: 'Abyssal',
+    category: 'Exotic',
+    typicalSpeakers: 'Demons',
+    description: 'The infernal language of demons',
+    implementationNotes: 'Exotic Choice Pool.'
+  },
+  {
+    name: 'Celestial',
+    category: 'Exotic',
+    typicalSpeakers: 'Celestials (Angels)',
+    description: 'The divine language of celestial beings',
+    implementationNotes: 'Exotic Choice Pool.'
+  },
+  {
+    name: 'Draconic',
+    category: 'Exotic',
+    typicalSpeakers: 'Dragons, Dragonborn, Kobolds',
+    description: 'The ancient language of dragons',
+    implementationNotes: 'Racial Default/Exotic Choice Pool: Known automatically by Dragonborn.'
+  },
+  {
+    name: 'Deep Speech',
+    category: 'Exotic',
+    typicalSpeakers: 'Mind Flayers, Aberrations',
+    description: 'The alien language of aberrations',
+    implementationNotes: 'Exotic Choice Pool.'
+  },
+  {
+    name: 'Infernal',
+    category: 'Exotic',
+    typicalSpeakers: 'Devils, Tieflings',
+    description: 'The diabolic language of devils',
+    implementationNotes: 'Racial Default/Exotic Choice Pool: Often known automatically by Tieflings.'
+  },
+  {
+    name: 'Primordial',
+    category: 'Exotic',
+    typicalSpeakers: 'Elementals',
+    description: 'The elemental language of primordial beings',
+    implementationNotes: 'Exotic Choice Pool: Note: Knowing this allows understanding of all four elemental dialects (Auran, Aquan, Ignan, Terran).'
+  },
+  {
+    name: 'Sylvan',
+    category: 'Exotic',
+    typicalSpeakers: 'Fey Creatures',
+    description: 'The mystical language of fey beings',
+    implementationNotes: 'Exotic Choice Pool.'
+  },
+  {
+    name: 'Undercommon',
+    category: 'Exotic',
+    typicalSpeakers: 'Drow, Kuo-Toa, Underdark Residents',
+    description: 'The subterranean language of the Underdark',
+    implementationNotes: 'Exotic Choice Pool.'
+  },
+  {
+    name: 'Blink Dog',
+    category: 'Exotic',
+    typicalSpeakers: 'Blink Dogs',
+    description: 'The canine language of blink dogs',
+    implementationNotes: 'Exotic Choice Pool: Used to communicate with this specific creature type.'
+  },
+  {
+    name: 'Bulette',
+    category: 'Exotic',
+    typicalSpeakers: 'Bulette',
+    description: 'The territorial language of bulettes',
+    implementationNotes: 'Exotic Choice Pool: Used to communicate with this specific creature type.'
+  },
+  {
+    name: 'Gargantuan',
+    category: 'Exotic',
+    typicalSpeakers: 'Colossal beings, Titans',
+    description: 'The thunderous language of colossal beings',
+    implementationNotes: 'Exotic Choice Pool: Very rare, perhaps only for characters with unique knowledge or lineage.'
+  },
+  {
+    name: 'Necril',
+    category: 'Exotic',
+    typicalSpeakers: 'Necromancers, Undead cultists',
+    description: 'The deathly language of necromancy',
+    implementationNotes: 'Exotic Choice Pool: Often used in certain campaign settings (like Eberron or Wildemount).'
+  },
+  {
+    name: 'Slaad',
+    category: 'Exotic',
+    typicalSpeakers: 'Slaadi, Chaos creatures',
+    description: 'The chaotic language of slaadi',
+    implementationNotes: 'Exotic Choice Pool: Tied to creatures of Limbo.'
+  },
+  {
+    name: 'Sphinx',
+    category: 'Exotic',
+    typicalSpeakers: 'Sphinxes',
+    description: 'The enigmatic language of sphinxes',
+    implementationNotes: 'Exotic Choice Pool: Rare, linked to ancient protectors or temples.'
+  },
+  {
+    name: 'Thri-kreen',
+    category: 'Exotic',
+    typicalSpeakers: 'Thri-kreen (Mantis folk)',
+    description: 'The clicking language of thri-kreen',
+    implementationNotes: 'Racial Default/Exotic Choice Pool: Known automatically by Thri-kreen.'
+  },
+  {
+    name: 'Urd',
+    category: 'Exotic',
+    typicalSpeakers: 'Urds (Winged Kobolds)',
+    description: 'The aerial language of urds',
+    implementationNotes: 'Exotic Choice Pool: A more specialized dialect or language for a specific type of monster.'
+  },
+  {
+    name: 'Void Speak',
+    category: 'Exotic',
+    typicalSpeakers: 'Those touched by the Far Realm',
+    description: 'The maddening language of the Far Realm',
+    implementationNotes: 'Exotic Choice Pool: Often replaces Deep Speech in specific horror settings.'
+  },
+
+  // Dialects
+  {
+    name: 'Auran',
+    category: 'Dialect',
+    typicalSpeakers: 'Elementals (Air)',
+    description: 'The airy dialect of air elementals',
+    implementationNotes: 'Dialect/Choice Pool: A dialect of Primordial. Some racial traits might grant only this dialect.'
+  },
+  {
+    name: 'Aquan',
+    category: 'Dialect',
+    typicalSpeakers: 'Elementals (Water)',
+    description: 'The fluid dialect of water elementals',
+    implementationNotes: 'Dialect/Choice Pool: A dialect of Primordial.'
+  },
+  {
+    name: 'Ignan',
+    category: 'Dialect',
+    typicalSpeakers: 'Elementals (Fire)',
+    description: 'The fiery dialect of fire elementals',
+    implementationNotes: 'Dialect/Choice Pool: A dialect of Primordial.'
+  },
+  {
+    name: 'Terran',
+    category: 'Dialect',
+    typicalSpeakers: 'Elementals (Earth)',
+    description: 'The earthen dialect of earth elementals',
+    implementationNotes: 'Dialect/Choice Pool: A dialect of Primordial.'
+  },
+
+  // Secret Languages
+  {
+    name: 'Thieves\' Cant',
+    category: 'Secret',
+    typicalSpeakers: 'Rogues',
+    description: 'The secret language of thieves and criminals',
+    implementationNotes: 'Auto-Include (Class): Rogue Level 1 feature.'
+  },
+  {
+    name: 'Druidic',
+    category: 'Secret',
+    typicalSpeakers: 'Druids',
+    description: 'The secret language of druids and nature',
+    implementationNotes: 'Auto-Include (Class): Druid Level 1 feature.'
+  }
+];
+
+export const getLanguagesByCategory = (category: Language['category']): Language[] => {
+  return LANGUAGES.filter(lang => lang.category === category);
+};
+
+export const getLanguageByName = (name: string): Language | undefined => {
+  return LANGUAGES.find(lang => lang.name === name);
+};
