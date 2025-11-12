@@ -2202,16 +2202,37 @@ const Step4Spells: React.FC<StepProps> = ({ data, updateData, nextStep, prevStep
     const allClasses = loadClasses();
     const selectedClass = allClasses.find(c => c.slug === data.classSlug);
 
-    // Auto-advance to next step if not a spellcaster
+    // Auto-advance and validation effects (must be called before any conditional returns)
     React.useEffect(() => {
-        if (!selectedClass || !selectedClass.spellcasting) {
+        if (!selectedClass || !selectedClass.spellcasting ||
+            (selectedClass.spellcasting.cantripsKnown === 0 && selectedClass.spellcasting.spellsKnownOrPrepared === 0)) {
             nextStep();
         }
     }, [selectedClass, nextStep]);
 
-    // If not a spellcaster, skip this step
-    if (!selectedClass || !selectedClass.spellcasting) {
-        return <div className='text-center text-gray-400'>This class doesn't have spellcasting. Advancing...</div>;
+    // Clear invalid spell selections if they exceed current limits
+    React.useEffect(() => {
+        if (selectedClass?.spellcasting) {
+            const spellcasting = selectedClass.spellcasting;
+            const validCantrips = data.spellSelection.selectedCantrips.slice(0, spellcasting.cantripsKnown);
+            const validSpells = data.spellSelection.selectedSpells.slice(0, spellcasting.spellsKnownOrPrepared);
+
+            if (validCantrips.length !== data.spellSelection.selectedCantrips.length ||
+                validSpells.length !== data.spellSelection.selectedSpells.length) {
+                updateData({
+                    spellSelection: {
+                        selectedCantrips: validCantrips,
+                        selectedSpells: validSpells
+                    }
+                });
+            }
+        }
+    }, [selectedClass, data.spellSelection, updateData]);
+
+    // If not a spellcaster or has no spells available, skip this step
+    if (!selectedClass || !selectedClass.spellcasting ||
+        (selectedClass.spellcasting.cantripsKnown === 0 && selectedClass.spellcasting.spellsKnownOrPrepared === 0)) {
+        return <div className='text-center text-gray-400'>This class doesn't have spells available at level {data.level}. Advancing...</div>;
     }
 
     const spellcasting = selectedClass.spellcasting!;
