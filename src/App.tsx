@@ -1378,14 +1378,14 @@ const STEP_TITLES = [
     'Choose Race',              // 1
     'Choose Class & Subclass',  // 2 - Sprint 5: Updated to include subclass
     'Choose Fighting Style',    // 3 - Sprint 5: Conditional for Fighter/Paladin/Ranger
-    'Select Spells',            // 4 - Sprint 2: Conditional for spellcasters
-    'Determine Abilities',      // 5
-    'Choose Feats',             // 6 - Sprint 5: Optional feat selection
-    'Select Languages',         // 7
-    'Select Equipment',         // 8
-    'Customize Equipment',      // 9 - Sprint 4: Equipment browser
-    'Finalize Background',      // 10
-    'Final Details'             // 11
+    'Choose Fighting Style',    // 4 - Sprint 5: Conditional for Fighter/Paladin/Ranger
+    'Select Spells',            // 5 - Sprint 2: Conditional for spellcasters
+    'Determine Abilities',      // 6
+    'Choose Feats',             // 7 - Sprint 5: Optional feat selection
+    'Select Languages',         // 8
+    'Select Equipment',         // 9
+    'Customize Equipment',      // 10 - Sprint 4: Equipment browser
+    'Finalize Background'       // 11
 ];
 
 interface StepProps {
@@ -3132,7 +3132,7 @@ const Step4Abilities: React.FC<StepProps> = ({ data, updateData, nextStep, prevS
                     disabled={!isComplete}
                     className="px-4 py-2 bg-red-600 hover:bg-red-500 rounded-lg text-white flex items-center disabled:bg-gray-600 disabled:cursor-not-allowed"
                 >
-                    Next: Traits <ArrowRight className="w-4 h-4 ml-2" />
+                    Next: Feats <ArrowRight className="w-4 h-4 ml-2" />
                 </button>
             </div>
         </div>
