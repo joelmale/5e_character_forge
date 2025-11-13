@@ -1,6 +1,6 @@
 import { Character, CharacterCreationData, AbilityName, SkillName, EquippedItem } from '../types/dnd';
-import { migrateSpellSelectionToCharacter } from '../utils/spellUtils';
 import { calculateKnownLanguages } from '../utils/languageUtils';
+import { initializeSpellcasting } from '../utils/spellcastingInit';
 import { generateUUID } from '../services/diceService';
 import {
   getAllRaces,
@@ -66,9 +66,9 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
   // 4. Calculate Spellcasting Stats (if applicable)
   let spellcastingData: Character['spellcasting'] = undefined;
   if (classData.spellcasting) {
-    spellcastingData = migrateSpellSelectionToCharacter(
-      data.spellSelection,
-      classData,
+    spellcastingData = initializeSpellcasting(
+      data.classSlug,
+      level,
       {
         STR: finalAbilities.STR.score,
         DEX: finalAbilities.DEX.score,
@@ -76,8 +76,7 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
         INT: finalAbilities.INT.score,
         WIS: finalAbilities.WIS.score,
         CHA: finalAbilities.CHA.score,
-      },
-      level
+      }
     );
   }
 

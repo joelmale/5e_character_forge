@@ -1,6 +1,8 @@
 // Spell management utilities for character creation and campaign play
 import { SpellcastingType, Class, Character, SpellSelectionData } from '../types/dnd';
 import { getLeveledSpellsByClass } from '../services/dataService';
+import { SPELL_SLOT_TABLES } from '../data/spellSlots';
+import { SPELL_LEARNING_RULES } from '../data/spellLearning';
 
 // Map class slugs to spellcasting types
 const SPELLCASTING_TYPE_MAP: Record<string, SpellcastingType> = {
@@ -130,18 +132,24 @@ export function migrateSpellSelectionToCharacter(
   }
 
   const spellcasting = classData.spellcasting;
+  const slotRules = SPELL_SLOT_TABLES[classData.slug];
+  const learningRules = SPELL_LEARNING_RULES[classData.slug];
+
+  // Get correct spell slots for the character's level
+  const spellSlots = slotRules?.byLevel?.[characterLevel] || spellcasting.spellSlots;
+
   const baseSpellcasting = {
     ability: spellcasting.ability,
     spellSaveDC: calculateSpellSaveDC(abilities, spellcasting.ability),
     spellAttackBonus: calculateSpellAttackBonus(abilities, spellcasting.ability),
     cantripsKnown: spellSelection.selectedCantrips,
-    spellSlots: [...spellcasting.spellSlots],
-    usedSpellSlots: new Array(spellcasting.spellSlots.length).fill(0),
+    spellSlots: [...spellSlots],
+    usedSpellSlots: new Array(spellSlots.length).fill(0),
     spellcastingType,
     cantripChoicesByLevel: { [characterLevel]: spellSelection.selectedCantrips.join(',') }
   };
 
-  switch (spellcastingType) {
+  switch (learningRules?.type) {
     case 'known':
       return {
         ...baseSpellcasting,
@@ -155,7 +163,7 @@ export function migrateSpellSelectionToCharacter(
         preparedSpells: spellSelection.preparedSpells || spellSelection.selectedSpells || []
       };
 
-    case 'wizard':
+    case 'spellbook':
       return {
         ...baseSpellcasting,
         spellbook: spellSelection.spellbook || spellSelection.selectedSpells || [],

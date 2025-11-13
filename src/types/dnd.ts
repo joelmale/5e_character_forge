@@ -408,3 +408,15 @@ export interface AlignmentData {
   category: string;
   examples: string[];
 }
+
+// Spell Learning Rules
+export interface SpellLearningRules {
+  type: 'prepared' | 'known' | 'spellbook' | 'none';
+  spellsKnown?: number[];          // Spells known by level (known casters)
+  spellsPrepared?: number[];        // Spells prepared by level (prepared casters)
+  spellbookCapacity?: number[];     // Spellbook capacity by level (wizards)
+  domainSpells?: string[];          // Cleric domain spells
+  circleSpells?: string[];          // Druid circle spells
+  magicalSecrets?: number[];        // Bard magical secrets by level
+  invocationsKnown?: number[];      // Warlock invocations by level
+}
