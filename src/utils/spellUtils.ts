@@ -94,7 +94,7 @@ export function validateSpellSelection(
       }
       break;
 
-    case 'wizard':
+    case 'wizard': {
       // Validate spellbook (6 spells)
       if (!spellSelection.spellbook || spellSelection.spellbook.length !== 6) {
         errors.push('Must select exactly 6 spells for your spellbook');
@@ -105,6 +105,7 @@ export function validateSpellSelection(
         errors.push(`Can prepare at most ${maxPrepared} spells per day`);
       }
       break;
+    }
   }
 
   return {

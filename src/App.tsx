@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Dice6, Plus, Trash2, Loader2, BookOpen, User as UserIcon, Shield, Zap, ArrowLeft, ArrowRight, Check, Download, Upload, XCircle, ChevronDown, ChevronUp, Shuffle } from 'lucide-react';
 import { getSpellcastingType, migrateSpellSelectionToCharacter } from './utils/spellUtils';
-import { SpellSelectionData } from './types/dnd';
+
 import { DiceBox3D } from './components/DiceBox3D';
 import { RollHistoryModal, RollHistoryTicker } from './components/RollHistory';
 import { FeatureModal } from './components/FeatureModal';
@@ -13,14 +13,14 @@ import { SpellPreparationModal } from './components/SpellPreparationModal';
 import { createAbilityRoll, createSkillRoll, createInitiativeRoll, getRollHistory, addRollToHistory, clearRollHistory, rollDice, generateUUID, DiceRoll } from './services/diceService';
 import { diceSounds } from './utils/diceSounds';
 import { featureDescriptions } from './utils/featureDescriptions';
-import { loadClasses, loadEquipment, FEAT_DATABASE as loadedFeats, getSubclassesByClass, getFeaturesByClass, getFeaturesBySubclass, SPELL_DATABASE, getCantripsByClass, getLeveledSpellsByClass, AppSpell, PROFICIENCY_BONUSES, getModifier, SKILL_TO_ABILITY, ALL_SKILLS, ALIGNMENTS_DATA, ALIGNMENTS, BACKGROUNDS, RACE_CATEGORIES, CLASS_CATEGORIES, EQUIPMENT_PACKAGES, getAllRaces, randomizeLevel, randomizeIdentity, randomizeRace, randomizeClassAndSkills, randomizeFightingStyle, randomizeSpells, randomizeAbilities, randomizeFeats, randomizeEquipmentChoices, randomizeAdditionalEquipment, randomizeLanguages, randomizePersonality } from './services/dataService';
+import { loadClasses, loadEquipment, FEAT_DATABASE as loadedFeats, getSubclassesByClass, getFeaturesByClass, getFeaturesBySubclass, SPELL_DATABASE, getCantripsByClass, getLeveledSpellsByClass, AppSpell, PROFICIENCY_BONUSES, getModifier, SKILL_TO_ABILITY, ALL_SKILLS, ALIGNMENTS_DATA, ALIGNMENTS, BACKGROUNDS, RACE_CATEGORIES, CLASS_CATEGORIES, EQUIPMENT_PACKAGES, getAllRaces, randomizeLevel, randomizeIdentity, randomizeRace, randomizeClassAndSkills, randomizeFightingStyle, randomizeSpells, randomizeAbilities, randomizeFeats, randomizeEquipmentChoices, randomizeAdditionalEquipment, randomizeLanguages, randomizePersonality, AppSubclass } from './services/dataService';
 import { calculateKnownLanguages, getMaxLanguages, parseBackgroundLanguageChoices, getRacialLanguages, getClassLanguages } from './utils/languageUtils';
 import { getLanguagesByCategory } from './data/languages';
 import { SPELL_SLOTS_BY_CLASS } from './data/spellSlots';
 import { CANTRIPS_KNOWN_BY_CLASS } from './data/cantrips';
 // import alignmentsData from './data/alignments.json';
-import { Ability, Character, AbilityScore, Skill, AbilityName, SkillName, Equipment, EquippedItem, Feat, CharacterCreationData, EquipmentPackage, Feature } from './types/dnd';
-import { AppSubclass } from './services/dataService';
+import { Ability, Character, AbilityScore, Skill, AbilityName, SkillName, Equipment, EquippedItem, Feat, CharacterCreationData, EquipmentPackage, Feature, SpellSelectionData } from './types/dnd';
+
 
 // Missing type definitions
 type DiceRollType = DiceRoll;
@@ -2305,10 +2305,10 @@ const Step4Spells: React.FC<StepProps> = ({ data, updateData, nextStep, prevStep
             // Validate cantrips
             const validCantrips = data.spellSelection.selectedCantrips.slice(0, spellcasting.cantripsKnown);
 
-            let updatedSelection = {
-                ...data.spellSelection,
-                selectedCantrips: validCantrips
-            };
+  const updatedSelection = {
+    ...data.spellSelection,
+    selectedCantrips: validCantrips
+  };
 
             // Validate based on spellcasting type
             if (spellcastingType === 'known') {

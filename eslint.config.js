@@ -23,6 +23,20 @@ export default tseslint.config(
         'warn',
         { allowConstantExport: true },
       ],
+      // Code quality rules
+      'no-console': 'warn',
+      'no-debugger': 'error',
+      'no-unused-vars': 'off', // Use TypeScript version
+      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+      '@typescript-eslint/explicit-function-return-type': 'off',
+      '@typescript-eslint/no-explicit-any': 'warn',
+      // React specific rules
+      'react-hooks/exhaustive-deps': 'error',
+      'react/prop-types': 'off', // TypeScript handles this
+      // General best practices
+      'eqeqeq': ['error', 'always'],
+      'no-duplicate-imports': 'error',
+      'prefer-template': 'error',
     },
   },
 );

@@ -2,6 +2,16 @@
 
 A single-page, fully responsive React/TypeScript application for creating, managing, and viewing D&D 5e character sheets with **100% client-side storage** using IndexedDB. No backend, no servers, no accounts needed - your data stays on your device!
 
+## Quality Gates
+
+| Gate | Status |
+|------|--------|
+| Code Quality | ![Code Quality](https://github.com/joelmale/5e_character_forge/workflows/Quality%20Gate/badge.svg) |
+| Test Coverage | ![Test Coverage](https://codecov.io/gh/joelmale/5e_character_forge/branch/master/graph/badge.svg) |
+| Bundle Size | ![Bundle Size](https://img.shields.io/bundlephobia/min/5e-character-forge) |
+| Security | ![Security](https://github.com/joelmale/5e_character_forge/workflows/CodeQL%20Security%20Scan/badge.svg) |
+| Build | ![Build](https://github.com/joelmale/5e_character_forge/workflows/Build%20%26%20Deploy/badge.svg) |
+
 ## Overview
 
 The 5e Character Forge allows users to:

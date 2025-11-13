@@ -16,7 +16,7 @@ import srdSubclasses2020egtw from '../data/srd/2020-egtw/5e-SRD-Subclasses.json'
 import srdFeats2014 from '../data/srd/2014/5e-SRD-Feats.json';
 import featsData from '../data/feats.json';
 import alignmentsData from '../data/alignments.json';
-import { AbilityName, Race, Class, Equipment, Feature, Subclass, Feat, RaceCategory, ClassCategory, EquipmentPackage, EquipmentChoice, EquipmentItem, EquippedItem, SpellcastingType } from '../types/dnd';
+import { AbilityName, Race, Class, Equipment, Feature, Subclass, Feat, RaceCategory, ClassCategory, EquipmentPackage, EquipmentChoice, EquipmentItem, EquippedItem, SpellcastingType, SkillName } from '../types/dnd';
 
 // Local type definitions for dataService
 interface Alignment {
@@ -752,7 +752,7 @@ export const FEAT_DATABASE = loadFeats();
 // Export raw data for reference
 export { srdSpells2014, srdRaces2014, srdClasses2014, srdEquipment2014, srdEquipment2024, srdFeatures2014, srdSubclasses2014 };
 
-import { SkillName } from '../types/dnd';
+
 import { SPELL_SLOTS_BY_CLASS } from '../data/spellSlots';
 import { CANTRIPS_KNOWN_BY_CLASS } from '../data/cantrips';
 
