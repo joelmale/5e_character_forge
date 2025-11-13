@@ -1296,10 +1296,11 @@ const STEP_TITLES = [
     'Select Spells',            // 4 - Sprint 2: Conditional for spellcasters
     'Determine Abilities',      // 5
     'Choose Feats',             // 6 - Sprint 5: Optional feat selection
-    'Select Equipment',         // 7
-    'Customize Equipment',      // 8 - Sprint 4: Equipment browser
-    'Select Languages',         // 9
-    'Finalize Background'       // 10
+    'Select Languages',         // 7
+    'Select Equipment',         // 8
+    'Customize Equipment',      // 9 - Sprint 4: Equipment browser
+    'Finalize Background',      // 10
+    'Final Details'             // 11
 ];
 
 interface StepProps {
@@ -3153,9 +3154,9 @@ const Step6Equipment: React.FC<StepProps & { skipToStep?: (step: number) => void
                 </button>
                 <button
                     onClick={() => {
-                        // Skip custom equipment step, go directly to traits (step 7)
+                        // Skip custom equipment step, go directly to traits (step 11)
                         if (allChoicesMade && skipToStep) {
-                            skipToStep(9); // Sprint 5: Updated to step 9 (Finalize Background step)
+                            skipToStep(11); // Skip to Traits/Final details step
                         }
                     }}
                     disabled={!allChoicesMade}
@@ -3339,6 +3340,11 @@ const Step8Traits: React.FC<StepProps & { onSubmit: (data: CharacterCreationData
 const Step9Languages: React.FC<StepProps> = ({ data, updateData, nextStep, prevStep }) => {
     const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set(['Standard']));
     const [selectedLanguages, setSelectedLanguages] = useState<string[]>(data.knownLanguages || []);
+
+    // Sync local state with parent data
+    useEffect(() => {
+        setSelectedLanguages(data.knownLanguages || []);
+    }, [data.knownLanguages]);
 
     // Calculate auto-included languages
     const autoLanguages = new Set<string>();
@@ -3582,7 +3588,14 @@ const Step9Languages: React.FC<StepProps> = ({ data, updateData, nextStep, prevS
     );
 };
 
-const Step7EquipmentBrowser: React.FC<StepProps> = ({ data, updateData, nextStep, prevStep }) => {
+interface EquipmentBrowserProps {
+    data: CharacterCreationData;
+    updateData: (updates: Partial<CharacterCreationData>) => void;
+    prevStep: () => void;
+    skipToStep?: (step: number) => void;
+}
+
+const Step7EquipmentBrowser: React.FC<EquipmentBrowserProps> = ({ data, updateData, prevStep, skipToStep }) => {
     const [searchQuery, setSearchQuery] = useState('');
     const [categoryFilter, setCategoryFilter] = useState<string>('All');
     const [yearFilter, setYearFilter] = useState<number | 'all'>('all');
@@ -3708,7 +3721,7 @@ const Step7EquipmentBrowser: React.FC<StepProps> = ({ data, updateData, nextStep
                         const inInventory = isInInventory(eq.slug);
                         return (
                             <div
-                                key={eq.slug}
+                                key={`${eq.slug}-${eq.year}`}
                                 className="bg-gray-700/50 p-3 rounded-lg hover:bg-gray-700 transition-colors"
                             >
                                 <div className="flex items-center justify-between gap-3">
@@ -3785,7 +3798,7 @@ const Step7EquipmentBrowser: React.FC<StepProps> = ({ data, updateData, nextStep
                     <ArrowLeft className="w-4 h-4 mr-2" /> Back
                 </button>
                 <button
-                    onClick={nextStep}
+                    onClick={() => skipToStep?.(11)}
                     className="px-4 py-2 bg-red-600 hover:bg-red-500 rounded-lg text-white flex items-center"
                 >
                     Next: Background <ArrowRight className="w-4 h-4 ml-2" />
@@ -3855,9 +3868,9 @@ const CharacterCreationWizard: React.FC<WizardProps> = ({ isOpen, onClose, onCha
             case 5: return <Step4Spells {...commonProps} />; // Sprint 2: Spell selection
             case 6: return <Step4Abilities {...commonProps} />;
             case 7: return <Step5point5Feats {...commonProps} />; // Sprint 5: Feats selection
-            case 8: return <Step6Equipment {...commonProps} skipToStep={skipToStep} />;
-            case 9: return <Step7EquipmentBrowser {...commonProps} />; // Sprint 4: Equipment browser
-            case 10: return <Step9Languages {...commonProps} />; // Language selection
+            case 8: return <Step9Languages {...commonProps} />; // Language selection
+            case 9: return <Step6Equipment {...commonProps} skipToStep={skipToStep} />;
+            case 10: return <Step7EquipmentBrowser {...commonProps} skipToStep={skipToStep} />; // Sprint 4: Equipment browser
             case 11: return <Step8Traits {...commonProps} onSubmit={handleSubmit} />;
             default: return <p>Unknown step.</p>;
         }

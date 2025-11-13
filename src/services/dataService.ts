@@ -387,25 +387,34 @@ export function transformClass(srdClass: SRDClass, year: number = 2014): Class {
       const choiceId = `${srdClass.index}-choice-${index}`;
 
       // Convert SRD options to EquipmentItem format
-      const options: EquipmentItem[][] = option.from.options.map(opt => {
-        if (opt.equipment) {
-          // Simple equipment reference
-          return [{
-            name: opt.equipment.name,
-            type: 'gear' as const, // Default type, could be enhanced
-            quantity: 1
-          }];
-        } else if (opt.equipment_category) {
-          // Equipment category - for now, return a placeholder
-          // This would need expansion to actual items in the category
-          return [{
-            name: `${opt.equipment_category.name} (choose one)`,
-            type: 'gear' as const,
-            quantity: 1
-          }];
-        }
-        return [];
-      }).filter(arr => arr.length > 0);
+      let options: EquipmentItem[][] = [];
+      if (option.from.options) {
+        options = option.from.options.map(opt => {
+          if (opt.equipment) {
+            // Simple equipment reference
+            return [{
+              name: opt.equipment.name,
+              type: 'gear' as const, // Default type, could be enhanced
+              quantity: 1
+            }];
+          } else if (opt.equipment_category) {
+            // Equipment category - for now, return a placeholder
+            // This would need expansion to actual items in the category
+            return [{
+              name: `${opt.equipment_category.name} (choose one)`,
+              type: 'gear' as const,
+              quantity: 1
+            }];
+          }
+          return [];
+        }).filter(arr => arr.length > 0);
+      } else if ((option.from as any).equipment_category) {
+        options = [[{
+          name: `Any ${(option.from as any).equipment_category.name}`,
+          type: 'gear' as const,
+          quantity: 1
+        }]];
+      }
 
       if (options.length > 0) {
         equipment_choices.push({
