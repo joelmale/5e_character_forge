@@ -16,7 +16,7 @@ import srdSubclasses2020egtw from '../data/srd/2020-egtw/5e-SRD-Subclasses.json'
 import srdFeats2014 from '../data/srd/2014/5e-SRD-Feats.json';
 import featsData from '../data/feats.json';
 import alignmentsData from '../data/alignments.json';
-import { AbilityName, Race, Class, Equipment, Feature, Subclass, Feat, RaceCategory, ClassCategory, EquipmentPackage, EquipmentChoice, EquipmentItem, EquippedItem } from '../types/dnd';
+import { AbilityName, Race, Class, Equipment, Feature, Subclass, Feat, RaceCategory, ClassCategory, EquipmentPackage, EquipmentChoice, EquipmentItem, EquippedItem, SpellcastingType } from '../types/dnd';
 
 // Local type definitions for dataService
 interface Alignment {
@@ -330,50 +330,63 @@ export function transformClass(srdClass: SRDClass, year: number = 2014): Class {
     // Default spell slots for full casters (will need to be adjusted for half-casters)
     const defaultSpellSlots = [0, 2, 3, 4, 4, 4, 4, 4, 4, 4]; // Level 1-9 slots at char level 1
 
-    // Define cantrips, spells known, and mode by class
+    // Define cantrips, spells known, and type by class
     let cantripsKnown = 0;
     let spellsKnownOrPrepared = 0;
-    let mode: 'known' | 'prepared' | 'book' = 'known';
+    let type: SpellcastingType = 'known';
 
     // Set defaults based on class (these are level 1 values)
     switch (srdClass.index) {
       case 'wizard':
         cantripsKnown = 3;
         spellsKnownOrPrepared = 6;
-        mode = 'book';
+        type = 'wizard';
         break;
       case 'sorcerer':
         cantripsKnown = 4;
         spellsKnownOrPrepared = 2;
-        mode = 'known';
+        type = 'known';
         break;
       case 'bard':
         cantripsKnown = 2;
         spellsKnownOrPrepared = 4;
-        mode = 'known';
-        break;
-      case 'cleric':
-      case 'druid':
-        cantripsKnown = 3;
-        spellsKnownOrPrepared = 3; // Can prepare WIS mod + level spells
-        mode = 'prepared';
+        type = 'known';
         break;
       case 'warlock':
         cantripsKnown = 2;
         spellsKnownOrPrepared = 2;
-        mode = 'known';
+        type = 'known';
+        break;
+      case 'cleric':
+        cantripsKnown = 3;
+        spellsKnownOrPrepared = 2;
+        type = 'prepared';
+        break;
+      case 'druid':
+        cantripsKnown = 2;
+        spellsKnownOrPrepared = 2;
+        type = 'prepared';
         break;
       case 'paladin':
+        cantripsKnown = 0;
+        spellsKnownOrPrepared = 0;
+        type = 'prepared';
+        break;
       case 'ranger':
         cantripsKnown = 0;
-        spellsKnownOrPrepared = 0; // Half-casters, get spells at level 2
-        mode = 'prepared';
+        spellsKnownOrPrepared = 0;
+        type = 'known';
+        break;
+      case 'artificer':
+        cantripsKnown = 0;
+        spellsKnownOrPrepared = 0;
+        type = 'prepared';
         break;
     }
 
     spellcasting = {
       ability,
-      mode,
+      type,
       cantripsKnown,
       spellsKnownOrPrepared,
       spellSlots: defaultSpellSlots,

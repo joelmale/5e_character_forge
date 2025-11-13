@@ -26,6 +26,7 @@ import {
     // Ability,
 } from '../types/dnd';
 import { updateCharacter } from '../services/dbService'; // Added this import
+import { migrateSpellSelectionToCharacter } from '../utils/spellUtils';
 
 // Helper to check if a class is a spellcaster
 export const isSpellcaster = (characterClass: Class | undefined | null): boolean => {
@@ -82,20 +83,19 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
     // 4. Calculate Spellcasting Stats (if applicable)
     let spellcastingData: Character['spellcasting'] = undefined;
     if (isSpellcaster(classData) && classData.spellcasting) {
-        const spellAbility = classData.spellcasting.ability;
-        const spellModifier = finalAbilities[spellAbility].modifier;
-        const classSpellSlots = SPELL_SLOTS_BY_CLASS[classData.slug]?.[level] || [0, 0, 0, 0, 0, 0, 0, 0, 0];
-
-        spellcastingData = {
-            ability: spellAbility,
-            spellSaveDC: 8 + pb + spellModifier,
-            spellAttackBonus: pb + spellModifier,
-            cantripsKnown: data.spellSelection.selectedCantrips,
-            spellsKnown: data.spellSelection.selectedSpells,
-            spellSlots: classSpellSlots,
-            usedSpellSlots: [0, 0, 0, 0, 0, 0, 0, 0, 0],
-            cantripChoicesByLevel: {},
-        };
+        spellcastingData = migrateSpellSelectionToCharacter(
+            data.spellSelection,
+            classData,
+            {
+                STR: finalAbilities.STR.score,
+                DEX: finalAbilities.DEX.score,
+                CON: finalAbilities.CON.score,
+                INT: finalAbilities.INT.score,
+                WIS: finalAbilities.WIS.score,
+                CHA: finalAbilities.CHA.score,
+            },
+            level
+        );
     }
 
     // 5. Build Equipment Inventory

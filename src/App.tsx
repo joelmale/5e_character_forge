@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Dice6, Plus, Trash2, Loader2, BookOpen, User as UserIcon, Shield, Zap, ArrowLeft, ArrowRight, Check, Download, Upload, XCircle, ChevronDown, ChevronUp, Shuffle } from 'lucide-react';
+import { getSpellcastingType, migrateSpellSelectionToCharacter } from './utils/spellUtils';
+import { SpellSelectionData } from './types/dnd';
 import { DiceBox3D } from './components/DiceBox3D';
 import { RollHistoryModal, RollHistoryTicker } from './components/RollHistory';
 import { FeatureModal } from './components/FeatureModal';
@@ -7,6 +9,7 @@ import { EquipmentDetailModal } from './components/EquipmentDetailModal';
 import { ChooseCantripModal } from './components/ChooseCantripModal';
 import ChooseSubclassModal from './components/ChooseSubclassModal';
 import AbilityScoreIncreaseModal from './components/AbilityScoreIncreaseModal';
+import { SpellPreparationModal } from './components/SpellPreparationModal';
 import { createAbilityRoll, createSkillRoll, createInitiativeRoll, getRollHistory, addRollToHistory, clearRollHistory, rollDice, generateUUID, DiceRoll } from './services/diceService';
 import { diceSounds } from './utils/diceSounds';
 import { featureDescriptions } from './utils/featureDescriptions';
@@ -168,14 +171,14 @@ const EquipmentPackDisplay: React.FC<EquipmentPackDisplayProps> = ({
               </li>
             ))}
           </ul>
-          {pack.description && (
-            <p className="text-xs text-gray-500 mt-2 italic">{pack.description}</p>
-          )}
-        </div>
-      )}
-    </div>
-  );
-};
+           {pack.description && (
+             <p className="text-xs text-gray-500 mt-2 italic">{pack.description}</p>
+           )}
+         </div>
+       )}
+     </div>
+    );
+  };
 
 // --- IndexedDB Configuration ---
 const DB_NAME = '5e_character_forge';
@@ -381,20 +384,19 @@ const calculateCharacterStats = (data: CharacterCreationData): Character => {
   // 4. Calculate Spellcasting Stats (if applicable)
   let spellcastingData: Character['spellcasting'] = undefined;
   if (classData.spellcasting) {
-    const spellAbility = classData.spellcasting.ability;
-    const spellModifier = finalAbilities[spellAbility].modifier;
-    const classSpellSlots = SPELL_SLOTS_BY_CLASS[classData.slug]?.[level] || [0, 0, 0, 0, 0, 0, 0, 0, 0];
-
-    spellcastingData = {
-      ability: spellAbility,
-      spellSaveDC: 8 + pb + spellModifier,
-      spellAttackBonus: pb + spellModifier,
-      cantripsKnown: data.spellSelection.selectedCantrips,
-      spellsKnown: data.spellSelection.selectedSpells,
-      spellSlots: classSpellSlots,
-      usedSpellSlots: [0, 0, 0, 0, 0, 0, 0, 0, 0],
-      cantripChoicesByLevel: {},
-    };
+    spellcastingData = migrateSpellSelectionToCharacter(
+      data.spellSelection,
+      classData,
+      {
+        STR: finalAbilities.STR.score,
+        DEX: finalAbilities.DEX.score,
+        CON: finalAbilities.CON.score,
+        INT: finalAbilities.INT.score,
+        WIS: finalAbilities.WIS.score,
+        CHA: finalAbilities.CHA.score,
+      },
+      level
+    );
   }
 
   // 5. Build Equipment Inventory
@@ -612,6 +614,8 @@ const CharacterSheet: React.FC<CharacterSheetProps> = ({
   onLongRest, onShortRest, onLevelUp, onLevelDown, onUpdateCharacter, onEquipArmor, onEquipWeapon, onUnequipItem,
   onAddItem, onRemoveItem, setEquipmentModal
 }) => {
+  const [showSpellPreparationModal, setShowSpellPreparationModal] = useState(false);
+
   const abilities = Object.entries(character.abilities) as [AbilityName, AbilityScore][];
   const skills = Object.entries(character.skills) as [SkillName, Skill][];
   const passivePerception = (character.skills.Perception.value + 10);
@@ -621,6 +625,17 @@ const CharacterSheet: React.FC<CharacterSheetProps> = ({
     const roll = createInitiativeRoll(character.initiative);
     setRollResult({ text: `${roll.label}: ${roll.notation}`, value: roll.total });
     onDiceRoll(roll);
+  };
+
+  // Handle spell preparation
+  const handleSpellPreparationSave = (preparedSpells: string[]) => {
+    onUpdateCharacter({
+      ...character,
+      spellcasting: {
+        ...character.spellcasting!,
+        preparedSpells
+      }
+    });
   };
 
   return (
@@ -791,7 +806,23 @@ const CharacterSheet: React.FC<CharacterSheetProps> = ({
 
               {/* Cantrips & Spells */}
               <div className="p-4 bg-gray-800 rounded-xl shadow-lg border-l-4 border-green-500">
-                <h3 className="text-lg font-bold text-green-400 mb-3">Known Spells</h3>
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-lg font-bold text-green-400">
+                    {character.spellcasting.spellcastingType === 'wizard' ? 'Spellcasting' :
+                     character.spellcasting.spellcastingType === 'prepared' ? 'Prepared Spells' :
+                     'Known Spells'}
+                  </h3>
+                  {character.spellcasting.spellcastingType === 'prepared' && (
+                    <button
+                      onClick={() => setShowSpellPreparationModal(true)}
+                      className="px-3 py-1 bg-purple-600 hover:bg-purple-500 rounded text-sm transition-colors flex items-center gap-1"
+                      title="Prepare spells for the day"
+                    >
+                      <BookOpen className="w-4 h-4" />
+                      Prepare
+                    </button>
+                  )}
+                </div>
                 <div className="space-y-3 text-sm">
                   <div>
                     <div className="font-semibold text-gray-300 mb-1">Cantrips ({character.spellcasting.cantripsKnown.length})</div>
@@ -802,15 +833,55 @@ const CharacterSheet: React.FC<CharacterSheetProps> = ({
                       })}
                     </ul>
                   </div>
-                  <div>
-                    <div className="font-semibold text-gray-300 mb-1">1st Level ({character.spellcasting.spellsKnown.length})</div>
-                    <ul className="list-disc list-inside space-y-0.5 text-xs text-gray-400">
-                      {character.spellcasting.spellsKnown.map((spellSlug) => {
-                        const spell = SPELL_DATABASE.find(s => s.slug === spellSlug);
-                        return <li key={spellSlug}>{spell?.name || spellSlug}</li>;
-                      })}
-                    </ul>
-                  </div>
+
+                  {/* Show appropriate spell list based on casting type */}
+                  {character.spellcasting.spellcastingType === 'wizard' && character.spellcasting.spellbook && (
+                    <div>
+                      <div className="font-semibold text-gray-300 mb-1">Spellbook ({character.spellcasting.spellbook.length})</div>
+                      <ul className="list-disc list-inside space-y-0.5 text-xs text-gray-400">
+                        {character.spellcasting.spellbook.map((spellSlug) => {
+                          const spell = SPELL_DATABASE.find(s => s.slug === spellSlug);
+                          return <li key={spellSlug}>{spell?.name || spellSlug}</li>;
+                        })}
+                      </ul>
+                    </div>
+                  )}
+
+                  {character.spellcasting.spellcastingType === 'wizard' && character.spellcasting.preparedSpells && (
+                    <div>
+                      <div className="font-semibold text-gray-300 mb-1">Prepared Today ({character.spellcasting.preparedSpells.length})</div>
+                      <ul className="list-disc list-inside space-y-0.5 text-xs text-gray-400">
+                        {character.spellcasting.preparedSpells.map((spellSlug) => {
+                          const spell = SPELL_DATABASE.find(s => s.slug === spellSlug);
+                          return <li key={spellSlug}>{spell?.name || spellSlug}</li>;
+                        })}
+                      </ul>
+                    </div>
+                  )}
+
+                  {character.spellcasting.spellcastingType === 'known' && character.spellcasting.spellsKnown && (
+                    <div>
+                      <div className="font-semibold text-gray-300 mb-1">Spells Known ({character.spellcasting.spellsKnown.length})</div>
+                      <ul className="list-disc list-inside space-y-0.5 text-xs text-gray-400">
+                        {character.spellcasting.spellsKnown.map((spellSlug) => {
+                          const spell = SPELL_DATABASE.find(s => s.slug === spellSlug);
+                          return <li key={spellSlug}>{spell?.name || spellSlug}</li>;
+                        })}
+                      </ul>
+                    </div>
+                  )}
+
+                  {character.spellcasting.spellcastingType === 'prepared' && character.spellcasting.preparedSpells && (
+                    <div>
+                      <div className="font-semibold text-gray-300 mb-1">Prepared Spells ({character.spellcasting.preparedSpells.length})</div>
+                      <ul className="list-disc list-inside space-y-0.5 text-xs text-gray-400">
+                        {character.spellcasting.preparedSpells.map((spellSlug) => {
+                          const spell = SPELL_DATABASE.find(s => s.slug === spellSlug);
+                          return <li key={spellSlug}>{spell?.name || spellSlug}</li>;
+                        })}
+                      </ul>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -1276,14 +1347,28 @@ const CharacterSheet: React.FC<CharacterSheetProps> = ({
                     </div>
                   );
                 })}
-              </div>
-            </div>
-           )}
-                 </div>
+               </div>
              </div>
-     </div>
-   );
- };
+           )}
+         </div>
+
+      {/* Spell Preparation Modal */}
+      {character.spellcasting?.spellcastingType === 'prepared' && (
+        <SpellPreparationModal
+          character={character}
+          availableSpells={SPELL_DATABASE.filter(spell =>
+            character.spellcasting!.spellsKnown?.includes(spell.slug) ||
+            character.spellcasting!.spellbook?.includes(spell.slug) || false
+          )}
+          isOpen={showSpellPreparationModal}
+          onClose={() => setShowSpellPreparationModal(false)}
+          onSave={handleSpellPreparationSave}
+        />
+      )}
+    </div>
+  </div>
+  );
+};
 
 
 // --- Character Creation Wizard Steps ---
@@ -2215,20 +2300,48 @@ const Step4Spells: React.FC<StepProps> = ({ data, updateData, nextStep, prevStep
     React.useEffect(() => {
         if (selectedClass?.spellcasting) {
             const spellcasting = selectedClass.spellcasting;
-            const validCantrips = data.spellSelection.selectedCantrips.slice(0, spellcasting.cantripsKnown);
-            const validSpells = data.spellSelection.selectedSpells.slice(0, spellcasting.spellsKnownOrPrepared);
+            const spellcastingType = getSpellcastingType(selectedClass.slug);
 
-            if (validCantrips.length !== data.spellSelection.selectedCantrips.length ||
-                validSpells.length !== data.spellSelection.selectedSpells.length) {
-                updateData({
-                    spellSelection: {
-                        selectedCantrips: validCantrips,
-                        selectedSpells: validSpells
-                    }
-                });
+            // Validate cantrips
+            const validCantrips = data.spellSelection.selectedCantrips.slice(0, spellcasting.cantripsKnown);
+
+            let updatedSelection = {
+                ...data.spellSelection,
+                selectedCantrips: validCantrips
+            };
+
+            // Validate based on spellcasting type
+            if (spellcastingType === 'known') {
+                const validSpells = (data.spellSelection.knownSpells || []).slice(0, spellcasting.spellsKnownOrPrepared);
+                updatedSelection.knownSpells = validSpells;
+            } else if (spellcastingType === 'prepared') {
+                const validSpells = (data.spellSelection.preparedSpells || []).slice(0, spellcasting.spellsKnownOrPrepared);
+                updatedSelection.preparedSpells = validSpells;
+            } else if (spellcastingType === 'wizard') {
+                // Validate spellbook (6 spells)
+                const validSpellbook = (data.spellSelection.spellbook || []).slice(0, 6);
+                // Validate daily preparation
+                const maxPrepared = Math.max(1, Math.floor((data.abilities.INT - 10) / 2) + 1);
+                const validDaily = (data.spellSelection.dailyPrepared || []).slice(0, maxPrepared);
+                updatedSelection.spellbook = validSpellbook;
+                updatedSelection.dailyPrepared = validDaily;
+            }
+
+            // Check if anything changed
+            const hasChanges =
+                validCantrips.length !== data.spellSelection.selectedCantrips.length ||
+                (spellcastingType === 'known' && updatedSelection.knownSpells?.length !== (data.spellSelection.knownSpells?.length || 0)) ||
+                (spellcastingType === 'prepared' && updatedSelection.preparedSpells?.length !== (data.spellSelection.preparedSpells?.length || 0)) ||
+                (spellcastingType === 'wizard' && (
+                    updatedSelection.spellbook?.length !== (data.spellSelection.spellbook?.length || 0) ||
+                    updatedSelection.dailyPrepared?.length !== (data.spellSelection.dailyPrepared?.length || 0)
+                ));
+
+            if (hasChanges) {
+                updateData({ spellSelection: updatedSelection });
             }
         }
-    }, [selectedClass, data.spellSelection, updateData]);
+    }, [selectedClass, data.spellSelection, data.abilities.INT, updateData]);
 
     // If not a spellcaster or has no spells available, skip this step
     if (!selectedClass || !selectedClass.spellcasting ||
@@ -2237,6 +2350,7 @@ const Step4Spells: React.FC<StepProps> = ({ data, updateData, nextStep, prevStep
     }
 
     const spellcasting = selectedClass.spellcasting!;
+    const spellcastingType = getSpellcastingType(selectedClass.slug);
     const availableCantrips = getCantripsByClass(data.classSlug);
     const availableSpells = getLeveledSpellsByClass(data.classSlug, 1);
 
@@ -2263,8 +2377,8 @@ const Step4Spells: React.FC<StepProps> = ({ data, updateData, nextStep, prevStep
         }
     };
 
-    const handleSpellToggle = (spellSlug: string) => {
-        const current = data.spellSelection.selectedSpells;
+    const handleSpellToggle = (spellSlug: string, field: keyof SpellSelectionData) => {
+        const current = (data.spellSelection[field] as string[]) || [];
         const isSelected = current.includes(spellSlug);
 
         if (isSelected) {
@@ -2272,7 +2386,7 @@ const Step4Spells: React.FC<StepProps> = ({ data, updateData, nextStep, prevStep
             updateData({
                 spellSelection: {
                     ...data.spellSelection,
-                    selectedSpells: current.filter(s => s !== spellSlug),
+                    [field]: current.filter(s => s !== spellSlug),
                 },
             });
         } else if (current.length < spellcasting.spellsKnownOrPrepared) {
@@ -2280,20 +2394,33 @@ const Step4Spells: React.FC<StepProps> = ({ data, updateData, nextStep, prevStep
             updateData({
                 spellSelection: {
                     ...data.spellSelection,
-                    selectedSpells: [...current, spellSlug],
+                    [field]: [...current, spellSlug],
                 },
             });
         }
     };
 
+
+
     const cantripsComplete = data.spellSelection.selectedCantrips.length === spellcasting.cantripsKnown;
-    const spellsComplete = data.spellSelection.selectedSpells.length === spellcasting.spellsKnownOrPrepared;
+
+    let spellsComplete = false;
+    if (spellcastingType === 'known') {
+        spellsComplete = (data.spellSelection.knownSpells?.length || 0) === spellcasting.spellsKnownOrPrepared;
+    } else if (spellcastingType === 'prepared') {
+        spellsComplete = (data.spellSelection.preparedSpells?.length || 0) === spellcasting.spellsKnownOrPrepared;
+    } else if (spellcastingType === 'wizard') {
+        const spellbookComplete = (data.spellSelection.spellbook?.length || 0) === 6;
+        const dailyComplete = (data.spellSelection.dailyPrepared?.length || 0) === Math.max(1, Math.floor((data.abilities.INT - 10) / 2) + 1);
+        spellsComplete = spellbookComplete && dailyComplete;
+    }
+
     const allSelectionsComplete = cantripsComplete && spellsComplete;
 
     // Spell mode description
-    const modeDescription = spellcasting.mode === 'book'
+    const modeDescription = spellcastingType === 'wizard'
         ? 'Choose spells for your spellbook. You can prepare a subset of these each day.'
-        : spellcasting.mode === 'prepared'
+        : spellcastingType === 'prepared'
         ? 'Choose spells to prepare. You can change your prepared spells after a long rest.'
         : 'Choose spells your character knows. These are permanent until you level up.';
 
@@ -2365,55 +2492,208 @@ const Step4Spells: React.FC<StepProps> = ({ data, updateData, nextStep, prevStep
                 </div>
             </div>
 
-            {/* 1st Level Spells Section */}
-            <div className="bg-gray-700/50 border border-gray-600 rounded-lg p-4 space-y-3">
-                <h4 className="text-lg font-bold text-yellow-300">
-                    1st Level Spells ({data.spellSelection.selectedSpells.length} / {spellcasting.spellsKnownOrPrepared} selected)
-                </h4>
-                <p className="text-xs text-gray-400">
-                    {spellcasting.mode === 'book' && 'These spells will be in your spellbook at 1st level.'}
-                    {spellcasting.mode === 'prepared' && 'You can prepare these spells from the full list.'}
-                    {spellcasting.mode === 'known' && 'These are the spells your character knows permanently.'}
-                </p>
+            {/* Spell Selection Sections - Varies by spellcasting type */}
+            {spellcastingType === 'wizard' && (
+                <>
+                    {/* Wizard Spellbook Section */}
+                    <div className="bg-gray-700/50 border border-gray-600 rounded-lg p-4 space-y-3">
+                        <h4 className="text-lg font-bold text-yellow-300">
+                            Spellbook ({data.spellSelection.spellbook?.length || 0} / 6 selected)
+                        </h4>
+                        <p className="text-xs text-gray-400">
+                            Choose 6 1st-level spells for your permanent spellbook. You can prepare a subset of these each day.
+                        </p>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {availableSpells.map((spell: AppSpell) => {
-                        const isSelected = data.spellSelection.selectedSpells.includes(spell.slug);
-                        const canSelect = data.spellSelection.selectedSpells.length < spellcasting.spellsKnownOrPrepared;
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            {availableSpells.map((spell: AppSpell) => {
+                                const isSelected = data.spellSelection.spellbook?.includes(spell.slug) || false;
+                                const canSelect = (data.spellSelection.spellbook?.length || 0) < 6;
 
-                        return (
-                            <button
-                                key={spell.slug}
-                                onClick={() => handleSpellToggle(spell.slug)}
-                                disabled={!isSelected && !canSelect}
-                                className={`p-3 rounded-lg border-2 text-left transition-all ${
-                                    isSelected
-                                        ? 'bg-blue-900 border-blue-500'
-                                        : canSelect
-                                        ? 'bg-gray-700 border-gray-600 hover:border-blue-400'
-                                        : 'bg-gray-800 border-gray-700 opacity-50 cursor-not-allowed'
-                                }`}
-                            >
-                                <div className="flex items-start justify-between">
-                                    <div className="flex-1">
-                                        <div className="font-semibold text-white">{spell.name}</div>
-                                        <div className="text-xs text-purple-300">{spell.school}</div>
+                                return (
+                                    <button
+                                        key={spell.slug}
+                                        onClick={() => handleSpellToggle(spell.slug, 'spellbook')}
+                                        disabled={!isSelected && !canSelect}
+                                        className={`p-3 rounded-lg border-2 text-left transition-all ${
+                                            isSelected
+                                                ? 'bg-blue-900 border-blue-500'
+                                                : canSelect
+                                                ? 'bg-gray-700 border-gray-600 hover:border-blue-400'
+                                                : 'bg-gray-800 border-gray-700 opacity-50 cursor-not-allowed'
+                                        }`}
+                                    >
+                                        <div className="flex items-start justify-between">
+                                            <div className="flex-1">
+                                                <div className="font-semibold text-white">{spell.name}</div>
+                                                <div className="text-xs text-purple-300">{spell.school}</div>
+                                            </div>
+                                            {isSelected && <Check className="w-5 h-5 text-green-400" />}
+                                        </div>
+                                        <div className="text-xs text-gray-400 mt-2 line-clamp-2">
+                                            {spell.description}
+                                        </div>
+                                        <div className="text-xs text-gray-500 mt-1">
+                                            {spell.castingTime} • {spell.range}
+                                            {spell.concentration && ' • Concentration'}
+                                            {spell.ritual && ' • Ritual'}
+                                        </div>
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
+
+                    {/* Wizard Daily Preparation Section */}
+                    <div className="bg-gray-700/50 border border-gray-600 rounded-lg p-4 space-y-3">
+                        <h4 className="text-lg font-bold text-yellow-300">
+                            Daily Preparation ({data.spellSelection.dailyPrepared?.length || 0} / {Math.max(1, Math.floor((data.abilities.INT - 10) / 2) + 1)} selected)
+                        </h4>
+                        <p className="text-xs text-gray-400">
+                            Choose spells to prepare for today from your spellbook. You can change this after a long rest.
+                        </p>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            {(data.spellSelection.spellbook || []).map((spellSlug) => {
+                                const spell = availableSpells.find(s => s.slug === spellSlug);
+                                if (!spell) return null;
+
+                                const isSelected = data.spellSelection.dailyPrepared?.includes(spell.slug) || false;
+                                const maxPrepared = Math.max(1, Math.floor((data.abilities.INT - 10) / 2) + 1);
+                                const canSelect = (data.spellSelection.dailyPrepared?.length || 0) < maxPrepared;
+
+                                return (
+                                    <button
+                                        key={spell.slug}
+                                        onClick={() => handleSpellToggle(spell.slug, 'dailyPrepared')}
+                                        disabled={!isSelected && !canSelect}
+                                        className={`p-3 rounded-lg border-2 text-left transition-all ${
+                                            isSelected
+                                                ? 'bg-green-900 border-green-500'
+                                                : canSelect
+                                                ? 'bg-gray-700 border-gray-600 hover:border-green-400'
+                                                : 'bg-gray-800 border-gray-700 opacity-50 cursor-not-allowed'
+                                        }`}
+                                    >
+                                        <div className="flex items-start justify-between">
+                                            <div className="flex-1">
+                                                <div className="font-semibold text-white">{spell.name}</div>
+                                                <div className="text-xs text-purple-300">{spell.school}</div>
+                                            </div>
+                                            {isSelected && <Check className="w-5 h-5 text-green-400" />}
+                                        </div>
+                                        <div className="text-xs text-gray-400 mt-2 line-clamp-2">
+                                            {spell.description}
+                                        </div>
+                                        <div className="text-xs text-gray-500 mt-1">
+                                            {spell.castingTime} • {spell.range}
+                                            {spell.concentration && ' • Concentration'}
+                                            {spell.ritual && ' • Ritual'}
+                                        </div>
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
+                </>
+            )}
+
+            {spellcastingType === 'known' && (
+                <div className="bg-gray-700/50 border border-gray-600 rounded-lg p-4 space-y-3">
+                    <h4 className="text-lg font-bold text-yellow-300">
+                        Spells Known ({data.spellSelection.knownSpells?.length || 0} / {spellcasting.spellsKnownOrPrepared} selected)
+                    </h4>
+                    <p className="text-xs text-gray-400">
+                        These are the spells your character knows permanently. You can change them when you level up.
+                    </p>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {availableSpells.map((spell: AppSpell) => {
+                            const isSelected = data.spellSelection.knownSpells?.includes(spell.slug) || false;
+                            const canSelect = (data.spellSelection.knownSpells?.length || 0) < spellcasting.spellsKnownOrPrepared;
+
+                            return (
+                                <button
+                                    key={spell.slug}
+                                    onClick={() => handleSpellToggle(spell.slug, 'knownSpells')}
+                                    disabled={!isSelected && !canSelect}
+                                    className={`p-3 rounded-lg border-2 text-left transition-all ${
+                                        isSelected
+                                            ? 'bg-blue-900 border-blue-500'
+                                            : canSelect
+                                            ? 'bg-gray-700 border-gray-600 hover:border-blue-400'
+                                            : 'bg-gray-800 border-gray-700 opacity-50 cursor-not-allowed'
+                                    }`}
+                                >
+                                    <div className="flex items-start justify-between">
+                                        <div className="flex-1">
+                                            <div className="font-semibold text-white">{spell.name}</div>
+                                            <div className="text-xs text-purple-300">{spell.school}</div>
+                                        </div>
+                                        {isSelected && <Check className="w-5 h-5 text-green-400" />}
                                     </div>
-                                    {isSelected && <Check className="w-5 h-5 text-green-400" />}
-                                </div>
-                                <div className="text-xs text-gray-400 mt-2 line-clamp-2">
-                                    {spell.description}
-                                </div>
-                                <div className="text-xs text-gray-500 mt-1">
-                                    {spell.castingTime} • {spell.range}
-                                    {spell.concentration && ' • Concentration'}
-                                    {spell.ritual && ' • Ritual'}
-                                </div>
-                            </button>
-                        );
-                    })}
+                                    <div className="text-xs text-gray-400 mt-2 line-clamp-2">
+                                        {spell.description}
+                                    </div>
+                                    <div className="text-xs text-gray-500 mt-1">
+                                        {spell.castingTime} • {spell.range}
+                                        {spell.concentration && ' • Concentration'}
+                                        {spell.ritual && ' • Ritual'}
+                                    </div>
+                                </button>
+                            );
+                        })}
+                    </div>
                 </div>
-            </div>
+            )}
+
+            {spellcastingType === 'prepared' && (
+                <div className="bg-gray-700/50 border border-gray-600 rounded-lg p-4 space-y-3">
+                    <h4 className="text-lg font-bold text-yellow-300">
+                        Prepared Spells ({data.spellSelection.preparedSpells?.length || 0} / {spellcasting.spellsKnownOrPrepared} selected)
+                    </h4>
+                    <p className="text-xs text-gray-400">
+                        Choose spells to prepare. You can change your prepared spells after a long rest.
+                    </p>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {availableSpells.map((spell: AppSpell) => {
+                            const isSelected = data.spellSelection.preparedSpells?.includes(spell.slug) || false;
+                            const canSelect = (data.spellSelection.preparedSpells?.length || 0) < spellcasting.spellsKnownOrPrepared;
+
+                            return (
+                                <button
+                                    key={spell.slug}
+                                    onClick={() => handleSpellToggle(spell.slug, 'preparedSpells')}
+                                    disabled={!isSelected && !canSelect}
+                                    className={`p-3 rounded-lg border-2 text-left transition-all ${
+                                        isSelected
+                                            ? 'bg-blue-900 border-blue-500'
+                                            : canSelect
+                                            ? 'bg-gray-700 border-gray-600 hover:border-blue-400'
+                                            : 'bg-gray-800 border-gray-700 opacity-50 cursor-not-allowed'
+                                    }`}
+                                >
+                                    <div className="flex items-start justify-between">
+                                        <div className="flex-1">
+                                            <div className="font-semibold text-white">{spell.name}</div>
+                                            <div className="text-xs text-purple-300">{spell.school}</div>
+                                        </div>
+                                        {isSelected && <Check className="w-5 h-5 text-green-400" />}
+                                    </div>
+                                    <div className="text-xs text-gray-400 mt-2 line-clamp-2">
+                                        {spell.description}
+                                    </div>
+                                    <div className="text-xs text-gray-500 mt-1">
+                                        {spell.castingTime} • {spell.range}
+                                        {spell.concentration && ' • Concentration'}
+                                        {spell.ritual && ' • Ritual'}
+                                    </div>
+                                </button>
+                            );
+                        })}
+                    </div>
+                </div>
+            )}
 
             {/* Navigation */}
             <div className='flex justify-between'>

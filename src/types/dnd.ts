@@ -87,16 +87,28 @@ export interface Character {
     racialTraits: string[];
   };
 
-  // Sprint 2: Spellcasting data
+  // Sprint 2: Spellcasting data (enhanced for differentiated types)
   spellcasting?: {
     ability: 'INT' | 'WIS' | 'CHA';
     spellSaveDC: number;
     spellAttackBonus: number;
-    cantripsKnown: string[]; // Spell slugs
-    spellsKnown: string[]; // Spell slugs for known/prepared spells
-    spellSlots: number[]; // Maximum spell slots by level
-    usedSpellSlots?: number[]; // Used spell slots by level (for tracking)
-    cantripChoicesByLevel?: Record<number, string>;
+
+    // Cantrips (always known, chosen at character creation)
+    cantripsKnown: string[];
+
+    // Spell knowledge based on casting type
+    spellsKnown?: string[];        // Known casters: fixed list (Bard, Sorcerer, etc.)
+    spellbook?: string[];          // Wizards: permanent spellbook
+    preparedSpells?: string[];     // Prepared casters: daily selection (Cleric, Druid, etc.)
+
+    // Spell slots and usage
+    spellSlots: number[];          // Maximum slots by level [cantrips, 1st, 2nd, ...]
+    usedSpellSlots: number[];      // Currently used slots by level
+
+    // Metadata and progression
+    spellcastingType: 'known' | 'prepared' | 'wizard';
+    cantripChoicesByLevel: Record<number, string>;
+    spellChoicesByLevel?: Record<number, string>; // For tracking spell learning
   };
 
   // Sprint 3: Character advancement
@@ -144,11 +156,25 @@ export interface EquipmentChoice {
 }
 
 // Sprint 2: Spell system interfaces
+// Spellcasting type classification
+export type SpellcastingType = 'known' | 'prepared' | 'wizard';
+
 export interface SpellSelectionData {
+  // All spellcasters - cantrips chosen at character creation
   selectedCantrips: string[]; // Spell slugs
-  selectedSpells: string[]; // Spell slugs for leveled spells
-  spellbook?: string[]; // Only for wizards - spells in spellbook
-  preparedSpells?: string[]; // Only for prepared casters (clerics, druids, paladins)
+
+  // Known Casters (Bard, Sorcerer, Warlock, Ranger)
+  knownSpells?: string[]; // Fixed spells known at level 1
+
+  // Prepared Casters (Cleric, Druid, Paladin, Artificer)
+  preparedSpells?: string[]; // Initially prepared spells from full class list
+
+  // Wizard Special Case
+  spellbook?: string[]; // 6 spells permanently in spellbook
+  dailyPrepared?: string[]; // Spells prepared for the day from spellbook
+
+  // Legacy support (deprecated - use type-specific fields above)
+  selectedSpells?: string[]; // For backward compatibility
 }
 
 // Sprint 3: Feat system (interface moved to Sprint 5 section below)
@@ -337,10 +363,13 @@ export interface Class {
   // Sprint 2: Spellcasting configuration
   spellcasting?: {
     ability: 'INT' | 'WIS' | 'CHA'; // Spellcasting ability modifier
-    mode: 'known' | 'prepared' | 'book'; // How spells are learned/prepared
+    type: SpellcastingType; // How spells are learned/prepared
     cantripsKnown: number; // Number of cantrips at level 1
     spellsKnownOrPrepared: number; // Number of spells known (sorcerer/bard) or can prepare (cleric/druid)
     spellSlots: number[]; // Spell slots by level [0, 2, 0, 0...] means 2 1st-level slots
+
+    // Legacy support
+    mode?: 'known' | 'prepared' | 'book'; // Deprecated - use type instead
   };
 
   // Sprint 3: Subclass support
