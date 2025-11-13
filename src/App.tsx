@@ -19,19 +19,14 @@ import { calculateKnownLanguages, getMaxLanguages, parseBackgroundLanguageChoice
 import { getLanguagesByCategory } from './data/languages';
 import { SPELL_SLOTS_BY_CLASS } from './data/spellSlots';
 import { CANTRIPS_KNOWN_BY_CLASS } from './data/cantrips';
-// import alignmentsData from './data/alignments.json';
 import { Ability, Character, AbilityScore, Skill, AbilityName, SkillName, Equipment, EquippedItem, Feat, CharacterCreationData, EquipmentPackage, Feature, SpellSelectionData } from './types/dnd';
-
-
-// Missing type definitions
-type DiceRollType = DiceRoll;
 
 interface CharacterSheetProps {
   character: Character;
   onClose: () => void;
   onDelete: (id: string) => void;
   setRollResult: (result: { text: string; value: number | null }) => void;
-  onDiceRoll: (roll: DiceRollType) => void;
+  onDiceRoll: (roll: DiceRoll) => void;
   onToggleInspiration: (characterId: string) => void;
   onFeatureClick: (feature: string | Feature) => void;
   onLongRest: (characterId: string) => void;
@@ -499,7 +494,7 @@ const formatModifier = (mod: number): string => mod >= 0 ? `+${mod}` : `${mod}`;
 
 // --- Sub-Components (CharacterSheet) ---
 
-const AbilityScoreBlock: React.FC<{ name: AbilityName; ability: AbilityScore; setRollResult: CharacterSheetProps['setRollResult']; onDiceRoll: (roll: DiceRollType) => void }> = ({ name, ability, setRollResult, onDiceRoll }) => {
+const AbilityScoreBlock: React.FC<{ name: AbilityName; ability: AbilityScore; setRollResult: CharacterSheetProps['setRollResult']; onDiceRoll: (roll: DiceRoll) => void }> = ({ name, ability, setRollResult, onDiceRoll }) => {
   const handleClick = () => {
     const roll = createAbilityRoll(name, ability.score);
     setRollResult({ text: `${roll.label}: ${roll.notation}`, value: roll.total });
@@ -518,7 +513,7 @@ const AbilityScoreBlock: React.FC<{ name: AbilityName; ability: AbilityScore; se
   );
 };
 
-const SkillEntry: React.FC<{ name: SkillName; skill: Skill; setRollResult: CharacterSheetProps['setRollResult']; onDiceRoll: (roll: DiceRollType) => void }> = ({ name, skill, setRollResult, onDiceRoll }) => {
+const SkillEntry: React.FC<{ name: SkillName; skill: Skill; setRollResult: CharacterSheetProps['setRollResult']; onDiceRoll: (roll: DiceRoll) => void }> = ({ name, skill, setRollResult, onDiceRoll }) => {
   const skillLabel = name.replace(/([A-Z])/g, ' $1').trim();
 
   const handleClick = () => {
@@ -1308,9 +1303,9 @@ const STEP_TITLES = [
     'Character Details',          // 1
     'Choose Race',                // 2
     'Choose Class & Subclass',    // 3 - Sprint 5: Updated to include subclass
-    'Choose Fighting Style',      // 4 - Sprint 5: Conditional for Fighter/Paladin/Ranger
+    'Select Spells',              // 4 - Sprint 2: Conditional for spellcasters
     'Choose Fighting Style',      // 5 - Sprint 5: Conditional for Fighter/Paladin/Ranger
-    'Select Spells',              // 6 - Sprint 2: Conditional for spellcasters
+    'Select Spells',              // 6 - 
     'Determine Abilities',        // 7
     'Choose Feats',               // 8 - Sprint 5: Optional feat selection
     'Select Languages',           // 9
@@ -4141,8 +4136,8 @@ const App: React.FC = () => {
   const [selectedCharacterIds, setSelectedCharacterIds] = useState<Set<string>>(new Set());
   const [isWizardOpen, setIsWizardOpen] = useState<boolean>(false);
   const [rollResult, setRollResult] = useState<{ text: string; value: number | null }>({ text: 'Ready to Roll!', value: null });
-  const [rollHistory, setRollHistory] = useState<DiceRollType[]>([]);
-  const [latestRoll, setLatestRoll] = useState<DiceRollType | null>(null);
+  const [rollHistory, setRollHistory] = useState<DiceRoll[]>([]);
+  const [latestRoll, setLatestRoll] = useState<DiceRoll | null>(null);
   const [featureModal, setFeatureModal] = useState<{name: string, description: string, source?: string} | null>(null);
   const [equipmentModal, setEquipmentModal] = useState<Equipment | null>(null);
   const [cantripModalState, setCantripModalState] = useState<{isOpen: boolean, characterId: string | null, characterClass: string | null}>({ isOpen: false, characterId: null, characterClass: null });
@@ -4171,7 +4166,7 @@ const App: React.FC = () => {
   }, []);
 
   // Handle dice roll
-  const handleDiceRoll = useCallback((roll: DiceRollType) => {
+  const handleDiceRoll = useCallback((roll: DiceRoll) => {
     // Add to history
     const updatedHistory = addRollToHistory(roll);
     setRollHistory(updatedHistory);
