@@ -14,6 +14,7 @@ import { createAbilityRoll, createSkillRoll, createInitiativeRoll, getRollHistor
 import { diceSounds } from './utils/diceSounds';
 import { featureDescriptions } from './utils/featureDescriptions';
 import { loadClasses, loadEquipment, FEAT_DATABASE as loadedFeats, getSubclassesByClass, getFeaturesByClass, getFeaturesBySubclass, SPELL_DATABASE, getCantripsByClass, getLeveledSpellsByClass, AppSpell, PROFICIENCY_BONUSES, getModifier, SKILL_TO_ABILITY, ALL_SKILLS, ALIGNMENTS_DATA, ALIGNMENTS, BACKGROUNDS, RACE_CATEGORIES, CLASS_CATEGORIES, EQUIPMENT_PACKAGES, getAllRaces, randomizeLevel, randomizeIdentity, randomizeRace, randomizeClassAndSkills, randomizeFightingStyle, randomizeSpells, randomizeAbilities, randomizeFeats, randomizeEquipmentChoices, randomizeAdditionalEquipment, randomizeLanguages, randomizePersonality, AppSubclass } from './services/dataService';
+import { getAllCharacters, addCharacter, deleteCharacter, updateCharacter } from './services/dbService';
 import { calculateKnownLanguages, getMaxLanguages, parseBackgroundLanguageChoices, getRacialLanguages, getClassLanguages } from './utils/languageUtils';
 import { getLanguagesByCategory } from './data/languages';
 import { SPELL_SLOTS_BY_CLASS } from './data/spellSlots';
@@ -180,78 +181,7 @@ const EquipmentPackDisplay: React.FC<EquipmentPackDisplayProps> = ({
     );
   };
 
-// --- IndexedDB Configuration ---
-const DB_NAME = '5e_character_forge';
-const DB_VERSION = 1;
-const STORE_NAME = 'characters';
 
-// --- IndexedDB Helper Functions ---
-const openDB = (): Promise<IDBDatabase> => {
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, DB_VERSION);
-
-    request.onerror = () => reject(request.error);
-    request.onsuccess = () => resolve(request.result);
-
-    request.onupgradeneeded = (event) => {
-      const db = (event.target as IDBOpenDBRequest).result;
-      if (!db.objectStoreNames.contains(STORE_NAME)) {
-        const objectStore = db.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: false });
-        objectStore.createIndex('name', 'name', { unique: false });
-        objectStore.createIndex('class', 'class', { unique: false });
-        objectStore.createIndex('level', 'level', { unique: false });
-      }
-    };
-  });
-};
-
-const getAllCharacters = async (): Promise<Character[]> => {
-  const db = await openDB();
-  return new Promise((resolve, reject) => {
-    const transaction = db.transaction([STORE_NAME], 'readonly');
-    const objectStore = transaction.objectStore(STORE_NAME);
-    const request = objectStore.getAll();
-
-    request.onerror = () => reject(request.error);
-    request.onsuccess = () => resolve(request.result);
-  });
-};
-
-const addCharacter = async (character: Character): Promise<string> => {
-  const db = await openDB();
-  return new Promise((resolve, reject) => {
-    const transaction = db.transaction([STORE_NAME], 'readwrite');
-    const objectStore = transaction.objectStore(STORE_NAME);
-    const request = objectStore.add(character);
-
-    request.onerror = () => reject(request.error);
-    request.onsuccess = () => resolve(character.id);
-  });
-};
-
-const deleteCharacter = async (id: string): Promise<void> => {
-  const db = await openDB();
-  return new Promise((resolve, reject) => {
-    const transaction = db.transaction([STORE_NAME], 'readwrite');
-    const objectStore = transaction.objectStore(STORE_NAME);
-    const request = objectStore.delete(id);
-
-    request.onerror = () => reject(request.error);
-    request.onsuccess = () => resolve();
-  });
-};
-
-const updateCharacter = async (character: Character): Promise<void> => {
-  const db = await openDB();
-  return new Promise((resolve, reject) => {
-    const transaction = db.transaction([STORE_NAME], 'readwrite');
-    const objectStore = transaction.objectStore(STORE_NAME);
-    const request = objectStore.put(character);
-
-    request.onerror = () => reject(request.error);
-    request.onsuccess = () => resolve();
-  });
-};
 
 // --- D&D 5e Character Interface (Must be adhered to) ---
 
@@ -1374,18 +1304,19 @@ const CharacterSheet: React.FC<CharacterSheetProps> = ({
 // --- Character Creation Wizard Steps ---
 
 const STEP_TITLES = [
-    'Character Details',        // 0
-    'Choose Race',              // 1
-    'Choose Class & Subclass',  // 2 - Sprint 5: Updated to include subclass
-    'Choose Fighting Style',    // 3 - Sprint 5: Conditional for Fighter/Paladin/Ranger
-    'Choose Fighting Style',    // 4 - Sprint 5: Conditional for Fighter/Paladin/Ranger
-    'Select Spells',            // 5 - Sprint 2: Conditional for spellcasters
-    'Determine Abilities',      // 6
-    'Choose Feats',             // 7 - Sprint 5: Optional feat selection
-    'Select Languages',         // 8
-    'Select Equipment',         // 9
-    'Customize Equipment',      // 10 - Sprint 4: Equipment browser
-    'Finalize Background'       // 11
+    'Character Level',            // New Step 0: Choose Level
+    'Character Details',          // 1
+    'Choose Race',                // 2
+    'Choose Class & Subclass',    // 3 - Sprint 5: Updated to include subclass
+    'Choose Fighting Style',      // 4 - Sprint 5: Conditional for Fighter/Paladin/Ranger
+    'Choose Fighting Style',      // 5 - Sprint 5: Conditional for Fighter/Paladin/Ranger
+    'Select Spells',              // 6 - Sprint 2: Conditional for spellcasters
+    'Determine Abilities',        // 7
+    'Choose Feats',               // 8 - Sprint 5: Optional feat selection
+    'Select Languages',           // 9
+    'Select Equipment',           // 10
+    'Customize Equipment',        // 11 - Sprint 4: Equipment browser
+    'Finalize Background'         // 12
 ];
 
 interface StepProps {
