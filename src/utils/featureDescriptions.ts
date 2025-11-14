@@ -6,6 +6,10 @@ export const featureDescriptions: Record<string, { description: string; source?:
     description: 'Accustomed to life underground, you have superior vision in dark and dim conditions. You can see in dim light within 60 feet of you as if it were bright light, and in darkness as if it were dim light. You can’t discern color in darkness, only shades of gray.',
     source: 'Player\'s Handbook',
   },
+  'Superior Darkvision': {
+    description: 'Your darkvision has a radius of 120 feet.',
+    source: 'Player\'s Handbook',
+  },
   'Superior Darkvision (120ft)': {
     description: 'Your darkvision has a radius of 120 feet.',
     source: 'Player\'s Handbook',
@@ -68,6 +72,10 @@ export const featureDescriptions: Record<string, { description: string; source?:
     description: 'You can attempt to hide even when you are obscured only by a creature that is at least one size larger than you.',
     source: 'Player\'s Handbook',
   },
+  'Stout Resilience': {
+    description: 'You have advantage on saving throws against poison, and you have resistance against poison damage.',
+    source: 'Player\'s Handbook',
+  },
   'Stout Resilience (poison advantage)': {
     description: 'You have advantage on saving throws against poison, and you have resistance against poison damage.',
     source: 'Player\'s Handbook',
@@ -104,6 +112,10 @@ export const featureDescriptions: Record<string, { description: string; source?:
   },
 
   // Half-Elf
+  'Skill Versatility': {
+    description: 'You gain proficiency in two skills of your choice.',
+    source: 'Player\'s Handbook',
+  },
   'Skill Versatility (2 skills)': {
     description: 'You gain proficiency in two skills of your choice.',
     source: 'Player\'s Handbook',
@@ -118,12 +130,20 @@ export const featureDescriptions: Record<string, { description: string; source?:
     description: 'When you score a critical hit with a melee weapon attack, you can roll one of the weapon’s damage dice one additional time and add it to the extra damage of the critical hit.',
     source: 'Player\'s Handbook',
   },
+  'Menacing': {
+    description: 'You gain proficiency in the Intimidation skill.',
+    source: 'Player\'s Handbook',
+  },
   'Menacing (Intimidation)': {
     description: 'You gain proficiency in the Intimidation skill.',
     source: 'Player\'s Handbook',
   },
 
   // Tiefling
+  'Hellish Resistance': {
+    description: 'You have resistance to fire damage.',
+    source: 'Player\'s Handbook',
+  },
   'Hellish Resistance (fire)': {
     description: 'You have resistance to fire damage.',
     source: 'Player\'s Handbook',
