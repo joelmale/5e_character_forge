@@ -93,7 +93,7 @@ export function createAbilityRoll(
     id: generateUUID(),
     type: 'ability',
     label: `${abilityName} Check`,
-    notation: `1d20${modifier >= 0 ? '+' : ''}${modifier}`,
+    notation: modifier === 0 ? '1d20' : `1d20${modifier >= 0 ? '+' : ''}${modifier}`,
     diceResults,
     modifier,
     total,
@@ -121,7 +121,7 @@ export function createSkillRoll(
     id: generateUUID(),
     type: 'skill',
     label: skillName,
-    notation: `1d20${skillValue >= 0 ? '+' : ''}${skillValue}`,
+    notation: skillValue === 0 ? '1d20' : `1d20${skillValue >= 0 ? '+' : ''}${skillValue}`,
     diceResults,
     modifier: skillValue,
     total,
@@ -145,7 +145,7 @@ export function createInitiativeRoll(initiativeModifier: number): DiceRoll {
     id: generateUUID(),
     type: 'initiative',
     label: 'Initiative',
-    notation: `1d20${initiativeModifier >= 0 ? '+' : ''}${initiativeModifier}`,
+    notation: initiativeModifier === 0 ? '1d20' : `1d20${initiativeModifier >= 0 ? '+' : ''}${initiativeModifier}`,
     diceResults,
     modifier: initiativeModifier,
     total,
@@ -233,7 +233,7 @@ export function createAdvantageRoll(label: string, modifier: number): DiceRoll {
     id: generateUUID(),
     type: 'complex',
     label: `${label} (Advantage)`,
-    notation: `2d20kh1${modifier >= 0 ? '+' : ''}${modifier}`,
+    notation: modifier === 0 ? '2d20kh1' : `2d20kh1${modifier >= 0 ? '+' : ''}${modifier}`,
     diceResults: [highest], // Only show the kept result
     modifier,
     total,
@@ -244,7 +244,7 @@ export function createAdvantageRoll(label: string, modifier: number): DiceRoll {
       sides: 20,
       results: diceResults
     }],
-    expression: `2d20kh1${modifier >= 0 ? '+' : ''}${modifier}`
+    expression: modifier === 0 ? '2d20kh1' : `2d20kh1${modifier >= 0 ? '+' : ''}${modifier}`
   };
 }
 
@@ -263,7 +263,7 @@ export function createDisadvantageRoll(label: string, modifier: number): DiceRol
     id: generateUUID(),
     type: 'complex',
     label: `${label} (Disadvantage)`,
-    notation: `2d20kl1${modifier >= 0 ? '+' : ''}${modifier}`,
+    notation: modifier === 0 ? '2d20kl1' : `2d20kl1${modifier >= 0 ? '+' : ''}${modifier}`,
     diceResults: [lowest], // Only show the kept result
     modifier,
     total,
@@ -274,7 +274,7 @@ export function createDisadvantageRoll(label: string, modifier: number): DiceRol
       sides: 20,
       results: diceResults
     }],
-    expression: `2d20kl1${modifier >= 0 ? '+' : ''}${modifier}`
+    expression: modifier === 0 ? '2d20kl1' : `2d20kl1${modifier >= 0 ? '+' : ''}${modifier}`
   };
 }
 

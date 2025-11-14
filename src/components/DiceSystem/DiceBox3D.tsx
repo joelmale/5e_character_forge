@@ -19,6 +19,7 @@ export const DiceBox3D: React.FC<DiceBox3DProps> = ({
   const [isInitialized, setIsInitialized] = useState(false);
   const [webGLSupported, setWebGLSupported] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [diceVisible, setDiceVisible] = useState(false);
 
   // Check WebGL support and initialize DiceBox
   useEffect(() => {
@@ -170,6 +171,7 @@ export const DiceBox3D: React.FC<DiceBox3DProps> = ({
         // Show the dice box first
         console.log('DiceBox3D: Calling diceBox.show()...');
         diceBoxRef.current!.show();
+        setDiceVisible(true);
         console.log('DiceBox3D: DiceBox shown successfully');
 
         // Then roll the dice
@@ -177,13 +179,14 @@ export const DiceBox3D: React.FC<DiceBox3DProps> = ({
         const result = await diceBoxRef.current!.roll(rollNotation);
         console.log('DiceBox3D: Roll completed with result:', result);
 
-        // Auto-clear after settle time + 3 seconds
-        const totalTime = 2000 + 3000; // settleTimeout + 3s
+        // Auto-clear after settle time + 10 seconds (give user time to see results)
+        const totalTime = 2000 + 10000; // settleTimeout + 10s
         clearTimeoutRef.current = setTimeout(() => {
           if (diceBoxRef.current) {
-            console.log('DiceBox3D: Hiding and clearing dice');
+            console.log('DiceBox3D: Hiding and clearing dice after timeout');
             diceBoxRef.current.hide();
             diceBoxRef.current.clear();
+            setDiceVisible(false);
           }
         }, totalTime);
 
@@ -222,11 +225,22 @@ export const DiceBox3D: React.FC<DiceBox3DProps> = ({
     );
   }
 
+  // Handle click to dismiss dice
+  const handleContainerClick = () => {
+    if (diceBoxRef.current && clearTimeoutRef.current) {
+      console.log('DiceBox3D: User clicked to dismiss dice');
+      clearTimeout(clearTimeoutRef.current);
+      diceBoxRef.current.hide();
+      diceBoxRef.current.clear();
+      setDiceVisible(false);
+    }
+  };
+
   return (
     <div
       id="dice-box"
       ref={containerRef}
-      className="fixed inset-0 pointer-events-none"
+      className={`fixed inset-0 ${diceVisible ? 'cursor-pointer' : 'pointer-events-none'}`}
       style={{
         width: '100vw',
         height: '100vh',
@@ -234,6 +248,7 @@ export const DiceBox3D: React.FC<DiceBox3DProps> = ({
         top: 0,
         left: 0,
       }}
+      onClick={handleContainerClick}
     >
       <canvas
         id="dice-canvas"
