@@ -4,7 +4,7 @@ import { Dice6, Plus, Trash2, BookOpen, User as UserIcon, Shield, Zap, ArrowLeft
 import { CharacterCreationWizard } from './components/CharacterCreationWizard';
 import { migrateSpellSelectionToCharacter } from './utils/spellUtils';
 
-import { DiceBox3D } from './components/DiceBox3D';
+import { DiceBox3D } from './components/DiceSystem/DiceBox3D';
 import { RollHistoryModal, RollHistoryTicker } from './components/RollHistory';
 import { FeatureModal } from './components/FeatureModal';
 import { EquipmentDetailModal } from './components/EquipmentDetailModal';
