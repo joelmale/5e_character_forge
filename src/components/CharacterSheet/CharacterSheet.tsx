@@ -49,11 +49,21 @@ export const CharacterSheet: React.FC<CharacterSheetProps> = ({
           onDiceRoll={onDiceRoll}
         />
 
+        {/* DEBUG: Attacks and Actions */}
+        <div style={{backgroundColor: 'red', color: 'white', padding: '20px', margin: '10px', border: '2px solid yellow'}}>
+          <h2>DEBUG: AttacksAndActions Component Should Render Here</h2>
+        </div>
+
         <AttacksAndActions
           character={character}
           setRollResult={setRollResult}
           onDiceRoll={onDiceRoll}
         />
+
+        {/* DEBUG: Saving Throws */}
+        <div style={{backgroundColor: 'orange', color: 'white', padding: '20px', margin: '10px', border: '2px solid yellow'}}>
+          <h2>DEBUG: SavingThrows Component Should Render Here</h2>
+        </div>
 
         <SavingThrows
           character={character}
