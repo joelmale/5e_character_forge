@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Dice6, Plus, Trash2, Loader2, BookOpen, User as UserIcon, Shield, Zap, ArrowLeft, ArrowRight, Check, Download, Upload, XCircle, ChevronDown, ChevronUp, Shuffle } from 'lucide-react';
-import { getSpellcastingType, migrateSpellSelectionToCharacter } from './utils/spellUtils';
+import { Dice6, Plus, Trash2, BookOpen, User as UserIcon, Shield, Zap, ArrowLeft, ArrowRight, Download, Upload, XCircle, ChevronDown, ChevronUp, Shuffle } from 'lucide-react';
+// REFACTORED: Loader2 import removed - was unused
+import { CharacterCreationWizard } from './components/CharacterCreationWizard';
+import { migrateSpellSelectionToCharacter } from './utils/spellUtils';
 
 import { DiceBox3D } from './components/DiceBox3D';
 import { RollHistoryModal, RollHistoryTicker } from './components/RollHistory';
@@ -13,19 +15,24 @@ import { SpellPreparationModal } from './components/SpellPreparationModal';
 import { createAbilityRoll, createSkillRoll, createInitiativeRoll, getRollHistory, addRollToHistory, clearRollHistory, rollDice, generateUUID, DiceRoll } from './services/diceService';
 import { diceSounds } from './utils/diceSounds';
 import { featureDescriptions } from './utils/featureDescriptions';
-import { loadClasses, loadEquipment, FEAT_DATABASE as loadedFeats, getSubclassesByClass, getFeaturesByClass, getFeaturesBySubclass, SPELL_DATABASE, getCantripsByClass, getLeveledSpellsByClass, AppSpell, PROFICIENCY_BONUSES, getModifier, SKILL_TO_ABILITY, ALL_SKILLS, ALIGNMENTS_DATA, ALIGNMENTS, BACKGROUNDS, RACE_CATEGORIES, CLASS_CATEGORIES, EQUIPMENT_PACKAGES, getAllRaces, randomizeLevel, randomizeIdentity, randomizeRace, randomizeClassAndSkills, randomizeFightingStyle, randomizeSpells, randomizeAbilities, randomizeFeats, randomizeEquipmentChoices, randomizeAdditionalEquipment, randomizeLanguages, randomizePersonality, AppSubclass } from './services/dataService';
+import { loadClasses, loadEquipment, FEAT_DATABASE as loadedFeats, getSubclassesByClass, getFeaturesByClass, getFeaturesBySubclass, SPELL_DATABASE, PROFICIENCY_BONUSES, getModifier, SKILL_TO_ABILITY, ALL_SKILLS, ALIGNMENTS_DATA, ALIGNMENTS, BACKGROUNDS, RACE_CATEGORIES, CLASS_CATEGORIES, EQUIPMENT_PACKAGES, getAllRaces, randomizeLevel, randomizeIdentity, randomizeRace, randomizeClassAndSkills, randomizeFightingStyle, randomizeSpells, randomizeAbilities, randomizeFeats, randomizeEquipmentChoices, randomizeAdditionalEquipment, randomizeLanguages, randomizePersonality, AppSubclass } from './services/dataService';
 import { getAllCharacters, addCharacter, deleteCharacter, updateCharacter } from './services/dbService';
-import { calculateKnownLanguages, getMaxLanguages, parseBackgroundLanguageChoices, getRacialLanguages, getClassLanguages } from './utils/languageUtils';
-import { getLanguagesByCategory } from './data/languages';
+// REFACTORED: Language utilities moved to languageUtils.ts for the wizard
+// Still used here in main App for character sheet display - can be removed once main app is refactored
+import { calculateKnownLanguages } from './utils/languageUtils';
 import { SPELL_SLOTS_BY_CLASS } from './data/spellSlots';
 import { CANTRIPS_KNOWN_BY_CLASS } from './data/cantrips';
-import { Ability, Character, AbilityScore, Skill, AbilityName, SkillName, Equipment, EquippedItem, Feat, CharacterCreationData, EquipmentPackage, Feature, SpellSelectionData } from './types/dnd';
+import { Ability, Character, AbilityScore, Skill, AbilityName, SkillName, Equipment, EquippedItem, Feat, CharacterCreationData, Feature } from './types/dnd';
 
 interface CharacterSheetProps {
   character: Character;
   onClose: () => void;
   onDelete: (id: string) => void;
-  setRollResult: (result: { text: string; value: number | null }) => void;
+  setRollResult: (result: {
+    text: string;
+    value: number | null;
+    details?: Array<{ value: number; kept: boolean; critical?: 'success' | 'failure' }>
+  }) => void;
   onDiceRoll: (roll: DiceRoll) => void;
   onToggleInspiration: (characterId: string) => void;
   onFeatureClick: (feature: string | Feature) => void;
@@ -42,23 +49,11 @@ interface CharacterSheetProps {
   setEquipmentModal: (item: Equipment | null) => void;
 }
 
-interface WizardProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onCharacterCreated: () => void;
-  setRollResult: (result: { text: string; value: number | null }) => void;
-}
+
 
 const DEBUG_MODE = true;
 
-// Equipment Pack Display Component
-interface EquipmentPackDisplayProps {
-  pack: EquipmentPackage;
-  isSelected?: boolean;
-  onClick?: () => void;
-  showRecommendation?: boolean;
-  characterClass?: string;
-}
+
 
 // Randomize Button Component
 interface RandomizeButtonProps {
@@ -106,75 +101,7 @@ const RandomizeAllButton: React.FC<RandomizeAllButtonProps> = ({
   );
 };
 
-const EquipmentPackDisplay: React.FC<EquipmentPackDisplayProps> = ({
-  pack,
-  isSelected = false,
-  onClick,
-  showRecommendation = false,
-  characterClass
-}) => {
-  const [isExpanded, setIsExpanded] = useState(false);
 
-  const isRecommended = characterClass && pack.recommendedFor?.includes(characterClass);
-
-  return (
-    <div className={`border-2 rounded-lg transition-all ${
-      isSelected
-        ? 'bg-blue-800 border-blue-500'
-        : 'bg-gray-700 border-gray-600 hover:bg-gray-600'
-    }`}>
-      <button
-        onClick={onClick}
-        className="w-full p-3 text-left"
-      >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <span className="text-white font-medium">{pack.name}</span>
-            {pack.startingGold && pack.startingGold > 0 && (
-              <span className="text-yellow-400 text-sm">({pack.startingGold} gp)</span>
-            )}
-            {showRecommendation && isRecommended && (
-              <span className="px-2 py-1 text-xs bg-green-700 text-green-200 rounded">
-                Recommended
-              </span>
-            )}
-          </div>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsExpanded(!isExpanded);
-            }}
-            className="p-1 hover:bg-gray-600 rounded"
-          >
-            <ChevronDown className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
-          </button>
-        </div>
-      </button>
-
-      {isExpanded && (
-        <div className="px-3 pb-3 border-t border-gray-600 mt-2 pt-2">
-          <div className="text-xs text-gray-400 mb-2">Contents:</div>
-          <ul className="text-sm space-y-1">
-            {pack.items.map((item, idx) => (
-              <li key={idx} className="flex items-center justify-between">
-                <span className="text-gray-300">
-                  • {item.name}
-                  {item.quantity > 1 && <span className="text-gray-400 ml-1">x{item.quantity}</span>}
-                </span>
-                {item.equipped && (
-                  <span className="text-xs text-green-400">(equipped)</span>
-                )}
-              </li>
-            ))}
-          </ul>
-           {pack.description && (
-             <p className="text-xs text-gray-500 mt-2 italic">{pack.description}</p>
-           )}
-         </div>
-       )}
-     </div>
-    );
-  };
 
 
 
@@ -184,33 +111,7 @@ const EquipmentPackDisplay: React.FC<EquipmentPackDisplayProps> = ({
 
 
 
-// Initial state for the creation process
-const initialCreationData: CharacterCreationData = {
-  name: '',
-  level: 1,
-  raceSlug: '',
-  classSlug: '',
-  abilities: { STR: 0, DEX: 0, CON: 0, INT: 0, WIS: 0, CHA: 0 },
-  abilityScoreMethod: 'standard-array',
-  background: 'Outlander',
-  alignment: 'Neutral Good',
-  selectedSkills: [],
-  equipmentChoices: [],
-  hpCalculationMethod: 'max',
-  spellSelection: {
-    selectedCantrips: [],
-    selectedSpells: [],
-  },
-  startingInventory: [],
-  subclassSlug: undefined,
-  selectedFightingStyle: undefined,
-  selectedFeats: [],
-  knownLanguages: [],
-  personality: "I'm quiet until I have something important to say.",
-  ideals: "Honesty. The truth must be preserved.",
-  bonds: "I owe my life to the individual who saved me.",
-  flaws: "I trust no one and question everything.",
-};
+
 
 // --- Mock API Data and Ruleset Functions (Simulating dnd5eapi.co) ---
 
@@ -259,6 +160,8 @@ export const FEAT_DATABASE: Feat[] = loadedFeats;
 
 
 
+// REFACTORED: calculateCharacterStats moved to characterCreationUtils.ts for the wizard
+// Still used here in main App for character sheet display - can be removed once main app is refactored
 const calculateCharacterStats = (data: CharacterCreationData): Character => {
   const raceData = getAllRaces().find(r => r.slug === data.raceSlug);
   const classData = loadClasses().find(c => c.slug === data.classSlug);
@@ -1298,20 +1201,21 @@ const CharacterSheet: React.FC<CharacterSheetProps> = ({
 
 // --- Character Creation Wizard Steps ---
 
+// REFACTORED: STEP_TITLES moved to wizard.constants.ts for the wizard
+// Still used here in main App - can be removed once main app wizard code is cleaned up
 const STEP_TITLES = [
     'Character Level',            // New Step 0: Choose Level
     'Character Details',          // 1
     'Choose Race',                // 2
     'Choose Class & Subclass',    // 3 - Sprint 5: Updated to include subclass
-    'Select Spells',              // 4 - Sprint 2: Conditional for spellcasters
-    'Choose Fighting Style',      // 5 - Sprint 5: Conditional for Fighter/Paladin/Ranger
-    'Select Spells',              // 6 - 
-    'Determine Abilities',        // 7
-    'Choose Feats',               // 8 - Sprint 5: Optional feat selection
-    'Select Languages',           // 9
-    'Select Equipment',           // 10
-    'Customize Equipment',        // 11 - Sprint 4: Equipment browser
-    'Finalize Background'         // 12
+    'Choose Fighting Style',      // 4 - Sprint 5: Conditional for Fighter/Paladin/Ranger
+    'Select Spells',              // 5 - Sprint 2: Conditional for spellcasters
+    'Determine Abilities',        // 6 - Ability score determination
+    'Choose Feats',               // 7 - Sprint 5: Optional feat selection
+    'Select Languages',           // 8 - Language selection
+    'Select Equipment',           // 9 - Equipment selection
+    'Customize Equipment',        // 10 - Sprint 4: Equipment browser
+    'Finalize Background'         // 11 - Background and trait finalization
 ];
 
 interface StepProps {
@@ -2073,6 +1977,7 @@ const Step3Class: React.FC<StepProps> = ({ data, updateData, nextStep, prevStep 
 const Step3point5FightingStyle: React.FC<StepProps> = ({ data, updateData, nextStep, prevStep }) => {
     const allClasses = loadClasses();
     const selectedClass = allClasses.find(c => c.slug === data.classSlug);
+    const hasProcessedAutoAdvance = React.useRef(false);
 
     // Define fighting styles available in SRD
     const FIGHTING_STYLES = [
@@ -2121,11 +2026,13 @@ const Step3point5FightingStyle: React.FC<StepProps> = ({ data, updateData, nextS
         if (!data.selectedFightingStyle && recommendedStyle) {
             updateData({ selectedFightingStyle: recommendedStyle.name });
         }
+
     }, [recommendedStyle, data.selectedFightingStyle, updateData]);
 
-    // Auto-skip if class doesn't get fighting style
+    // Auto-skip if class doesn't get fighting style (only on first mount)
     React.useEffect(() => {
-        if (!hasFightingStyle) {
+        if (!hasProcessedAutoAdvance.current && !hasFightingStyle) {
+            hasProcessedAutoAdvance.current = true;
             nextStep();
         }
     }, [hasFightingStyle, nextStep]);
@@ -2203,441 +2110,6 @@ const Step3point5FightingStyle: React.FC<StepProps> = ({ data, updateData, nextS
                     className="px-4 py-2 bg-red-600 hover:bg-red-500 rounded-lg text-white flex items-center disabled:bg-gray-600 disabled:cursor-not-allowed"
                 >
                     Next: {selectedClass.spellcasting ? 'Spells' : 'Abilities'} <ArrowRight className="w-4 h-4 ml-2" />
-                </button>
-            </div>
-        </div>
-    );
-};
-
-// Sprint 2: Spell Selection Step
-const Step4Spells: React.FC<StepProps> = ({ data, updateData, nextStep, prevStep }) => {
-    const allClasses = loadClasses();
-    const selectedClass = allClasses.find(c => c.slug === data.classSlug);
-
-    // Auto-advance and validation effects (must be called before any conditional returns)
-    React.useEffect(() => {
-        if (!selectedClass || !selectedClass.spellcasting ||
-            (selectedClass.spellcasting.cantripsKnown === 0 && selectedClass.spellcasting.spellsKnownOrPrepared === 0)) {
-            nextStep();
-        }
-    }, [selectedClass, nextStep]);
-
-    // Clear invalid spell selections if they exceed current limits
-    React.useEffect(() => {
-        if (selectedClass?.spellcasting) {
-            const spellcasting = selectedClass.spellcasting;
-            const spellcastingType = getSpellcastingType(selectedClass.slug);
-
-            // Validate cantrips
-            const validCantrips = data.spellSelection.selectedCantrips.slice(0, spellcasting.cantripsKnown);
-
-  const updatedSelection = {
-    ...data.spellSelection,
-    selectedCantrips: validCantrips
-  };
-
-            // Validate based on spellcasting type
-            if (spellcastingType === 'known') {
-                const validSpells = (data.spellSelection.knownSpells || []).slice(0, spellcasting.spellsKnownOrPrepared);
-                updatedSelection.knownSpells = validSpells;
-            } else if (spellcastingType === 'prepared') {
-                const validSpells = (data.spellSelection.preparedSpells || []).slice(0, spellcasting.spellsKnownOrPrepared);
-                updatedSelection.preparedSpells = validSpells;
-            } else if (spellcastingType === 'wizard') {
-                // Validate spellbook (6 spells)
-                const validSpellbook = (data.spellSelection.spellbook || []).slice(0, 6);
-                // Validate daily preparation
-                const maxPrepared = Math.max(1, Math.floor((data.abilities.INT - 10) / 2) + 1);
-                const validDaily = (data.spellSelection.dailyPrepared || []).slice(0, maxPrepared);
-                updatedSelection.spellbook = validSpellbook;
-                updatedSelection.dailyPrepared = validDaily;
-            }
-
-            // Check if anything changed
-            const hasChanges =
-                validCantrips.length !== data.spellSelection.selectedCantrips.length ||
-                (spellcastingType === 'known' && updatedSelection.knownSpells?.length !== (data.spellSelection.knownSpells?.length || 0)) ||
-                (spellcastingType === 'prepared' && updatedSelection.preparedSpells?.length !== (data.spellSelection.preparedSpells?.length || 0)) ||
-                (spellcastingType === 'wizard' && (
-                    updatedSelection.spellbook?.length !== (data.spellSelection.spellbook?.length || 0) ||
-                    updatedSelection.dailyPrepared?.length !== (data.spellSelection.dailyPrepared?.length || 0)
-                ));
-
-            if (hasChanges) {
-                updateData({ spellSelection: updatedSelection });
-            }
-        }
-    }, [selectedClass, data.spellSelection, data.abilities.INT, updateData]);
-
-    // If not a spellcaster or has no spells available, skip this step
-    if (!selectedClass || !selectedClass.spellcasting ||
-        (selectedClass.spellcasting.cantripsKnown === 0 && selectedClass.spellcasting.spellsKnownOrPrepared === 0)) {
-        return <div className='text-center text-gray-400'>This class doesn't have spells available at level {data.level}. Advancing...</div>;
-    }
-
-    const spellcasting = selectedClass.spellcasting!;
-    const spellcastingType = getSpellcastingType(selectedClass.slug);
-    const availableCantrips = getCantripsByClass(data.classSlug);
-    const availableSpells = getLeveledSpellsByClass(data.classSlug, 1);
-
-    const handleCantripToggle = (spellSlug: string) => {
-        const current = data.spellSelection.selectedCantrips;
-        const isSelected = current.includes(spellSlug);
-
-        if (isSelected) {
-            // Deselect
-            updateData({
-                spellSelection: {
-                    ...data.spellSelection,
-                    selectedCantrips: current.filter(s => s !== spellSlug),
-                },
-            });
-        } else if (current.length < spellcasting.cantripsKnown) {
-            // Select (if under limit)
-            updateData({
-                spellSelection: {
-                    ...data.spellSelection,
-                    selectedCantrips: [...current, spellSlug],
-                },
-            });
-        }
-    };
-
-    const handleSpellToggle = (spellSlug: string, field: keyof SpellSelectionData) => {
-        const current = (data.spellSelection[field] as string[]) || [];
-        const isSelected = current.includes(spellSlug);
-
-        if (isSelected) {
-            // Deselect
-            updateData({
-                spellSelection: {
-                    ...data.spellSelection,
-                    [field]: current.filter(s => s !== spellSlug),
-                },
-            });
-        } else if (current.length < spellcasting.spellsKnownOrPrepared) {
-            // Select (if under limit)
-            updateData({
-                spellSelection: {
-                    ...data.spellSelection,
-                    [field]: [...current, spellSlug],
-                },
-            });
-        }
-    };
-
-
-
-    const cantripsComplete = data.spellSelection.selectedCantrips.length === spellcasting.cantripsKnown;
-
-    let spellsComplete = false;
-    if (spellcastingType === 'known') {
-        spellsComplete = (data.spellSelection.knownSpells?.length || 0) === spellcasting.spellsKnownOrPrepared;
-    } else if (spellcastingType === 'prepared') {
-        spellsComplete = (data.spellSelection.preparedSpells?.length || 0) === spellcasting.spellsKnownOrPrepared;
-    } else if (spellcastingType === 'wizard') {
-        const spellbookComplete = (data.spellSelection.spellbook?.length || 0) === 6;
-        const dailyComplete = (data.spellSelection.dailyPrepared?.length || 0) === Math.max(1, Math.floor((data.abilities.INT - 10) / 2) + 1);
-        spellsComplete = spellbookComplete && dailyComplete;
-    }
-
-    const allSelectionsComplete = cantripsComplete && spellsComplete;
-
-    // Spell mode description
-    const modeDescription = spellcastingType === 'wizard'
-        ? 'Choose spells for your spellbook. You can prepare a subset of these each day.'
-        : spellcastingType === 'prepared'
-        ? 'Choose spells to prepare. You can change your prepared spells after a long rest.'
-        : 'Choose spells your character knows. These are permanent until you level up.';
-
-    return (
-        <div className='space-y-6'>
-            <div className='flex justify-between items-start'>
-                <div>
-                    <h3 className='text-xl font-bold text-red-300'>Select Your Spells</h3>
-                    <p className='text-sm text-gray-400 mt-1'>
-                        {selectedClass.name} - {modeDescription}
-                    </p>
-                    <p className='text-xs text-purple-300 mt-1'>
-                        Spellcasting Ability: <span className='font-bold'>{spellcasting.ability}</span>
-                    </p>
-                </div>
-                <RandomizeButton
-                    onClick={() => {
-                        const spells = randomizeSpells(data.classSlug, data.level);
-                        updateData({ spellSelection: spells });
-                    }}
-                    title="Randomize spell selection"
-                />
-            </div>
-
-            {/* Cantrips Section */}
-            <div className="bg-gray-700/50 border border-gray-600 rounded-lg p-4 space-y-3">
-                <h4 className="text-lg font-bold text-yellow-300">
-                    Cantrips ({data.spellSelection.selectedCantrips.length} / {spellcasting.cantripsKnown} selected)
-                </h4>
-                <p className="text-xs text-gray-400">
-                    Cantrips are 0-level spells that can be cast at will, without expending spell slots.
-                </p>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {availableCantrips.map((spell: AppSpell) => {
-                        const isSelected = data.spellSelection.selectedCantrips.includes(spell.slug);
-                        const canSelect = data.spellSelection.selectedCantrips.length < spellcasting.cantripsKnown;
-
-                        return (
-                            <button
-                                key={spell.slug}
-                                onClick={() => handleCantripToggle(spell.slug)}
-                                disabled={!isSelected && !canSelect}
-                                className={`p-3 rounded-lg border-2 text-left transition-all ${
-                                    isSelected
-                                        ? 'bg-blue-900 border-blue-500'
-                                        : canSelect
-                                        ? 'bg-gray-700 border-gray-600 hover:border-blue-400'
-                                        : 'bg-gray-800 border-gray-700 opacity-50 cursor-not-allowed'
-                                }`}
-                            >
-                                <div className="flex items-start justify-between">
-                                    <div className="flex-1">
-                                        <div className="font-semibold text-white">{spell.name}</div>
-                                        <div className="text-xs text-purple-300">{spell.school}</div>
-                                    </div>
-                                    {isSelected && <Check className="w-5 h-5 text-green-400" />}
-                                </div>
-                                <div className="text-xs text-gray-400 mt-2 line-clamp-2">
-                                    {spell.description}
-                                </div>
-                                <div className="text-xs text-gray-500 mt-1">
-                                    {spell.castingTime} • {spell.range}
-                                    {spell.concentration && ' • Concentration'}
-                                </div>
-                            </button>
-                        );
-                    })}
-                </div>
-            </div>
-
-            {/* Spell Selection Sections - Varies by spellcasting type */}
-            {spellcastingType === 'wizard' && (
-                <>
-                    {/* Wizard Spellbook Section */}
-                    <div className="bg-gray-700/50 border border-gray-600 rounded-lg p-4 space-y-3">
-                        <h4 className="text-lg font-bold text-yellow-300">
-                            Spellbook ({data.spellSelection.spellbook?.length || 0} / 6 selected)
-                        </h4>
-                        <p className="text-xs text-gray-400">
-                            Choose 6 1st-level spells for your permanent spellbook. You can prepare a subset of these each day.
-                        </p>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            {availableSpells.map((spell: AppSpell) => {
-                                const isSelected = data.spellSelection.spellbook?.includes(spell.slug) || false;
-                                const canSelect = (data.spellSelection.spellbook?.length || 0) < 6;
-
-                                return (
-                                    <button
-                                        key={spell.slug}
-                                        onClick={() => handleSpellToggle(spell.slug, 'spellbook')}
-                                        disabled={!isSelected && !canSelect}
-                                        className={`p-3 rounded-lg border-2 text-left transition-all ${
-                                            isSelected
-                                                ? 'bg-blue-900 border-blue-500'
-                                                : canSelect
-                                                ? 'bg-gray-700 border-gray-600 hover:border-blue-400'
-                                                : 'bg-gray-800 border-gray-700 opacity-50 cursor-not-allowed'
-                                        }`}
-                                    >
-                                        <div className="flex items-start justify-between">
-                                            <div className="flex-1">
-                                                <div className="font-semibold text-white">{spell.name}</div>
-                                                <div className="text-xs text-purple-300">{spell.school}</div>
-                                            </div>
-                                            {isSelected && <Check className="w-5 h-5 text-green-400" />}
-                                        </div>
-                                        <div className="text-xs text-gray-400 mt-2 line-clamp-2">
-                                            {spell.description}
-                                        </div>
-                                        <div className="text-xs text-gray-500 mt-1">
-                                            {spell.castingTime} • {spell.range}
-                                            {spell.concentration && ' • Concentration'}
-                                            {spell.ritual && ' • Ritual'}
-                                        </div>
-                                    </button>
-                                );
-                            })}
-                        </div>
-                    </div>
-
-                    {/* Wizard Daily Preparation Section */}
-                    <div className="bg-gray-700/50 border border-gray-600 rounded-lg p-4 space-y-3">
-                        <h4 className="text-lg font-bold text-yellow-300">
-                            Daily Preparation ({data.spellSelection.dailyPrepared?.length || 0} / {Math.max(1, Math.floor((data.abilities.INT - 10) / 2) + 1)} selected)
-                        </h4>
-                        <p className="text-xs text-gray-400">
-                            Choose spells to prepare for today from your spellbook. You can change this after a long rest.
-                        </p>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            {(data.spellSelection.spellbook || []).map((spellSlug) => {
-                                const spell = availableSpells.find(s => s.slug === spellSlug);
-                                if (!spell) return null;
-
-                                const isSelected = data.spellSelection.dailyPrepared?.includes(spell.slug) || false;
-                                const maxPrepared = Math.max(1, Math.floor((data.abilities.INT - 10) / 2) + 1);
-                                const canSelect = (data.spellSelection.dailyPrepared?.length || 0) < maxPrepared;
-
-                                return (
-                                    <button
-                                        key={spell.slug}
-                                        onClick={() => handleSpellToggle(spell.slug, 'dailyPrepared')}
-                                        disabled={!isSelected && !canSelect}
-                                        className={`p-3 rounded-lg border-2 text-left transition-all ${
-                                            isSelected
-                                                ? 'bg-green-900 border-green-500'
-                                                : canSelect
-                                                ? 'bg-gray-700 border-gray-600 hover:border-green-400'
-                                                : 'bg-gray-800 border-gray-700 opacity-50 cursor-not-allowed'
-                                        }`}
-                                    >
-                                        <div className="flex items-start justify-between">
-                                            <div className="flex-1">
-                                                <div className="font-semibold text-white">{spell.name}</div>
-                                                <div className="text-xs text-purple-300">{spell.school}</div>
-                                            </div>
-                                            {isSelected && <Check className="w-5 h-5 text-green-400" />}
-                                        </div>
-                                        <div className="text-xs text-gray-400 mt-2 line-clamp-2">
-                                            {spell.description}
-                                        </div>
-                                        <div className="text-xs text-gray-500 mt-1">
-                                            {spell.castingTime} • {spell.range}
-                                            {spell.concentration && ' • Concentration'}
-                                            {spell.ritual && ' • Ritual'}
-                                        </div>
-                                    </button>
-                                );
-                            })}
-                        </div>
-                    </div>
-                </>
-            )}
-
-            {spellcastingType === 'known' && (
-                <div className="bg-gray-700/50 border border-gray-600 rounded-lg p-4 space-y-3">
-                    <h4 className="text-lg font-bold text-yellow-300">
-                        Spells Known ({data.spellSelection.knownSpells?.length || 0} / {spellcasting.spellsKnownOrPrepared} selected)
-                    </h4>
-                    <p className="text-xs text-gray-400">
-                        These are the spells your character knows permanently. You can change them when you level up.
-                    </p>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        {availableSpells.map((spell: AppSpell) => {
-                            const isSelected = data.spellSelection.knownSpells?.includes(spell.slug) || false;
-                            const canSelect = (data.spellSelection.knownSpells?.length || 0) < spellcasting.spellsKnownOrPrepared;
-
-                            return (
-                                <button
-                                    key={spell.slug}
-                                    onClick={() => handleSpellToggle(spell.slug, 'knownSpells')}
-                                    disabled={!isSelected && !canSelect}
-                                    className={`p-3 rounded-lg border-2 text-left transition-all ${
-                                        isSelected
-                                            ? 'bg-blue-900 border-blue-500'
-                                            : canSelect
-                                            ? 'bg-gray-700 border-gray-600 hover:border-blue-400'
-                                            : 'bg-gray-800 border-gray-700 opacity-50 cursor-not-allowed'
-                                    }`}
-                                >
-                                    <div className="flex items-start justify-between">
-                                        <div className="flex-1">
-                                            <div className="font-semibold text-white">{spell.name}</div>
-                                            <div className="text-xs text-purple-300">{spell.school}</div>
-                                        </div>
-                                        {isSelected && <Check className="w-5 h-5 text-green-400" />}
-                                    </div>
-                                    <div className="text-xs text-gray-400 mt-2 line-clamp-2">
-                                        {spell.description}
-                                    </div>
-                                    <div className="text-xs text-gray-500 mt-1">
-                                        {spell.castingTime} • {spell.range}
-                                        {spell.concentration && ' • Concentration'}
-                                        {spell.ritual && ' • Ritual'}
-                                    </div>
-                                </button>
-                            );
-                        })}
-                    </div>
-                </div>
-            )}
-
-            {spellcastingType === 'prepared' && (
-                <div className="bg-gray-700/50 border border-gray-600 rounded-lg p-4 space-y-3">
-                    <h4 className="text-lg font-bold text-yellow-300">
-                        Prepared Spells ({data.spellSelection.preparedSpells?.length || 0} / {spellcasting.spellsKnownOrPrepared} selected)
-                    </h4>
-                    <p className="text-xs text-gray-400">
-                        Choose spells to prepare. You can change your prepared spells after a long rest.
-                    </p>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        {availableSpells.map((spell: AppSpell) => {
-                            const isSelected = data.spellSelection.preparedSpells?.includes(spell.slug) || false;
-                            const canSelect = (data.spellSelection.preparedSpells?.length || 0) < spellcasting.spellsKnownOrPrepared;
-
-                            return (
-                                <button
-                                    key={spell.slug}
-                                    onClick={() => handleSpellToggle(spell.slug, 'preparedSpells')}
-                                    disabled={!isSelected && !canSelect}
-                                    className={`p-3 rounded-lg border-2 text-left transition-all ${
-                                        isSelected
-                                            ? 'bg-blue-900 border-blue-500'
-                                            : canSelect
-                                            ? 'bg-gray-700 border-gray-600 hover:border-blue-400'
-                                            : 'bg-gray-800 border-gray-700 opacity-50 cursor-not-allowed'
-                                    }`}
-                                >
-                                    <div className="flex items-start justify-between">
-                                        <div className="flex-1">
-                                            <div className="font-semibold text-white">{spell.name}</div>
-                                            <div className="text-xs text-purple-300">{spell.school}</div>
-                                        </div>
-                                        {isSelected && <Check className="w-5 h-5 text-green-400" />}
-                                    </div>
-                                    <div className="text-xs text-gray-400 mt-2 line-clamp-2">
-                                        {spell.description}
-                                    </div>
-                                    <div className="text-xs text-gray-500 mt-1">
-                                        {spell.castingTime} • {spell.range}
-                                        {spell.concentration && ' • Concentration'}
-                                        {spell.ritual && ' • Ritual'}
-                                    </div>
-                                </button>
-                            );
-                        })}
-                    </div>
-                </div>
-            )}
-
-            {/* Navigation */}
-            <div className='flex justify-between'>
-                <button onClick={prevStep} className='px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-500 flex items-center gap-2'>
-                    <ArrowLeft className='w-4 h-4' />
-                    Back
-                </button>
-                <button
-                    onClick={nextStep}
-                    disabled={!allSelectionsComplete}
-                    className={`px-4 py-2 rounded-lg flex items-center gap-2 ${
-                        allSelectionsComplete
-                            ? 'bg-red-700 text-white hover:bg-red-600'
-                            : 'bg-gray-700 text-gray-500 cursor-not-allowed'
-                    }`}
-                >
-                    Next: Abilities
-                    <ArrowRight className='w-4 h-4' />
                 </button>
             </div>
         </div>
@@ -3065,734 +2537,15 @@ const Step4Abilities: React.FC<StepProps> = ({ data, updateData, nextStep, prevS
     );
 };
 
-// Sprint 5: Feats Selection Step
-const Step5point5Feats: React.FC<StepProps> = ({ data, updateData, nextStep, prevStep }) => {
-    const [showFeatDetails, setShowFeatDetails] = useState<string | null>(null);
 
-    // Calculate how many feats the character can take
-    const maxFeats = Math.floor((data.level - 1) / 4); // 0 at levels 1-3, 1 at 4-7, 2 at 8-11, etc.
-    const selectedFeats = data.selectedFeats || [];
 
-    // For now, all feats are available (prerequisite checking can be enhanced later)
-    const availableFeats = FEAT_DATABASE;
 
-    const handleFeatToggle = (featSlug: string) => {
-        const isSelected = selectedFeats.includes(featSlug);
 
-        if (isSelected) {
-            // Deselect
-            updateData({
-                selectedFeats: selectedFeats.filter(s => s !== featSlug)
-            });
-        } else if (selectedFeats.length < maxFeats) {
-            // Select
-            updateData({
-                selectedFeats: [...selectedFeats, featSlug]
-            });
-        }
-    };
 
-    return (
-        <div className='space-y-6'>
-            <div className='flex justify-between items-start'>
-                <div className='flex-1'>
-                    <h3 className='text-xl font-bold text-red-300'>Choose Feats (Optional)</h3>
-                    <p className='text-sm text-gray-400 mt-2'>
-                        Feats represent special talents or areas of expertise. At certain levels, you can choose to take a feat instead of an Ability Score Improvement.
-                    </p>
-                    <div className="mt-2 p-3 bg-blue-900/30 border border-blue-700 rounded-lg">
-                        <div className="text-sm text-blue-300">
-                            <strong>Level {data.level}:</strong> You can select up to {maxFeats} feat{maxFeats !== 1 ? 's' : ''}
-                        </div>
-                    </div>
-                    <div className="text-xs text-gray-400 mt-1">
-                        ℹ️ Feats are optional. You can also choose Ability Score Improvements at these levels.
-                    </div>
-                </div>
-                <RandomizeButton
-                    onClick={() => {
-                        const feats = randomizeFeats();
-                        updateData({ selectedFeats: feats });
-                    }}
-                    title="Randomize feat selection"
-                />
-            </div>
 
-            {selectedFeats.length > 0 && (
-                <div className="bg-green-900/20 border border-green-700 rounded-lg p-3">
-                    <div className="text-sm font-semibold text-green-400 mb-2">
-                        Selected Feats ({selectedFeats.length} / {maxFeats}):
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                        {selectedFeats.map(slug => {
-                            const feat = FEAT_DATABASE.find(f => f.slug === slug);
-                            return (
-                                <span key={slug} className="px-2 py-1 bg-green-700 text-white text-xs rounded">
-                                    {feat?.name}
-                                </span>
-                            );
-                        })}
-                    </div>
-                </div>
-            )}
 
-            {maxFeats > 0 && (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 max-h-96 overflow-y-auto p-2">
-                    {availableFeats.map(feat => {
-                        const isSelected = selectedFeats.includes(feat.slug);
-                        const canSelect = selectedFeats.length < maxFeats;
 
-                        return (
-                            <div key={feat.slug} className="relative">
-                                <button
-                                    onClick={() => handleFeatToggle(feat.slug)}
-                                    disabled={!canSelect && !isSelected}
-                                    className={`w-full p-3 rounded-lg text-left border-2 transition-all ${
-                                        isSelected
-                                            ? 'bg-green-800 border-green-500 shadow-md'
-                                            : canSelect
-                                            ? 'bg-gray-700 border-gray-600 hover:bg-gray-600'
-                                            : 'bg-gray-800 border-gray-700 text-gray-500 cursor-not-allowed'
-                                    }`}
-                                >
-                                    <div className="flex items-start justify-between">
-                                        <p className="text-sm font-bold text-yellow-300">{feat.name}</p>
-                                        {feat.abilityScoreIncrease && (
-                                            <span className="text-xs bg-blue-600 text-white px-1 py-0.5 rounded ml-2">
-                                                +ASI
-                                            </span>
-                                        )}
-                                    </div>
-                                    <p className="text-xs text-gray-500 mt-1">{feat.source} {feat.year}</p>
-                                    {feat.prerequisite && (
-                                        <p className="text-xs text-yellow-400 mt-1">
-                                            Requires: {feat.prerequisite}
-                                        </p>
-                                    )}
-                                    <p className="text-xs text-gray-400 mt-2 line-clamp-2">
-                                        {feat.description}
-                                    </p>
-                                </button>
-                                <button
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        setShowFeatDetails(showFeatDetails === feat.slug ? null : feat.slug);
-                                    }}
-                                    className="absolute top-2 right-2 text-xs text-blue-400 hover:text-blue-300"
-                                    title="View details"
-                                >
-                                    {showFeatDetails === feat.slug ? '✕' : 'ℹ️'}
-                                </button>
-                                {showFeatDetails === feat.slug && (
-                                    <div className="absolute z-10 mt-2 p-3 bg-gray-900 border border-gray-600 rounded-lg shadow-xl w-80 left-0">
-                                        <h5 className="font-bold text-yellow-300 text-sm mb-2">{feat.name}</h5>
-                                        <p className="text-xs text-gray-300 mb-2">{feat.description}</p>
-                                        <div className="text-xs text-gray-400">
-                                            <strong className="text-gray-300">Benefits:</strong>
-                                            <ul className="list-disc list-inside mt-1 space-y-1">
-                                                {feat.benefits.map((benefit, idx) => (
-                                                    <li key={idx}>{benefit}</li>
-                                                ))}
-                                            </ul>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        );
-                    })}
-                </div>
-            )}
 
-            {maxFeats === 0 && (
-                <div className="text-center text-gray-400 py-8">
-                    <p>Feats become available starting at level 4.</p>
-                    <p className="text-sm mt-2">Your character is currently level {data.level}.</p>
-                </div>
-            )}
-
-            <div className='flex justify-between'>
-                <button onClick={prevStep} className="px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded-lg text-white flex items-center">
-                    <ArrowLeft className="w-4 h-4 mr-2" /> Back
-                </button>
-                <button
-                    onClick={nextStep}
-                    className="px-4 py-2 bg-red-600 hover:bg-red-500 rounded-lg text-white flex items-center"
-                >
-                    Next: Equipment <ArrowRight className="w-4 h-4 ml-2" />
-                </button>
-            </div>
-        </div>
-    );
-};
-
-const Step6Equipment: React.FC<StepProps & { skipToStep?: (step: number) => void }> = ({ data, updateData, nextStep, prevStep, skipToStep }) => {
-    const allClasses = loadClasses();
-    const selectedClass = allClasses.find(c => c.slug === data.classSlug);
-
-    if (!selectedClass) {
-        return <div>Loading...</div>;
-    }
-
-    // Initialize equipment choices if not already set
-    const equipmentChoices = data.equipmentChoices || [];
-    if (equipmentChoices.length === 0 && Array.isArray(selectedClass.equipment_choices) && selectedClass.equipment_choices.length > 0) {
-        updateData({ equipmentChoices: selectedClass.equipment_choices });
-    }
-
-    const handleEquipmentChoice = (choiceId: string, optionIndex: number) => {
-        const currentChoices = data.equipmentChoices || [];
-        const updatedChoices = currentChoices.map(choice =>
-            choice.choiceId === choiceId ? { ...choice, selected: optionIndex } : choice
-        );
-        updateData({ equipmentChoices: updatedChoices });
-    };
-
-    const allChoicesMade = (data.equipmentChoices || []).every(choice => choice.selected !== null);
-
-    return (
-        <div className='space-y-6'>
-            <div>
-                <h3 className='text-xl font-bold text-red-300'>Select Starting Equipment</h3>
-                <p className="text-sm text-gray-400 mt-1">
-                    Choose your starting equipment based on your class. Your background will also grant additional items.
-                </p>
-            </div>
-
-            {/* Equipment Choices */}
-            {(data.equipmentChoices || []).map((choice, idx) => (
-                <div key={choice.choiceId} className="bg-gray-700/50 border border-gray-600 rounded-lg p-4 space-y-3">
-                    <h4 className="font-semibold text-yellow-300">
-                        {idx + 1}. {choice.description}
-                    </h4>
-
-                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                         {choice.options.map((option, optionIdx) => {
-                             // Check if this option contains an equipment pack
-                             const packOption = option.find(item =>
-                                 EQUIPMENT_PACKAGES.some(pack => pack.name === item.name)
-                             );
-                             const pack = packOption ? EQUIPMENT_PACKAGES.find(p => p.name === packOption.name) : null;
-
-                             if (pack) {
-                                 // Display as expandable pack
-                                 return (
-                                     <EquipmentPackDisplay
-                                         key={optionIdx}
-                                         pack={pack}
-                                         isSelected={choice.selected === optionIdx}
-                                         onClick={() => handleEquipmentChoice(choice.choiceId, optionIdx)}
-                                         showRecommendation={true}
-                                         characterClass={data.classSlug}
-                                     />
-                                 );
-                             } else {
-                                 // Display as regular equipment option
-                                 return (
-                                     <button
-                                         key={optionIdx}
-                                         onClick={() => handleEquipmentChoice(choice.choiceId, optionIdx)}
-                                         className={`p-3 rounded-lg border-2 text-left transition-all ${
-                                             choice.selected === optionIdx
-                                                 ? 'bg-blue-800 border-blue-500'
-                                                 : 'bg-gray-700 border-gray-600 hover:bg-gray-600'
-                                         }`}
-                                     >
-                                         <div className="space-y-1">
-                                             {option.map((item, itemIdx) => (
-                                                 <div key={itemIdx} className="text-sm">
-                                                     <span className="text-white font-medium">{item.name}</span>
-                                                     {item.quantity > 1 && (
-                                                         <span className="text-gray-400 ml-1">x{item.quantity}</span>
-                                                     )}
-                                                     {item.weight && item.weight > 0 && (
-                                                         <span className="text-gray-500 text-xs ml-2">({item.weight} lb)</span>
-                                                     )}
-                                                 </div>
-                                             ))}
-                                         </div>
-                                     </button>
-                                 );
-                             }
-                         })}
-                    </div>
-                </div>
-            ))}
-
-            {/* Background Equipment Info */}
-            {(() => {
-                const backgroundData = BACKGROUNDS.find(bg => bg.name === data.background);
-                if (backgroundData?.equipment) {
-                    return (
-                        <div className="p-3 bg-green-900/20 border border-green-700 rounded-lg">
-                            <div className="text-xs font-semibold text-green-400 mb-2">
-                                Background Equipment (Auto-granted from {data.background}):
-                            </div>
-                            <div className="space-y-1">
-                                {Array.isArray(backgroundData.equipment)
-                                    ? backgroundData.equipment.map((item, index) => (
-                                        <div key={index} className="text-sm text-gray-300">• {item}</div>
-                                      ))
-                                    : <p className="text-sm text-gray-300">{backgroundData.equipment}</p>
-                                }
-                            </div>
-                        </div>
-                    );
-                }
-                return null;
-            })()}
-
-            {!allChoicesMade && (
-                <div className="text-xs text-yellow-400">
-                    ⚠️ Please make all equipment choices before continuing
-                </div>
-            )}
-
-            <div className='flex justify-between items-center gap-3'>
-                <button onClick={prevStep} className="px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded-lg text-white flex items-center">
-                    <ArrowLeft className="w-4 h-4 mr-2" /> Back
-                </button>
-                <button
-                    onClick={nextStep}
-                    disabled={!allChoicesMade}
-                    className="px-4 py-2 bg-yellow-600 hover:bg-yellow-500 rounded-lg text-white flex items-center disabled:bg-gray-600 disabled:cursor-not-allowed"
-                >
-                    Custom Equipment <ArrowRight className="w-4 h-4 ml-2" />
-                </button>
-                <button
-                    onClick={() => {
-                        // Skip custom equipment step, go directly to traits (step 11)
-                        if (allChoicesMade && skipToStep) {
-                            skipToStep(11); // Skip to Traits/Final details step
-                        }
-                    }}
-                    disabled={!allChoicesMade}
-                    className="px-4 py-2 bg-red-600 hover:bg-red-500 rounded-lg text-white flex items-center disabled:bg-gray-600 disabled:cursor-not-allowed"
-                >
-                    Skip to Traits <ArrowRight className="w-4 h-4 ml-2" />
-                </button>
-            </div>
-        </div>
-    );
-};
-
-const Step8Traits: React.FC<StepProps & { onSubmit: (data: CharacterCreationData) => void }> = ({ data, updateData, prevStep, onSubmit }) => {
-    // Set default personality traits for Outlander background
-    React.useEffect(() => {
-        if (data.background === 'Outlander' && !data.personality) {
-            updateData({
-                personality: "I'm driven by a wanderlust that led me away from home. I watch over my friends as if they were a litter of newborn pups."
-            });
-        }
-        if (data.background === 'Outlander' && !data.ideals) {
-            updateData({
-                ideals: "Change: Life is like the seasons, in constant change, and we must change with it. (Chaotic)"
-            });
-        }
-        if (data.background === 'Outlander' && !data.bonds) {
-            updateData({
-                bonds: "My family, clan, or tribe is the most important thing in my life, even when they are far from me."
-            });
-        }
-        if (data.background === 'Outlander' && !data.flaws) {
-            updateData({
-                flaws: "I am too enamored of ale, wine, and other intoxicants."
-            });
-        }
-    }, [data.background, data.personality, data.ideals, data.bonds, data.flaws, updateData]);
-
-    return (
-        <div className='space-y-6'>
-            <div className='flex justify-between items-center'>
-                <h3 className='text-xl font-bold text-red-300'>Final Details & Personality</h3>
-                <RandomizeButton
-                    onClick={() => {
-                        const personality = randomizePersonality();
-                        updateData(personality);
-                    }}
-                    title="Randomize personality traits"
-                />
-            </div>
-
-            <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Personality Traits
-                </label>
-                <textarea
-                    placeholder="Describe your character's personality traits and quirks..."
-                    value={data.personality}
-                    onChange={(e) => updateData({ personality: e.target.value })}
-                    className="w-full h-20 p-3 bg-gray-700 text-white rounded-lg focus:ring-red-500 focus:border-red-500 resize-none"
-                />
-            </div>
-
-            <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Ideals
-                </label>
-                <textarea
-                    placeholder="What principles and beliefs guide your character?"
-                    value={data.ideals}
-                    onChange={(e) => updateData({ ideals: e.target.value })}
-                    className="w-full h-16 p-3 bg-gray-700 text-white rounded-lg focus:ring-red-500 focus:border-red-500 resize-none"
-                />
-            </div>
-
-            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-                <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                        Bonds
-                    </label>
-                    <textarea
-                        placeholder="Who or what is your character connected to?"
-                        value={data.bonds}
-                        onChange={(e) => updateData({ bonds: e.target.value })}
-                        className="w-full h-16 p-3 bg-gray-700 text-white rounded-lg focus:ring-red-500 focus:border-red-500 resize-none"
-                    />
-                </div>
-                <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                        Flaws
-                    </label>
-                    <textarea
-                        placeholder="What weaknesses does your character have?"
-                        value={data.flaws}
-                        onChange={(e) => updateData({ flaws: e.target.value })}
-                        className="w-full h-16 p-3 bg-gray-700 text-white rounded-lg focus:ring-red-500 focus:border-red-500 resize-none"
-                    />
-                </div>
-            </div>
-
-            {/* Hit Points Calculation Method */}
-            {(() => {
-                const allClasses = loadClasses();
-                const selectedClass = allClasses.find(c => c.slug === data.classSlug);
-                if (!selectedClass) return null;
-
-                const conModifier = getModifier(data.abilities.CON);
-
-                return (
-                    <div className="bg-gray-700/50 border border-gray-600 rounded-lg p-4 space-y-3">
-                        <h4 className="text-lg font-bold text-yellow-300">Starting Hit Points</h4>
-                        <p className="text-xs text-gray-400">
-                            Choose how to determine your starting HP (at 1st level, most players take maximum).
-                        </p>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            <button
-                                onClick={() => updateData({ hpCalculationMethod: 'max', rolledHP: undefined })}
-                                className={`p-3 rounded-lg border-2 text-left transition-all ${
-                                    data.hpCalculationMethod === 'max'
-                                        ? 'bg-blue-800 border-blue-500'
-                                        : 'bg-gray-700 border-gray-600 hover:bg-gray-600'
-                                }`}
-                            >
-                                <div className="font-semibold text-white">Take Maximum (Recommended)</div>
-                                <div className="text-sm text-gray-300 mt-1">
-                                    {selectedClass.hit_die} + {conModifier} = {selectedClass.hit_die + conModifier} HP
-                                </div>
-                                <div className="text-xs text-gray-400 mt-1">Standard for 1st level characters</div>
-                            </button>
-
-                            <button
-                                onClick={() => {
-                                    // Roll the hit die
-                                    const rolled = rollDice(1, selectedClass.hit_die)[0];
-                                    updateData({ hpCalculationMethod: 'rolled', rolledHP: rolled });
-                                }}
-                                className={`p-3 rounded-lg border-2 text-left transition-all ${
-                                    data.hpCalculationMethod === 'rolled'
-                                        ? 'bg-blue-800 border-blue-500'
-                                        : 'bg-gray-700 border-gray-600 hover:bg-gray-600'
-                                }`}
-                            >
-                                <div className="font-semibold text-white">Roll Hit Die</div>
-                                <div className="text-sm text-gray-300 mt-1">
-                                    {data.hpCalculationMethod === 'rolled' && data.rolledHP ? (
-                                        <>
-                                            Rolled: {data.rolledHP} + {conModifier} = {data.rolledHP + conModifier} HP
-                                        </>
-                                    ) : (
-                                        <>
-                                            1d{selectedClass.hit_die} + {conModifier}
-                                        </>
-                                    )}
-                                </div>
-                                <div className="text-xs text-gray-400 mt-1">
-                                    {data.hpCalculationMethod === 'rolled' ? 'Click to re-roll' : 'Click to roll'}
-                                </div>
-                            </button>
-                        </div>
-
-                        <div className="text-xs text-gray-500 mt-2">
-                            Final HP: <span className="text-white font-bold">
-                                {data.hpCalculationMethod === 'max'
-                                    ? selectedClass.hit_die + conModifier
-                                    : data.rolledHP ? data.rolledHP + conModifier : 0
-                                } HP
-                            </span>
-                        </div>
-                    </div>
-                );
-            })()}
-
-            <div className='flex justify-between'>
-                <button onClick={prevStep} className="px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded-lg text-white flex items-center"><ArrowLeft className="w-4 h-4 mr-2" /> Back</button>
-                <button onClick={() => onSubmit(data)} className="px-4 py-2 bg-green-600 hover:bg-green-500 rounded-lg text-white flex items-center font-bold">Create Character <Check className="w-4 h-4 ml-2" /></button>
-            </div>
-        </div>
-    );
-};
-
-const Step9Languages: React.FC<StepProps> = ({ data, updateData, nextStep, prevStep }) => {
-    const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set(['Standard']));
-    const [selectedLanguages, setSelectedLanguages] = useState<string[]>(data.knownLanguages || []);
-
-    // Sync local state with parent data
-    useEffect(() => {
-        setSelectedLanguages(data.knownLanguages || []);
-    }, [data.knownLanguages]);
-
-    // Calculate auto-included languages
-    const autoLanguages = new Set<string>();
-    autoLanguages.add('Common'); // Always included
-
-    // Add racial languages
-    getRacialLanguages(data.raceSlug).forEach((lang: string) => autoLanguages.add(lang));
-
-    // Add class languages
-    getClassLanguages(data.classSlug).forEach((lang: string) => autoLanguages.add(lang));
-
-    // Get background language choices
-    const background = BACKGROUNDS.find(bg => bg.name === data.background);
-    const backgroundChoices = background ? parseBackgroundLanguageChoices(background.languages || []) : { direct: [], choices: 0 };
-
-    // Add direct background languages
-    backgroundChoices.direct.forEach((lang: string) => autoLanguages.add(lang));
-
-    // Calculate remaining language slots
-    const intelligenceScore = data.abilities.INT;
-    const maxLanguages = getMaxLanguages(intelligenceScore);
-    const totalAvailableSlots = maxLanguages + backgroundChoices.choices;
-    const remainingSlots = Math.max(0, totalAvailableSlots - selectedLanguages.length);
-
-    const toggleCategory = (categoryName: string) => {
-        setExpandedCategories(prev => {
-            const newSet = new Set(prev);
-            if (newSet.has(categoryName)) {
-                newSet.delete(categoryName);
-            } else {
-                newSet.add(categoryName);
-            }
-            return newSet;
-        });
-    };
-
-    const handleLanguageToggle = (languageName: string) => {
-        setSelectedLanguages(prev => {
-            const newSelected = prev.includes(languageName)
-                ? prev.filter(lang => lang !== languageName)
-                : [...prev, languageName];
-
-            // Update the data
-            updateData({ knownLanguages: newSelected });
-            return newSelected;
-        });
-    };
-
-    // Validation for required background language selections
-    const hasRequiredBackgroundSelections = selectedLanguages.length >= backgroundChoices.choices;
-
-    const languageCategories = [
-        { name: 'Standard' as const, icon: '🏛️', description: 'Common languages of major civilizations' },
-        { name: 'Exotic' as const, icon: '✨', description: 'Rare and mystical languages' },
-        { name: 'Secret' as const, icon: '🔒', description: 'Hidden languages of specific groups' },
-        { name: 'Dialect' as const, icon: '💬', description: 'Specialized dialects and elemental tongues' }
-    ];
-
-    return (
-        <div className='space-y-6'>
-            <div className='flex justify-between items-center'>
-                <h3 className='text-xl font-bold text-red-300'>Select Languages</h3>
-                <RandomizeButton
-                    onClick={() => {
-                        const languages = randomizeLanguages(data.raceSlug, data.background);
-                        updateData({ knownLanguages: languages });
-                        setSelectedLanguages(languages);
-                    }}
-                    title="Randomize language selection"
-                />
-            </div>
-
-            {/* Language Limits Info */}
-            <div className="bg-gray-700/50 border border-gray-600 rounded-lg p-4">
-                <h4 className="text-lg font-bold text-yellow-300 mb-2">Language Proficiency</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                    <div>
-                        <span className="text-gray-300">Intelligence Score:</span>
-                        <span className="text-white font-bold ml-2">{intelligenceScore}</span>
-                    </div>
-                    <div>
-                        <span className="text-gray-300">Maximum Languages:</span>
-                        <span className="text-white font-bold ml-2">{maxLanguages}</span>
-                    </div>
-                    <div>
-                        <span className="text-gray-300">Languages Known:</span>
-                        <span className="text-white font-bold ml-2">{autoLanguages.size + selectedLanguages.length}</span>
-                    </div>
-                    <div>
-                        <span className="text-gray-300">Remaining Slots:</span>
-                        <span className={`font-bold ml-2 ${remainingSlots > 0 ? 'text-green-400' : 'text-red-400'}`}>
-                            {remainingSlots}
-                        </span>
-                    </div>
-                </div>
-            </div>
-
-            {/* Auto-Included Languages */}
-            <div className="bg-blue-900/20 border border-blue-700 rounded-lg p-4">
-                <h4 className="text-lg font-bold text-blue-300 mb-3">Auto-Included Languages</h4>
-                <p className="text-sm text-gray-400 mb-3">
-                    These languages are automatically known based on your race, class, and background choices.
-                </p>
-                <div className="flex flex-wrap gap-2">
-                    {Array.from(autoLanguages).sort().map(language => (
-                        <span key={language} className="px-3 py-1 bg-blue-800 text-blue-100 rounded-full text-sm">
-                            {language}
-                        </span>
-                    ))}
-                </div>
-            </div>
-
-            {/* Background Language Choices */}
-            {backgroundChoices.choices > 0 && (
-                <div className="bg-purple-900/20 border border-purple-700 rounded-lg p-4">
-                    <h4 className="text-lg font-bold text-purple-300 mb-3">
-                        Background Choice: {backgroundChoices.choices} Language{backgroundChoices.choices > 1 ? 's' : ''} of Your Choice
-                    </h4>
-                    <p className="text-sm text-gray-400 mb-3">
-                        Your {data.background} background allows you to choose {backgroundChoices.choices} additional language{backgroundChoices.choices > 1 ? 's' : ''}.
-                    </p>
-                    <div className="text-sm text-yellow-300">
-                        Selected: {selectedLanguages.length} / {backgroundChoices.choices}
-                    </div>
-                </div>
-            )}
-
-            {/* Language Selection */}
-            <div className="space-y-3">
-                <h4 className="text-lg font-bold text-yellow-300">Choose Additional Languages</h4>
-                <p className="text-sm text-gray-400">
-                    Select languages from the categories below. You can learn additional languages through feats, magic items, or DM approval.
-                </p>
-
-                {languageCategories.map(category => {
-                    const categoryLanguages = getLanguagesByCategory(category.name);
-                    const availableInCategory = categoryLanguages.filter(lang =>
-                        !autoLanguages.has(lang.name) && !selectedLanguages.includes(lang.name)
-                    );
-
-                    return (
-                        <div key={category.name} className='border border-gray-600 rounded-lg overflow-hidden'>
-                            <button
-                                onClick={() => toggleCategory(category.name)}
-                                className='w-full p-4 bg-gray-700 hover:bg-gray-650 flex items-center justify-between transition-colors'
-                            >
-                                <div className='flex items-center gap-3'>
-                                    <span className='text-2xl'>{category.icon}</span>
-                                    <div className='text-left'>
-                                        <div className='font-bold text-yellow-300 text-lg'>{category.name} Languages</div>
-                                        <div className='text-xs text-gray-400'>{category.description}</div>
-                                    </div>
-                                </div>
-                                {expandedCategories.has(category.name) ? (
-                                    <ChevronUp className='w-5 h-5 text-gray-400' />
-                                ) : (
-                                    <ChevronDown className='w-5 h-5 text-gray-400' />
-                                )}
-                            </button>
-
-                            {expandedCategories.has(category.name) && (
-                                <div className='p-4 bg-gray-800/50'>
-                                    {availableInCategory.length === 0 ? (
-                                        <p className="text-gray-400 text-sm">No additional {category.name.toLowerCase()} languages available.</p>
-                                    ) : (
-                                        <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
-                                            {availableInCategory.map(language => {
-                                                const isSelected = selectedLanguages.includes(language.name);
-                                                const canSelect = remainingSlots > 0 || isSelected;
-
-                                                return (
-                                                    <button
-                                                        key={language.name}
-                                                        onClick={() => canSelect && handleLanguageToggle(language.name)}
-                                                        disabled={!canSelect && !isSelected}
-                                                        className={`p-3 rounded-lg border-2 text-left transition-all ${
-                                                            isSelected
-                                                                ? 'bg-green-800 border-green-500'
-                                                                : canSelect
-                                                                    ? 'bg-gray-700 border-gray-600 hover:bg-gray-600'
-                                                                    : 'bg-gray-800 border-gray-700 opacity-50 cursor-not-allowed'
-                                                        }`}
-                                                    >
-                                                        <div className="font-semibold text-white">{language.name}</div>
-                                                        <div className="text-xs text-gray-400 mt-1">
-                                                            {language.typicalSpeakers}
-                                                        </div>
-                                                        <div className="text-xs text-gray-500 mt-1 line-clamp-2">
-                                                            {language.description}
-                                                        </div>
-                                                    </button>
-                                                );
-                                            })}
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-                        </div>
-                    );
-                })}
-            </div>
-
-            {/* Selected Languages Summary */}
-            {selectedLanguages.length > 0 && (
-                <div className="bg-green-900/20 border border-green-700 rounded-lg p-4">
-                    <h4 className="text-lg font-bold text-green-300 mb-3">Selected Languages</h4>
-                    <div className="flex flex-wrap gap-2">
-                        {selectedLanguages.map(language => (
-                            <div key={language} className="flex items-center gap-2 px-3 py-1 bg-green-800 text-green-100 rounded-full text-sm">
-                                <span>{language}</span>
-                                <button
-                                    onClick={() => handleLanguageToggle(language)}
-                                    className="text-green-300 hover:text-white ml-1"
-                                >
-                                    ×
-                                </button>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            )}
-
-            {/* Navigation */}
-            <div className='flex justify-between'>
-                <button onClick={prevStep} className="px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded-lg text-white flex items-center">
-                    <ArrowLeft className="w-4 h-4 mr-2" /> Back
-                </button>
-                <button
-                    onClick={nextStep}
-                    disabled={!hasRequiredBackgroundSelections}
-                    className={`px-4 py-2 rounded-lg text-white flex items-center ${
-                        hasRequiredBackgroundSelections
-                            ? 'bg-red-600 hover:bg-red-500'
-                            : 'bg-gray-500 cursor-not-allowed'
-                    }`}
-                >
-                    Next: Final Details <ArrowRight className="w-4 h-4 ml-2" />
-                </button>
-            </div>
-        </div>
-    );
-};
 
 interface EquipmentBrowserProps {
     data: CharacterCreationData;
@@ -3801,332 +2554,9 @@ interface EquipmentBrowserProps {
     skipToStep?: (step: number) => void;
 }
 
-const Step7EquipmentBrowser: React.FC<EquipmentBrowserProps> = ({ data, updateData, prevStep, skipToStep }) => {
-    const [searchQuery, setSearchQuery] = useState('');
-    const [categoryFilter, setCategoryFilter] = useState<string>('All');
-    const [yearFilter, setYearFilter] = useState<number | 'all'>('all');
-    const [selectedEquipment, setSelectedEquipment] = useState<Equipment | null>(null);
 
-    // Get all equipment categories
-    const categories = ['All', ...Array.from(new Set(EQUIPMENT_DATABASE.map(eq => eq.equipment_category)))];
 
-    // Filter equipment
-    const filteredEquipment = EQUIPMENT_DATABASE.filter(eq => {
-        const matchesSearch = eq.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                             eq.equipment_category.toLowerCase().includes(searchQuery.toLowerCase());
-        const matchesCategory = categoryFilter === 'All' || eq.equipment_category === categoryFilter;
-        const matchesYear = yearFilter === 'all' || eq.year === yearFilter;
-        return matchesSearch && matchesCategory && matchesYear;
-    });
-
-    // Check if item is already in starting inventory
-    const isInInventory = (equipmentSlug: string): number => {
-        return data.startingInventory?.filter(item => item.equipmentSlug === equipmentSlug)
-                                      .reduce((sum, item) => sum + item.quantity, 0) || 0;
-    };
-
-    // Add item to starting inventory
-    const addToInventory = (equipmentSlug: string) => {
-        const currentInventory = data.startingInventory || [];
-        const existingItem = currentInventory.find(item => item.equipmentSlug === equipmentSlug);
-
-        if (existingItem) {
-            updateData({
-                startingInventory: currentInventory.map(item =>
-                    item.equipmentSlug === equipmentSlug
-                        ? { ...item, quantity: item.quantity + 1 }
-                        : item
-                )
-            });
-        } else {
-            updateData({
-                startingInventory: [...currentInventory, {
-                    equipmentSlug,
-                    quantity: 1,
-                    equipped: false
-                }]
-            });
-        }
-    };
-
-    // Remove item from starting inventory
-    const removeFromInventory = (equipmentSlug: string) => {
-        const currentInventory = data.startingInventory || [];
-        const existingItem = currentInventory.find(item => item.equipmentSlug === equipmentSlug);
-
-        if (existingItem && existingItem.quantity > 1) {
-            updateData({
-                startingInventory: currentInventory.map(item =>
-                    item.equipmentSlug === equipmentSlug
-                        ? { ...item, quantity: item.quantity - 1 }
-                        : item
-                )
-            });
-        } else {
-            updateData({
-                startingInventory: currentInventory.filter(item => item.equipmentSlug !== equipmentSlug)
-            });
-        }
-    };
-
-    return (
-        <div className="space-y-4">
-            <div className='flex justify-between items-start'>
-                <div className='flex-1'>
-                    <h3 className="text-xl font-bold text-yellow-300 mb-2">Customize Starting Equipment</h3>
-                    <p className="text-sm text-gray-400">
-                        Browse and add additional equipment to your starting inventory. You already have your class equipment package.
-                    </p>
-                </div>
-                <RandomizeButton
-                    onClick={() => {
-                        const additionalEquipment = randomizeAdditionalEquipment();
-                        updateData({ startingInventory: additionalEquipment });
-                    }}
-                    title="Randomize additional equipment"
-                />
-            </div>
-
-            {/* Search and Filters */}
-            <div className="space-y-3">
-                <input
-                    type="text"
-                    placeholder="Search equipment..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-yellow-500 focus:outline-none"
-                />
-
-                <div className="flex gap-2 flex-wrap">
-                    <select
-                        value={categoryFilter}
-                        onChange={(e) => setCategoryFilter(e.target.value)}
-                        className="px-3 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-yellow-500 focus:outline-none"
-                    >
-                        {categories.map(cat => (
-                            <option key={cat} value={cat}>{cat}</option>
-                        ))}
-                    </select>
-
-                    <select
-                        value={yearFilter}
-                        onChange={(e) => setYearFilter(e.target.value === 'all' ? 'all' : parseInt(e.target.value))}
-                        className="px-3 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-yellow-500 focus:outline-none"
-                    >
-                        <option value="all">All Editions</option>
-                        <option value="2014">2014 SRD</option>
-                        <option value="2024">2024 SRD</option>
-                    </select>
-                </div>
-            </div>
-
-            {/* Equipment List */}
-            <div className="bg-gray-700/30 rounded-lg p-4 max-h-[400px] overflow-y-auto">
-                <div className="grid grid-cols-1 gap-2">
-                    {filteredEquipment.slice(0, 50).map(eq => {
-                        const inInventory = isInInventory(eq.slug);
-                        return (
-                            <div
-                                key={`${eq.slug}-${eq.year}`}
-                                className="bg-gray-700/50 p-3 rounded-lg hover:bg-gray-700 transition-colors"
-                            >
-                                <div className="flex items-center justify-between gap-3">
-                                    <div className="flex-grow min-w-0">
-                                        <button
-                                            onClick={() => setSelectedEquipment(eq)}
-                                            className="text-left hover:text-yellow-300 transition-colors"
-                                        >
-                                            <div className="font-semibold text-white">{eq.name}</div>
-                                            <div className="text-xs text-gray-400 flex items-center gap-2 flex-wrap">
-                                                <span>{eq.equipment_category}</span>
-                                                <span>•</span>
-                                                <span>{eq.cost.quantity} {eq.cost.unit}</span>
-                                                <span>•</span>
-                                                <span>{eq.weight} lb</span>
-                                                <span className="bg-gray-600 px-2 py-0.5 rounded">{eq.year === 2024 ? '2024' : '2014'}</span>
-                                            </div>
-                                        </button>
-                                    </div>
-                                    <div className="flex items-center gap-2 flex-shrink-0">
-                                        {inInventory > 0 && (
-                                            <span className="text-sm font-mono text-yellow-300">×{inInventory}</span>
-                                        )}
-                                        <div className="flex gap-1">
-                                            <button
-                                                onClick={() => addToInventory(eq.slug)}
-                                                className="px-3 py-1 bg-green-600 hover:bg-green-500 rounded text-sm"
-                                            >
-                                                +
-                                            </button>
-                                            {inInventory > 0 && (
-                                                <button
-                                                    onClick={() => removeFromInventory(eq.slug)}
-                                                    className="px-3 py-1 bg-red-600 hover:bg-red-500 rounded text-sm"
-                                                >
-                                                    −
-                                                </button>
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        );
-                    })}
-                </div>
-                {filteredEquipment.length > 50 && (
-                    <p className="text-center text-xs text-gray-400 mt-3">
-                        Showing first 50 results. Refine your search to see more.
-                    </p>
-                )}
-                {filteredEquipment.length === 0 && (
-                    <p className="text-center text-gray-400 py-8">No equipment found matching your filters.</p>
-                )}
-            </div>
-
-            {/* Current Custom Additions */}
-            {data.startingInventory && data.startingInventory.length > 0 && (
-                <div className="bg-yellow-900/20 border border-yellow-700 rounded-lg p-4">
-                    <h4 className="text-sm font-semibold text-yellow-400 mb-2">
-                        Custom Equipment Added ({data.startingInventory.length} items)
-                    </h4>
-                    <div className="text-xs text-gray-400">
-                        These items will be added to your starting inventory along with your class equipment package.
-                    </div>
-                </div>
-            )}
-
-            {/* Navigation */}
-            <div className="flex justify-between pt-4">
-                <button
-                    onClick={prevStep}
-                    className="px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded-lg text-white flex items-center"
-                >
-                    <ArrowLeft className="w-4 h-4 mr-2" /> Back
-                </button>
-                <button
-                    onClick={() => skipToStep?.(11)}
-                    className="px-4 py-2 bg-red-600 hover:bg-red-500 rounded-lg text-white flex items-center"
-                >
-                    Next: Background <ArrowRight className="w-4 h-4 ml-2" />
-                </button>
-            </div>
-
-            {/* Equipment Detail Modal */}
-            {selectedEquipment && (
-                <EquipmentDetailModal
-                    equipment={selectedEquipment}
-                    onClose={() => setSelectedEquipment(null)}
-                />
-            )}
-        </div>
-    );
-};
-
-// --- Main Wizard Component ---
-
-const CharacterCreationWizard: React.FC<WizardProps> = ({ isOpen, onClose, onCharacterCreated, setRollResult }) => {
-    const [currentStep, setCurrentStep] = useState<number>(0);
-    const [creationData, setCreationData] = useState<CharacterCreationData>(initialCreationData);
-    const [isLoading, setIsLoading] = useState<boolean>(false);
-    const [error, setError] = useState<string | null>(null);
-
-    if (!isOpen) return null;
-
-    const updateData = (updates: Partial<CharacterCreationData>) => {
-        setCreationData(prev => ({ ...prev, ...updates }));
-    };
-
-    const nextStep = () => setCurrentStep(prev => Math.min(prev + 1, STEP_TITLES.length - 1));
-    const prevStep = () => setCurrentStep(prev => Math.max(prev - 1, 0));
-    const skipToStep = (step: number) => setCurrentStep(Math.min(Math.max(step, 0), STEP_TITLES.length - 1));
-
-    const handleSubmit = async (data: CharacterCreationData) => {
-        setIsLoading(true);
-        setError(null);
-        setRollResult({ text: "Creating character sheet...", value: 0 });
-
-        try {
-            const finalCharacter = calculateCharacterStats(data);
-            await addCharacter(finalCharacter);
-
-            setRollResult({ text: `Successfully created ${finalCharacter.name}!`, value: 0 });
-            onCharacterCreated();
-            onClose();
-            setCreationData(initialCreationData);
-            setCurrentStep(0);
-        } catch (e: unknown) {
-            const errorMessage = e instanceof Error ? e.message : "An unknown error occurred during character creation.";
-            console.error("Error creating character:", e);
-            setError(`Error: ${errorMessage}. Check console for details.`);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    const renderStep = () => {
-        const commonProps = { data: creationData, updateData, nextStep, prevStep, stepIndex: currentStep };
-        switch (currentStep) {
-            case 0: return <Step0Level {...commonProps} />;
-            case 1: return <Step1Details {...commonProps} />;
-            case 2: return <Step2Race {...commonProps} />;
-            case 3: return <Step3Class {...commonProps} />;
-            case 4: return <Step3point5FightingStyle {...commonProps} />; // Sprint 5: Fighting Style (Fighter/Paladin/Ranger)
-            case 5: return <Step4Spells {...commonProps} />; // Sprint 2: Spell selection
-            case 6: return <Step4Abilities {...commonProps} />;
-            case 7: return <Step5point5Feats {...commonProps} />; // Sprint 5: Feats selection
-            case 8: return <Step9Languages {...commonProps} />; // Language selection
-            case 9: return <Step6Equipment {...commonProps} skipToStep={skipToStep} />;
-            case 10: return <Step7EquipmentBrowser {...commonProps} skipToStep={skipToStep} />; // Sprint 4: Equipment browser
-            case 11: return <Step8Traits {...commonProps} onSubmit={handleSubmit} />;
-            default: return <p>Unknown step.</p>;
-        }
-    };
-
-    return (
-        <div className="fixed inset-0 bg-gray-900 bg-opacity-90 flex items-center justify-center z-50 p-4 overflow-y-auto" onClick={onClose}>
-            <div
-                className="bg-gray-800 rounded-2xl shadow-2xl w-full max-w-5xl transition-all transform duration-300 scale-100 my-8 flex flex-col max-h-[calc(100vh-4rem)]"
-                onClick={(e) => e.stopPropagation()}
-            >
-                {/* Fixed Header */}
-                <div className="flex-shrink-0 p-6 md:p-8 pb-4">
-                    <div className="flex justify-between items-center border-b border-red-700 pb-3">
-                        <h2 className="text-2xl font-bold text-red-500 flex items-center">
-                            <Dice6 className="w-6 h-6 mr-2" /> {STEP_TITLES[currentStep]}
-                        </h2>
-                        <button onClick={onClose} className="text-gray-400 hover:text-white text-xl font-bold">&times;</button>
-                    </div>
-
-                    {/* Progress Bar */}
-                    <div className='mt-4'>
-                        <div className='h-2 bg-gray-700 rounded-full overflow-hidden'>
-                            <div
-                                className='h-full bg-red-600 transition-all duration-500'
-                                style={{ width: `${((currentStep + 1) / STEP_TITLES.length) * 100}%` }}
-                            />
-                        </div>
-                        <p className='text-center text-sm text-gray-400 mt-2'>Step {currentStep + 1} of {STEP_TITLES.length}</p>
-                    </div>
-                </div>
-
-                {/* Scrollable Content */}
-                <div className="flex-1 overflow-y-auto px-6 md:px-8 pb-6 md:pb-8">
-                    {/* Error & Loading */}
-                    {error && (<div className="bg-red-900/50 text-red-300 p-3 rounded-lg mb-4 text-sm font-medium">{error}</div>)}
-                    {isLoading && (
-                        <div className="text-center p-8">
-                            <Loader2 className="w-8 h-8 mx-auto animate-spin text-red-500" />
-                            <p className="mt-2 text-red-400">Calculating stats and saving...</p>
-                        </div>
-                    )}
-
-                    {/* Wizard Content */}
-                    {!isLoading && renderStep()}
-                </div>
-            </div>
-        </div>
-    );
-};
+// --- Main Wizard Component (Now in separate module) ---
 
 
 /** Main Application Component */
@@ -4135,7 +2565,11 @@ const App: React.FC = () => {
   const [selectedCharacterId, setSelectedCharacterId] = useState<string | null>(null);
   const [selectedCharacterIds, setSelectedCharacterIds] = useState<Set<string>>(new Set());
   const [isWizardOpen, setIsWizardOpen] = useState<boolean>(false);
-  const [rollResult, setRollResult] = useState<{ text: string; value: number | null }>({ text: 'Ready to Roll!', value: null });
+  const [rollResult, setRollResult] = useState<{
+    text: string;
+    value: number | null;
+    details?: Array<{ value: number; kept: boolean; critical?: 'success' | 'failure' }>
+  }>({ text: 'Ready to Roll!', value: null });
   const [rollHistory, setRollHistory] = useState<DiceRoll[]>([]);
   const [latestRoll, setLatestRoll] = useState<DiceRoll | null>(null);
   const [featureModal, setFeatureModal] = useState<{name: string, description: string, source?: string} | null>(null);
@@ -4861,14 +3295,30 @@ const App: React.FC = () => {
           </div>
         </header>
 
-        {/* Dice Roll Display */}
-        <div className={`fixed top-4 right-4 p-4 rounded-lg shadow-xl transition-all duration-300 z-40
+        {/* Enhanced Dice Roll Display */}
+        <div className={`fixed top-4 right-4 p-4 rounded-lg shadow-xl transition-all duration-300 z-40 max-w-xs
           ${rollResult.value !== null ? 'bg-green-800/90 border border-green-500' : 'bg-gray-800/90 border border-gray-600'}`}
         >
           <div className="text-sm font-semibold text-gray-300">{rollResult.text}</div>
           {rollResult.value !== null && (
             <div className="text-4xl font-extrabold text-yellow-300 mt-1">
               {rollResult.value}
+            </div>
+          )}
+          {rollResult.details && (
+            <div className="mt-2 text-xs text-gray-400">
+              {rollResult.details.map((detail, idx) => (
+                <div key={idx} className="flex items-center gap-1">
+                  <span className={detail.kept ? 'text-yellow-300 font-semibold' : 'text-gray-500'}>
+                    {detail.value}
+                  </span>
+                  {detail.critical && (
+                    <span className="text-red-400 font-bold">
+                      {detail.critical === 'success' ? '!' : '💀'}
+                    </span>
+                  )}
+                </div>
+              ))}
             </div>
           )}
         </div>

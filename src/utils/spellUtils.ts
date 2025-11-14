@@ -1,6 +1,6 @@
 // Spell management utilities for character creation and campaign play
 import { SpellcastingType, Class, Character, SpellSelectionData } from '../types/dnd';
-import { getLeveledSpellsByClass } from '../services/dataService';
+import { getLeveledSpellsByClass, loadClasses } from '../services/dataService';
 import { SPELL_SLOT_TABLES } from '../data/spellSlots';
 import { SPELL_LEARNING_RULES } from '../data/spellLearning';
 
@@ -114,6 +114,109 @@ export function validateSpellSelection(
     isValid: errors.length === 0,
     errors
   };
+}
+
+/**
+ * Check if a class has spellcasting available at the current level
+ */
+export function hasSpellcastingAtLevel(classSlug: string): boolean {
+  const allClasses = loadClasses();
+  const selectedClass = allClasses.find((c: any) => c.slug === classSlug);
+
+  if (!selectedClass || !selectedClass.spellcasting) {
+    return false;
+  }
+
+  // Check if they have any spells available at this level
+  return selectedClass.spellcasting.cantripsKnown > 0 ||
+         selectedClass.spellcasting.spellsKnownOrPrepared > 0;
+}
+
+/**
+ * Get available spells for character creation
+ */
+export function getAvailableSpellsForCreation(classSlug: string, level: number) {
+  const { getCantripsByClass, getLeveledSpellsByClass } = require('../services/dataService');
+  return {
+    cantrips: getCantripsByClass(classSlug),
+    spells: getLeveledSpellsByClass(classSlug, level)
+  };
+}
+
+/**
+ * Check if spell selections are complete for character creation
+ */
+export function areSpellSelectionsComplete(
+  spellSelection: SpellSelectionData,
+  classSlug: string,
+  level: number,
+  abilities: Record<string, number>
+): boolean {
+  const allClasses = loadClasses();
+  const selectedClass = allClasses.find(c => c.slug === classSlug);
+
+  if (!selectedClass?.spellcasting) {
+    return true; // Non-spellcasters are always "complete"
+  }
+
+  const spellcasting = selectedClass.spellcasting;
+  const spellcastingType = getSpellcastingType(classSlug);
+
+  // Check cantrips
+  const cantripsComplete = spellSelection.selectedCantrips.length === spellcasting.cantripsKnown;
+
+  let spellsComplete = false;
+  if (spellcastingType === 'known') {
+    spellsComplete = (spellSelection.knownSpells?.length || 0) === spellcasting.spellsKnownOrPrepared;
+  } else if (spellcastingType === 'prepared') {
+    spellsComplete = (spellSelection.preparedSpells?.length || 0) === spellcasting.spellsKnownOrPrepared;
+  } else if (spellcastingType === 'wizard') {
+    const spellbookComplete = (spellSelection.spellbook?.length || 0) === 6;
+    const maxPrepared = getMaxPreparedSpells(abilities, 'INT', level);
+    const dailyComplete = (spellSelection.dailyPrepared?.length || 0) === maxPrepared;
+    spellsComplete = spellbookComplete && dailyComplete;
+  }
+
+  return cantripsComplete && spellsComplete;
+}
+
+/**
+ * Clean up invalid spell selections when character data changes
+ */
+export function cleanupInvalidSpellSelections(
+  spellSelection: SpellSelectionData,
+  classSlug: string,
+  level: number,
+  abilities: Record<string, number>
+): SpellSelectionData {
+  const allClasses = loadClasses();
+  const selectedClass = allClasses.find(c => c.slug === classSlug);
+
+  if (!selectedClass?.spellcasting) {
+    return spellSelection;
+  }
+
+  const spellcasting = selectedClass.spellcasting;
+  const spellcastingType = getSpellcastingType(classSlug);
+  const updatedSelection = { ...spellSelection };
+
+  // Validate cantrips
+  updatedSelection.selectedCantrips = spellSelection.selectedCantrips.slice(0, spellcasting.cantripsKnown);
+
+  // Validate based on spellcasting type
+  if (spellcastingType === 'known') {
+    updatedSelection.knownSpells = (spellSelection.knownSpells || []).slice(0, spellcasting.spellsKnownOrPrepared);
+  } else if (spellcastingType === 'prepared') {
+    updatedSelection.preparedSpells = (spellSelection.preparedSpells || []).slice(0, spellcasting.spellsKnownOrPrepared);
+  } else if (spellcastingType === 'wizard') {
+    // Validate spellbook (6 spells)
+    updatedSelection.spellbook = (spellSelection.spellbook || []).slice(0, 6);
+    // Validate daily preparation
+    const maxPrepared = getMaxPreparedSpells(abilities, 'INT', level);
+    updatedSelection.dailyPrepared = (spellSelection.dailyPrepared || []).slice(0, maxPrepared);
+  }
+
+  return updatedSelection;
 }
 
 /**

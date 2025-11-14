@@ -57,6 +57,9 @@ export const DiceBox3D: React.FC<DiceBox3DProps> = ({
           lightIntensity: 1,
         };
 
+        // Add error handling for WebAssembly issues
+        console.log('Initializing DiceBox with config:', config);
+
         const diceBox = new DiceBox(config);
         await diceBox.init();
 
@@ -71,7 +74,12 @@ export const DiceBox3D: React.FC<DiceBox3DProps> = ({
         setIsInitialized(true);
       } catch (err) {
         console.error('Failed to initialize DiceBox:', err);
-        setError('Failed to initialize 3D dice. Check console for details.');
+        const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+        if (errorMessage.includes('WebAssembly') || errorMessage.includes('wasm')) {
+          setError('3D dice physics not available. WebAssembly support required.');
+        } else {
+          setError('Failed to initialize 3D dice. Check console for details.');
+        }
       }
     };
 

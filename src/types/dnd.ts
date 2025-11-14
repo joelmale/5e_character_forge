@@ -134,6 +134,18 @@ export interface Character {
   };
   equippedArmor?: string; // Equipment slug of equipped armor
   equippedWeapons?: string[]; // Equipment slugs of equipped weapons (primary, offhand, etc.)
+
+  // Combat state
+  temporaryHitPoints?: number;
+  deathSaves?: {
+    successes: number;
+    failures: number;
+  };
+  conditions?: string[];
+
+  // Metadata
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 // --- Intermediate Wizard Data Structure ---

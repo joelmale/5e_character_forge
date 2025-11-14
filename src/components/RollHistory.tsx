@@ -29,6 +29,11 @@ export const RollHistoryTicker: React.FC<RollHistoryTickerProps> = ({ rolls }) =
               <span className="text-gray-300">{roll.label}:</span>
               <span className="font-mono text-yellow-300">{roll.notation}</span>
               <span className="text-gray-500">→</span>
+              {roll.pools?.length ? (
+                <span className="text-xs text-gray-400">
+                  [{roll.pools[0].results.join(',')}] →
+                </span>
+              ) : null}
               <span
                 className={`font-bold ${
                   roll.critical === 'success'
@@ -165,42 +170,65 @@ export const RollHistoryModal: React.FC<RollHistoryModalProps> = ({
                       </span>
                     </div>
 
-                    <div className="flex items-center gap-3 text-lg">
-                      <span className="font-mono text-yellow-300">
-                        {roll.notation}
-                      </span>
-                      <span className="text-gray-500">→</span>
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm text-gray-400">
-                          [
-                          {roll.diceResults.map((die, i) => (
-                            <span key={i}>
-                              {die}
-                              {i < roll.diceResults.length - 1 && ', '}
-                            </span>
-                          ))}
-                          ]
-                        </span>
-                        {roll.modifier !== 0 && (
-                          <span className="text-sm text-gray-400">
-                            {roll.modifier > 0 ? '+' : ''}
-                            {roll.modifier}
-                          </span>
-                        )}
-                        <span className="text-gray-500">=</span>
-                        <span
-                          className={`text-2xl font-bold ${
-                            roll.critical === 'success'
-                              ? 'text-green-400'
-                              : roll.critical === 'failure'
-                              ? 'text-red-400'
-                              : 'text-white'
-                          }`}
-                        >
-                          {roll.total}
-                        </span>
-                      </div>
-                    </div>
+                     <div className="flex items-center gap-3 text-lg">
+                       <span className="font-mono text-yellow-300">
+                         {roll.notation}
+                       </span>
+                       <span className="text-gray-500">→</span>
+                       <div className="flex items-center gap-2">
+                         {roll.pools?.length ? (
+                           // Complex roll with pools
+                           <div className="text-sm text-gray-400">
+                             {roll.pools.map((pool, poolIdx) => (
+                               <span key={poolIdx}>
+                                 [
+                                 {pool.results.map((die, i) => {
+                                   const isKept = roll.diceResults?.includes(die);
+                                   return (
+                                     <span key={i} className={isKept ? 'text-yellow-300 font-semibold' : 'text-gray-500 line-through'}>
+                                       {die}
+                                       {i < pool.results.length - 1 && ', '}
+                                     </span>
+                                   );
+                                 })}
+                                 ]
+                                 {poolIdx < roll.pools!.length - 1 && ' + '}
+                               </span>
+                             ))}
+                           </div>
+                         ) : (
+                           // Simple roll
+                           <span className="text-sm text-gray-400">
+                             [
+                             {roll.diceResults.map((die, i) => (
+                               <span key={i}>
+                                 {die}
+                                 {i < roll.diceResults.length - 1 && ', '}
+                               </span>
+                             ))}
+                             ]
+                           </span>
+                         )}
+                         {roll.modifier !== 0 && (
+                           <span className="text-sm text-gray-400">
+                             {roll.modifier > 0 ? '+' : ''}
+                             {roll.modifier}
+                           </span>
+                         )}
+                         <span className="text-gray-500">=</span>
+                         <span
+                           className={`text-2xl font-bold ${
+                             roll.critical === 'success'
+                               ? 'text-green-400'
+                               : roll.critical === 'failure'
+                               ? 'text-red-400'
+                               : 'text-white'
+                           }`}
+                         >
+                           {roll.total}
+                         </span>
+                       </div>
+                     </div>
                   </div>
                 ))}
             </div>
