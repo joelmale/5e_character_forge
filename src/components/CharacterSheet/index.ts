@@ -13,6 +13,7 @@ export { AttunementSlots } from './AttunementSlots';
 export { ProficienciesAndLanguages } from './ProficienciesAndLanguages';
 export { Conditions } from './Conditions';
 export { CoinManagement } from './CoinManagement';
+export { CollapsibleSection } from './CollapsibleSection';
 export { SpellcastingSection } from './SpellcastingSection';
 export { EquipmentSection } from './EquipmentSection';
 export { FeaturesSection } from './FeaturesSection';
