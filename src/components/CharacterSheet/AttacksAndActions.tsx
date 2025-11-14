@@ -67,8 +67,8 @@ export const AttacksAndActions: React.FC<AttacksAndActionsProps> = ({
   const equippedWeapons = getEquippedWeapons();
 
   return (
-    <div className="bg-gray-800 rounded-xl shadow-lg border-l-4 border-red-500">
-      <h3 className="text-lg font-bold text-red-400 mb-4 px-6 pt-4">Attacks & Actions</h3>
+    <div className="bg-red-900 rounded-xl shadow-lg border-l-4 border-yellow-500 p-2">
+      <h3 className="text-lg font-bold text-yellow-400 mb-4 px-6 pt-4">⚔️ Attacks & Actions</h3>
 
       <div className="px-6 pb-4 space-y-3">
         {/* Unarmed Strike - Always available */}
