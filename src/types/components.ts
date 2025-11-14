@@ -76,10 +76,6 @@ export interface CharacterListProps {
   onCharacterDelete: (id: string) => void;
 }
 
-// Dice Roll Display Props
-export interface DiceRollDisplayProps {
-  rollResult: { text: string; value: number | null };
-}
 
 // Import/Export Controls Props
 export interface ImportExportControlsProps {
