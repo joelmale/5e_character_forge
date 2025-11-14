@@ -135,6 +135,7 @@ export const CharacterSheet: React.FC<CharacterSheetProps> = ({
           character={character}
           setRollResult={setRollResult}
           onDiceRoll={onDiceRoll}
+          onUpdateCharacter={onUpdateCharacter}
         />
 
         <CollapsibleSection
@@ -192,16 +193,7 @@ export const CharacterSheet: React.FC<CharacterSheetProps> = ({
           />
         </CollapsibleSection>
 
-        {/* DEBUG: Saving Throws */}
-        <div style={{backgroundColor: 'orange', color: 'white', padding: '20px', margin: '10px', border: '2px solid yellow'}}>
-          <h2>DEBUG: SavingThrows Component Should Render Here</h2>
-        </div>
 
-        <SavingThrows
-          character={character}
-          setRollResult={setRollResult}
-          onDiceRoll={onDiceRoll}
-        />
 
         <CollapsibleSection
           title="Hit Dice"
@@ -285,10 +277,6 @@ export const CharacterSheet: React.FC<CharacterSheetProps> = ({
           />
         </CollapsibleSection>
 
-        <AttunementSlots
-          character={character}
-        />
-
         <CollapsibleSection
           title="Coin Pouch"
           icon={Coins}
@@ -320,15 +308,6 @@ export const CharacterSheet: React.FC<CharacterSheetProps> = ({
             setEquipmentModal={setEquipmentModal}
           />
         </CollapsibleSection>
-
-        <ProficienciesAndLanguages
-          character={character}
-        />
-
-        <FeaturesSection
-          character={character}
-          onFeatureClick={onFeatureClick}
-        />
 
         {character.spellcasting?.spellcastingType === 'prepared' && (
           <SpellPreparationModal

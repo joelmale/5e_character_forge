@@ -12,6 +12,7 @@ interface CharacterStatsProps {
     details?: Array<{ value: number; kept: boolean; critical?: 'success' | 'failure' }>
   }) => void;
   onDiceRoll: (roll: any) => void;
+  onUpdateCharacter?: (character: Character) => void;
 }
 
 type RollType = 'normal' | 'advantage' | 'disadvantage';
@@ -20,8 +21,10 @@ export const CharacterStats: React.FC<CharacterStatsProps> = ({
   character,
   setRollResult,
   onDiceRoll,
+  onUpdateCharacter,
 }) => {
   const [initiativeRollType, setInitiativeRollType] = useState<RollType>('normal');
+  const [tempHpInput, setTempHpInput] = useState('');
   const passivePerception = (character.skills.Perception.value + 10);
 
   const handleInitiativeRoll = (type: RollType = initiativeRollType) => {
@@ -65,10 +68,76 @@ export const CharacterStats: React.FC<CharacterStatsProps> = ({
     return 30;
   };
 
+  const handleAddTempHp = () => {
+    const amount = parseInt(tempHpInput);
+    if (isNaN(amount) || amount <= 0 || !onUpdateCharacter) return;
+
+    const currentTempHp = character.temporaryHitPoints || 0;
+    const newTempHp = Math.max(0, currentTempHp + amount);
+
+    onUpdateCharacter({
+      ...character,
+      temporaryHitPoints: newTempHp
+    });
+    setTempHpInput('');
+  };
+
+  const handleRemoveTempHp = () => {
+    if (!onUpdateCharacter) return;
+
+    onUpdateCharacter({
+      ...character,
+      temporaryHitPoints: 0
+    });
+  };
+
   return (
     <div className="grid grid-cols-2 md:grid-cols-6 gap-4 bg-gray-800/70 p-4 rounded-xl shadow-lg border border-red-900">
       <div className="col-span-1 flex flex-col items-center"><Shield className="w-6 h-6 text-red-500 mb-1" /><span className="text-sm font-semibold text-gray-400">AC</span><div className="text-4xl font-extrabold text-white">{character.armorClass}</div></div>
-      <div className="col-span-1 flex flex-col items-center"><Zap className="w-6 h-6 text-red-500 mb-1" /><span className="text-sm font-semibold text-gray-400">HP</span><div className="text-center"><div className="text-2xl font-extrabold text-green-400">{character.hitPoints}<span className="text-gray-400 text-lg">/{character.maxHitPoints}</span></div>{character.temporaryHitPoints && character.temporaryHitPoints > 0 && (<div className="text-sm font-bold text-blue-400">+{character.temporaryHitPoints} temp</div>)}</div></div>
+      <div className="col-span-1 flex flex-col items-center">
+        <Zap className="w-6 h-6 text-red-500 mb-1" />
+        <span className="text-sm font-semibold text-gray-400">HP</span>
+        <div className="text-center">
+          <div className="text-2xl font-extrabold text-green-400">
+            {character.hitPoints}
+            <span className="text-gray-400 text-lg">/{character.maxHitPoints}</span>
+          </div>
+          {character.temporaryHitPoints && character.temporaryHitPoints > 0 && (
+            <div className="text-sm font-bold text-blue-400 flex items-center justify-center gap-1">
+              +{character.temporaryHitPoints} temp
+              {onUpdateCharacter && (
+                <button
+                  onClick={handleRemoveTempHp}
+                  className="text-xs text-red-400 hover:text-red-300 ml-1"
+                  title="Remove temporary HP"
+                >
+                  ×
+                </button>
+              )}
+            </div>
+          )}
+          {onUpdateCharacter && (
+            <div className="mt-1 flex items-center gap-1">
+              <input
+                type="number"
+                value={tempHpInput}
+                onChange={(e) => setTempHpInput(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleAddTempHp()}
+                placeholder="+"
+                className="w-8 h-5 text-xs bg-gray-700 text-white rounded border border-gray-600 focus:border-blue-500 focus:outline-none text-center"
+                min="1"
+              />
+              <button
+                onClick={handleAddTempHp}
+                className="text-xs text-blue-400 hover:text-blue-300"
+                title="Add temporary HP"
+              >
+                +
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
       <div className="col-span-1 relative">
         <button
           onClick={() => handleInitiativeRoll()}
