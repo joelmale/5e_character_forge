@@ -1148,7 +1148,7 @@ const COMPREHENSIVE_RACES: Race[] = [
     name: 'Drow (Dark Elf)',
     source: 'PHB',
     ability_bonuses: { DEX: 2, CHA: 1 },
-    racial_traits: ['Superior Darkvision', 'Fey Ancestry', 'Trance', 'Keen Senses', 'Drow Magic', 'Sunlight Sensitivity'],
+    racial_traits: ['Superior Darkvision (120ft)', 'Fey Ancestry', 'Trance', 'Keen Senses', 'Drow Magic', 'Sunlight Sensitivity'],
     description: 'Elves are a magical people of otherworldly grace, living in the world but not entirely part of it. Drow, or dark elves, have black skin that resembles polished obsidian and stark white or pale yellow hair.',
     typicalRoles: ['Wizard', 'Rogue', 'Fighter', 'Warlock']
   },
@@ -1166,7 +1166,7 @@ const COMPREHENSIVE_RACES: Race[] = [
     name: 'Stout Halfling',
     source: 'PHB',
     ability_bonuses: { DEX: 2, CON: 1 },
-    racial_traits: ['Lucky', 'Brave', 'Halfling Nimbleness', 'Stout Resilience'],
+    racial_traits: ['Lucky', 'Brave', 'Halfling Nimbleness', 'Stout Resilience (poison advantage)'],
     description: 'Halflings are an affable and cheerful people. They cherish the bonds of family and friendship as well as the comforts of hearth and home. Stout halflings are hardier than average and have some resistance to poison.',
     typicalRoles: ['Rogue', 'Barbarian', 'Fighter', 'Cleric']
   },
@@ -1202,7 +1202,7 @@ const COMPREHENSIVE_RACES: Race[] = [
     name: 'Half-Elf',
     source: 'PHB',
     ability_bonuses: { CHA: 2 },
-    racial_traits: ['Darkvision', 'Fey Ancestry', 'Skill Versatility'],
+    racial_traits: ['Darkvision', 'Fey Ancestry', 'Skill Versatility (2 skills)'],
     description: 'Half-elves combine what some say are the best qualities of their elf and human parents: human curiosity, inventiveness, and ambition tempered by the refined senses, love of nature, and artistic tastes of the elves.',
     typicalRoles: ['Bard', 'Fighter', 'Rogue', 'Paladin', 'Any']
   },
@@ -1211,7 +1211,7 @@ const COMPREHENSIVE_RACES: Race[] = [
     name: 'Half-Orc',
     source: 'PHB',
     ability_bonuses: { STR: 2, CON: 1 },
-    racial_traits: ['Darkvision', 'Menacing', 'Relentless Endurance', 'Savage Attacks'],
+    racial_traits: ['Darkvision', 'Menacing (Intimidation)', 'Relentless Endurance', 'Savage Attacks'],
     description: 'Half-orcs are the short-tempered and sullen result of human and orc pairings. They are strong and tough, but they are often shunned by both races.',
     typicalRoles: ['Barbarian', 'Fighter', 'Rogue', 'Paladin']
   },
@@ -1220,7 +1220,7 @@ const COMPREHENSIVE_RACES: Race[] = [
     name: 'Tiefling',
     source: 'PHB',
     ability_bonuses: { INT: 1, CHA: 2 },
-    racial_traits: ['Darkvision', 'Hellish Resistance', 'Infernal Legacy'],
+    racial_traits: ['Darkvision', 'Hellish Resistance (fire)', 'Infernal Legacy'],
     description: 'Tieflings are derived from human bloodlines, and in the broadest possible sense, they still look human. However, their infernal heritage has left a clear imprint on their appearance.',
     typicalRoles: ['Warlock', 'Wizard', 'Rogue', 'Bard']
   },
@@ -1323,7 +1323,7 @@ const COMPREHENSIVE_RACES: Race[] = [
     name: 'Orc',
     source: 'VGtM',
     ability_bonuses: { STR: 2, CON: 1, INT: -2 },
-    racial_traits: ['Darkvision', 'Aggressive', 'Menacing', 'Powerful Build'],
+    racial_traits: ['Darkvision', 'Aggressive', 'Menacing (Intimidation)', 'Powerful Build'],
     description: 'Orcs are brutish, green-skinned humanoids that dwell in tribal societies. They are fierce warriors who revel in battle.',
     typicalRoles: ['Barbarian', 'Fighter', 'Rogue', 'Shaman']
   },
