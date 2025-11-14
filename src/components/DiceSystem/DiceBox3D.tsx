@@ -1,8 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import DiceBox, { type DiceBoxConfig } from '@3d-dice/dice-box';
-import DiceParser from '@3d-dice/dice-parser-interface';
-import DisplayResults from '@3d-dice/dice-ui/src/displayResults';
-import type { DiceRoll } from '../../utils/diceRoller';
+import type { DiceRoll } from '../../services/diceService';
 
 interface DiceBox3DProps {
   latestRoll: DiceRoll | null;
@@ -14,8 +12,6 @@ export const DiceBox3D: React.FC<DiceBox3DProps> = ({
   onRollComplete,
 }) => {
   const diceBoxRef = useRef<DiceBox | null>(null);
-  const diceParserRef = useRef<DiceParser | null>(null);
-  const displayResultsRef = useRef<DisplayResults | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const clearTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastRollIdRef = useRef<string | null>(null);
@@ -24,32 +20,32 @@ export const DiceBox3D: React.FC<DiceBox3DProps> = ({
   const [webGLSupported, setWebGLSupported] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Initialize Dice Parser and Display Results
-  useEffect(() => {
-    diceParserRef.current = new DiceParser();
-    displayResultsRef.current = new DisplayResults("#dice-box");
-  }, []);
-
   // Check WebGL support and initialize DiceBox
   useEffect(() => {
+    let mounted = true;
+
     const initDiceSystem = async () => {
       // Check WebGL support
       const canvas = document.createElement('canvas');
       const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
 
       if (!gl) {
-        setWebGLSupported(false);
-        setError('WebGL is not supported in your browser');
+        if (mounted) {
+          setWebGLSupported(false);
+          setError('WebGL is not supported in your browser');
+        }
         return;
       }
 
       try {
-        const config: DiceBoxConfig = {
+        // Create DiceBox instance with v1.1.0+ API (config object only)
+        const config = {
           id: 'dice-canvas',
+          assetPath: '/assets/dice-box/',  // This should point to the directory containing themes/ and ammo/
           container: '#dice-box',
-          assetPath: '/assets/dice-box/',
           theme: 'default',
-          offscreen: false,
+          themeColor: '#1e3a8a',  // Dark blue
+          offscreen: false,  // Disable Web Worker to avoid CORS issues
           scale: 6,
           gravity: 1,
           mass: 1,
@@ -60,61 +56,37 @@ export const DiceBox3D: React.FC<DiceBox3DProps> = ({
           spinForce: 3,
           throwForce: 4,
           startingHeight: 8,
-          settleTimeout: 2500,
-          delay: 10,
+          settleTimeout: 2000,
           enableShadows: true,
           lightIntensity: 1,
         };
 
-        console.log('Initializing enhanced DiceBox with config:', config);
+        console.log('Initializing DiceBox with config:', config);
 
         const diceBox = new DiceBox(config);
+
+        // Wait for initialization to complete
         await diceBox.init();
 
-        // Enhanced roll complete handler with parser integration
+        if (!mounted) return;
+
+        // Simple roll complete handler
         diceBox.onRollComplete = (results) => {
           console.log('Dice roll complete:', results);
-
-          if (!diceParserRef.current || !displayResultsRef.current) {
-            console.error('Dice parser or display results not initialized');
-            return;
-          }
-
-          // Handle rerolls using the parser
-          const rerolls = diceParserRef.current.handleRerolls(results);
-          if (rerolls.length) {
-            console.log('Processing rerolls:', rerolls);
-            rerolls.forEach((roll: any) => diceBox.roll(roll));
-            return rerolls;
-          }
-
-          // Parse final results and display them
-          const finalResults = diceParserRef.current.parseFinalResults(results);
-          console.log('Final parsed results:', finalResults);
-
-          displayResultsRef.current.showResults(finalResults);
 
           if (onRollComplete) {
             onRollComplete();
           }
         };
 
-        // Clear dice on click anywhere on the screen
-        const clearDiceHandler = () => {
-          const diceBoxCanvas = document.getElementById("dice-canvas");
-          if (diceBoxCanvas && window.getComputedStyle(diceBoxCanvas).display !== "none") {
-            diceBox.hide().clear();
-            displayResultsRef.current?.clear();
-          }
-        };
-
-        document.addEventListener("mousedown", clearDiceHandler);
-
         diceBoxRef.current = diceBox;
         setIsInitialized(true);
+        console.log('DiceBox initialized successfully!');
 
       } catch (err) {
-        console.error('Failed to initialize enhanced DiceBox:', err);
+        console.error('Failed to initialize DiceBox:', err);
+        if (!mounted) return;
+
         const errorMessage = err instanceof Error ? err.message : 'Unknown error';
 
         if (errorMessage.includes('WebAssembly') || errorMessage.includes('wasm')) {
@@ -122,7 +94,7 @@ export const DiceBox3D: React.FC<DiceBox3DProps> = ({
         } else if (errorMessage.includes('theme config')) {
           setError('Dice theme configuration not found. Check theme files.');
         } else {
-          setError('Failed to initialize 3D dice. Check console for details.');
+          setError(`Failed to initialize 3D dice: ${errorMessage}`);
         }
       }
     };
@@ -131,28 +103,23 @@ export const DiceBox3D: React.FC<DiceBox3DProps> = ({
 
     // Cleanup function
     return () => {
-      if (diceBoxRef.current) {
-        diceBoxRef.current.clear();
-      }
-      // Remove event listener if it was added
-      const diceBoxCanvas = document.getElementById("dice-canvas");
-      if (diceBoxCanvas) {
-        document.removeEventListener("mousedown", () => {
-          if (diceBoxCanvas && window.getComputedStyle(diceBoxCanvas).display !== "none") {
-            diceBoxRef.current?.hide().clear();
-            displayResultsRef.current?.clear();
-          }
-        });
+      mounted = false;
+      // Only clear if the diceBox is fully initialized and has the clear method
+      if (diceBoxRef.current && typeof diceBoxRef.current.clear === 'function') {
+        try {
+          diceBoxRef.current.clear();
+        } catch (err) {
+          console.warn('Error clearing dice box:', err);
+        }
       }
     };
   }, [onRollComplete]);
 
-  // Handle dice rolls with enhanced notation support
+  // Handle dice rolls
   useEffect(() => {
     if (
       !isInitialized ||
       !diceBoxRef.current ||
-      !diceParserRef.current ||
       !latestRoll ||
       lastRollIdRef.current === latestRoll.id
     ) {
@@ -166,33 +133,29 @@ export const DiceBox3D: React.FC<DiceBox3DProps> = ({
       clearTimeout(clearTimeoutRef.current);
     }
 
-    // Enhanced roll processing with complex notation support
+    // Roll the dice
     const rollDice = async () => {
       try {
-        // Support both simple rolls and complex notations
-        let rollNotation: string;
+        // Use the notation from the roll
+        const rollNotation = latestRoll.notation;
 
-        if (latestRoll.pools && latestRoll.pools.length > 0) {
-          // Complex roll with multiple dice types - convert to notation
-          const notations: string[] = [];
-          latestRoll.pools.forEach(pool => {
-            notations.push(`${pool.count}d${pool.sides}`);
-          });
-          rollNotation = notations.join('+');
-        } else {
-          // Simple d20 roll - convert to notation
-          rollNotation = `1d20${latestRoll.modifier !== 0 ? (latestRoll.modifier > 0 ? '+' : '') + latestRoll.modifier : ''}`;
-        }
+        console.log('Rolling dice with notation:', rollNotation, 'for roll:', latestRoll);
+        console.log('DiceBox instance:', diceBoxRef.current);
 
-        console.log('Rolling dice with notation:', rollNotation);
+        // Show the dice box first
+        diceBoxRef.current!.show();
+        console.log('DiceBox shown');
 
-        // Roll dice with notation string
-        await diceBoxRef.current!.show().roll(rollNotation);
+        // Then roll the dice
+        const result = await diceBoxRef.current!.roll(rollNotation);
+        console.log('Roll result:', result);
 
         // Auto-clear after settle time + 3 seconds
-        const totalTime = 2500 + 3000; // settleTimeout + 3s
+        const totalTime = 2000 + 3000; // settleTimeout + 3s
         clearTimeoutRef.current = setTimeout(() => {
           if (diceBoxRef.current) {
+            console.log('Hiding and clearing dice');
+            diceBoxRef.current.hide();
             diceBoxRef.current.clear();
           }
         }, totalTime);
@@ -234,13 +197,25 @@ export const DiceBox3D: React.FC<DiceBox3DProps> = ({
     <div
       id="dice-box"
       ref={containerRef}
-      className="fixed inset-0 pointer-events-none z-40"
+      className="fixed inset-0 pointer-events-none"
       style={{
-        width: '100%',
-        height: '100%',
+        width: '100vw',
+        height: '100vh',
+        zIndex: 9999,
+        top: 0,
+        left: 0,
       }}
     >
-      <canvas id="dice-canvas" className="w-full h-full" />
+      <canvas
+        id="dice-canvas"
+        className="w-full h-full"
+        style={{
+          display: 'block',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+        }}
+      />
     </div>
   );
 };

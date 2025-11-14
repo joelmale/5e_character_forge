@@ -12,8 +12,7 @@ import { ChooseCantripModal } from './components/ChooseCantripModal';
 import ChooseSubclassModal from './components/ChooseSubclassModal';
 import AbilityScoreIncreaseModal from './components/AbilityScoreIncreaseModal';
 import { SpellPreparationModal } from './components/SpellPreparationModal';
-import { createAbilityRoll, createSkillRoll, createInitiativeRoll, getRollHistory, addRollToHistory, clearRollHistory, rollDice, generateUUID, DiceRoll } from './services/diceService';
-import { diceSounds } from './utils/diceSounds';
+import { createAbilityRoll, createSkillRoll, createInitiativeRoll, generateUUID, DiceRoll } from './services/diceService';
 import { featureDescriptions } from './utils/featureDescriptions';
 import { loadClasses, loadEquipment, FEAT_DATABASE as loadedFeats, getSubclassesByClass, getFeaturesByClass, getFeaturesBySubclass, SPELL_DATABASE, PROFICIENCY_BONUSES, getModifier, SKILL_TO_ABILITY, ALL_SKILLS, ALIGNMENTS_DATA, ALIGNMENTS, BACKGROUNDS, RACE_CATEGORIES, CLASS_CATEGORIES, EQUIPMENT_PACKAGES, getAllRaces, randomizeLevel, randomizeIdentity, randomizeRace, randomizeClassAndSkills, randomizeFightingStyle, randomizeSpells, randomizeAbilities, randomizeFeats, randomizeEquipmentChoices, randomizeAdditionalEquipment, randomizeLanguages, randomizePersonality, AppSubclass } from './services/dataService';
 import { getAllCharacters, addCharacter, deleteCharacter, updateCharacter } from './services/dbService';
@@ -23,6 +22,7 @@ import { calculateKnownLanguages } from './utils/languageUtils';
 import { SPELL_SLOTS_BY_CLASS } from './data/spellSlots';
 import { CANTRIPS_KNOWN_BY_CLASS } from './data/cantrips';
 import { Ability, Character, AbilityScore, Skill, AbilityName, SkillName, Equipment, EquippedItem, Feat, CharacterCreationData, Feature } from './types/dnd';
+import { useDiceContext } from './context';
 
 interface CharacterSheetProps {
   character: Character;
@@ -2561,6 +2561,9 @@ interface EquipmentBrowserProps {
 
 /** Main Application Component */
 const App: React.FC = () => {
+  // Use DiceContext for dice rolling functionality
+  const { rollHistory, latestRoll, rollDice, clearHistory } = useDiceContext();
+
   const [characters, setCharacters] = useState<Character[]>([]);
   const [selectedCharacterId, setSelectedCharacterId] = useState<string | null>(null);
   const [selectedCharacterIds, setSelectedCharacterIds] = useState<Set<string>>(new Set());
@@ -2570,8 +2573,6 @@ const App: React.FC = () => {
     value: number | null;
     details?: Array<{ value: number; kept: boolean; critical?: 'success' | 'failure' }>
   }>({ text: 'Ready to Roll!', value: null });
-  const [rollHistory, setRollHistory] = useState<DiceRoll[]>([]);
-  const [latestRoll, setLatestRoll] = useState<DiceRoll | null>(null);
   const [featureModal, setFeatureModal] = useState<{name: string, description: string, source?: string} | null>(null);
   const [equipmentModal, setEquipmentModal] = useState<Equipment | null>(null);
   const [cantripModalState, setCantripModalState] = useState<{isOpen: boolean, characterId: string | null, characterClass: string | null}>({ isOpen: false, characterId: null, characterClass: null });
@@ -2593,34 +2594,10 @@ const App: React.FC = () => {
     }
   }, []);
 
-  // Load roll history on mount
-  useEffect(() => {
-    const history = getRollHistory();
-    setRollHistory(history);
-  }, []);
-
-  // Handle dice roll
+  // Handle dice roll - use DiceContext's rollDice function
   const handleDiceRoll = useCallback((roll: DiceRoll) => {
-    // Add to history
-    const updatedHistory = addRollToHistory(roll);
-    setRollHistory(updatedHistory);
-    setLatestRoll(roll);
-
-    // Play sounds
-    diceSounds.playRollSound(roll.diceResults.length);
-
-    if (roll.critical === 'success') {
-      setTimeout(() => diceSounds.playCritSuccessSound(), 300);
-    } else if (roll.critical === 'failure') {
-      setTimeout(() => diceSounds.playCritFailureSound(), 300);
-    }
-  }, []);
-
-  // Clear roll history
-  const handleClearHistory = useCallback(() => {
-    clearRollHistory();
-    setRollHistory([]);
-  }, []);
+    rollDice(roll);
+  }, [rollDice]);
 
   // Load characters from IndexedDB
   const loadCharacters = useCallback(async () => {
@@ -3251,7 +3228,7 @@ const App: React.FC = () => {
         />
         <DiceBox3D latestRoll={latestRoll} />
         <RollHistoryTicker rolls={rollHistory} />
-        <RollHistoryModal rolls={rollHistory} onClear={handleClearHistory} />
+        <RollHistoryModal rolls={rollHistory} onClear={clearHistory} />
         <FeatureModal feature={featureModal} onClose={() => setFeatureModal(null)} />
         <EquipmentDetailModal equipment={equipmentModal} onClose={() => setEquipmentModal(null)} />
       </>

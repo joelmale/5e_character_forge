@@ -18,7 +18,10 @@
       "Bash(xargs:*)",
       "Bash(git checkout:*)",
       "Bash(python3:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(curl:*)",
+      "Bash(npm run dev:*)",
+      "Bash(rsync:*)"
     ],
     "deny": [],
     "ask": [],

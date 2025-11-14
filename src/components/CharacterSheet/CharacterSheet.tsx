@@ -5,6 +5,8 @@ import {
   CharacterStats,
   AbilityScores,
   SkillsSection,
+  SavingThrows,
+  AttacksAndActions,
   SpellcastingSection,
   EquipmentSection,
   FeaturesSection
@@ -46,6 +48,20 @@ export const CharacterSheet: React.FC<CharacterSheetProps> = ({
           setRollResult={setRollResult}
           onDiceRoll={onDiceRoll}
         />
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <SavingThrows
+            character={character}
+            setRollResult={setRollResult}
+            onDiceRoll={onDiceRoll}
+          />
+
+          <AttacksAndActions
+            character={character}
+            setRollResult={setRollResult}
+            onDiceRoll={onDiceRoll}
+          />
+        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <AbilityScores

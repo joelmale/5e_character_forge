@@ -5,6 +5,8 @@ export { AbilityScores } from './AbilityScores';
 export { AbilityScoreBlock } from './AbilityScoreBlock';
 export { SkillsSection } from './SkillsSection';
 export { SkillEntry } from './SkillEntry';
+export { SavingThrows } from './SavingThrows';
+export { AttacksAndActions } from './AttacksAndActions';
 export { SpellcastingSection } from './SpellcastingSection';
 export { EquipmentSection } from './EquipmentSection';
 export { FeaturesSection } from './FeaturesSection';
