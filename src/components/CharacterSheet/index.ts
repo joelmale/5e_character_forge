@@ -11,6 +11,8 @@ export { HitDice } from './HitDice';
 export { ExperiencePoints } from './ExperiencePoints';
 export { AttunementSlots } from './AttunementSlots';
 export { ProficienciesAndLanguages } from './ProficienciesAndLanguages';
+export { Conditions } from './Conditions';
+export { CoinManagement } from './CoinManagement';
 export { SpellcastingSection } from './SpellcastingSection';
 export { EquipmentSection } from './EquipmentSection';
 export { FeaturesSection } from './FeaturesSection';

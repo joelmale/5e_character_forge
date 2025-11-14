@@ -11,6 +11,8 @@ import {
   ExperiencePoints,
   AttunementSlots,
   ProficienciesAndLanguages,
+  Conditions,
+  CoinManagement,
   SpellcastingSection,
   EquipmentSection,
   FeaturesSection
@@ -51,6 +53,11 @@ export const CharacterSheet: React.FC<CharacterSheetProps> = ({
           character={character}
           setRollResult={setRollResult}
           onDiceRoll={onDiceRoll}
+        />
+
+        <Conditions
+          character={character}
+          onUpdateCharacter={onUpdateCharacter}
         />
 
         <ExperiencePoints
@@ -103,6 +110,11 @@ export const CharacterSheet: React.FC<CharacterSheetProps> = ({
 
         <AttunementSlots
           character={character}
+        />
+
+        <CoinManagement
+          character={character}
+          onUpdateCharacter={onUpdateCharacter}
         />
 
         <EquipmentSection

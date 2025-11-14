@@ -1,0 +1,128 @@
+import React, { useState } from 'react';
+import { Coins, Plus, Minus } from 'lucide-react';
+import { Character } from '../../types/dnd';
+
+interface CoinManagementProps {
+  character: Character;
+  onUpdateCharacter: (character: Character) => void;
+}
+
+export const CoinManagement: React.FC<CoinManagementProps> = ({
+  character,
+  onUpdateCharacter,
+}) => {
+  const [coinInputs, setCoinInputs] = useState({
+    cp: '',
+    sp: '',
+    gp: '',
+    pp: ''
+  });
+
+  const currency = character.currency || { cp: 0, sp: 0, gp: 0, pp: 0 };
+
+  const updateCoin = (type: 'cp' | 'sp' | 'gp' | 'pp', amount: number) => {
+    const newAmount = Math.max(0, currency[type] + amount);
+    const updatedCharacter = {
+      ...character,
+      currency: {
+        ...currency,
+        [type]: newAmount
+      }
+    };
+    onUpdateCharacter(updatedCharacter);
+  };
+
+  const addCoins = () => {
+    Object.entries(coinInputs).forEach(([type, value]) => {
+      const amount = parseInt(value) || 0;
+      if (amount > 0) {
+        updateCoin(type as 'cp' | 'sp' | 'gp' | 'pp', amount);
+      }
+    });
+    setCoinInputs({ cp: '', sp: '', gp: '', pp: '' });
+  };
+
+  const removeCoins = () => {
+    Object.entries(coinInputs).forEach(([type, value]) => {
+      const amount = parseInt(value) || 0;
+      if (amount > 0) {
+        updateCoin(type as 'cp' | 'sp' | 'gp' | 'pp', -amount);
+      }
+    });
+    setCoinInputs({ cp: '', sp: '', gp: '', pp: '' });
+  };
+
+  const totalValue = (currency.cp * 0.01) + (currency.sp * 0.1) + currency.gp + (currency.pp * 10);
+
+  return (
+    <div className="bg-yellow-900 rounded-xl shadow-lg border-l-4 border-yellow-500 p-4">
+      <h3 className="text-lg font-bold text-yellow-400 mb-4 flex items-center gap-2">
+        <Coins className="w-5 h-5" />
+        Coin Pouch
+      </h3>
+
+      {/* Current Coins */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+        <div className="text-center p-3 bg-gray-800/50 rounded-lg">
+          <div className="text-2xl font-bold text-orange-400">{currency.cp}</div>
+          <div className="text-xs text-gray-400">Copper</div>
+        </div>
+        <div className="text-center p-3 bg-gray-800/50 rounded-lg">
+          <div className="text-2xl font-bold text-gray-400">{currency.sp}</div>
+          <div className="text-xs text-gray-400">Silver</div>
+        </div>
+        <div className="text-center p-3 bg-gray-800/50 rounded-lg">
+          <div className="text-2xl font-bold text-yellow-400">{currency.gp}</div>
+          <div className="text-xs text-gray-400">Gold</div>
+        </div>
+        <div className="text-center p-3 bg-gray-800/50 rounded-lg">
+          <div className="text-2xl font-bold text-blue-400">{currency.pp}</div>
+          <div className="text-xs text-gray-400">Platinum</div>
+        </div>
+      </div>
+
+      {/* Total Value */}
+      <div className="text-center mb-4 p-3 bg-gray-800/30 rounded-lg">
+        <div className="text-lg font-bold text-white">{totalValue.toFixed(2)} gp</div>
+        <div className="text-xs text-gray-400">Total Value</div>
+      </div>
+
+      {/* Coin Management */}
+      <div className="space-y-3">
+        <h4 className="text-sm font-semibold text-yellow-300">Add/Remove Coins:</h4>
+
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+          {Object.entries(coinInputs).map(([type, value]) => (
+            <div key={type} className="space-y-1">
+              <label className="text-xs text-gray-400 uppercase">{type}</label>
+              <input
+                type="number"
+                value={value}
+                onChange={(e) => setCoinInputs(prev => ({ ...prev, [type]: e.target.value }))}
+                placeholder="0"
+                className="w-full px-2 py-1 bg-gray-800 text-white rounded border border-gray-600 focus:border-yellow-500 focus:outline-none text-sm"
+              />
+            </div>
+          ))}
+        </div>
+
+        <div className="flex gap-2">
+          <button
+            onClick={addCoins}
+            className="flex-1 py-2 bg-green-600 hover:bg-green-500 rounded text-sm font-medium transition-colors flex items-center justify-center gap-1"
+          >
+            <Plus className="w-4 h-4" />
+            Add Coins
+          </button>
+          <button
+            onClick={removeCoins}
+            className="flex-1 py-2 bg-red-600 hover:bg-red-500 rounded text-sm font-medium transition-colors flex items-center justify-center gap-1"
+          >
+            <Minus className="w-4 h-4" />
+            Remove Coins
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};

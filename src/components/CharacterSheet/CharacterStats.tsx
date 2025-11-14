@@ -68,7 +68,7 @@ export const CharacterStats: React.FC<CharacterStatsProps> = ({
   return (
     <div className="grid grid-cols-2 md:grid-cols-6 gap-4 bg-gray-800/70 p-4 rounded-xl shadow-lg border border-red-900">
       <div className="col-span-1 flex flex-col items-center"><Shield className="w-6 h-6 text-red-500 mb-1" /><span className="text-sm font-semibold text-gray-400">AC</span><div className="text-4xl font-extrabold text-white">{character.armorClass}</div></div>
-      <div className="col-span-1 flex flex-col items-center"><Zap className="w-6 h-6 text-red-500 mb-1" /><span className="text-sm font-semibold text-gray-400">HP</span><div className="text-2xl font-extrabold text-green-400">{character.hitPoints}<span className="text-gray-400 text-lg">/{character.maxHitPoints}</span></div></div>
+      <div className="col-span-1 flex flex-col items-center"><Zap className="w-6 h-6 text-red-500 mb-1" /><span className="text-sm font-semibold text-gray-400">HP</span><div className="text-center"><div className="text-2xl font-extrabold text-green-400">{character.hitPoints}<span className="text-gray-400 text-lg">/{character.maxHitPoints}</span></div>{character.temporaryHitPoints && character.temporaryHitPoints > 0 && (<div className="text-sm font-bold text-blue-400">+{character.temporaryHitPoints} temp</div>)}</div></div>
       <div className="col-span-1 relative">
         <button
           onClick={() => handleInitiativeRoll()}
