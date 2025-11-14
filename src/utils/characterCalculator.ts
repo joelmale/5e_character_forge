@@ -204,10 +204,11 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
     armorClass,
     hitPoints: maxHitPoints,
     maxHitPoints,
-    hitDice: {
-      current: level,
-      max: level,
-    },
+      hitDice: {
+        current: data.level,
+        max: data.level,
+        dieType: 12, // TODO: Make this dynamic based on class
+      },
     speed: 30,
     initiative: finalAbilities.DEX.modifier,
     abilities: finalAbilities,

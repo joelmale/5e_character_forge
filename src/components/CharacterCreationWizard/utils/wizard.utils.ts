@@ -196,6 +196,7 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
     hitDice: {
       current: level,
       max: level,
+      dieType: 12, // TODO: Make this dynamic based on class
     },
     speed: 30,
     initiative: finalAbilities.DEX.modifier,

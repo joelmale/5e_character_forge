@@ -67,6 +67,7 @@ export interface Character {
   hitDice: {
     current: number;
     max: number;
+    dieType: number; // d6, d8, d10, d12, etc.
   };
   speed: number;
   initiative: number;

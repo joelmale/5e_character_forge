@@ -7,6 +7,7 @@ import {
   SkillsSection,
   SavingThrows,
   AttacksAndActions,
+  HitDice,
   SpellcastingSection,
   EquipmentSection,
   FeaturesSection
@@ -69,6 +70,11 @@ export const CharacterSheet: React.FC<CharacterSheetProps> = ({
           character={character}
           setRollResult={setRollResult}
           onDiceRoll={onDiceRoll}
+        />
+
+        <HitDice
+          character={character}
+          onUpdateCharacter={onUpdateCharacter}
         />
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
