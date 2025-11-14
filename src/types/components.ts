@@ -6,7 +6,11 @@ export interface CharacterSheetProps {
   character: Character;
   onClose: () => void;
   onDelete: (id: string) => void;
-  setRollResult: (result: { text: string; value: number | null }) => void;
+  setRollResult: (result: {
+    text: string;
+    value: number | null;
+    details?: Array<{ value: number; kept: boolean; critical?: 'success' | 'failure' }>
+  }) => void;
   onDiceRoll: (roll: DiceRoll) => void;
   onToggleInspiration: (characterId: string) => void;
   onFeatureClick: (feature: string | Feature) => void;
