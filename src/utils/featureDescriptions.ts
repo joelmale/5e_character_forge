@@ -138,4 +138,290 @@ export const featureDescriptions: Record<string, { description: string; source?:
     description: 'While you are not wearing any armor, your Armor Class equals 10 + your Dexterity modifier + your Constitution modifier. You can use a shield and still gain this benefit.',
     source: 'Player\'s Handbook',
   },
+
+  // Additional Dwarf Traits
+  'Stonecunning': {
+    description: 'Whenever you make an Intelligence (History) check related to the origin of stonework, you are considered proficient in the History skill and add double your proficiency bonus to the check, instead of your normal proficiency bonus.',
+    source: 'Player\'s Handbook',
+  },
+  'Dwarven Combat Training': {
+    description: 'You have proficiency with the battleaxe, handaxe, light hammer, and warhammer.',
+    source: 'Player\'s Handbook',
+  },
+  'Tool Proficiency': {
+    description: 'You gain proficiency with the artisan\'s tools of your choice: smith\'s tools, brewer\'s supplies, or mason\'s tools.',
+    source: 'Player\'s Handbook',
+  },
+
+  // Additional Elf Traits
+  'Keen Senses': {
+    description: 'You have proficiency in the Perception skill.',
+    source: 'Player\'s Handbook',
+  },
+  'Elf Weapon Training': {
+    description: 'You have proficiency with the longsword, shortsword, shortbow, and longbow.',
+    source: 'Player\'s Handbook',
+  },
+  'Cantrip': {
+    description: 'You know one cantrip of your choice from the wizard spell list. Intelligence is your spellcasting ability for it.',
+    source: 'Player\'s Handbook',
+  },
+  'Fleet of Foot': {
+    description: 'Your base walking speed increases to 35 feet.',
+    source: 'Player\'s Handbook',
+  },
+
+  // Additional Halfling Traits
+  'Halfling Nimbleness': {
+    description: 'You can move through the space of any creature that is of a size larger than yours.',
+    source: 'Player\'s Handbook',
+  },
+
+  // Additional Gnome Traits
+  'Natural Illusionist': {
+    description: 'You know the minor illusion cantrip. Intelligence is your spellcasting ability for it.',
+    source: 'Player\'s Handbook',
+  },
+  'Speak with Small Beasts': {
+    description: 'Through sounds and gestures, you can communicate simple ideas with Small or smaller beasts.',
+    source: 'Player\'s Handbook',
+  },
+  'Artificer\'s Lore': {
+    description: 'Whenever you make an Intelligence (History) check related to magic items, alchemical objects, or technological devices, you can add twice your proficiency bonus, instead of any proficiency bonus you normally apply.',
+    source: 'Player\'s Handbook',
+  },
+  'Tinker': {
+    description: 'You have proficiency with artisan\'s tools (tinker\'s tools). Using those tools, you can spend 1 hour and 10 gp worth of materials to construct a Tiny clockwork device (AC 5, 1 hp). The device ceases to function after 24 hours (unless you spend 1 hour repairing it to keep the device functioning), or when you use your action to dismantle it; at that time, you can reclaim the materials used to create it. You can have up to three such devices active at a time.',
+    source: 'Player\'s Handbook',
+  },
+
+  // Additional Tiefling Traits
+  'Infernal Legacy': {
+    description: 'You know the thaumaturgy cantrip. When you reach 3rd level, you can cast the hellish rebuke spell as a 2nd-level spell once with this trait and regain the ability to do so when you finish a long rest. When you reach 5th level, you can cast the darkness spell once with this trait and regain the ability to do so when you finish a long rest. Charisma is your spellcasting ability for these spells.',
+    source: 'Player\'s Handbook',
+  },
+
+  // Additional Aasimar Traits
+  'Celestial Resistance': {
+    description: 'You have resistance to necrotic damage and radiant damage.',
+    source: 'Player\'s Handbook',
+  },
+  'Healing Hands': {
+    description: 'As an action, you can touch a creature and cause it to regain a number of hit points equal to your level. Once you use this trait, you can\'t use it again until you finish a long rest.',
+    source: 'Player\'s Handbook',
+  },
+  'Light Bearer': {
+    description: 'You know the light cantrip. Charisma is your spellcasting ability for it.',
+    source: 'Player\'s Handbook',
+  },
+
+  // Additional Half-Elf Traits
+  'Versatile': {
+    description: 'You gain proficiency in two skills of your choice.',
+    source: 'Player\'s Handbook',
+  },
+  'Skilled': {
+    description: 'You gain proficiency in one skill of your choice.',
+    source: 'Player\'s Handbook',
+  },
+
+  // Firbolg Traits
+  'Firbolg Magic': {
+    description: 'You can cast detect magic and disguise self with this trait, using Wisdom as your spellcasting ability for them. Once you cast either spell with this trait, you can\'t cast that spell with it again until you finish a long rest.',
+    source: 'Player\'s Handbook',
+  },
+  'Powerful Build': {
+    description: 'You count as one size larger when determining your carrying capacity and the weight you can push, drag, or lift.',
+    source: 'Player\'s Handbook',
+  },
+  'Hidden Step': {
+    description: 'As a bonus action, you can magically turn invisible until the start of your next turn or until you attack, make a damage roll, or force someone to make a saving throw. Once you use this trait, you can\'t use it again until you finish a short or long rest.',
+    source: 'Player\'s Handbook',
+  },
+  'Speech of Beast and Leaf': {
+    description: 'You have the ability to communicate in a limited manner with beasts and plants. They can understand the meaning of your words, though you have no special ability to understand them in return. You have advantage on all Charisma checks you make to influence them.',
+    source: 'Player\'s Handbook',
+  },
+
+  // Goliath Traits
+  'Stone\'s Endurance': {
+    description: 'You can focus yourself to occasionally shrug off injury. When you take damage, you can use your reaction to roll a d12. Add your Constitution modifier to the number rolled, and reduce the damage by that total. After you use this trait, you can\'t use it again until you finish a short or long rest.',
+    source: 'Player\'s Handbook',
+  },
+  'Mountain Born': {
+    description: 'You\'re acclimated to high altitude, including elevations of 20,000 feet or higher. You\'re also naturally adapted to cold climates.',
+    source: 'Player\'s Handbook',
+  },
+
+  // Kenku Traits
+  'Expert Forgery': {
+    description: 'You can duplicate other creatures\' handwriting and craftwork. You have advantage on all checks made to produce forgeries or duplicates of existing objects.',
+    source: 'Player\'s Handbook',
+  },
+  'Kenku Training': {
+    description: 'You are proficient with two of the following skills of your choice: Acrobatics, Deception, Stealth, or Sleight of Hand.',
+    source: 'Player\'s Handbook',
+  },
+  'Mimicry': {
+    description: 'You can mimic sounds you have heard, including voices. A creature that hears the sounds you make can tell they are imitations with a successful Wisdom (Insight) check opposed by your Charisma (Deception) check.',
+    source: 'Player\'s Handbook',
+  },
+
+  // Tabaxi Traits
+  'Feline Agility': {
+    description: 'Your reflexes and agility allow you to move with a burst of speed. When you move on your turn in combat, you can double your speed until the end of the turn. Once you use this trait, you can\'t use it again until you move 0 feet on one of your turns.',
+    source: 'Player\'s Handbook',
+  },
+  'Cat\'s Claws': {
+    description: 'Because of your claws, you have a climbing speed of 20 feet. In addition, your claws are natural weapons, which you can use to make unarmed strikes. If you hit with them, you deal slashing damage equal to 1d4 + your Strength modifier, instead of the bludgeoning damage normal for an unarmed strike.',
+    source: 'Player\'s Handbook',
+  },
+  'Cat\'s Talent': {
+    description: 'You have proficiency in the Perception and Stealth skills.',
+    source: 'Player\'s Handbook',
+  },
+
+  // Triton Traits
+  'Amphibious': {
+    description: 'You can breathe air and water.',
+    source: 'Player\'s Handbook',
+  },
+  'Control Air and Water': {
+    description: 'You can cast fog cloud with this trait. Starting at 3rd level, you can cast gust of wind with it. Once you cast a spell with this trait, you can\'t cast that spell with it again until you finish a long rest. Constitution is your spellcasting ability for these spells.',
+    source: 'Player\'s Handbook',
+  },
+  'Emissary of the Sea': {
+    description: 'Aquatic beasts have an initial attitude of indifference toward you and are more likely to be friendly if you communicate that you are a friend of the sea. If you are speaking to a creature that can understand you and it can hear you, it must succeed on a DC 14 Wisdom saving throw or be charmed by you for 1 hour.',
+    source: 'Player\'s Handbook',
+  },
+  'Guardians of the Depths': {
+    description: 'Adapted to even the most extreme ocean depths, you have resistance to cold damage, and you ignore any of the drawbacks caused by a deep, underwater environment.',
+    source: 'Player\'s Handbook',
+  },
+
+  // Bugbear Traits
+  'Long-Limbed': {
+    description: 'When you make a melee attack on your turn, your reach for it is 5 feet greater than normal.',
+    source: 'Player\'s Handbook',
+  },
+  'Sneaky': {
+    description: 'You are proficient in the Stealth skill.',
+    source: 'Player\'s Handbook',
+  },
+  'Surprise Attack': {
+    description: 'If you surprise a creature and hit it with an attack on your first turn in combat, the attack deals an extra 2d6 damage to it. You can use this trait only once per combat.',
+    source: 'Player\'s Handbook',
+  },
+
+  // Goblin Traits
+  'Fury of the Small': {
+    description: 'When you damage a creature with an attack or a spell and the creature\'s size is larger than yours, you can cause the attack or spell to deal extra damage to the creature. The extra damage equals your level. Once you use this trait, you can\'t use it again until you finish a short or long rest.',
+    source: 'Player\'s Handbook',
+  },
+  'Nimble Escape': {
+    description: 'You can take the Disengage or Hide action as a bonus action on each of your turns.',
+    source: 'Player\'s Handbook',
+  },
+
+  // Kobold Traits
+  'Martial Training': {
+    description: 'You are proficient with two martial weapons of your choice and with light armor.',
+    source: 'Player\'s Handbook',
+  },
+  'Saving Face': {
+    description: 'Once per short rest, when you are hit by an attack, you can use your reaction to gain a +5 bonus to your AC for that attack, potentially causing it to miss you.',
+    source: 'Player\'s Handbook',
+  },
+
+  // Orc Traits
+  'Aggressive': {
+    description: 'As a bonus action, you can move up to your speed toward an enemy of your choice that you can see or hear. You must end this move closer to the enemy than you started.',
+    source: 'Player\'s Handbook',
+  },
+
+  // Yuan-ti Pureblood Traits
+  'Innate Spellcasting': {
+    description: 'You know the poison spray cantrip. You can cast animal friendship an unlimited number of times with this trait, but you can target only snakes with it. Starting at 3rd level, you can also cast suggestion with this trait. Once you cast it, you can\'t do so again until you finish a long rest. Charisma is your spellcasting ability for these spells.',
+    source: 'Player\'s Handbook',
+  },
+  'Magic Resistance': {
+    description: 'You have advantage on saving throws against spells and other magical effects.',
+    source: 'Player\'s Handbook',
+  },
+  'Poison Immunity': {
+    description: 'You are immune to poison damage and the poisoned condition.',
+    source: 'Player\'s Handbook',
+  },
+
+  // Fairy Traits
+  'Fairy Magic': {
+    description: 'You know the druidcraft cantrip. When you reach 3rd level, you can cast enlarge/reduce once with this trait, and you regain the ability to do so when you finish a long rest. Intelligence is your spellcasting ability for these spells.',
+    source: 'Player\'s Handbook',
+  },
+  'Flight': {
+    description: 'You have a flying speed of 30 feet. You can\'t use this flying speed while wearing medium or heavy armor.',
+    source: 'Player\'s Handbook',
+  },
+
+  // Harengon Traits
+  'Hare-Trigger': {
+    description: 'You can add your proficiency bonus to your initiative rolls.',
+    source: 'Player\'s Handbook',
+  },
+  'Leporine Senses': {
+    description: 'You have proficiency in the Perception skill.',
+    source: 'Player\'s Handbook',
+  },
+  'Lucky Footwork': {
+    description: 'When you fail a Dexterity saving throw, you can use your reaction to roll a d4 and add it to the save, potentially turning the failure into a success. You can\'t use this trait if you\'re prone or your speed is 0.',
+    source: 'Player\'s Handbook',
+  },
+  'Rabbit Hop': {
+    description: 'As a bonus action, you can jump a number of feet equal to five times your proficiency bonus, without provoking opportunity attacks. You can use this trait only if your speed isn\'t reduced by heavy armor. You can use it a number of times equal to your proficiency bonus, and you regain all expended uses when you finish a long rest.',
+    source: 'Player\'s Handbook',
+  },
+
+  // Loxodon Traits
+  'Loxodon Serenity': {
+    description: 'You have advantage on saving throws against being charmed or frightened.',
+    source: 'Player\'s Handbook',
+  },
+  'Natural Armor': {
+    description: 'You have thick, leathery skin. When you aren\'t wearing armor, your AC is 12 + your Dexterity modifier. You can use your natural armor to determine your AC if the armor you wear would leave you with a lower AC. A shield\'s benefits apply as normal while you use your natural armor.',
+    source: 'Player\'s Handbook',
+  },
+  'Trunk': {
+    description: 'You can grasp things with your trunk, and you can use it as a snorkel. It has a reach of 5 feet, and it can lift a number of pounds equal to five times your Strength score. You can also use it to do the following: You can use your trunk to do the following: pull a weapon from an enemy\'s grasp, open a door or container, grapple a creature, or make an unarmed strike.',
+    source: 'Player\'s Handbook',
+  },
+
+  // Aarakocra Traits
+  'Silent Feathers': {
+    description: 'You have proficiency in the Stealth skill.',
+    source: 'Player\'s Handbook',
+  },
+
+  // Gith Traits
+  'Decadent Mastery': {
+    description: 'You learn one language of your choice, and you are proficient with one tool of your choice. In addition, you gain proficiency in one skill of your choice from the following list: Arcana, History, Performance, or Persuasion.',
+    source: 'Player\'s Handbook',
+  },
+  'Githyanki Psionics': {
+    description: 'You know the mage hand cantrip. When you reach 3rd level, you can cast the shield spell once with this trait as a 3rd-level spell, and you regain the ability to do so when you finish a long rest. When you reach 5th level, you can cast the detect thoughts spell once with this trait, and you regain the ability to do so when you finish a long rest. Intelligence is your spellcasting ability for these spells.',
+    source: 'Player\'s Handbook',
+  },
+  'Martial Prodigy': {
+    description: 'You are proficient with light and medium armor and with shortswords, longswords, and greatswords.',
+    source: 'Player\'s Handbook',
+  },
+
+  // Genasi Traits
+  'Fire Resistance': {
+    description: 'You have resistance to fire damage.',
+    source: 'Player\'s Handbook',
+  },
+  'Reach to the Blaze': {
+    description: 'You know the produce flame cantrip. Once you reach 3rd level, you can cast the burning hands spell once with this trait as a 1st-level spell, and you regain the ability to do so when you finish a long rest. Constitution is your spellcasting ability for these spells.',
+    source: 'Player\'s Handbook',
+  },
 };
