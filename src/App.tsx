@@ -12,7 +12,7 @@ import { ChooseCantripModal } from './components/ChooseCantripModal';
 import ChooseSubclassModal from './components/ChooseSubclassModal';
 import AbilityScoreIncreaseModal from './components/AbilityScoreIncreaseModal';
 import { SpellPreparationModal } from './components/SpellPreparationModal';
-import { createAbilityRoll, createSkillRoll, createInitiativeRoll, generateUUID, DiceRoll } from './services/diceService';
+import { createAbilityRoll, createSkillRoll, createInitiativeRoll, generateUUID, DiceRoll, rollDice } from './services/diceService';
 import { featureDescriptions } from './utils/featureDescriptions';
 import { loadClasses, loadEquipment, FEAT_DATABASE as loadedFeats, getSubclassesByClass, getFeaturesByClass, getFeaturesBySubclass, SPELL_DATABASE, PROFICIENCY_BONUSES, getModifier, SKILL_TO_ABILITY, ALL_SKILLS, ALIGNMENTS_DATA, ALIGNMENTS, BACKGROUNDS, RACE_CATEGORIES, CLASS_CATEGORIES, EQUIPMENT_PACKAGES, getAllRaces, randomizeLevel, randomizeIdentity, randomizeRace, randomizeClassAndSkills, randomizeFightingStyle, randomizeSpells, randomizeAbilities, randomizeFeats, randomizeEquipmentChoices, randomizeAdditionalEquipment, randomizeLanguages, randomizePersonality, AppSubclass } from './services/dataService';
 import { getAllCharacters, addCharacter, deleteCharacter, updateCharacter } from './services/dbService';
