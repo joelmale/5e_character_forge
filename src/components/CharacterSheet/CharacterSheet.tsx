@@ -8,6 +8,7 @@ import {
   SavingThrows,
   AttacksAndActions,
   HitDice,
+  ExperiencePoints,
   SpellcastingSection,
   EquipmentSection,
   FeaturesSection
@@ -50,10 +51,10 @@ export const CharacterSheet: React.FC<CharacterSheetProps> = ({
           onDiceRoll={onDiceRoll}
         />
 
-        {/* DEBUG: Attacks and Actions */}
-        <div style={{backgroundColor: 'red', color: 'white', padding: '20px', margin: '10px', border: '2px solid yellow'}}>
-          <h2>DEBUG: AttacksAndActions Component Should Render Here</h2>
-        </div>
+        <ExperiencePoints
+          character={character}
+          onUpdateCharacter={onUpdateCharacter}
+        />
 
         <AttacksAndActions
           character={character}

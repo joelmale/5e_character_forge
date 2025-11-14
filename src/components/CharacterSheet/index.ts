@@ -8,6 +8,7 @@ export { SkillEntry } from './SkillEntry';
 export { SavingThrows } from './SavingThrows';
 export { AttacksAndActions } from './AttacksAndActions';
 export { HitDice } from './HitDice';
+export { ExperiencePoints } from './ExperiencePoints';
 export { SpellcastingSection } from './SpellcastingSection';
 export { EquipmentSection } from './EquipmentSection';
 export { FeaturesSection } from './FeaturesSection';
