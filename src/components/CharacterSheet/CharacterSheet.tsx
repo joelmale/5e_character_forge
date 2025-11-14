@@ -9,6 +9,8 @@ import {
   AttacksAndActions,
   HitDice,
   ExperiencePoints,
+  AttunementSlots,
+  ProficienciesAndLanguages,
   SpellcastingSection,
   EquipmentSection,
   FeaturesSection
@@ -99,6 +101,10 @@ export const CharacterSheet: React.FC<CharacterSheetProps> = ({
           onSpellPreparation={() => setShowSpellPreparationModal(true)}
         />
 
+        <AttunementSlots
+          character={character}
+        />
+
         <EquipmentSection
           character={character}
           onUpdateCharacter={onUpdateCharacter}
@@ -108,6 +114,10 @@ export const CharacterSheet: React.FC<CharacterSheetProps> = ({
           onAddItem={onAddItem}
           onRemoveItem={onRemoveItem}
           setEquipmentModal={setEquipmentModal}
+        />
+
+        <ProficienciesAndLanguages
+          character={character}
         />
 
         <FeaturesSection

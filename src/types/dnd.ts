@@ -246,6 +246,7 @@ export interface EquippedItem {
   equipmentSlug: string; // Reference to Equipment slug
   quantity: number;
   equipped: boolean; // Is this item currently equipped?
+  attuned?: boolean; // Is this magic item attuned? (requires attunement slot)
   notes?: string; // Player notes about the item
 }
 
