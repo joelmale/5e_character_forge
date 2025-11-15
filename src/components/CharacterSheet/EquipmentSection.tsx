@@ -1,5 +1,5 @@
 import React from 'react';
-import { Plus } from 'lucide-react';
+import { Plus, Box } from 'lucide-react';
 import { Character } from '../../types/dnd';
 
 interface EquipmentSectionProps {
@@ -23,32 +23,36 @@ export const EquipmentSection: React.FC<EquipmentSectionProps> = ({
   onRemoveItem,
   setEquipmentModal,
 }) => {
-  if (!character.inventory || character.inventory.length === 0) {
-    return null;
-  }
-
   return (
     <div className="space-y-4">
-      <h2 className="text-xl font-bold text-orange-500 border-b border-orange-800 pb-1">Equipment & Inventory</h2>
+      <h2 className="text-xl font-bold text-orange-500 border-b border-orange-800 pb-1">Inventory</h2>
 
-      {/* Inventory Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Inventory List */}
-        <div className="md:col-span-2 p-4 bg-gray-800 rounded-xl shadow-lg border-l-4 border-yellow-500">
-          <div className="flex justify-between items-center mb-3">
-            <h3 className="text-lg font-bold text-yellow-400">Inventory ({character.inventory.length} items)</h3>
-            <button
-              onClick={() => {
-                // Show equipment browser modal
-                onAddItem(character.id, 'random-item', 1);
-              }}
-              className="px-3 py-1 bg-yellow-600 hover:bg-yellow-500 rounded text-xs transition-colors flex items-center gap-1"
-              title="Add item from equipment database"
-            >
-              <Plus className="w-3 h-3" />
-              Add Item
-            </button>
+      {/* Inventory List - Full Width */}
+      <div className="p-4 bg-gray-800 rounded-xl shadow-lg border-l-4 border-yellow-500">
+        <div className="flex justify-between items-center mb-3">
+          <h3 className="text-lg font-bold text-yellow-400">
+            Inventory ({character.inventory?.length || 0} items)
+          </h3>
+          <button
+            onClick={() => {
+              // Show equipment browser modal
+              onAddItem(character.id, 'random-item', 1);
+            }}
+            className="px-3 py-1 bg-yellow-600 hover:bg-yellow-500 rounded text-xs transition-colors flex items-center gap-1"
+            title="Add item from equipment database"
+          >
+            <Plus className="w-3 h-3" />
+            Add Item
+          </button>
+        </div>
+
+        {(!character.inventory || character.inventory.length === 0) ? (
+          <div className="text-center py-8 text-gray-500">
+            <Box className="w-12 h-12 mx-auto mb-4 opacity-50" />
+            <p className="text-lg font-medium mb-2">No items in inventory</p>
+            <p className="text-sm">Use the "Add Item" button to get started</p>
           </div>
+        ) : (
           <div className="space-y-2 max-h-[400px] overflow-y-auto">
             {character.inventory.map((item, idx) => (
               <div key={idx} className="bg-gray-700/50 p-2 rounded hover:bg-gray-700 transition-colors">
@@ -83,35 +87,7 @@ export const EquipmentSection: React.FC<EquipmentSectionProps> = ({
               </div>
             ))}
           </div>
-        </div>
-
-        {/* Currency and Encumbrance */}
-        <div className="space-y-4">
-          {/* Currency */}
-          {character.currency && (
-            <div className="p-4 bg-gray-800 rounded-xl shadow-lg border-l-4 border-yellow-600">
-              <h3 className="text-lg font-bold text-yellow-500 mb-3">Currency</h3>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between items-center">
-                  <span className="text-yellow-200">Gold (gp):</span>
-                  <input
-                    type="number"
-                    min="0"
-                    value={character.currency.gp}
-                    onChange={(e) => {
-                      const updatedCharacter = {
-                        ...character,
-                        currency: { ...character.currency!, gp: Math.max(0, parseInt(e.target.value) || 0) }
-                      };
-                      onUpdateCharacter(updatedCharacter);
-                    }}
-                    className="w-20 px-2 py-1 bg-gray-700 text-white rounded border border-gray-600 focus:border-yellow-500 focus:outline-none text-right"
-                  />
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
+        )}
       </div>
     </div>
   );

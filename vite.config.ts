@@ -7,11 +7,13 @@ export default defineConfig({
   server: {
     port: 3000,
     host: true,
-    // Removed strict CORS headers that were blocking dice-box asset loading
-    // headers: {
-    //   'Cross-Origin-Embedder-Policy': 'require-corp',
-    //   'Cross-Origin-Opener-Policy': 'same-origin',
-    // }
+    headers: {
+      'Cross-Origin-Embedder-Policy': 'require-corp',
+      'Cross-Origin-Opener-Policy': 'same-origin',
+    }
+  },
+  optimizeDeps: {
+    include: ['@3d-dice/dice-box']
   },
   build: {
     outDir: 'dist',

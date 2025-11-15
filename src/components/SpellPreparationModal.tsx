@@ -149,7 +149,16 @@ export const SpellPreparationModal: React.FC<SpellPreparationModalProps> = ({
                           {spell.name}
                           {isSelected && <Check className="w-4 h-4 text-green-400" />}
                         </div>
-                        <div className="text-xs text-purple-300 mt-1">{spell.school}</div>
+                        <div className="text-xs text-purple-300 mt-1 flex items-center gap-2">
+                          {spell.school}
+                          <span className={`px-1.5 py-0.5 rounded text-xs font-medium ${
+                            spell.source === '2024'
+                              ? 'bg-blue-900/50 text-blue-300 border border-blue-700'
+                              : 'bg-gray-700/50 text-gray-300 border border-gray-600'
+                          }`}>
+                            {spell.source}
+                          </span>
+                        </div>
                       </div>
                     </div>
                     <div className="text-xs text-gray-400 mt-2 line-clamp-2">

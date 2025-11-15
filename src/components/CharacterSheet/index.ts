@@ -20,3 +20,5 @@ export { CollapsibleSection } from './CollapsibleSection';
 export { SpellcastingSection } from './SpellcastingSection';
 export { EquipmentSection } from './EquipmentSection';
 export { FeaturesSection } from './FeaturesSection';
+export { ActiveEquipmentPanel } from './ActiveEquipmentPanel';
+export { LanguagesPanel } from './LanguagesPanel';

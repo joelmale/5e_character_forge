@@ -1,5 +1,5 @@
 import { CharacterCreationData, Character, AbilityName, SkillName } from '../types/dnd';
-import { getAllRaces, loadClasses, BACKGROUNDS, PROFICIENCY_BONUSES, getModifier, SKILL_TO_ABILITY, ALL_SKILLS } from '../services/dataService';
+import { getAllRaces, loadClasses, BACKGROUNDS, PROFICIENCY_BONUSES, getModifier, SKILL_TO_ABILITY, ALL_SKILLS, getHitDieForClass } from '../services/dataService';
 import { migrateSpellSelectionToCharacter } from '../utils/spellUtils';
 
 /**
@@ -104,7 +104,7 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
     hitDice: {
       current: level,
       max: level,
-      dieType: 12, // TODO: Make this dynamic based on class
+      dieType: getHitDieForClass(data.classSlug),
     },
     speed: 30, // Default speed, would need race-specific logic
     initiative,

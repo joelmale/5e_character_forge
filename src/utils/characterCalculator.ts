@@ -14,6 +14,7 @@ import {
   EQUIPMENT_PACKAGES,
   getFeaturesByClass,
   getFeaturesBySubclass,
+  getHitDieForClass,
 } from '../services/dataService';
 
 export const calculateCharacterStats = (data: CharacterCreationData): Character => {
@@ -207,7 +208,7 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
       hitDice: {
         current: data.level,
         max: data.level,
-        dieType: 12, // TODO: Make this dynamic based on class
+        dieType: getHitDieForClass(data.classSlug),
       },
     speed: 30,
     initiative: finalAbilities.DEX.modifier,

@@ -22,32 +22,20 @@ export const AbilityScores: React.FC<AbilityScoresProps> = ({
 }) => {
   const abilities = Object.entries(character.abilities) as [AbilityName, any][];
 
-  // Classic layout: 2 columns, large circular design
+  // Classic layout: Single column, large circular design
   if (layoutMode === 'classic') {
     return (
       <div className="space-y-3">
-        <div className="grid grid-cols-2 gap-3">
-          {abilities.map(([name, ability]) => (
-            <AbilityScoreBlock
-              key={name}
-              name={name}
-              ability={ability}
-              setRollResult={setRollResult}
-              onDiceRoll={onDiceRoll}
-              layoutMode="classic"
-            />
-          ))}
-        </div>
-        <div className="flex items-center justify-between p-2 bg-gray-700/50 rounded border border-gray-600">
-          <span className="text-xs font-bold uppercase tracking-wide">Inspiration</span>
-          <button
-            onClick={() => onToggleInspiration(character.id)}
-            className={`w-6 h-6 rounded-full transition-all cursor-pointer ${character.inspiration ? 'bg-yellow-500' : 'bg-gray-600 hover:bg-gray-500'}`}
-            title={character.inspiration ? 'Remove Inspiration' : 'Grant Inspiration'}
-          >
-            {character.inspiration && <Zap className="w-4 h-4 mx-auto text-gray-900" />}
-          </button>
-        </div>
+        {abilities.map(([name, ability]) => (
+          <AbilityScoreBlock
+            key={name}
+            name={name}
+            ability={ability}
+            setRollResult={setRollResult}
+            onDiceRoll={onDiceRoll}
+            layoutMode="classic"
+          />
+        ))}
       </div>
     );
   }

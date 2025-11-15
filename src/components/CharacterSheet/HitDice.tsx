@@ -14,9 +14,7 @@ export const HitDice: React.FC<HitDiceProps> = ({
 }) => {
   // Calculate hit dice based on class and level
   const getHitDiceInfo = () => {
-    // This is a simplified calculation - in a full implementation,
-    // this would look up the character's class hit die from SRD data
-    const hitDieType = 12; // Assume d12 for barbarian, would be dynamic
+    const hitDieType = character.hitDice.dieType;
     const maxHitDice = character.level;
 
     return {

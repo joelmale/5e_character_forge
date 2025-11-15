@@ -1,4 +1,5 @@
 import { generateUUID } from './diceService';
+import levelConstantsData from '../data/levelConstants.json';
 import {
     loadRaces,
     loadClasses,
@@ -10,6 +11,7 @@ import {
     getFeaturesByClass,
     getFeaturesBySubclass,
     aggregateProficiencies,
+    getHitDieForClass,
     // FEAT_DATABASE,
 } from './dataService';
 import { SPELL_SLOTS_BY_CLASS } from '../data/spellSlots';
@@ -196,11 +198,11 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
         armorClass,
         hitPoints: maxHitPoints,
         maxHitPoints,
-        hitDice: {
-            current: level,
-            max: level,
-            dieType: 12, // TODO: Make this dynamic based on class
-        },
+         hitDice: {
+             current: level,
+             max: level,
+             dieType: getHitDieForClass(data.classSlug),
+         },
          speed: raceData.speed || 30,
         initiative: finalAbilities.DEX.modifier,
         abilities: finalAbilities,
@@ -387,7 +389,7 @@ export const handleLevelUp = async (
         }
     }
 
-    const asiLevels = [4, 8, 12, 16, 19];
+    const asiLevels = levelConstantsData.asiLevels;
     if (asiLevels.includes(newLevel)) {
         setAsiModalState({ isOpen: true, characterId: characterId });
     }

@@ -47,7 +47,13 @@ The 5e Character Forge allows users to:
   - Armor Class (10 + DEX modifier)
   - Initiative and proficiency bonus
 - **Interactive Sheet (F5)**: Click any ability or skill to roll d20 + modifiers
-- **Responsive Design (F6)**: Mobile-first design with Tailwind CSS
+- **Spell System (F7)**: Comprehensive spell support for all caster classes
+  - 340+ spells from D&D 5e SRD (2014 + 2024 editions)
+  - Source tracking for edition identification
+  - Spell preparation for Clerics, Druids, Paladins, and Wizards
+  - Cantrip and leveled spell management
+  - Automatic spell slot calculation by level
+- **Responsive Design (F8)**: Mobile-first design with Tailwind CSS
 
 ## Technical Stack
 

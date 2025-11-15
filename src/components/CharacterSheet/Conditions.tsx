@@ -20,6 +20,24 @@ export const Conditions: React.FC<ConditionsProps> = ({
     'Prone', 'Restrained', 'Stunned', 'Unconscious'
   ];
 
+  // Condition effects mapping
+  const conditionEffects: Record<string, string> = {
+    'Blinded': 'Cannot see, automatically fails checks requiring sight, attacks have disadvantage, attacks against you have advantage',
+    'Charmed': 'Cannot attack charmer, charmer has advantage on social checks against you',
+    'Deafened': 'Cannot hear, automatically fails checks requiring hearing',
+    'Frightened': 'Disadvantage on ability checks and attack rolls while source of fear is in sight, cannot willingly move closer to source',
+    'Grappled': 'Speed becomes 0, ends if grappler incapacitated or if you move out of reach',
+    'Incapacitated': 'Cannot take actions or reactions',
+    'Invisible': 'Cannot be seen, attacks have advantage, attacks against you have disadvantage',
+    'Paralyzed': 'Cannot move or speak, automatically fails STR and DEX saves, attacks have advantage, auto-crit on hit',
+    'Petrified': 'Transformed to stone, incapacitated, speed becomes 0, cannot speak, fails all saves',
+    'Poisoned': 'Disadvantage on attack rolls and ability checks',
+    'Prone': 'Can only crawl, disadvantage on attacks, attacks against you have advantage (melee) or disadvantage (ranged)',
+    'Restrained': 'Speed becomes 0, disadvantage on attacks and DEX saves, attacks against you have advantage',
+    'Stunned': 'Incapacitated, cannot move, can speak falteringly, automatically fails STR and DEX saves',
+    'Unconscious': 'Incapacitated, unaware of surroundings, drops everything, falls prone, automatically fails STR and DEX saves'
+  };
+
   const activeConditions = character.conditions || [];
 
   const addCondition = (condition: string) => {
@@ -50,29 +68,28 @@ export const Conditions: React.FC<ConditionsProps> = ({
   };
 
   return (
-    <div className="bg-red-900 rounded-xl shadow-lg border-l-4 border-yellow-500 p-4">
-      <h3 className="text-lg font-bold text-yellow-400 mb-4 flex items-center gap-2">
-        <AlertTriangle className="w-5 h-5" />
+    <div className="bg-red-900 rounded-xl shadow-lg border-l-4 border-yellow-500 p-3">
+      <h3 className="text-sm font-bold text-yellow-400 mb-2 flex items-center gap-2 uppercase tracking-wider font-cinzel">
+        <AlertTriangle className="w-4 h-4" />
         Conditions
       </h3>
 
       {/* Active Conditions */}
       {activeConditions.length > 0 && (
-        <div className="mb-4">
-          <h4 className="text-sm font-semibold text-red-300 mb-2">Active Conditions:</h4>
-          <div className="flex flex-wrap gap-2">
+        <div className="mb-2">
+          <div className="flex flex-wrap gap-1 mb-2">
             {activeConditions.map((condition, index) => (
               <div
                 key={index}
-                className="flex items-center gap-1 px-3 py-1 bg-red-800/70 rounded-full text-sm text-white"
+                className="flex items-center gap-1 px-2 py-0.5 bg-red-800/70 rounded-full text-xs text-white"
               >
                 <span>{condition}</span>
                 <button
                   onClick={() => removeCondition(condition)}
-                  className="ml-1 hover:bg-red-700 rounded-full p-0.5"
+                  className="ml-0.5 hover:bg-red-700 rounded-full p-0.5"
                   title={`Remove ${condition}`}
                 >
-                  <X className="w-3 h-3" />
+                  <X className="w-2.5 h-2.5" />
                 </button>
               </div>
             ))}
@@ -81,7 +98,7 @@ export const Conditions: React.FC<ConditionsProps> = ({
       )}
 
       {/* Add New Condition */}
-      <div className="space-y-3">
+      <div className="space-y-2">
         <div className="flex gap-2">
           <input
             type="text"
@@ -121,13 +138,24 @@ export const Conditions: React.FC<ConditionsProps> = ({
       </div>
 
       {/* Condition Effects Summary */}
-      {activeConditions.length > 0 && (
-        <div className="mt-4 pt-4 border-t border-gray-600">
+      <div className="mt-4 pt-4 border-t border-gray-600">
+        {activeConditions.length > 0 ? (
+          <div className="space-y-2">
+            {activeConditions.map((condition, index) => (
+              <div key={index} className="text-xs text-gray-300">
+                <div className="font-semibold text-red-300 mb-1">{condition}:</div>
+                <div className="text-gray-400 leading-relaxed">
+                  {conditionEffects[condition] || 'Effect details not available'}
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
           <div className="text-xs text-gray-400 text-center">
             Active conditions may affect ability checks, attacks, and movement
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };

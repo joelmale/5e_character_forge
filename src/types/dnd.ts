@@ -1,4 +1,6 @@
-export const ABILITY_SCORES = ['STR', 'DEX', 'CON', 'INT', 'WIS', 'CHA'] as const;
+import gameConstantsData from '../data/gameConstants.json';
+
+export const ABILITY_SCORES = gameConstantsData.ABILITY_SCORES as readonly string[];
 export type Ability = typeof ABILITY_SCORES[number];
 
 export interface Alignment {

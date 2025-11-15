@@ -37,6 +37,9 @@ pnpm-debug.log*
 .stylelintcache
 *.tsbuildinfo
 
+# Archived SRD data (replaced by merged spell list)
+src/data/srd/archive/
+
 # Vite
 vite.config.ts.timestamp-*
 dist-ssr

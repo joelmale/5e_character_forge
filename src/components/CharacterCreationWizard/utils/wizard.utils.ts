@@ -1,5 +1,5 @@
 import { CharacterCreationData, Character, AbilityName, SkillName, EquippedItem } from '../../../types/dnd';
-import { getAllRaces, loadClasses, loadEquipment, getFeaturesByClass, getFeaturesBySubclass, PROFICIENCY_BONUSES, ALL_SKILLS, SKILL_TO_ABILITY, BACKGROUNDS, EQUIPMENT_PACKAGES, getModifier } from '../../../services/dataService';
+import { getAllRaces, loadClasses, loadEquipment, getFeaturesByClass, getFeaturesBySubclass, PROFICIENCY_BONUSES, ALL_SKILLS, SKILL_TO_ABILITY, BACKGROUNDS, EQUIPMENT_PACKAGES, getModifier, getHitDieForClass } from '../../../services/dataService';
 import { migrateSpellSelectionToCharacter } from '../../../utils/spellUtils';
 import { generateUUID } from '../../../services/diceService';
 import { calculateKnownLanguages } from '../../../utils/languageUtils';
@@ -196,7 +196,7 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
     hitDice: {
       current: level,
       max: level,
-      dieType: 12, // TODO: Make this dynamic based on class
+      dieType: getHitDieForClass(data.classSlug),
     },
     speed: 30,
     initiative: finalAbilities.DEX.modifier,

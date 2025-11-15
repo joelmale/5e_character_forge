@@ -26,12 +26,11 @@ export const ProficienciesAndLanguages: React.FC<ProficienciesAndLanguagesProps>
             <Shield className="w-4 h-4" />
             <span className="text-sm font-semibold">Armor</span>
           </div>
-          <div className="space-y-1">
+          <div className="flex flex-wrap gap-2">
             {armorProficiencies.map((proficiency, index) => (
-              <div key={index} className="flex items-center gap-2 p-2 bg-gray-800/50 rounded">
-                <div className="w-2 h-2 bg-emerald-400 rounded-full"></div>
-                <span className="text-sm text-gray-300">{proficiency}</span>
-              </div>
+              <span key={index} className="px-2 py-1 bg-blue-700 text-white text-xs rounded">
+                {proficiency}
+              </span>
             ))}
           </div>
         </div>
@@ -42,12 +41,11 @@ export const ProficienciesAndLanguages: React.FC<ProficienciesAndLanguagesProps>
             <Sword className="w-4 h-4" />
             <span className="text-sm font-semibold">Weapons</span>
           </div>
-          <div className="space-y-1">
+          <div className="flex flex-wrap gap-2">
             {weaponProficiencies.map((proficiency, index) => (
-              <div key={index} className="flex items-center gap-2 p-2 bg-gray-800/50 rounded">
-                <div className="w-2 h-2 bg-emerald-400 rounded-full"></div>
-                <span className="text-sm text-gray-300">{proficiency}</span>
-              </div>
+              <span key={index} className="px-2 py-1 bg-blue-700 text-white text-xs rounded">
+                {proficiency}
+              </span>
             ))}
           </div>
         </div>
@@ -58,12 +56,11 @@ export const ProficienciesAndLanguages: React.FC<ProficienciesAndLanguagesProps>
             <Hammer className="w-4 h-4" />
             <span className="text-sm font-semibold">Tools</span>
           </div>
-          <div className="space-y-1">
+          <div className="flex flex-wrap gap-2">
             {toolProficiencies.map((proficiency, index) => (
-              <div key={index} className="flex items-center gap-2 p-2 bg-gray-800/50 rounded">
-                <div className="w-2 h-2 bg-emerald-400 rounded-full"></div>
-                <span className="text-sm text-gray-300">{proficiency}</span>
-              </div>
+              <span key={index} className="px-2 py-1 bg-blue-700 text-white text-xs rounded">
+                {proficiency}
+              </span>
             ))}
           </div>
         </div>
@@ -74,12 +71,11 @@ export const ProficienciesAndLanguages: React.FC<ProficienciesAndLanguagesProps>
             <Languages className="w-4 h-4" />
             <span className="text-sm font-semibold">Languages</span>
           </div>
-          <div className="space-y-1">
+          <div className="flex flex-wrap gap-2">
             {languages.map((language, index) => (
-              <div key={index} className="flex items-center gap-2 p-2 bg-gray-800/50 rounded">
-                <div className="w-2 h-2 bg-emerald-400 rounded-full"></div>
-                <span className="text-sm text-gray-300">{language}</span>
-              </div>
+              <span key={index} className="px-2 py-1 bg-green-700 text-white text-xs rounded">
+                {language}
+              </span>
             ))}
           </div>
         </div>

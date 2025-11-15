@@ -1,22 +1,12 @@
 import { AbilityName } from '../types/dnd';
 import { rollDice } from '../services/diceService';
 
-export const ABILITY_NAMES: AbilityName[] = ['STR', 'DEX', 'CON', 'INT', 'WIS', 'CHA'];
+import abilityScoreConfig from '../data/abilityScoreConfig.json';
 
+export const ABILITY_NAMES: AbilityName[] = abilityScoreConfig.ABILITY_NAMES as AbilityName[];
 export const STANDARD_ARRAY_SCORES = [15, 14, 13, 12, 10, 8] as const;
-
-export const POINT_BUY_COSTS: Record<number, number> = {
-  8: 0, 9: 1, 10: 2, 11: 3, 12: 4, 13: 5, 14: 7, 15: 9
-};
-
-export const ABILITY_METHOD_TITLES: Record<string, string> = {
-  'standard-array': 'Standard Array',
-  'standard-roll': '4d6, Drop Lowest',
-  'classic-roll': '3d6 in Order',
-  '5d6-drop-2': '5d6, Drop Two Lowest',
-  'point-buy': 'Point Buy (27 Points)',
-  'custom': 'Custom Entry'
-};
+export const POINT_BUY_COSTS: Record<number, number> = abilityScoreConfig.POINT_BUY_COSTS;
+export const ABILITY_METHOD_TITLES: Record<string, string> = abilityScoreConfig.ABILITY_METHOD_TITLES;
 
 /**
  * Generate ability scores using standard array method

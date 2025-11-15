@@ -14,14 +14,15 @@ import ChooseSubclassModal from './components/ChooseSubclassModal';
 import AbilityScoreIncreaseModal from './components/AbilityScoreIncreaseModal';
 import { SpellPreparationModal } from './components/SpellPreparationModal';
 import { createAbilityRoll, createSkillRoll, createInitiativeRoll, generateUUID, DiceRoll, rollDice } from './services/diceService';
+import { loadFeatures } from './services/dataService';
 import { featureDescriptions } from './utils/featureDescriptions';
-import { loadClasses, loadEquipment, FEAT_DATABASE as loadedFeats, getSubclassesByClass, getFeaturesByClass, getFeaturesBySubclass, SPELL_DATABASE, PROFICIENCY_BONUSES, getModifier, SKILL_TO_ABILITY, ALL_SKILLS, ALIGNMENTS_DATA, ALIGNMENTS, BACKGROUNDS, RACE_CATEGORIES, CLASS_CATEGORIES, EQUIPMENT_PACKAGES, getAllRaces, randomizeLevel, randomizeIdentity, randomizeRace, randomizeClassAndSkills, randomizeFightingStyle, randomizeSpells, randomizeAbilities, randomizeFeats, randomizeEquipmentChoices, randomizeAdditionalEquipment, randomizeLanguages, randomizePersonality, AppSubclass } from './services/dataService';
+import { loadClasses, loadEquipment, FEAT_DATABASE as loadedFeats, getSubclassesByClass, getFeaturesByClass, getFeaturesBySubclass, SPELL_DATABASE, PROFICIENCY_BONUSES, getModifier, SKILL_TO_ABILITY, ALL_SKILLS, ALIGNMENTS_DATA, ALIGNMENTS, BACKGROUNDS, RACE_CATEGORIES, CLASS_CATEGORIES, EQUIPMENT_PACKAGES, getAllRaces, randomizeLevel, randomizeIdentity, randomizeRace, randomizeClassAndSkills, randomizeFightingStyle, randomizeSpells, randomizeAbilities, randomizeFeats, randomizeEquipmentChoices, randomizeAdditionalEquipment, randomizeLanguages, randomizePersonality, AppSubclass, getHitDieForClass, CANTRIPS_KNOWN_BY_CLASS, SPELL_SLOTS_BY_CLASS } from './services/dataService';
 import { getAllCharacters, addCharacter, deleteCharacter, updateCharacter } from './services/dbService';
 // REFACTORED: Language utilities moved to languageUtils.ts for the wizard
 // Still used here in main App for character sheet display - can be removed once main app is refactored
 import { calculateKnownLanguages } from './utils/languageUtils';
-import { SPELL_SLOTS_BY_CLASS } from './data/spellSlots';
-import { CANTRIPS_KNOWN_BY_CLASS } from './data/cantrips';
+
+import levelConstantsData from './data/levelConstants.json';
 import { Ability, Character, AbilityScore, Skill, AbilityName, SkillName, Equipment, EquippedItem, Feat, CharacterCreationData, Feature } from './types/dnd';
 import { CharacterSheetProps } from './types/components';
 import { useDiceContext } from './context';
@@ -326,11 +327,11 @@ const calculateCharacterStats = (data: CharacterCreationData): Character => {
     armorClass,
     hitPoints: maxHitPoints,
     maxHitPoints,
-    hitDice: {
-      current: level,
-      max: level,
-      dieType: 12, // TODO: Make this dynamic based on class
-    },
+     hitDice: {
+       current: level,
+       max: level,
+       dieType: getHitDieForClass(data.classSlug),
+     },
     speed: 30,
     initiative: finalAbilities.DEX.modifier,
     abilities: finalAbilities,
@@ -401,7 +402,7 @@ interface StepProps {
 }
 
 const Step0Level: React.FC<StepProps> = ({ data, updateData, nextStep }) => {
-    const milestoneLevels = [2, 3, 4, 5, 6, 8, 11, 12, 14, 16, 17, 19, 20];
+    const milestoneLevels = levelConstantsData.milestoneLevels;
 
     const getMilestoneIcon = (level: number) => {
         const icons = {
@@ -1760,11 +1761,25 @@ const App: React.FC = () => {
   // Handle feature click
   const handleFeatureClick = useCallback((feature: string | Feature) => {
     const featureName = typeof feature === 'string' ? feature : feature.name;
-    const featureDesc = featureDescriptions[featureName];
-    if (featureDesc) {
-      setFeatureModal({ name: featureName, ...featureDesc });
+
+    // Try to find the feature in SRD data first
+    const allFeatures = loadFeatures();
+    const srdFeature = allFeatures.find(f => f.name === featureName);
+
+    if (srdFeature && srdFeature.desc && srdFeature.desc.length > 0) {
+      setFeatureModal({
+        name: featureName,
+        description: srdFeature.desc.join('\n\n'),
+        source: 'SRD'
+      });
     } else {
-      setFeatureModal({ name: featureName, description: 'No description available for this feature.' });
+      // Fallback to manual descriptions
+      const featureDesc = featureDescriptions[featureName];
+      if (featureDesc) {
+        setFeatureModal({ name: featureName, ...featureDesc });
+      } else {
+        setFeatureModal({ name: featureName, description: 'No description available for this feature.' });
+      }
     }
   }, []);
 
@@ -1987,7 +2002,7 @@ const App: React.FC = () => {
       return;
     }
 
-    const hitDie = classData.hit_die;
+    const hitDie = getHitDieForClass(classData.slug);
     const conModifier = character.abilities.CON.modifier;
     const hpIncrease = Math.max(1, Math.floor(hitDie / 2) + 1 + conModifier);
 
@@ -1997,6 +2012,12 @@ const App: React.FC = () => {
       proficiencyBonus: newProficiencyBonus,
       maxHitPoints: character.maxHitPoints + hpIncrease,
       hitPoints: character.maxHitPoints + hpIncrease, // Also heal to full on level up
+      hitDice: {
+        ...character.hitDice,
+        max: newLevel, // Update max hit dice to new level
+        current: character.hitDice.current, // Keep current hit dice as-is
+        dieType: hitDie, // Update die type to match class hit die
+      },
     };
 
     if (updatedCharacter.spellcasting) {
@@ -2009,7 +2030,7 @@ const App: React.FC = () => {
       }
     }
 
-    const asiLevels = [4, 8, 12, 16, 19];
+    const asiLevels = levelConstantsData.asiLevels;
     if (asiLevels.includes(newLevel)) {
       setAsiModalState({ isOpen: true, characterId: characterId });
     }

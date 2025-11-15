@@ -114,13 +114,17 @@ The `Character` interface is the canonical data structure for all saved characte
 ### SRD Data Structure
 
 Located in `/src/data/srd/`:
-- `2014/` - Core D&D 5e 2014 SRD data
+- `5e-SRD-Spells-Merged.json` - **Merged spell database** (2014 + 2024 editions)
+- `2014/` - Core D&D 5e 2014 SRD data (archived)
 - `2024/` - Updated 2024 rules (equipment)
 - `2018/`, `2020/`, `2020-egtw/` - Additional subclasses
+- `archive/` - **Archived original spell files**
 
 **Data Loading:**
+- Merged spell database combines 2014 and 2024 SRD editions
 - All SRD JSON is imported statically in `dataService.ts`
 - Data is transformed from SRD format to app-specific types
+- Each spell includes `source: '2014' | '2024'` for edition tracking
 - Reference SRD database: `/Users/JoelN/Coding/5e-SRD-database/src/2014/*.json`
 
 ### Component Organization
@@ -170,7 +174,8 @@ Located in `/src/data/srd/`:
 **Spell Data Location:**
 - Spell slots by class/level: `/src/data/spellSlots.ts`
 - Cantrips known: `/src/data/cantrips.ts`
-- Spell database: Loaded from SRD in `dataService.ts` as `SPELL_DATABASE`
+- Spell database: **Merged 2014+2024 SRD** loaded in `dataService.ts` as `SPELL_DATABASE`
+- Source tracking: Each spell has `source` field ('2014' or '2024')
 
 ### Equipment System
 

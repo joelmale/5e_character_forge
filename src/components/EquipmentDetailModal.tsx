@@ -1,5 +1,6 @@
 import React from 'react';
 import { X, Sword, Shield, Package } from 'lucide-react';
+import { loadEquipment } from '../services/dataService';
 
 interface Equipment {
   slug: string;
@@ -45,17 +46,35 @@ interface Equipment {
 }
 
 interface EquipmentDetailModalProps {
-  equipment: Equipment | null;
+  equipment: Equipment | { slug: string } | null;
   onClose: () => void;
 }
 
 export const EquipmentDetailModal: React.FC<EquipmentDetailModalProps> = ({ equipment, onClose }) => {
-  if (!equipment) {
+  // Handle case where equipment is passed as a slug
+  const equipmentData = React.useMemo(() => {
+    if (!equipment) return null;
+
+    // If it's already an Equipment object, use it directly
+    if ('name' in equipment) {
+      return equipment;
+    }
+
+    // If it's an object with a slug, look up the equipment
+    if ('slug' in equipment) {
+      const allEquipment = loadEquipment();
+      return allEquipment.find(eq => eq.slug === equipment.slug) || null;
+    }
+
+    return null;
+  }, [equipment]);
+
+  if (!equipmentData) {
     return null;
   }
 
-  const isWeapon = equipment.weapon_category;
-  const isArmor = equipment.armor_category;
+  const isWeapon = equipmentData.weapon_category;
+  const isArmor = equipmentData.armor_category;
   const isGear = !isWeapon && !isArmor;
 
   return (
@@ -74,11 +93,11 @@ export const EquipmentDetailModal: React.FC<EquipmentDetailModalProps> = ({ equi
               {isWeapon && <Sword className="w-6 h-6 text-red-400" />}
               {isArmor && <Shield className="w-6 h-6 text-blue-400" />}
               {isGear && <Package className="w-6 h-6 text-yellow-400" />}
-              <h3 className="text-2xl font-bold text-orange-400">{equipment.name}</h3>
-            </div>
-            <div className="flex items-center gap-3 text-sm text-gray-400">
-              <span className="bg-gray-700 px-2 py-1 rounded">{equipment.equipment_category}</span>
-              <span className="bg-gray-700 px-2 py-1 rounded">SRD {equipment.year}</span>
+               <h3 className="text-2xl font-bold text-orange-400">{equipmentData.name}</h3>
+             </div>
+             <div className="flex items-center gap-3 text-sm text-gray-400">
+               <span className="bg-gray-700 px-2 py-1 rounded">{equipmentData.equipment_category}</span>
+               <span className="bg-gray-700 px-2 py-1 rounded">SRD {equipmentData.year}</span>
             </div>
           </div>
           <button
@@ -92,10 +111,10 @@ export const EquipmentDetailModal: React.FC<EquipmentDetailModalProps> = ({ equi
         {/* Content */}
         <div className="p-6 space-y-6">
           {/* Description */}
-          {equipment.description && (
-            <div>
-              <h4 className="text-lg font-bold text-orange-300 mb-2">Description</h4>
-              <p className="text-gray-300 leading-relaxed whitespace-pre-wrap">{equipment.description}</p>
+          {equipmentData.description && (
+            <div className="mb-6">
+              <h4 className="text-lg font-bold text-orange-400 mb-2">Description</h4>
+              <p className="text-gray-300 leading-relaxed whitespace-pre-wrap">{equipmentData.description}</p>
             </div>
           )}
 
@@ -104,12 +123,12 @@ export const EquipmentDetailModal: React.FC<EquipmentDetailModalProps> = ({ equi
             <div className="bg-gray-700/50 p-3 rounded">
               <div className="text-xs text-gray-400 mb-1">Cost</div>
               <div className="text-lg font-bold text-yellow-300">
-                {equipment.cost.quantity} {equipment.cost.unit}
+                {equipmentData.cost?.quantity} {equipmentData.cost?.unit}
               </div>
             </div>
             <div className="bg-gray-700/50 p-3 rounded">
               <div className="text-xs text-gray-400 mb-1">Weight</div>
-              <div className="text-lg font-bold text-white">{equipment.weight} lb</div>
+              <div className="text-lg font-bold text-white">{equipmentData.weight} lb</div>
             </div>
           </div>
 

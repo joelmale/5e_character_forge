@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
-import DiceBox, { type DiceBoxConfig } from '@3d-dice/dice-box';
 import type { DiceRoll } from '../../services/diceService';
+
+// Dynamic import for DiceBox to avoid bundling issues
+let DiceBox: any = null;
 
 interface DiceBox3DProps {
   latestRoll: DiceRoll | null;
@@ -11,7 +13,7 @@ export const DiceBox3D: React.FC<DiceBox3DProps> = ({
   latestRoll,
   onRollComplete,
 }) => {
-  const diceBoxRef = useRef<DiceBox | null>(null);
+  const diceBoxRef = useRef<any>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const clearTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastRollIdRef = useRef<string | null>(null);

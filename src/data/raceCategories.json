@@ -1,0 +1,35 @@
+[
+  {
+    "name": "📖 Core Races",
+    "icon": "📖",
+    "description": "The fundamental races from the Player's Handbook, perfect for traditional D&D campaigns.",
+    "filterCriteria": {
+      "source": "PHB"
+    }
+  },
+  {
+    "name": "🗺️ Exotic Races",
+    "icon": "🗺️",
+    "description": "Unique and flavorful races from Volo's Guide to Monsters, adding exotic flair to your character.",
+    "filterCriteria": {
+      "source": "VGtM"
+    }
+  },
+  {
+    "name": "🚀 Monstrous Races",
+    "icon": "🚀",
+    "description": "Play as the monsters! Challenging but rewarding races for experienced players.",
+    "filterCriteria": {
+      "source": "VGtM",
+      "slugs": ["bugbear", "goblin", "hobgoblin", "kobold", "orc", "yuan-ti-pureblood"]
+    }
+  },
+  {
+    "name": "✨ Planar Races",
+    "icon": "✨",
+    "description": "Beings touched by other planes, from the Feywild to the Elemental Planes.",
+    "filterCriteria": {
+      "sources": ["WGtE", "GGtR", "Strixhaven", "MToF", "EE"]
+    }
+  }
+]

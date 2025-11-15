@@ -11,14 +11,16 @@ import {
   HitDice,
   ExperiencePoints,
   AttunementSlots,
-  ProficienciesAndLanguages,
   Conditions,
   CoinManagement,
   CollapsibleSection,
   SpellcastingSection,
   EquipmentSection,
-  FeaturesSection
+  FeaturesSection,
+  ActiveEquipmentPanel,
+  LanguagesPanel
 } from '../index';
+import { getSpellsForClass } from '../../../services/dataService';
 import { SpellPreparationModal } from '../../SpellPreparationModal';
 
 export const ModernStackedLayout: React.FC<CharacterSheetProps> = ({
@@ -39,6 +41,7 @@ export const ModernStackedLayout: React.FC<CharacterSheetProps> = ({
     'experience': character.level >= 20, // Collapse if max level
     'attunement': character.level < 6, // Collapse if no slots
     'proficiencies': true,
+    'languages': true,   // Languages collapsed by default
     'conditions': !character.conditions?.length, // Expand if has conditions
     'coin': true,
     'spellcasting': !character.spellcasting,
@@ -221,7 +224,7 @@ export const ModernStackedLayout: React.FC<CharacterSheetProps> = ({
         </CollapsibleSection>
 
         <CollapsibleSection
-          title="Equipment & Inventory"
+          title="Inventory"
           icon={Package}
           isCollapsed={collapsedSections.equipment}
           onToggle={() => toggleSection('equipment')}
@@ -322,13 +325,25 @@ export const ModernStackedLayout: React.FC<CharacterSheetProps> = ({
         </CollapsibleSection>
 
         <CollapsibleSection
-          title="Proficiencies & Languages"
-          icon={BookOpen}
+          title="Active Equipment"
+          icon={Package}
           isCollapsed={collapsedSections.proficiencies}
           onToggle={() => toggleSection('proficiencies')}
           className="border-emerald-500 bg-emerald-900"
         >
-          <ProficienciesAndLanguages
+          <ActiveEquipmentPanel
+            character={character}
+          />
+        </CollapsibleSection>
+
+        <CollapsibleSection
+          title="Languages"
+          icon={BookOpen}
+          isCollapsed={true}
+          onToggle={() => toggleSection('languages')}
+          className="border-blue-500 bg-blue-900"
+        >
+          <LanguagesPanel
             character={character}
           />
         </CollapsibleSection>
@@ -336,7 +351,7 @@ export const ModernStackedLayout: React.FC<CharacterSheetProps> = ({
         {character.spellcasting?.spellcastingType === 'prepared' && (
           <SpellPreparationModal
             character={character}
-            availableSpells={[]} // TODO: Get from SPELL_DATABASE
+            availableSpells={getSpellsForClass(character.class)}
             isOpen={showSpellPreparationModal}
             onClose={() => setShowSpellPreparationModal(false)}
             onSave={handleSpellPreparationSave}

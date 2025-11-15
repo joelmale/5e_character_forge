@@ -115,20 +115,24 @@ export const Step2Race: React.FC<StepProps> = ({ data, updateData, nextStep, pre
           <div className="space-y-2 text-sm">
             <div>
               <span className="font-semibold text-red-400">Ability Bonuses: </span>
-              <span className="text-gray-300">
-                {Object.entries(selectedRace.ability_bonuses)
-                  .map(([ability, bonus]) => `${ability} +${bonus}`)
-                  .join(', ')}
-              </span>
+              <div className="flex flex-wrap gap-2 mt-1">
+                {Object.entries(selectedRace.ability_bonuses).map(([ability, bonus]) => (
+                  <span key={ability} className="px-2 py-1 bg-blue-700 text-white text-xs rounded">
+                    {ability} +{bonus}
+                  </span>
+                ))}
+              </div>
             </div>
 
             <div>
               <span className="font-semibold text-red-400">Racial Traits: </span>
-              <ul className="list-disc list-inside text-gray-300 ml-4">
+              <div className="flex flex-wrap gap-2 mt-1">
                 {selectedRace.racial_traits.map((trait, idx) => (
-                  <li key={idx} className="text-xs">{trait}</li>
+                  <span key={idx} className="px-2 py-1 bg-green-700 text-white text-xs rounded">
+                    {trait}
+                  </span>
                 ))}
-              </ul>
+              </div>
             </div>
 
             <div className="pt-2 border-t border-gray-600">

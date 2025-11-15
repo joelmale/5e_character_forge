@@ -26,7 +26,8 @@ export const SpellcastingSection: React.FC<SpellcastingSectionProps> = ({
   return (
     <div className="space-y-4">
       <h2 className="text-xl font-bold text-purple-500 border-b border-purple-800 pb-1">Spellcasting</h2>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {/* Top Row: Spell Stats and Prepared Spells side by side */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Spellcasting Stats */}
         <div className="p-4 bg-gray-800 rounded-xl shadow-lg border-l-4 border-purple-500">
           <h3 className="text-lg font-bold text-purple-400 mb-3">Spell Stats</h3>
@@ -43,26 +44,6 @@ export const SpellcastingSection: React.FC<SpellcastingSectionProps> = ({
               <span className="text-gray-400">Spell Attack:</span>
               <span className="font-bold text-yellow-300">+{character.spellcasting.spellAttackBonus}</span>
             </div>
-          </div>
-        </div>
-
-        {/* Spell Slots - Simplified */}
-        <div className="p-4 bg-gray-800 rounded-xl shadow-lg border-l-4 border-blue-500">
-          <h3 className="text-lg font-bold text-blue-400 mb-3">Spell Slots</h3>
-          <div className="space-y-2 text-sm">
-            {character.spellcasting.spellSlots.map((maxSlots, index) => {
-              if (maxSlots === 0) return null;
-              const spellLevel = index + 1;
-              const usedSlots = character.spellcasting?.usedSpellSlots?.[index] || 0;
-              const availableSlots = maxSlots - usedSlots;
-
-              return (
-                <div key={spellLevel} className="flex justify-between items-center">
-                  <span className="text-gray-400">Level {spellLevel}:</span>
-                  <span className="font-bold text-white">{availableSlots}/{maxSlots}</span>
-                </div>
-              );
-            })}
           </div>
         </div>
 
@@ -87,13 +68,64 @@ export const SpellcastingSection: React.FC<SpellcastingSectionProps> = ({
           <div className="space-y-3 text-sm">
             <div>
               <div className="font-semibold text-gray-300 mb-1">Cantrips ({character.spellcasting.cantripsKnown.length})</div>
-              <ul className="list-disc list-inside space-y-0.5 text-xs text-gray-400">
+              <div className="flex flex-wrap gap-2">
                 {character.spellcasting.cantripsKnown.map((spellSlug) => (
-                  <li key={spellSlug}>{spellSlug}</li>
+                  <span key={spellSlug} className="px-2 py-1 bg-purple-700 text-white text-xs rounded">
+                    {spellSlug}
+                  </span>
                 ))}
-              </ul>
+              </div>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Bottom Row: Spell Slots - Full Width */}
+      <div className="p-4 bg-gray-800 rounded-xl shadow-lg border-l-4 border-blue-500">
+        <h3 className="text-lg font-bold text-blue-400 mb-3">Spell Slots</h3>
+        <div className="grid grid-cols-2 gap-3 text-sm">
+          {character.spellcasting.spellSlots.map((maxSlots, index) => {
+            if (maxSlots === 0) return null;
+            const spellLevel = index + 1;
+            const usedSlots = character.spellcasting?.usedSpellSlots?.[index] || 0;
+            const availableSlots = maxSlots - usedSlots;
+
+            return (
+              <div key={spellLevel} className="flex flex-col items-center space-y-2 p-2 bg-gray-700/50 rounded-lg">
+                <div className="flex items-center justify-between w-full">
+                  <span className="text-gray-400 text-xs">Level {spellLevel}</span>
+                  <span className="font-bold text-white text-xs">{availableSlots}/{maxSlots}</span>
+                </div>
+                <div className="flex items-center gap-1 justify-center flex-wrap">
+                  {Array.from({ length: maxSlots }, (_, slotIndex) => (
+                    <button
+                      key={slotIndex}
+                      onClick={() => {
+                        const newUsedSlots = slotIndex < usedSlots ? slotIndex : slotIndex + 1;
+                        const updatedCharacter = {
+                          ...character,
+                          spellcasting: {
+                            ...character.spellcasting!,
+                            usedSpellSlots: {
+                              ...character.spellcasting!.usedSpellSlots,
+                              [index]: Math.min(newUsedSlots, maxSlots)
+                            }
+                          }
+                        };
+                        _onUpdateCharacter(updatedCharacter);
+                      }}
+                      className={`w-4 h-4 rounded-full border-2 transition-colors ${
+                        slotIndex < usedSlots
+                          ? 'bg-red-500 border-red-400 cursor-pointer hover:bg-red-400'
+                          : 'bg-blue-400 border-blue-300 cursor-pointer hover:bg-blue-300'
+                      }`}
+                      title={`${slotIndex < usedSlots ? 'Used' : 'Available'} slot - Click to toggle`}
+                    />
+                  ))}
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>

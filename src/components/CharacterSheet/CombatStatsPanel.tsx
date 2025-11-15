@@ -3,6 +3,7 @@ import { Shield, Zap, Dice6, Footprints, Plus, Minus } from 'lucide-react';
 import { Character } from '../../types/dnd';
 import { createInitiativeRoll, createAdvantageRoll, createDisadvantageRoll } from '../../services/diceService';
 import { formatModifier } from '../../utils/formatters';
+import { loadEquipment } from '../../services/dataService';
 import { HitDice } from './HitDice';
 import { DeathSaves } from './DeathSaves';
 
@@ -86,12 +87,51 @@ export const CombatStatsPanel: React.FC<CombatStatsPanelProps> = ({
     });
   };
 
+  const getACBreakdown = () => {
+    const breakdown = [];
+    breakdown.push(`Base: 10 + ${character.abilities.DEX.modifier >= 0 ? '+' : ''}${character.abilities.DEX.modifier} DEX`);
+
+    // Get equipped armor details
+    const equippedArmor = character.equippedArmor
+      ? loadEquipment().find(eq => eq.slug === character.equippedArmor)
+      : null;
+
+    // Get equipped shield
+    const equippedShield = character.equippedWeapons?.find(slug => {
+      const item = loadEquipment().find(eq => eq.slug === slug);
+      return item?.equipment_category === 'Armor' && item.armor_category === 'Shield';
+    });
+
+    if (equippedArmor && equippedArmor.armor_class) {
+      if (equippedArmor.armor_category === 'Light') {
+        breakdown.push(`${equippedArmor.name}: ${equippedArmor.armor_class.base} + full DEX bonus`);
+      } else if (equippedArmor.armor_category === 'Medium') {
+        const dexBonus = Math.min(character.abilities.DEX.modifier, equippedArmor.armor_class.max_bonus || 2);
+        breakdown.push(`${equippedArmor.name}: ${equippedArmor.armor_class.base} + ${dexBonus} DEX (max ${equippedArmor.armor_class.max_bonus || 2})`);
+      } else if (equippedArmor.armor_category === 'Heavy') {
+        breakdown.push(`${equippedArmor.name}: ${equippedArmor.armor_class.base} (no DEX bonus)`);
+      }
+    }
+
+    if (equippedShield) {
+      const shield = loadEquipment().find(eq => eq.slug === equippedShield);
+      if (shield) {
+        breakdown.push(`${shield.name}: +2 AC`);
+      }
+    }
+
+    return breakdown;
+  };
+
   return (
     <div className="space-y-3">
       {/* Top Row - AC, Initiative, Speed */}
       <div className="grid grid-cols-3 gap-3">
         {/* Armor Class */}
-        <div className="flex flex-col items-center bg-gray-700/50 p-3 rounded border border-gray-600">
+        <div
+          className="flex flex-col items-center bg-gray-700/50 p-3 rounded border border-gray-600 cursor-help"
+          title={getACBreakdown().join('\n')}
+        >
           <Shield className="w-5 h-5 text-red-500 mb-1" />
           <span className="text-xs font-semibold text-gray-400 uppercase">AC</span>
           <div className="text-3xl font-extrabold text-white">{character.armorClass}</div>

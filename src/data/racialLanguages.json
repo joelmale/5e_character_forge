@@ -1,0 +1,14 @@
+{
+  "RACIAL_LANGUAGE_MAP": {
+    "dwarf": ["Dwarvish"],
+    "elf": ["Elvish"],
+    "gnome": ["Gnomish"],
+    "halfling": ["Halfling"],
+    "half-orc": ["Orc"],
+    "dragonborn": ["Draconic"],
+    "tiefling": ["Infernal"],
+    "aarakocra": ["Aarakocra"],
+    "gith": ["Gith"],
+    "thri-kreen": ["Thri-kreen"]
+  }
+}

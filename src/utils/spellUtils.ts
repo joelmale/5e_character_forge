@@ -3,24 +3,10 @@ import { SpellcastingType, Class, Character, SpellSelectionData } from '../types
 import { getLeveledSpellsByClass, loadClasses } from '../services/dataService';
 import { SPELL_SLOT_TABLES } from '../data/spellSlots';
 import { SPELL_LEARNING_RULES } from '../data/spellLearning';
+import spellcastingTypesData from '../data/spellcastingTypes.json';
 
 // Map class slugs to spellcasting types
-const SPELLCASTING_TYPE_MAP: Record<string, SpellcastingType> = {
-  // Known Casters
-  'bard': 'known',
-  'sorcerer': 'known',
-  'warlock': 'known',
-  'ranger': 'known',
-
-  // Prepared Casters
-  'cleric': 'prepared',
-  'druid': 'prepared',
-  'paladin': 'prepared',
-  'artificer': 'prepared',
-
-  // Wizard (Special)
-  'wizard': 'wizard'
-};
+const SPELLCASTING_TYPE_MAP: Record<string, SpellcastingType> = spellcastingTypesData.SPELLCASTING_TYPE_MAP as Record<string, SpellcastingType>;
 
 /**
  * Get the spellcasting type for a given class

@@ -5,23 +5,18 @@ import { Character } from '../../types/dnd';
 interface CoinManagementProps {
   character: Character;
   onUpdateCharacter: (character: Character) => void;
+  compact?: boolean;
 }
 
 export const CoinManagement: React.FC<CoinManagementProps> = ({
   character,
   onUpdateCharacter,
+  compact = false,
 }) => {
-  const [coinInputs, setCoinInputs] = useState({
-    cp: '',
-    sp: '',
-    gp: '',
-    pp: ''
-  });
-
   const currency = character.currency || { cp: 0, sp: 0, gp: 0, pp: 0 };
 
   const updateCoin = (type: 'cp' | 'sp' | 'gp' | 'pp', amount: number) => {
-    const newAmount = Math.max(0, currency[type] + amount);
+    const newAmount = Math.max(0, amount);
     const updatedCharacter = {
       ...character,
       currency: {
@@ -32,11 +27,81 @@ export const CoinManagement: React.FC<CoinManagementProps> = ({
     onUpdateCharacter(updatedCharacter);
   };
 
+  const totalValue = (currency.cp * 0.01) + (currency.sp * 0.1) + currency.gp + (currency.pp * 10);
+
+  if (compact) {
+    return (
+      <div className="bg-yellow-900 rounded-lg border-l-4 border-yellow-500 p-2">
+        <h3 className="text-sm font-bold text-yellow-400 mb-2 flex items-center gap-1">
+          <Coins className="w-4 h-4" />
+          Currency
+        </h3>
+
+        {/* Direct Edit Coin Display */}
+        <div className="flex justify-between gap-1 mb-2">
+          <div className="text-center p-1 bg-gray-800/50 rounded flex-1">
+            <input
+              type="number"
+              value={currency.cp}
+              onChange={(e) => updateCoin('cp', parseInt(e.target.value) || 0)}
+              className="w-full text-center bg-transparent text-lg font-bold text-orange-400 border-none focus:outline-none focus:ring-1 focus:ring-orange-400 rounded text-sm"
+              min="0"
+            />
+            <div className="text-xs text-gray-500">CP</div>
+          </div>
+          <div className="text-center p-1 bg-gray-800/50 rounded flex-1">
+            <input
+              type="number"
+              value={currency.sp}
+              onChange={(e) => updateCoin('sp', parseInt(e.target.value) || 0)}
+              className="w-full text-center bg-transparent text-lg font-bold text-gray-400 border-none focus:outline-none focus:ring-1 focus:ring-gray-400 rounded text-sm"
+              min="0"
+            />
+            <div className="text-xs text-gray-500">SP</div>
+          </div>
+          <div className="text-center p-1 bg-gray-800/50 rounded flex-1">
+            <input
+              type="number"
+              value={currency.gp}
+              onChange={(e) => updateCoin('gp', parseInt(e.target.value) || 0)}
+              className="w-full text-center bg-transparent text-lg font-bold text-yellow-400 border-none focus:outline-none focus:ring-1 focus:ring-yellow-400 rounded text-sm"
+              min="0"
+            />
+            <div className="text-xs text-gray-500">GP</div>
+          </div>
+          <div className="text-center p-1 bg-gray-800/50 rounded flex-1">
+            <input
+              type="number"
+              value={currency.pp}
+              onChange={(e) => updateCoin('pp', parseInt(e.target.value) || 0)}
+              className="w-full text-center bg-transparent text-lg font-bold text-blue-400 border-none focus:outline-none focus:ring-1 focus:ring-blue-400 rounded text-sm"
+              min="0"
+            />
+            <div className="text-xs text-gray-500">PP</div>
+          </div>
+        </div>
+
+        {/* Total Value */}
+        <div className="text-center p-1 bg-gray-800/30 rounded">
+          <div className="text-sm font-bold text-white">{totalValue.toFixed(2)} gp</div>
+        </div>
+      </div>
+    );
+  }
+
+  // Full version (unchanged)
+  const [coinInputs, setCoinInputs] = useState({
+    cp: '',
+    sp: '',
+    gp: '',
+    pp: ''
+  });
+
   const addCoins = () => {
     Object.entries(coinInputs).forEach(([type, value]) => {
       const amount = parseInt(value) || 0;
       if (amount > 0) {
-        updateCoin(type as 'cp' | 'sp' | 'gp' | 'pp', amount);
+        updateCoin(type as 'cp' | 'sp' | 'gp' | 'pp', currency[type as keyof typeof currency] + amount);
       }
     });
     setCoinInputs({ cp: '', sp: '', gp: '', pp: '' });
@@ -46,13 +111,11 @@ export const CoinManagement: React.FC<CoinManagementProps> = ({
     Object.entries(coinInputs).forEach(([type, value]) => {
       const amount = parseInt(value) || 0;
       if (amount > 0) {
-        updateCoin(type as 'cp' | 'sp' | 'gp' | 'pp', -amount);
+        updateCoin(type as 'cp' | 'sp' | 'gp' | 'pp', currency[type as keyof typeof currency] - amount);
       }
     });
     setCoinInputs({ cp: '', sp: '', gp: '', pp: '' });
   };
-
-  const totalValue = (currency.cp * 0.01) + (currency.sp * 0.1) + currency.gp + (currency.pp * 10);
 
   return (
     <div className="bg-yellow-900 rounded-xl shadow-lg border-l-4 border-yellow-500 p-4">
