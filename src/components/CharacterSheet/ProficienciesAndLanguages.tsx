@@ -9,12 +9,11 @@ interface ProficienciesAndLanguagesProps {
 export const ProficienciesAndLanguages: React.FC<ProficienciesAndLanguagesProps> = ({
   character,
 }) => {
-  // This would need to be calculated based on race, class, and background
-  // For now, showing placeholder data
-  const armorProficiencies = ['Light armor', 'Medium armor', 'Shields'];
-  const weaponProficiencies = ['Simple weapons', 'Martial weapons'];
-  const toolProficiencies = ['Smith\'s tools'];
-  const languages = ['Common', 'Dwarvish'];
+  // Use real proficiency data from character
+  const armorProficiencies = character.proficiencies?.armor || [];
+  const weaponProficiencies = character.proficiencies?.weapons || [];
+  const toolProficiencies = character.proficiencies?.tools || [];
+  const languages = character.languages || [];
 
   return (
     <div className="bg-emerald-900 rounded-xl shadow-lg border-l-4 border-yellow-500 p-4">
@@ -91,15 +90,15 @@ export const ProficienciesAndLanguages: React.FC<ProficienciesAndLanguagesProps>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
           <div>
             <div className="text-lg font-bold text-white">{armorProficiencies.length}</div>
-            <div className="text-xs text-gray-400">Armor Types</div>
+            <div className="text-xs text-gray-400">Armor Proficiencies</div>
           </div>
           <div>
             <div className="text-lg font-bold text-white">{weaponProficiencies.length}</div>
-            <div className="text-xs text-gray-400">Weapon Types</div>
+            <div className="text-xs text-gray-400">Weapon Proficiencies</div>
           </div>
           <div>
             <div className="text-lg font-bold text-white">{toolProficiencies.length}</div>
-            <div className="text-xs text-gray-400">Tool Sets</div>
+            <div className="text-xs text-gray-400">Tool Proficiencies</div>
           </div>
           <div>
             <div className="text-lg font-bold text-white">{languages.length}</div>

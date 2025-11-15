@@ -1,5 +1,6 @@
 export { CharacterSheet } from './CharacterSheet';
 export { CharacterHeader } from './CharacterHeader';
+export { LayoutSelector } from './LayoutSelector';
 export { CharacterStats } from './CharacterStats';
 export { AbilityScores } from './AbilityScores';
 export { AbilityScoreBlock } from './AbilityScoreBlock';
@@ -8,6 +9,8 @@ export { SkillEntry } from './SkillEntry';
 export { SavingThrows } from './SavingThrows';
 export { AttacksAndActions } from './AttacksAndActions';
 export { HitDice } from './HitDice';
+export { DeathSaves } from './DeathSaves';
+export { CombatStatsPanel } from './CombatStatsPanel';
 export { ExperiencePoints } from './ExperiencePoints';
 export { AttunementSlots } from './AttunementSlots';
 export { ProficienciesAndLanguages } from './ProficienciesAndLanguages';

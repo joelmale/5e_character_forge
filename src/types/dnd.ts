@@ -78,8 +78,13 @@ export interface Character {
   skills: {
     Acrobatics: Skill; AnimalHandling: Skill; Arcana: Skill; Athletics: Skill; Deception: Skill; History: Skill; Insight: Skill; Intimidation: Skill; Investigation: Skill; Medicine: Skill; Nature: Skill; Perception: Skill; Performance: Skill; Persuasion: Skill; Religion: Skill; SleightOfHand: Skill; Stealth: Skill; Survival: Skill;
   };
-  languages?: string[]; // Known languages
-  featuresAndTraits: {
+   languages?: string[]; // Known languages
+   proficiencies?: {
+     armor?: string[];
+     weapons?: string[];
+     tools?: string[];
+   };
+   featuresAndTraits: {
     personality: string;
     ideals: string;
     bonds: string;
@@ -339,6 +344,7 @@ export interface Race {
   slug: string;
   name: string;
   source: string;
+  speed?: number;
   ability_bonuses: Partial<Record<AbilityName, number>>;
   racial_traits: string[];
   description: string;

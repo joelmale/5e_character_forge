@@ -1,5 +1,5 @@
 import React from 'react';
-import { CharacterProvider, DiceProvider, ModalProvider } from './context';
+import { CharacterProvider, DiceProvider, ModalProvider, LayoutProvider } from './context';
 import App from './App';
 
 const AppWithProviders: React.FC = () => {
@@ -7,7 +7,9 @@ const AppWithProviders: React.FC = () => {
     <CharacterProvider>
       <DiceProvider>
         <ModalProvider>
-          <App />
+          <LayoutProvider>
+            <App />
+          </LayoutProvider>
         </ModalProvider>
       </DiceProvider>
     </CharacterProvider>

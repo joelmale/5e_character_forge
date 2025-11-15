@@ -3,6 +3,7 @@ import { Dice6 } from 'lucide-react';
 import { SkillName } from '../../types/dnd';
 import { createSkillRoll, createAdvantageRoll, createDisadvantageRoll } from '../../services/diceService';
 import { formatModifier } from '../../utils/formatters';
+import type { LayoutMode } from './AbilityScores';
 
 interface SkillEntryProps {
   name: SkillName;
@@ -13,6 +14,7 @@ interface SkillEntryProps {
     details?: Array<{ value: number; kept: boolean; critical?: 'success' | 'failure' }>
   }) => void;
   onDiceRoll: (roll: any) => void;
+  layoutMode?: LayoutMode;
 }
 
 type RollType = 'normal' | 'advantage' | 'disadvantage';
@@ -22,6 +24,7 @@ export const SkillEntry: React.FC<SkillEntryProps> = ({
   skill,
   setRollResult,
   onDiceRoll,
+  layoutMode = 'modern',
 }) => {
   const [showMenu, setShowMenu] = useState(false);
   const [rollType, setRollType] = useState<RollType>('normal');
@@ -70,6 +73,75 @@ export const SkillEntry: React.FC<SkillEntryProps> = ({
     }
   };
 
+  // Classic layout: Compact, traditional D&D skill checklist
+  if (layoutMode === 'classic') {
+    return (
+      <div className="relative">
+        <button
+          onClick={() => handleRoll()}
+          onContextMenu={(e) => {
+            e.preventDefault();
+            setShowMenu(!showMenu);
+          }}
+          className="flex items-center justify-between px-2 py-1 hover:bg-gray-700 rounded transition-colors cursor-pointer w-full group"
+          title={`Roll ${skillLabel} check (${rollType}) - Right-click for options`}
+        >
+          <div className="flex items-center gap-1.5">
+            {/* Proficiency bubble */}
+            <div className={`w-3 h-3 rounded-full border ${skill.proficient ? 'bg-yellow-500 border-yellow-500' : 'border-gray-500'}`} />
+            {/* Roll indicator */}
+            {getRollIcon() && (
+              <span className="text-xs font-bold text-green-400">{getRollIcon()}</span>
+            )}
+            <span className="text-xs font-medium text-gray-300 group-hover:text-white">{skillLabel}</span>
+          </div>
+          <span className="font-mono text-sm font-bold text-yellow-300">{formatModifier(skill.value)}</span>
+        </button>
+
+        {showMenu && (
+          <div className="absolute top-full left-0 mt-1 bg-gray-800 border border-gray-600 rounded-lg shadow-lg z-50 min-w-32">
+            <button
+              onClick={() => {
+                setRollType('normal');
+                handleRoll('normal');
+              }}
+              className="w-full text-left px-3 py-2 text-sm hover:bg-gray-700 first:rounded-t-lg"
+            >
+              Normal
+            </button>
+            <button
+              onClick={() => {
+                setRollType('advantage');
+                handleRoll('advantage');
+              }}
+              className="w-full text-left px-3 py-2 text-sm hover:bg-gray-700 text-green-400"
+            >
+              Advantage
+            </button>
+            <button
+              onClick={() => {
+                setRollType('disadvantage');
+                handleRoll('disadvantage');
+              }}
+              className="w-full text-left px-3 py-2 text-sm hover:bg-gray-700 text-red-400 last:rounded-b-lg"
+            >
+              Disadvantage
+            </button>
+          </div>
+        )}
+
+        {/* Click outside to close menu */}
+        {showMenu && (
+          <div
+            className="fixed inset-0 z-40"
+            onClick={() => setShowMenu(false)}
+          />
+        )}
+      </div>
+    );
+  }
+
+  // Modern layout: Original design
   return (
     <div className="relative">
       <button

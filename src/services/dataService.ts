@@ -301,9 +301,10 @@ export function transformRace(srdRace: SRDRace, year: number = 2014): Race {
     slug: srdRace.index,
     name: srdRace.name,
     source: `SRD ${year}`,
+    speed: srdRace.speed,
     ability_bonuses: abilityBonuses,
     racial_traits: srdRace.traits.map(t => t.name),
-    description: `${srdRace.name} from the System Reference Document.`, 
+    description: `${srdRace.name} from the System Reference Document.`,
     typicalRoles: [], // SRD doesn't include this, would need to be added manually
   };
 }
@@ -1102,6 +1103,7 @@ const COMPREHENSIVE_RACES: Race[] = [
     slug: 'human',
     name: 'Human',
     source: 'PHB',
+    speed: 30,
     ability_bonuses: { STR: 1, DEX: 1, CON: 1, INT: 1, WIS: 1, CHA: 1 },
     racial_traits: ['Versatile', 'Skilled'],
     description: 'Humans are the most adaptable and ambitious people among the common races. Whatever drives them, humans are the innovators, the achievers, and the pioneers of the worlds.',
@@ -1111,6 +1113,7 @@ const COMPREHENSIVE_RACES: Race[] = [
     slug: 'mountain-dwarf',
     name: 'Mountain Dwarf',
     source: 'PHB',
+    speed: 25,
     ability_bonuses: { STR: 2, CON: 2 },
     racial_traits: ['Darkvision', 'Dwarven Resilience', 'Stonecunning', 'Dwarven Combat Training', 'Tool Proficiency'],
     description: 'Bold and hardy, dwarves are known as skilled warriors, miners, and workers of stone and metal. Mountain dwarves are strong and hardy inhabitants of the mountains.',
@@ -1120,23 +1123,26 @@ const COMPREHENSIVE_RACES: Race[] = [
     slug: 'hill-dwarf',
     name: 'Hill Dwarf',
     source: 'PHB',
+    speed: 25,
     ability_bonuses: { CON: 2, WIS: 1 },
     racial_traits: ['Darkvision', 'Dwarven Resilience', 'Stonecunning', 'Dwarven Combat Training', 'Tool Proficiency'],
-    description: 'Bold and hardy, dwarves are known as skilled warriors, miners, and workers of stone and metal. Hill dwarves have keen senses, deep intuition, and remarkable resilience.',
+    description: 'Bold and hardy, dwarves are known as skilled warriors, miners, and workers of stone and metal. Hill dwarves are wise and tough inhabitants of the hills.',
     typicalRoles: ['Cleric', 'Fighter', 'Barbarian', 'Paladin']
   },
   {
     slug: 'high-elf',
     name: 'High Elf',
+    speed: 30,
     source: 'PHB',
     ability_bonuses: { DEX: 2, INT: 1 },
-    racial_traits: ['Darkvision', 'Fey Ancestry', 'Trance', 'Keen Senses', 'Elf Weapon Training', 'Cantrip'],
-    description: 'Elves are a magical people of otherworldly grace, living in the world but not entirely part of it. High elves are the most common subrace, known for their pursuit of arcane magic.',
-    typicalRoles: ['Wizard', 'Fighter', 'Rogue', 'Druid']
+    racial_traits: ['Darkvision', 'Fey Ancestry', 'Trance', 'Elf Weapon Training', 'Cantrip'],
+    description: 'Elves are a magical people of otherworldly grace, living in the world but not entirely part of it. High elves are the most common elves, known for their intelligence and magical affinity.',
+    typicalRoles: ['Wizard', 'Fighter', 'Rogue', 'Cleric', 'Any']
   },
   {
     slug: 'wood-elf',
     name: 'Wood Elf',
+    speed: 30,
     source: 'PHB',
     ability_bonuses: { DEX: 2, WIS: 1 },
     racial_traits: ['Darkvision', 'Fey Ancestry', 'Trance', 'Keen Senses', 'Elf Weapon Training', 'Fleet of Foot', 'Mask of the Wild'],
@@ -1146,6 +1152,7 @@ const COMPREHENSIVE_RACES: Race[] = [
   {
     slug: 'drow',
     name: 'Drow (Dark Elf)',
+    speed: 30,
     source: 'PHB',
     ability_bonuses: { DEX: 2, CHA: 1 },
     racial_traits: ['Superior Darkvision (120ft)', 'Fey Ancestry', 'Trance', 'Keen Senses', 'Drow Magic', 'Sunlight Sensitivity'],
@@ -1155,15 +1162,17 @@ const COMPREHENSIVE_RACES: Race[] = [
   {
     slug: 'lightfoot-halfling',
     name: 'Lightfoot Halfling',
+    speed: 30,
     source: 'PHB',
     ability_bonuses: { DEX: 2, CHA: 1 },
     racial_traits: ['Lucky', 'Brave', 'Halfling Nimbleness', 'Naturally Stealthy'],
-    description: 'Halflings are an affable and cheerful people. They cherish the bonds of family and friendship as well as the comforts of hearth and home. Lightfoot halflings are stealthy and good-natured.',
-    typicalRoles: ['Rogue', 'Bard', 'Cleric', 'Wizard']
+    description: 'Halflings are cheerful, brave, and lucky people who live in close-knit communities. Lightfoot halflings are stealthy and charismatic.',
+    typicalRoles: ['Rogue', 'Bard', 'Cleric', 'Wizard', 'Any']
   },
   {
     slug: 'stout-halfling',
     name: 'Stout Halfling',
+    speed: 30,
     source: 'PHB',
     ability_bonuses: { DEX: 2, CON: 1 },
     racial_traits: ['Lucky', 'Brave', 'Halfling Nimbleness', 'Stout Resilience (poison advantage)'],
@@ -1173,6 +1182,7 @@ const COMPREHENSIVE_RACES: Race[] = [
   {
     slug: 'forest-gnome',
     name: 'Forest Gnome',
+    speed: 30,
     source: 'PHB',
     ability_bonuses: { INT: 2, DEX: 1 },
     racial_traits: ['Darkvision', 'Gnome Cunning', 'Natural Illusionist', 'Speak with Small Beasts'],
@@ -1182,6 +1192,7 @@ const COMPREHENSIVE_RACES: Race[] = [
   {
     slug: 'rock-gnome',
     name: 'Rock Gnome',
+    speed: 30,
     source: 'PHB',
     ability_bonuses: { INT: 2, CON: 1 },
     racial_traits: ['Darkvision', 'Gnome Cunning', 'Artificer\'s Lore', 'Tinker'],
@@ -1191,6 +1202,7 @@ const COMPREHENSIVE_RACES: Race[] = [
   {
     slug: 'dragonborn',
     name: 'Dragonborn',
+    speed: 30,
     source: 'PHB',
     ability_bonuses: { STR: 2, CHA: 1 },
     racial_traits: ['Draconic Ancestry', 'Breath Weapon', 'Damage Resistance'],
@@ -1200,6 +1212,8 @@ const COMPREHENSIVE_RACES: Race[] = [
   {
     slug: 'half-elf',
     name: 'Half-Elf',
+    speed: 30,
+    speed: 30,
     source: 'PHB',
     ability_bonuses: { CHA: 2 },
     racial_traits: ['Darkvision', 'Fey Ancestry', 'Skill Versatility (2 skills)'],
@@ -1209,6 +1223,8 @@ const COMPREHENSIVE_RACES: Race[] = [
   {
     slug: 'half-orc',
     name: 'Half-Orc',
+    speed: 30,
+    speed: 30,
     source: 'PHB',
     ability_bonuses: { STR: 2, CON: 1 },
     racial_traits: ['Darkvision', 'Menacing (Intimidation)', 'Relentless Endurance', 'Savage Attacks'],
@@ -1218,6 +1234,8 @@ const COMPREHENSIVE_RACES: Race[] = [
   {
     slug: 'tiefling',
     name: 'Tiefling',
+    speed: 30,
+    speed: 30,
     source: 'PHB',
     ability_bonuses: { INT: 1, CHA: 2 },
     racial_traits: ['Darkvision', 'Hellish Resistance (fire)', 'Infernal Legacy'],
@@ -1229,6 +1247,8 @@ const COMPREHENSIVE_RACES: Race[] = [
   {
     slug: 'aasimar',
     name: 'Aasimar',
+    speed: 30,
+    speed: 30,
     source: 'VGtM',
     ability_bonuses: { WIS: 1, CHA: 2 },
     racial_traits: ['Darkvision', 'Celestial Resistance', 'Healing Hands', 'Light Bearer'],
@@ -1238,6 +1258,8 @@ const COMPREHENSIVE_RACES: Race[] = [
   {
     slug: 'firbolg',
     name: 'Firbolg',
+    speed: 30,
+    speed: 30,
     source: 'VGtM',
     ability_bonuses: { STR: 1, WIS: 2 },
     racial_traits: ['Firbolg Magic', 'Hidden Step', 'Powerful Build', 'Speech of Beast and Leaf'],
@@ -1247,6 +1269,8 @@ const COMPREHENSIVE_RACES: Race[] = [
   {
     slug: 'goliath',
     name: 'Goliath',
+    speed: 30,
+    speed: 30,
     source: 'VGtM',
     ability_bonuses: { STR: 2, CON: 1 },
     racial_traits: ['Stone\'s Endurance', 'Powerful Build', 'Mountain Born'],
@@ -1256,6 +1280,8 @@ const COMPREHENSIVE_RACES: Race[] = [
   {
     slug: 'kenku',
     name: 'Kenku',
+    speed: 30,
+    speed: 30,
     source: 'VGtM',
     ability_bonuses: { DEX: 2, WIS: 1 },
     racial_traits: ['Expert Forgery', 'Kenku Training', 'Mimicry'],
@@ -1265,6 +1291,8 @@ const COMPREHENSIVE_RACES: Race[] = [
   {
     slug: 'tabaxi',
     name: 'Tabaxi',
+    speed: 30,
+    speed: 30,
     source: 'VGtM',
     ability_bonuses: { DEX: 2, CHA: 1 },
     racial_traits: ['Darkvision', 'Feline Agility', 'Cat\'s Claws', 'Cat\'s Talent'],
@@ -1274,6 +1302,8 @@ const COMPREHENSIVE_RACES: Race[] = [
   {
     slug: 'triton',
     name: 'Triton',
+    speed: 30,
+    speed: 30,
     source: 'VGtM',
     ability_bonuses: { STR: 1, CON: 1, CHA: 1 },
     racial_traits: ['Amphibious', 'Control Air and Water', 'Emissary of the Sea', 'Guardians of the Depths'],
@@ -1285,6 +1315,8 @@ const COMPREHENSIVE_RACES: Race[] = [
   {
     slug: 'bugbear',
     name: 'Bugbear',
+    speed: 30,
+    speed: 30,
     source: 'VGtM',
     ability_bonuses: { STR: 2, DEX: 1 },
     racial_traits: ['Darkvision', 'Long-Limbed', 'Powerful Build', 'Sneaky', 'Surprise Attack'],
@@ -1294,6 +1326,7 @@ const COMPREHENSIVE_RACES: Race[] = [
   {
     slug: 'goblin',
     name: 'Goblin',
+    speed: 30,
     source: 'VGtM',
     ability_bonuses: { DEX: 2, CON: 1 },
     racial_traits: ['Darkvision', 'Fury of the Small', 'Nimble Escape'],
@@ -1303,6 +1336,7 @@ const COMPREHENSIVE_RACES: Race[] = [
   {
     slug: 'hobgoblin',
     name: 'Hobgoblin',
+    speed: 30,
     source: 'VGtM',
     ability_bonuses: { CON: 2, INT: 1 },
     racial_traits: ['Darkvision', 'Martial Training', 'Saving Face'],
@@ -1312,6 +1346,7 @@ const COMPREHENSIVE_RACES: Race[] = [
   {
     slug: 'kobold',
     name: 'Kobold',
+    speed: 30,
     source: 'VGtM',
     ability_bonuses: { DEX: 2, STR: -2 },
     racial_traits: ['Darkvision', 'Grovel, Cower, and Beg', 'Pack Tactics', 'Sunlight Sensitivity'],
@@ -1321,6 +1356,7 @@ const COMPREHENSIVE_RACES: Race[] = [
   {
     slug: 'orc',
     name: 'Orc',
+    speed: 30,
     source: 'VGtM',
     ability_bonuses: { STR: 2, CON: 1, INT: -2 },
     racial_traits: ['Darkvision', 'Aggressive', 'Menacing (Intimidation)', 'Powerful Build'],
@@ -1330,6 +1366,7 @@ const COMPREHENSIVE_RACES: Race[] = [
   {
     slug: 'yuan-ti-pureblood',
     name: 'Yuan-Ti Pureblood',
+    speed: 30,
     source: 'VGtM',
     ability_bonuses: { CHA: 2, INT: 1 },
     racial_traits: ['Darkvision', 'Innate Spellcasting', 'Magic Resistance', 'Poison Immunity'],
@@ -1341,6 +1378,7 @@ const COMPREHENSIVE_RACES: Race[] = [
   {
     slug: 'fairy',
     name: 'Fairy',
+    speed: 30,
     source: 'WGtE',
     ability_bonuses: { DEX: 2, CHA: 1 },
     racial_traits: ['Fairy Magic', 'Flight'],
@@ -1351,6 +1389,7 @@ const COMPREHENSIVE_RACES: Race[] = [
     slug: 'harengon',
     name: 'Harengon',
     source: 'WGtE',
+    speed: 30,
     ability_bonuses: { DEX: 2, WIS: 1 },
     racial_traits: ['Hare-Trigger', 'Leporine Senses', 'Lucky Footwork', 'Rabbit Hop'],
     description: 'Harengons are rabbit-like humanoids who hail from the Feywild. They are quick and lucky, with enhanced senses and agility.',
@@ -1359,6 +1398,7 @@ const COMPREHENSIVE_RACES: Race[] = [
   {
     slug: 'loxodon',
     name: 'Loxodon',
+    speed: 30,
     source: 'GGtR',
     ability_bonuses: { CON: 2, WIS: 1 },
     racial_traits: ['Powerful Build', 'Loxodon Serenity', 'Natural Armor', 'Trunk'],
@@ -1368,6 +1408,7 @@ const COMPREHENSIVE_RACES: Race[] = [
   {
     slug: 'owlin',
     name: 'Owlin',
+    speed: 30,
     source: 'Strixhaven',
     ability_bonuses: { DEX: 2, WIS: 1 },
     racial_traits: ['Darkvision', 'Flight', 'Silent Feathers'],
@@ -1377,6 +1418,7 @@ const COMPREHENSIVE_RACES: Race[] = [
   {
     slug: 'githyanki',
     name: 'Githyanki',
+    speed: 30,
     source: 'MToF',
     ability_bonuses: { STR: 1, INT: 1 },
     racial_traits: ['Decadent Mastery', 'Githyanki Psionics', 'Martial Prodigy'],
@@ -1386,6 +1428,7 @@ const COMPREHENSIVE_RACES: Race[] = [
   {
     slug: 'fire-genasi',
     name: 'Fire Genasi',
+    speed: 30,
     source: 'EE',
     ability_bonuses: { CON: 2, INT: 1 },
     racial_traits: ['Darkvision', 'Fire Resistance', 'Reach to the Blaze'],
@@ -2139,5 +2182,144 @@ export const randomizePersonality = (): { personality: string; ideals: string; b
     bonds: getRandomElement(bonds),
     flaws: getRandomElement(flaws)
   };
+};
+
+/**
+ * Extract proficiencies from race data
+ */
+export const getRaceProficiencies = (raceSlug: string): { armor?: string[]; weapons?: string[]; tools?: string[] } => {
+  const race = loadRaces().find(r => r.slug === raceSlug);
+  if (!race) return {};
+
+  const proficiencies: { armor?: string[]; weapons?: string[]; tools?: string[] } = {};
+
+  // Check racial traits for proficiency information
+  race.racial_traits.forEach(trait => {
+    const traitLower = trait.toLowerCase();
+
+    // Armor proficiencies
+    if (traitLower.includes('light armor') || traitLower.includes('medium armor') || traitLower.includes('heavy armor') || traitLower.includes('shields')) {
+      if (!proficiencies.armor) proficiencies.armor = [];
+      if (traitLower.includes('light')) proficiencies.armor.push('Light armor');
+      if (traitLower.includes('medium')) proficiencies.armor.push('Medium armor');
+      if (traitLower.includes('heavy')) proficiencies.armor.push('Heavy armor');
+      if (traitLower.includes('shields')) proficiencies.armor.push('Shields');
+    }
+
+    // Weapon proficiencies
+    if (traitLower.includes('weapon training') || traitLower.includes('combat training')) {
+      if (!proficiencies.weapons) proficiencies.weapons = [];
+      // This is a simplified extraction - in a real implementation, you'd parse the trait descriptions
+      if (traitLower.includes('battleaxe') || traitLower.includes('handaxe') || traitLower.includes('warhammer')) {
+        proficiencies.weapons.push('Battleaxe', 'Handaxe', 'Light hammer', 'Warhammer');
+      }
+    }
+
+    // Tool proficiencies
+    if (traitLower.includes('tool proficiency') || traitLower.includes('smith') || traitLower.includes('brewer')) {
+      if (!proficiencies.tools) proficiencies.tools = [];
+      if (traitLower.includes('smith')) proficiencies.tools.push('Smith\'s tools');
+      if (traitLower.includes('brewer')) proficiencies.tools.push('Brewer\'s supplies');
+    }
+  });
+
+  return proficiencies;
+};
+
+/**
+ * Extract proficiencies from class data
+ */
+export const getClassProficiencies = (classSlug: string): { armor?: string[]; weapons?: string[]; tools?: string[] } => {
+  const classData = loadClasses().find(c => c.slug === classSlug);
+  if (!classData) return {};
+
+  const proficiencies: { armor?: string[]; weapons?: string[]; tools?: string[] } = {};
+
+  // Extract from class features and descriptions
+  const classDesc = classData.description.toLowerCase();
+
+  // Armor proficiencies
+  if (classDesc.includes('light armor')) {
+    if (!proficiencies.armor) proficiencies.armor = [];
+    proficiencies.armor.push('Light armor');
+  }
+  if (classDesc.includes('medium armor')) {
+    if (!proficiencies.armor) proficiencies.armor = [];
+    proficiencies.armor.push('Medium armor');
+  }
+  if (classDesc.includes('heavy armor')) {
+    if (!proficiencies.armor) proficiencies.armor = [];
+    proficiencies.armor.push('Heavy armor');
+  }
+  if (classDesc.includes('shields')) {
+    if (!proficiencies.armor) proficiencies.armor = [];
+    proficiencies.armor.push('Shields');
+  }
+
+  // Weapon proficiencies
+  if (classDesc.includes('simple weapons')) {
+    if (!proficiencies.weapons) proficiencies.weapons = [];
+    proficiencies.weapons.push('Simple weapons');
+  }
+  if (classDesc.includes('martial weapons')) {
+    if (!proficiencies.weapons) proficiencies.weapons = [];
+    proficiencies.weapons.push('Martial weapons');
+  }
+
+  // Tool proficiencies
+  if (classDesc.includes('thieves\' tools')) {
+    if (!proficiencies.tools) proficiencies.tools = [];
+    proficiencies.tools.push('Thieves\' tools');
+  }
+
+  return proficiencies;
+};
+
+/**
+ * Extract proficiencies from background data
+ */
+export const getBackgroundProficiencies = (background: string): { armor?: string[]; weapons?: string[]; tools?: string[] } => {
+  // Simplified background proficiency extraction
+  const proficiencies: { armor?: string[]; weapons?: string[]; tools?: string[] } = {};
+
+  const bgLower = background.toLowerCase();
+
+  // Tool proficiencies based on background
+  if (bgLower.includes('criminal') || bgLower.includes('spy')) {
+    proficiencies.tools = ['Thieves\' tools'];
+  }
+  if (bgLower.includes('entertainer')) {
+    proficiencies.tools = ['Disguise kit', 'One musical instrument'];
+  }
+  if (bgLower.includes('guild artisan')) {
+    proficiencies.tools = ['One type of artisan\'s tools'];
+  }
+
+  return proficiencies;
+};
+
+/**
+ * Aggregate proficiencies from race, class, and background
+ */
+export const aggregateProficiencies = (raceSlug: string, classSlug: string, background: string): { armor?: string[]; weapons?: string[]; tools?: string[] } => {
+  const raceProf = getRaceProficiencies(raceSlug);
+  const classProf = getClassProficiencies(classSlug);
+  const backgroundProf = getBackgroundProficiencies(background);
+
+  const aggregated: { armor?: string[]; weapons?: string[]; tools?: string[] } = {};
+
+  // Merge armor proficiencies
+  const armorSet = new Set([...(raceProf.armor || []), ...(classProf.armor || []), ...(backgroundProf.armor || [])]);
+  if (armorSet.size > 0) aggregated.armor = Array.from(armorSet);
+
+  // Merge weapon proficiencies
+  const weaponSet = new Set([...(raceProf.weapons || []), ...(classProf.weapons || []), ...(backgroundProf.weapons || [])]);
+  if (weaponSet.size > 0) aggregated.weapons = Array.from(weaponSet);
+
+  // Merge tool proficiencies
+  const toolSet = new Set([...(raceProf.tools || []), ...(classProf.tools || []), ...(backgroundProf.tools || [])]);
+  if (toolSet.size > 0) aggregated.tools = Array.from(toolSet);
+
+  return aggregated;
 };
 

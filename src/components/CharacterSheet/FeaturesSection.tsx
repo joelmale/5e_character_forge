@@ -13,7 +13,7 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({
   return (
     <div className="space-y-4">
       <h2 className="text-xl font-bold text-red-500 border-b border-red-800 pb-1">Features & Traits</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4">
         <div className="p-4 bg-gray-800 rounded-xl shadow-lg border-l-4 border-blue-500">
           <h3 className="text-lg font-bold text-blue-400 mb-2">Personality, Ideals, Bonds & Flaws</h3>
           <ul className="list-disc list-inside space-y-1 text-sm text-gray-300">
@@ -39,7 +39,7 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({
 
       {/* SRD Features Display */}
       {character.srdFeatures && (character.srdFeatures.classFeatures.length > 0 || character.srdFeatures.subclassFeatures.length > 0) && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4">
           {/* Class Features */}
           {character.srdFeatures.classFeatures.length > 0 && (
             <div className="p-4 bg-gray-800 rounded-xl shadow-lg border-l-4 border-orange-500">
@@ -106,7 +106,7 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({
       {character.selectedFeats && character.selectedFeats.length > 0 && (
         <div className="p-4 bg-gray-800 rounded-xl shadow-lg border-l-4 border-cyan-500">
           <h3 className="text-lg font-bold text-cyan-400 mb-2">Feats</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+          <div className="grid grid-cols-1 gap-2">
             {character.selectedFeats.map((featSlug, index) => (
               <div key={`feat-${index}`} className="p-2 bg-gray-700 rounded border border-cyan-700">
                 <div className="font-semibold text-cyan-300 text-sm">{featSlug}</div>

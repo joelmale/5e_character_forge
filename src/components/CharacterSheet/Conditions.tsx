@@ -93,10 +93,10 @@ export const Conditions: React.FC<ConditionsProps> = ({
           />
           <button
             onClick={addCustomCondition}
-            className="px-3 py-2 bg-yellow-600 hover:bg-yellow-500 rounded text-sm font-medium transition-colors flex items-center gap-1"
+            className="px-2 py-2 bg-yellow-600 hover:bg-yellow-500 rounded transition-colors flex items-center justify-center"
+            title="Add condition"
           >
             <Plus className="w-4 h-4" />
-            Add
           </button>
         </div>
 
@@ -104,12 +104,13 @@ export const Conditions: React.FC<ConditionsProps> = ({
         <div>
           <h4 className="text-sm font-semibold text-red-300 mb-2">Common Conditions:</h4>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-            {commonConditions.map((condition, index) => (
+            {commonConditions
+              .filter(condition => !activeConditions.includes(condition))
+              .map((condition, index) => (
               <button
                 key={index}
                 onClick={() => addCondition(condition)}
-                disabled={activeConditions.includes(condition)}
-                className="px-2 py-1 bg-gray-800/50 hover:bg-red-800/70 disabled:bg-gray-700 disabled:opacity-50 rounded text-xs text-gray-300 hover:text-white transition-colors text-left"
+                className="px-2 py-1 bg-gray-800/50 hover:bg-red-800/70 rounded text-xs text-gray-300 hover:text-white transition-colors text-left"
                 title={`Add ${condition}`}
               >
                 {condition}

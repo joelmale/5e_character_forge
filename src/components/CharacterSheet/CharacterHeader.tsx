@@ -1,6 +1,7 @@
 import React from 'react';
 import { Trash2 } from 'lucide-react';
 import { Character } from '../../types/dnd';
+import { LayoutSelector } from './LayoutSelector';
 
 interface CharacterHeaderProps {
   character: Character;
@@ -24,8 +25,9 @@ export const CharacterHeader: React.FC<CharacterHeaderProps> = ({
   return (
     <>
       {/* Header and Controls */}
-      <div className="flex justify-between items-center border-b border-red-700 pb-3">
+      <div className="flex justify-between items-center border-b border-red-700 pb-3 gap-4">
         <h1 className="text-3xl font-serif font-bold text-red-500 truncate">{character.name}</h1>
+        <LayoutSelector />
         <div className="flex space-x-3">
           <button
             onClick={() => onShortRest(character.id)}

@@ -9,6 +9,7 @@ import {
     loadEquipment,
     getFeaturesByClass,
     getFeaturesBySubclass,
+    aggregateProficiencies,
     // FEAT_DATABASE,
 } from './dataService';
 import { SPELL_SLOTS_BY_CLASS } from '../data/spellSlots';
@@ -177,7 +178,10 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
         allClassFeatures.push(`Fighting Style: ${data.selectedFightingStyle}`);
     }
 
-    // 10. Construct Final Character Object
+    // 10. Calculate Proficiencies
+    const proficiencies = aggregateProficiencies(data.raceSlug, data.classSlug, data.background);
+
+    // 11. Construct Final Character Object
     return {
         id: generateUUID(), // Generate UUID for IndexedDB
         name: data.name || "Unnamed Hero",
@@ -197,10 +201,11 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
             max: level,
             dieType: 12, // TODO: Make this dynamic based on class
         },
-        speed: 30,
+         speed: raceData.speed || 30,
         initiative: finalAbilities.DEX.modifier,
         abilities: finalAbilities,
         skills: finalSkills,
+        proficiencies,
         featuresAndTraits: {
             personality: data.personality,
             ideals: data.ideals,

@@ -329,3 +329,111 @@ export function createComplexRoll(label: string, notation: string): DiceRoll {
     expression: notation
   };
 }
+
+/**
+ * Create a dice roll for a saving throw
+ * @param abilityName The ability used for the save (STR, DEX, etc.)
+ * @param abilityModifier The ability modifier
+ * @param proficiencyBonus The character's proficiency bonus
+ * @param isProficient Whether the character is proficient in this save
+ * @returns DiceRoll object
+ */
+export function createSavingThrowRoll(
+  abilityName: string,
+  abilityModifier: number,
+  proficiencyBonus: number,
+  isProficient: boolean
+): DiceRoll {
+  const modifier = abilityModifier + (isProficient ? proficiencyBonus : 0);
+  const diceResults = rollDice(1, 20);
+  const dieValue = diceResults[0];
+  const total = dieValue + modifier;
+  const critical = detectCritical(dieValue, 20);
+
+  return {
+    id: generateUUID(),
+    type: 'saving-throw',
+    label: `${abilityName} Save`,
+    notation: modifier === 0 ? '1d20' : `1d20${modifier >= 0 ? '+' : ''}${modifier}`,
+    diceResults,
+    modifier,
+    total,
+    critical,
+    timestamp: Date.now(),
+  };
+}
+
+/**
+ * Create a dice roll for a weapon attack
+ * @param weaponName The name of the weapon
+ * @param abilityModifier The relevant ability modifier (STR or DEX)
+ * @param proficiencyBonus The character's proficiency bonus
+ * @returns DiceRoll object
+ */
+export function createWeaponAttackRoll(
+  weaponName: string,
+  abilityModifier: number,
+  proficiencyBonus: number
+): DiceRoll {
+  const modifier = abilityModifier + proficiencyBonus;
+  const diceResults = rollDice(1, 20);
+  const dieValue = diceResults[0];
+  const total = dieValue + modifier;
+  const critical = detectCritical(dieValue, 20);
+
+  return {
+    id: generateUUID(),
+    type: 'attack',
+    label: `${weaponName} Attack`,
+    notation: modifier === 0 ? '1d20' : `1d20${modifier >= 0 ? '+' : ''}${modifier}`,
+    diceResults,
+    modifier,
+    total,
+    critical,
+    timestamp: Date.now(),
+  };
+}
+
+/**
+ * Create a dice roll for weapon damage
+ * @param weaponName The name of the weapon
+ * @param damageDice The damage dice notation (e.g., "1d8", "2d6")
+ * @param abilityModifier The relevant ability modifier
+ * @param damageType The type of damage (e.g., "slashing", "piercing")
+ * @returns DiceRoll object
+ */
+export function createWeaponDamageRoll(
+  weaponName: string,
+  damageDice: string,
+  abilityModifier: number,
+  damageType: string
+): DiceRoll {
+  // Parse damage dice (e.g., "2d6" -> count=2, sides=6)
+  const match = damageDice.match(/^(\d+)d(\d+)$/);
+  if (!match) {
+    throw new Error(`Invalid damage dice: ${damageDice}`);
+  }
+
+  const count = parseInt(match[1]);
+  const sides = parseInt(match[2]);
+  const diceResults = rollDice(count, sides);
+  const diceTotal = diceResults.reduce((sum, val) => sum + val, 0);
+  const total = diceTotal + abilityModifier;
+
+  return {
+    id: generateUUID(),
+    type: 'complex',
+    label: `${weaponName} Damage (${damageType})`,
+    notation: abilityModifier === 0 ? damageDice : `${damageDice}${abilityModifier >= 0 ? '+' : ''}${abilityModifier}`,
+    diceResults,
+    modifier: abilityModifier,
+    total,
+    timestamp: Date.now(),
+    pools: [{
+      count,
+      sides,
+      results: diceResults
+    }],
+    expression: abilityModifier === 0 ? damageDice : `${damageDice}${abilityModifier >= 0 ? '+' : ''}${abilityModifier}`
+  };
+}
