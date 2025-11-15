@@ -45,12 +45,12 @@ export const SkillEntry: React.FC<SkillEntryProps> = ({
 
     // Create detailed results for display
     const details = roll.pools && roll.pools.length > 0
-      ? roll.pools[0].results.map((value, idx) => ({
+      ? roll.pools[0].results.map((value, _idx) => ({
           value,
           kept: roll.diceResults.includes(value),
           critical: roll.diceResults.length === 1 && roll.diceResults[0] === value ? roll.critical : undefined
         }))
-      : roll.diceResults.map((value, idx) => ({
+      : roll.diceResults.map((value, _idx) => ({
           value,
           kept: true,
           critical: roll.diceResults.length === 1 ? roll.critical : undefined

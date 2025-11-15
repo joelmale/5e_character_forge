@@ -141,15 +141,17 @@ export function updateSpellcastingOnLevelUp(
   // Update spell access based on type
   let spellUpdates = {};
   switch (learningRules.type) {
-    case 'prepared':
+    case 'prepared': {
       const availableSpells = getLeveledSpellsByClass(classSlug, newLevel).map((s: any) => s.slug);
       spellUpdates = { spellsKnown: availableSpells };
       break;
-    case 'known':
+    }
+    case 'known': {
       const spellsKnownLimit = learningRules.spellsKnown?.[newLevel - 1] || character.spellcasting.spellsKnown?.length || 0;
       const knownSpells = getLeveledSpellsByClass(classSlug, newLevel).slice(0, spellsKnownLimit).map((s: any) => s.slug);
       spellUpdates = { spellsKnown: knownSpells };
       break;
+    }
     case 'spellbook':
       // Spellbook casters keep their existing spells
       break;

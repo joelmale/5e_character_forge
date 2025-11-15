@@ -15,7 +15,7 @@ interface EquipmentSectionProps {
 
 export const EquipmentSection: React.FC<EquipmentSectionProps> = ({
   character,
-  onUpdateCharacter,
+  onUpdateCharacter: _onUpdateCharacter,
   onEquipArmor: _onEquipArmor,
   onEquipWeapon: _onEquipWeapon,
   onUnequipItem: _onUnequipItem,

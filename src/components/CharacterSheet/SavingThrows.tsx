@@ -23,7 +23,7 @@ export const SavingThrows: React.FC<SavingThrowsProps> = ({
   character,
   setRollResult,
   onDiceRoll,
-  onUpdateCharacter,
+  onUpdateCharacter: _onUpdateCharacter,
   layoutMode = 'modern',
 }) => {
   const [activeMenuAbility, setActiveMenuAbility] = useState<AbilityName | null>(null);

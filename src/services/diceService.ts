@@ -298,7 +298,6 @@ export function createComplexRoll(label: string, notation: string): DiceRoll {
   const modifier = modifierStr ? parseInt(modifierStr) : 0;
 
   const diceResults = rollDice(count, sides);
-  let finalResults = diceResults;
   let keptResults = diceResults;
 
   // Handle keep highest/lowest

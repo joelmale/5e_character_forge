@@ -55,7 +55,7 @@ export const Step4Spells: React.FC<StepProps> = ({ data, updateData, nextStep, p
         updateData({ spellSelection: cleanedSelection });
       }
     }
-  }, [selectedClass, data.spellSelection, data.abilities.INT, data.classSlug, data.level, updateData]);
+  }, [selectedClass, data.spellSelection, data.abilities, data.classSlug, data.level, updateData]);
 
   // If not a spellcaster or has no spells available, skip this step
   if (!selectedClass || !selectedClass.spellcasting ||

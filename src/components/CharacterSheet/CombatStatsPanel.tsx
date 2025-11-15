@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Shield, Zap, Dice6, Footprints, Plus, Minus } from 'lucide-react';
+import { Shield, Dice6, Footprints, Plus } from 'lucide-react';
 import { Character } from '../../types/dnd';
 import { createInitiativeRoll, createAdvantageRoll, createDisadvantageRoll } from '../../services/diceService';
 import { formatModifier } from '../../utils/formatters';

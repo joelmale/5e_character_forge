@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Dice6, ChevronDown } from 'lucide-react';
+import { Dice6 } from 'lucide-react';
 import { AbilityName } from '../../types/dnd';
 import { createAbilityRoll, createAdvantageRoll, createDisadvantageRoll } from '../../services/diceService';
 import { formatModifier } from '../../utils/formatters';
@@ -44,12 +44,12 @@ export const AbilityScoreBlock: React.FC<AbilityScoreBlockProps> = ({
 
     // Create detailed results for display
     const details = roll.pools && roll.pools.length > 0
-      ? roll.pools[0].results.map((value, idx) => ({
+      ? roll.pools[0].results.map((value, _idx) => ({
           value,
           kept: roll.diceResults.includes(value),
           critical: roll.diceResults.length === 1 && roll.diceResults[0] === value ? roll.critical : undefined
         }))
-      : roll.diceResults.map((value, idx) => ({
+      : roll.diceResults.map((value, _idx) => ({
           value,
           kept: true,
           critical: roll.diceResults.length === 1 ? roll.critical : undefined

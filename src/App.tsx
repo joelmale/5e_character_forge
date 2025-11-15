@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Dice6, Plus, Trash2, BookOpen, User as UserIcon, Shield, Zap, ArrowLeft, ArrowRight, Download, Upload, XCircle, ChevronDown, ChevronUp, Shuffle } from 'lucide-react';
+import { Dice6, Plus, Trash2, BookOpen, Shield, ArrowLeft, ArrowRight, Download, Upload, XCircle, ChevronDown, ChevronUp, Shuffle } from 'lucide-react';
 // REFACTORED: Loader2 import removed - was unused
 import { CharacterCreationWizard } from './components/CharacterCreationWizard';
 import { CharacterSheet } from './components/CharacterSheet';
@@ -12,22 +12,20 @@ import { EquipmentDetailModal } from './components/EquipmentDetailModal';
 import { ChooseCantripModal } from './components/ChooseCantripModal';
 import ChooseSubclassModal from './components/ChooseSubclassModal';
 import AbilityScoreIncreaseModal from './components/AbilityScoreIncreaseModal';
-import { SpellPreparationModal } from './components/SpellPreparationModal';
-import { createAbilityRoll, createSkillRoll, createInitiativeRoll, generateUUID, DiceRoll, rollDice } from './services/diceService';
-import { loadFeatures } from './services/dataService';
+import { generateUUID, DiceRoll, rollDice } from './services/diceService';
 import { featureDescriptions } from './utils/featureDescriptions';
-import { loadClasses, loadEquipment, FEAT_DATABASE as loadedFeats, getSubclassesByClass, getFeaturesByClass, getFeaturesBySubclass, SPELL_DATABASE, PROFICIENCY_BONUSES, getModifier, SKILL_TO_ABILITY, ALL_SKILLS, ALIGNMENTS_DATA, ALIGNMENTS, BACKGROUNDS, RACE_CATEGORIES, CLASS_CATEGORIES, EQUIPMENT_PACKAGES, getAllRaces, randomizeLevel, randomizeIdentity, randomizeRace, randomizeClassAndSkills, randomizeFightingStyle, randomizeSpells, randomizeAbilities, randomizeFeats, randomizeEquipmentChoices, randomizeAdditionalEquipment, randomizeLanguages, randomizePersonality, AppSubclass, getHitDieForClass, CANTRIPS_KNOWN_BY_CLASS, SPELL_SLOTS_BY_CLASS } from './services/dataService';
+import { loadClasses, loadEquipment, loadFeatures, FEAT_DATABASE as loadedFeats, getSubclassesByClass, getFeaturesByClass, getFeaturesBySubclass, PROFICIENCY_BONUSES, getModifier, SKILL_TO_ABILITY, ALL_SKILLS, ALIGNMENTS_DATA, ALIGNMENTS, BACKGROUNDS, RACE_CATEGORIES, CLASS_CATEGORIES, EQUIPMENT_PACKAGES, getAllRaces, randomizeLevel, randomizeIdentity, randomizeRace, randomizeClassAndSkills, randomizeFightingStyle, randomizeSpells, randomizeAbilities, randomizeFeats, randomizeEquipmentChoices, randomizeAdditionalEquipment, randomizeLanguages, randomizePersonality, AppSubclass, getHitDieForClass, CANTRIPS_KNOWN_BY_CLASS, SPELL_SLOTS_BY_CLASS } from './services/dataService';
 import { getAllCharacters, addCharacter, deleteCharacter, updateCharacter } from './services/dbService';
 // REFACTORED: Language utilities moved to languageUtils.ts for the wizard
 // Still used here in main App for character sheet display - can be removed once main app is refactored
 import { calculateKnownLanguages } from './utils/languageUtils';
 
 import levelConstantsData from './data/levelConstants.json';
-import { Ability, Character, AbilityScore, Skill, AbilityName, SkillName, Equipment, EquippedItem, Feat, CharacterCreationData, Feature } from './types/dnd';
+import { Ability, Character, AbilityName, SkillName, Equipment, EquippedItem, Feat, CharacterCreationData, Feature } from './types/dnd';
 import { CharacterSheetProps } from './types/components';
 import { useDiceContext } from './context';
 
-const DEBUG_MODE = true;
+
 
 
 

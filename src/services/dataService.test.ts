@@ -7,7 +7,6 @@ import {
   aggregateProficiencies,
   getRaceProficiencies,
   getClassProficiencies,
-  getBackgroundProficiencies,
   loadRaces,
   loadClasses,
   SPELL_DATABASE,

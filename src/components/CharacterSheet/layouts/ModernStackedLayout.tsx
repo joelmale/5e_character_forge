@@ -59,12 +59,12 @@ export const ModernStackedLayout: React.FC<CharacterSheetProps> = ({
     if (saved) {
       try {
         setCollapsedSections(JSON.parse(saved));
-      } catch (e) {
+      } catch (_e) {
         // Fall back to defaults if parsing fails
         setCollapsedSections(getDefaultCollapsedState(character));
       }
     }
-  }, [character.id]);
+  }, [character.id, character]);
 
   // Save preferences
   useEffect(() => {

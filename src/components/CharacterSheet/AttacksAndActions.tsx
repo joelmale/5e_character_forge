@@ -1,6 +1,6 @@
 import React from 'react';
 import { Character, Equipment } from '../../types/dnd';
-import { loadEquipment, getModifier } from '../../services/dataService';
+import { loadEquipment } from '../../services/dataService';
 
 interface AttacksAndActionsProps {
   character: Character;
@@ -55,7 +55,7 @@ const getWeaponDamage = (weapon: Equipment, character: Character): string => {
 
 export const AttacksAndActions: React.FC<AttacksAndActionsProps> = ({
   character,
-  setRollResult,
+  setRollResult: _setRollResult,
   onDiceRoll,
 }) => {
   const allEquipment = loadEquipment();
@@ -77,7 +77,6 @@ export const AttacksAndActions: React.FC<AttacksAndActionsProps> = ({
     const damageRoll = getWeaponDamage(weapon, character);
 
     const rollText = `${isExtraAttack ? 'Extra Attack: ' : ''}${isOffHand ? 'Off-hand: ' : ''}${weapon.name} Attack`;
-    const fullRoll = `${attackRoll} (${damageRoll} ${weapon.damage?.damage_type || 'damage'})`;
 
     // Create the roll object for the dice system
     const roll = {

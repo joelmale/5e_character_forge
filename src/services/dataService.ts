@@ -24,7 +24,6 @@ import classCategoriesData from '../data/classCategories.json';
 import enhancedClassData from '../data/enhancedClassData.json';
 import gameConstantsData from '../data/gameConstants.json';
 import levelConstantsData from '../data/levelConstants.json';
-import randomNamesData from '../data/randomNames.json';
 import spellcastingTypesData from '../data/spellcastingTypes.json';
 import racialLanguagesData from '../data/racialLanguages.json';
 import backgroundDefaultsData from '../data/backgroundDefaults.json';

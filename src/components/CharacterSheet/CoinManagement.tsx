@@ -15,6 +15,14 @@ export const CoinManagement: React.FC<CoinManagementProps> = ({
 }) => {
   const currency = character.currency || { cp: 0, sp: 0, gp: 0, pp: 0 };
 
+  // Full version state (must be declared before any early returns)
+  const [coinInputs, setCoinInputs] = useState({
+    cp: '',
+    sp: '',
+    gp: '',
+    pp: ''
+  });
+
   const updateCoin = (type: 'cp' | 'sp' | 'gp' | 'pp', amount: number) => {
     const newAmount = Math.max(0, amount);
     const updatedCharacter = {
@@ -88,14 +96,6 @@ export const CoinManagement: React.FC<CoinManagementProps> = ({
       </div>
     );
   }
-
-  // Full version (unchanged)
-  const [coinInputs, setCoinInputs] = useState({
-    cp: '',
-    sp: '',
-    gp: '',
-    pp: ''
-  });
 
   const addCoins = () => {
     Object.entries(coinInputs).forEach(([type, value]) => {

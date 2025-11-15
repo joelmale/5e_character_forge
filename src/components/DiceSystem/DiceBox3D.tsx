@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import type { DiceRoll } from '../../services/diceService';
 
 // Dynamic import for DiceBox to avoid bundling issues
-let DiceBox: any = null;
+const DiceBox: any = null;
 
 interface DiceBox3DProps {
   latestRoll: DiceRoll | null;
