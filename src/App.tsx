@@ -432,7 +432,7 @@ const App: React.FC = () => {
     }
 
     if (updatedCharacter.spellcasting) {
-      const cantripsKnownAtNewLevel = (CANTRIPS_KNOWN_BY_CLASS as any)[classData.slug]?.[newLevel];
+      const cantripsKnownAtNewLevel = (CANTRIPS_KNOWN_BY_CLASS as Record<string, Record<string, number>>)[classData.slug]?.[newLevel.toString()];
       if (cantripsKnownAtNewLevel && cantripsKnownAtNewLevel > updatedCharacter.spellcasting.cantripsKnown.length) {
         // Open modal to choose cantrip instead of adding a placeholder
         setCantripModalState({
@@ -765,8 +765,8 @@ const App: React.FC = () => {
     const updatedAbilities = { ...character.abilities };
     for (const ability of Object.keys(increases) as Ability[]) {
       const increase = increases[ability] || 0;
-      (updatedAbilities as any)[ability].score += increase;
-      (updatedAbilities as any)[ability].modifier = getModifier((updatedAbilities as any)[ability].score);
+      updatedAbilities[ability as keyof typeof updatedAbilities].score += increase;
+      updatedAbilities[ability as keyof typeof updatedAbilities].modifier = getModifier(updatedAbilities[ability as keyof typeof updatedAbilities].score);
     }
 
     const updatedCharacter = {

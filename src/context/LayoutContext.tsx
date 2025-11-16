@@ -6,6 +6,7 @@ export interface LayoutContextType {
   setLayoutMode: (mode: LayoutMode) => void;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const LayoutContext = createContext<LayoutContextType | undefined>(undefined);
 
 interface LayoutProviderProps {

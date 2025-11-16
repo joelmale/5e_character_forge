@@ -266,6 +266,7 @@ export const ClassicDndLayout: React.FC<CharacterSheetProps> = ({
               <FeaturesSection
                 character={character}
                 onFeatureClick={onFeatureClick}
+                layoutMode="classic-dnd"
               />
              </div>
            </div>

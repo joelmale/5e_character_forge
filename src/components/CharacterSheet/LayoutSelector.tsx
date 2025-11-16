@@ -13,9 +13,9 @@ export const LayoutSelector: React.FC = () => {
   ];
 
   return (
-    <div className="hidden lg:flex items-center gap-2">
+    <div className="flex flex-col gap-1">
       <span className="text-xs text-gray-400">Layout:</span>
-      <div className="flex gap-1 bg-gray-800 rounded-lg p-1">
+      <div className="flex flex-col gap-0 bg-gray-800 rounded-lg p-1">
         {layouts.map((l) => (
           <button
             key={l.value}

@@ -138,7 +138,7 @@ export const Conditions: React.FC<ConditionsProps> = ({
         {/* Common Conditions */}
         <div>
           <h4 className="text-sm font-semibold text-red-300 mb-2">Common Conditions:</h4>
-          <div className="grid grid-cols-3 md:grid-cols-5 gap-2">
+          <div className="flex flex-wrap gap-2">
             {commonConditions
               .filter(condition => !activeConditions.includes(condition))
               .map((condition, index) => {

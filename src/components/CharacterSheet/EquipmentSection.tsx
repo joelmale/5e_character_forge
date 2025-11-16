@@ -1,6 +1,7 @@
 import React from 'react';
 import { Plus, Box } from 'lucide-react';
-import { Character } from '../../types/dnd';
+import { Character, Equipment } from '../../types/dnd';
+import { loadEquipment } from '../../services/dataService';
 
 interface EquipmentSectionProps {
   character: Character;
@@ -10,7 +11,7 @@ interface EquipmentSectionProps {
   onUnequipItem: (characterId: string, itemSlug: string) => void;
   onAddItem: (characterId: string, equipmentSlug: string, quantity?: number) => void;
   onRemoveItem: (characterId: string, equipmentSlug: string, quantity?: number) => void;
-  setEquipmentModal: (item: { slug: string }) => void;
+  setEquipmentModal: (item: Equipment | null) => void;
 }
 
 export const EquipmentSection: React.FC<EquipmentSectionProps> = ({
@@ -60,7 +61,10 @@ export const EquipmentSection: React.FC<EquipmentSectionProps> = ({
                   <div className="flex-grow min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <button
-                        onClick={() => setEquipmentModal({ slug: item.equipmentSlug })}
+                        onClick={() => {
+                          const equipment = loadEquipment().find(eq => eq.slug === item.equipmentSlug);
+                          setEquipmentModal(equipment || null);
+                        }}
                         className="font-semibold text-white hover:text-orange-300 transition-colors text-left"
                       >
                         {item.equipmentSlug}

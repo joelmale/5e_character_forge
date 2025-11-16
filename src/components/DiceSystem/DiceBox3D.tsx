@@ -77,7 +77,7 @@ export const DiceBox3D: React.FC<DiceBox3DProps> = ({
           }
         };
 
-      } catch {} {
+      } catch (err) {
         if (!mounted) return;
 
         const errorMessage = err instanceof Error ? err.message : 'Unknown error';

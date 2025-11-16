@@ -455,12 +455,15 @@ export function transformClass(srdClass: SRDClass, year: number = 2014): Class {
           }
           return [];
         }).filter(arr => arr.length > 0);
-      } else if ((option.from as { equipment_category: { name: string } }).equipment_category) {
-        options = [[{
-          name: `Any ${(option.from as { equipment_category: { name: string } }).equipment_category.name}`,
-          type: 'gear' as const,
-          quantity: 1
-        }]];
+      } else if (option.from && typeof option.from === 'object' && 'equipment_category' in option.from) {
+        const fromObj = option.from as { equipment_category?: { name?: string } };
+        if (fromObj.equipment_category?.name) {
+          options = [[{
+            name: `Any ${fromObj.equipment_category.name}`,
+            type: 'gear' as const,
+            quantity: 1
+          }]];
+        }
       }
 
       if (options.length > 0) {
@@ -1165,10 +1168,10 @@ export const RACE_CATEGORIES: RaceCategory[] = raceCategoriesData.map((category:
   races: category.filterCriteria.source
     ? COMPREHENSIVE_RACES.filter(race => race.source === category.filterCriteria.source)
     : category.filterCriteria.sources
-    ? COMPREHENSIVE_RACES.filter(race => category.filterCriteria.sources.includes(race.source))
+    ? COMPREHENSIVE_RACES.filter(race => category.filterCriteria.sources?.includes(race.source))
     : category.filterCriteria.slugs
     ? COMPREHENSIVE_RACES.filter(race =>
-        ['VGtM'].includes(race.source) && category.filterCriteria.slugs.includes(race.slug)
+        ['VGtM'].includes(race.source) && category.filterCriteria.slugs?.includes(race.slug)
       )
     : []
 }));

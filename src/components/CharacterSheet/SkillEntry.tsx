@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Dice6 } from 'lucide-react';
 import { SkillName } from '../../types/dnd';
 import { createSkillRoll, createAdvantageRoll, createDisadvantageRoll, DiceRoll } from '../../services/diceService';
 import { formatModifier } from '../../utils/formatters';

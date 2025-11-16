@@ -2,20 +2,20 @@
 import { generateUUID } from './diceService';
 import levelConstantsData from '../data/levelConstants.json';
 import {
-    loadRaces,
-    loadClasses,
-    getModifier,
-    PROFICIENCY_BONUSES,
-    SKILL_TO_ABILITY,
-    ALL_SKILLS,
-    loadEquipment,
-    getFeaturesByClass,
-    getFeaturesBySubclass,
-    aggregateProficiencies,
-    getHitDieForClass,
-    // FEAT_DATABASE,
+  loadRaces,
+  loadClasses,
+  loadEquipment,
+  getModifier,
+  PROFICIENCY_BONUSES,
+  ALL_SKILLS,
+  SKILL_TO_ABILITY,
+  getFeaturesByClass,
+  getFeaturesBySubclass,
+  aggregateProficiencies,
+  getHitDieForClass,
+  SPELL_SLOTS_BY_CLASS,
+  CANTRIPS_KNOWN_BY_CLASS
 } from './dataService';
-import { SPELL_SLOTS_BY_CLASS, CANTRIPS_KNOWN_BY_CLASS } from './dataService';
 // import { CANTRIPS_KNOWN_BY_CLASS } from '../data/cantrips';
 import {
     CharacterCreationData,
@@ -397,7 +397,7 @@ export const handleLevelUp = async (
     }
 
     if (updatedCharacter.spellcasting) {
-        const cantripsKnownAtNewLevel = (CANTRIPS_KNOWN_BY_CLASS as any)[classData.slug]?.[newLevel];
+        const cantripsKnownAtNewLevel = (CANTRIPS_KNOWN_BY_CLASS as Record<string, Record<string, number>>)[classData.slug]?.[newLevel];
         if (cantripsKnownAtNewLevel && cantripsKnownAtNewLevel > updatedCharacter.spellcasting.cantripsKnown.length) {
             // Open modal to choose cantrip instead of adding a placeholder
             setCantripModalState({

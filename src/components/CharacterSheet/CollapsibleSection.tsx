@@ -86,18 +86,11 @@ export const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
-    console.log('handleDrop fired on panel:', panelId);
     if (panelId && onDrop) {
       const draggedPanelId = e.dataTransfer.getData('text/plain');
-      console.log('Dragged panel:', draggedPanelId, 'Target panel:', panelId);
       if (draggedPanelId !== panelId) {
-        console.log('Calling onDrop with target:', panelId);
         onDrop(panelId);
-      } else {
-        console.log('Same panel, not dropping');
       }
-    } else {
-      console.log('Missing panelId or onDrop handler');
     }
   };
 

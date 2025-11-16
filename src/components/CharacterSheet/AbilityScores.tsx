@@ -1,5 +1,4 @@
 import React from 'react';
-import { Zap } from 'lucide-react';
 import { Character, AbilityName } from '../../types/dnd';
 import { AbilityScoreBlock } from './index';
 import { DiceRoll } from '../../services/diceService';
@@ -18,7 +17,7 @@ export const AbilityScores: React.FC<AbilityScoresProps> = ({
   character,
   setRollResult,
   onDiceRoll,
-  onToggleInspiration,
+  onToggleInspiration: _onToggleInspiration,
   layoutMode = 'modern',
 }) => {
   const abilities = Object.entries(character.abilities) as [AbilityName, { score: number; modifier: number }][];

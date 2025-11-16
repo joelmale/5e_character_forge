@@ -84,8 +84,8 @@ export function useSpellcasting({
     const updatedAbilities = { ...character.abilities };
     for (const ability of Object.keys(increases) as Ability[]) {
       const increase = increases[ability] || 0;
-      (updatedAbilities as any)[ability].score += increase;
-      (updatedAbilities as any)[ability].modifier = getModifier((updatedAbilities as any)[ability].score);
+      updatedAbilities[ability as keyof typeof updatedAbilities].score += increase;
+      updatedAbilities[ability as keyof typeof updatedAbilities].modifier = getModifier(updatedAbilities[ability as keyof typeof updatedAbilities].score);
     }
 
     const updatedCharacter = {

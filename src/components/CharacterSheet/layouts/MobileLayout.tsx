@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Shield, Sword, Dice6, Trophy, Zap, BookOpen, AlertTriangle, Coins, Sparkles, Package, Star, Activity, Dumbbell, ListChecks } from 'lucide-react';
 import { CharacterSheetProps } from '../../../types/components';
 import { Character } from '../../../types/dnd';
+import { DiceRoll } from '../../../services/diceService';
 import {
   CharacterHeader,
   CharacterStats,
@@ -11,14 +12,12 @@ import {
   AttacksAndActions,
   HitDice,
   ExperiencePoints,
-  AttunementSlots,
   Conditions,
   CoinManagement,
   CollapsibleSection,
   SpellcastingSection,
   EquipmentSection,
   FeaturesSection,
-  ActiveEquipmentPanel,
   LanguagesPanel
 } from '../index';
 import { getSpellsForClass } from '../../../services/dataService';
@@ -200,7 +199,7 @@ export const MobileLayout: React.FC<CharacterSheetProps> = ({
           <AttacksAndActions
             character={character}
             setRollResult={setRollResult}
-            onDiceRoll={onDiceRoll as any}
+            onDiceRoll={onDiceRoll as (roll: DiceRoll & { description: string; damageNotation?: string; damageType?: string }) => void}
           />
         )
       },
@@ -302,6 +301,7 @@ export const MobileLayout: React.FC<CharacterSheetProps> = ({
         content: (
           <EquipmentSection
             character={character}
+            onUpdateCharacter={onUpdateCharacter}
             onEquipArmor={onEquipArmor}
             onEquipWeapon={onEquipWeapon}
             onUnequipItem={onUnequipItem}
@@ -319,6 +319,7 @@ export const MobileLayout: React.FC<CharacterSheetProps> = ({
           <FeaturesSection
             character={character}
             onFeatureClick={onFeatureClick}
+            layoutMode="mobile"
           />
         )
       }
@@ -339,16 +340,6 @@ export const MobileLayout: React.FC<CharacterSheetProps> = ({
   return (
     <div className="p-4 md:p-8 bg-gray-900 text-gray-100 min-h-screen pb-24">
       <div className="max-w-4xl mx-auto space-y-3">
-        {/* Player Name Header */}
-        <div className="text-center py-4">
-          <h1 className="text-4xl font-serif font-bold text-red-400 drop-shadow-lg">
-            {character.name}
-          </h1>
-          <div className="text-lg text-gray-300 mt-1">
-            {character.race} {character.class} • Level {character.level}
-          </div>
-        </div>
-
         <CharacterHeader
           character={character}
           onClose={onClose}
@@ -405,7 +396,7 @@ export const MobileLayout: React.FC<CharacterSheetProps> = ({
               isCollapsed={collapsedSections[panelId] || (adjustMode && panelId !== 'coreStats' && panelId !== 'abilityScores')}
               onToggle={() => !adjustMode && toggleSection(panelId)}
               className={config.className}
-              {...((config as any).badge && { badge: (config as any).badge })}
+              {...(('badge' in config) && { badge: config.badge })}
               isAdjustMode={adjustMode}
               panelId={panelId}
               onDragStart={handleDragStart}
