@@ -1,4 +1,6 @@
-export const ABILITY_SCORES = ['STR', 'DEX', 'CON', 'INT', 'WIS', 'CHA'] as const;
+import gameConstantsData from '../data/gameConstants.json';
+
+export const ABILITY_SCORES = gameConstantsData.ABILITY_SCORES as readonly string[];
 export type Ability = typeof ABILITY_SCORES[number];
 
 export interface Alignment {
@@ -67,6 +69,7 @@ export interface Character {
   hitDice: {
     current: number;
     max: number;
+    dieType: number; // d6, d8, d10, d12, etc.
   };
   speed: number;
   initiative: number;
@@ -77,8 +80,13 @@ export interface Character {
   skills: {
     Acrobatics: Skill; AnimalHandling: Skill; Arcana: Skill; Athletics: Skill; Deception: Skill; History: Skill; Insight: Skill; Intimidation: Skill; Investigation: Skill; Medicine: Skill; Nature: Skill; Perception: Skill; Performance: Skill; Persuasion: Skill; Religion: Skill; SleightOfHand: Skill; Stealth: Skill; Survival: Skill;
   };
-  languages?: string[]; // Known languages
-  featuresAndTraits: {
+   languages?: string[]; // Known languages
+   proficiencies?: {
+     armor?: string[];
+     weapons?: string[];
+     tools?: string[];
+   };
+   featuresAndTraits: {
     personality: string;
     ideals: string;
     bonds: string;
@@ -112,10 +120,10 @@ export interface Character {
   };
 
   // Sprint 3: Character advancement
-  subclass?: string; // Subclass slug (e.g., "berserker")
+  subclass?: string | null; // Subclass slug (e.g., "berserker")
   experiencePoints?: number; // Current XP
   feats?: string[]; // Feat slugs (deprecated - use selectedFeats)
-  selectedFightingStyle?: string; // Fighting Style name (Fighter/Paladin/Ranger)
+  selectedFightingStyle?: string | null; // Fighting Style name (Fighter/Paladin/Ranger)
 
   // Sprint 5: Features, Subclasses, and Feats
   srdFeatures?: {
@@ -134,6 +142,18 @@ export interface Character {
   };
   equippedArmor?: string; // Equipment slug of equipped armor
   equippedWeapons?: string[]; // Equipment slugs of equipped weapons (primary, offhand, etc.)
+
+  // Combat state
+  temporaryHitPoints?: number;
+  deathSaves?: {
+    successes: number;
+    failures: number;
+  };
+  conditions?: string[];
+
+  // Metadata
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 // --- Intermediate Wizard Data Structure ---
@@ -233,6 +253,7 @@ export interface EquippedItem {
   equipmentSlug: string; // Reference to Equipment slug
   quantity: number;
   equipped: boolean; // Is this item currently equipped?
+  attuned?: boolean; // Is this magic item attuned? (requires attunement slot)
   notes?: string; // Player notes about the item
 }
 
@@ -307,8 +328,8 @@ export interface CharacterCreationData {
   startingInventory?: EquippedItem[];
 
   // Sprint 5: Subclass, Fighting Style, and Feats
-  subclassSlug?: string;
-  selectedFightingStyle?: string;
+  subclassSlug?: string | null;
+  selectedFightingStyle?: string | null;
   selectedFeats?: string[]; // Array of feat slugs
 
   // Language selection
@@ -325,6 +346,7 @@ export interface Race {
   slug: string;
   name: string;
   source: string;
+  speed?: number;
   ability_bonuses: Partial<Record<AbilityName, number>>;
   racial_traits: string[];
   description: string;
@@ -407,4 +429,16 @@ export interface AlignmentData {
   long_desc: string;   // Our detailed character descriptions
   category: string;
   examples: string[];
+}
+
+// Spell Learning Rules
+export interface SpellLearningRules {
+  type: 'prepared' | 'known' | 'spellbook' | 'none';
+  spellsKnown?: number[];          // Spells known by level (known casters)
+  spellsPrepared?: number[];        // Spells prepared by level (prepared casters)
+  spellbookCapacity?: number[];     // Spellbook capacity by level (wizards)
+  domainSpells?: string[];          // Cleric domain spells
+  circleSpells?: string[];          // Druid circle spells
+  magicalSecrets?: number[];        // Bard magical secrets by level
+  invocationsKnown?: number[];      // Warlock invocations by level
 }

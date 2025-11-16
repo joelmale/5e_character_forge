@@ -1,6 +1,7 @@
 import { LANGUAGES } from '../data/languages';
 import { getAllRaces, BACKGROUNDS, getModifier } from '../services/dataService';
 import { CharacterCreationData } from '../types/dnd';
+import racialLanguagesData from '../data/racialLanguages.json';
 
 export const calculateKnownLanguages = (data: CharacterCreationData): string[] => {
   const languages = new Set<string>();
@@ -34,21 +35,7 @@ export const getRacialLanguages = (raceSlug: string): string[] => {
 
   if (!race) return [];
 
-  // Map race names to their default languages
-  const racialLanguageMap: Record<string, string[]> = {
-    'dwarf': ['Dwarvish'],
-    'elf': ['Elvish'],
-    'gnome': ['Gnomish'],
-    'halfling': ['Halfling'],
-    'half-orc': ['Orc'],
-    'dragonborn': ['Draconic'],
-    'tiefling': ['Infernal'],
-    'aarakocra': ['Aarakocra'],
-    'gith': ['Gith'],
-    'thri-kreen': ['Thri-kreen']
-  };
-
-  return racialLanguageMap[raceSlug] || [];
+  return (racialLanguagesData.RACIAL_LANGUAGE_MAP as Record<string, string[]>)[raceSlug] || [];
 };
 
 export const getBackgroundLanguages = (backgroundName: string): string[] => {

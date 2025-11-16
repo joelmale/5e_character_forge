@@ -18,7 +18,14 @@
       "Bash(xargs:*)",
       "Bash(git checkout:*)",
       "Bash(python3:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(curl:*)",
+      "Bash(npm run dev:*)",
+      "Bash(rsync:*)",
+      "Bash(mkdir:*)",
+      "WebFetch(domain:5e-spellbook.app)",
+      "WebFetch(domain:github.com)",
+      "WebSearch"
     ],
     "deny": [],
     "ask": [],

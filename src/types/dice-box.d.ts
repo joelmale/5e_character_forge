@@ -52,8 +52,58 @@ declare module '@3d-dice/dice-box' {
 
     onRollComplete?: (results: DiceRollResult[]) => void;
 
-    hide(): void;
+    hide(): DiceBox;
 
-    show(): void;
+    show(): DiceBox;
+  }
+}
+
+declare module '@3d-dice/dice-parser-interface' {
+  export interface ParsedRoll {
+    notation: string;
+    dice: Array<{
+      qty: number;
+      sides: number;
+      modifier?: number;
+    }>;
+  }
+
+  export interface RerollData {
+    notation: string;
+    condition: string;
+  }
+
+  export interface FinalResult {
+    total: number;
+    dice: DiceRollResult[];
+    modifier?: number;
+  }
+
+  export default class DiceParser {
+    parseNotation(notation: string): ParsedRoll;
+
+    handleRerolls(results: DiceRollResult[]): RerollData[];
+
+    parseFinalResults(results: DiceRollResult[]): FinalResult;
+  }
+}
+
+declare module '@3d-dice/dice-ui/src/displayResults' {
+  export interface DisplayResult {
+    total: number;
+    dice: Array<{
+      value: number;
+      sides: number;
+      success?: boolean;
+      critical?: boolean;
+    }>;
+  }
+
+  export default class DisplayResults {
+    constructor(container: string);
+
+    showResults(results: DisplayResult | DisplayResult[]): void;
+
+    clear(): void;
   }
 }

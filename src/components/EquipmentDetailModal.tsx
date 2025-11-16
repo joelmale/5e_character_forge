@@ -1,61 +1,38 @@
 import React from 'react';
 import { X, Sword, Shield, Package } from 'lucide-react';
-
-interface Equipment {
-  slug: string;
-  name: string;
-  year: number;
-  equipment_category: string;
-  cost: {
-    quantity: number;
-    unit: 'cp' | 'sp' | 'gp' | 'pp';
-  };
-  weight: number;
-  description?: string;
-  weapon_category?: 'Simple' | 'Martial';
-  weapon_range?: 'Melee' | 'Ranged';
-  damage?: {
-    damage_dice: string;
-    damage_type: string;
-  };
-  range?: {
-    normal: number;
-    long?: number;
-  };
-  properties?: string[];
-  two_handed_damage?: {
-    damage_dice: string;
-    damage_type: string;
-  };
-  mastery?: string;
-  armor_category?: 'Light' | 'Medium' | 'Heavy' | 'Shield';
-  armor_class?: {
-    base: number;
-    dex_bonus: boolean;
-    max_bonus?: number;
-  };
-  str_minimum?: number;
-  stealth_disadvantage?: boolean;
-  don_time?: string;
-  doff_time?: string;
-  tool_category?: string;
-  gear_category?: string;
-  contents?: Array<{ item_index: string; item_name: string; quantity: number }>;
-  capacity?: string;
-}
+import { loadEquipment } from '../services/dataService';
+import { Equipment } from '../types/dnd';
 
 interface EquipmentDetailModalProps {
-  equipment: Equipment | null;
+  equipment: Equipment | { slug: string } | null;
   onClose: () => void;
 }
 
 export const EquipmentDetailModal: React.FC<EquipmentDetailModalProps> = ({ equipment, onClose }) => {
-  if (!equipment) {
+  // Handle case where equipment is passed as a slug
+  const equipmentData = React.useMemo(() => {
+    if (!equipment) return null;
+
+    // If it's already an Equipment object, use it directly
+    if ('name' in equipment) {
+      return equipment;
+    }
+
+    // If it's an object with a slug, look up the equipment
+    if ('slug' in equipment) {
+      const allEquipment = loadEquipment();
+      return allEquipment.find(eq => eq.slug === equipment.slug) || null;
+    }
+
+    return null;
+  }, [equipment]);
+
+  if (!equipmentData) {
     return null;
   }
 
-  const isWeapon = equipment.weapon_category;
-  const isArmor = equipment.armor_category;
+  const isWeapon = equipmentData.weapon_category;
+  const isArmor = equipmentData.armor_category;
   const isGear = !isWeapon && !isArmor;
 
   return (
@@ -74,11 +51,11 @@ export const EquipmentDetailModal: React.FC<EquipmentDetailModalProps> = ({ equi
               {isWeapon && <Sword className="w-6 h-6 text-red-400" />}
               {isArmor && <Shield className="w-6 h-6 text-blue-400" />}
               {isGear && <Package className="w-6 h-6 text-yellow-400" />}
-              <h3 className="text-2xl font-bold text-orange-400">{equipment.name}</h3>
-            </div>
-            <div className="flex items-center gap-3 text-sm text-gray-400">
-              <span className="bg-gray-700 px-2 py-1 rounded">{equipment.equipment_category}</span>
-              <span className="bg-gray-700 px-2 py-1 rounded">SRD {equipment.year}</span>
+               <h3 className="text-2xl font-bold text-orange-400">{equipmentData.name}</h3>
+             </div>
+             <div className="flex items-center gap-3 text-sm text-gray-400">
+               <span className="bg-gray-700 px-2 py-1 rounded">{equipmentData.equipment_category}</span>
+               <span className="bg-gray-700 px-2 py-1 rounded">SRD {equipmentData.year}</span>
             </div>
           </div>
           <button
@@ -92,10 +69,10 @@ export const EquipmentDetailModal: React.FC<EquipmentDetailModalProps> = ({ equi
         {/* Content */}
         <div className="p-6 space-y-6">
           {/* Description */}
-          {equipment.description && (
-            <div>
-              <h4 className="text-lg font-bold text-orange-300 mb-2">Description</h4>
-              <p className="text-gray-300 leading-relaxed whitespace-pre-wrap">{equipment.description}</p>
+          {equipmentData.description && (
+            <div className="mb-6">
+              <h4 className="text-lg font-bold text-orange-400 mb-2">Description</h4>
+              <p className="text-gray-300 leading-relaxed whitespace-pre-wrap">{equipmentData.description}</p>
             </div>
           )}
 
@@ -104,12 +81,12 @@ export const EquipmentDetailModal: React.FC<EquipmentDetailModalProps> = ({ equi
             <div className="bg-gray-700/50 p-3 rounded">
               <div className="text-xs text-gray-400 mb-1">Cost</div>
               <div className="text-lg font-bold text-yellow-300">
-                {equipment.cost.quantity} {equipment.cost.unit}
+                {equipmentData.cost?.quantity} {equipmentData.cost?.unit}
               </div>
             </div>
             <div className="bg-gray-700/50 p-3 rounded">
               <div className="text-xs text-gray-400 mb-1">Weight</div>
-              <div className="text-lg font-bold text-white">{equipment.weight} lb</div>
+              <div className="text-lg font-bold text-white">{equipmentData.weight} lb</div>
             </div>
           </div>
 
@@ -122,43 +99,43 @@ export const EquipmentDetailModal: React.FC<EquipmentDetailModalProps> = ({ equi
                   <div className="bg-gray-700/50 p-3 rounded">
                     <div className="text-xs text-gray-400 mb-1">Category</div>
                     <div className="text-sm font-bold text-white">
-                      {equipment.weapon_category} {equipment.weapon_range}
+                      {equipmentData.weapon_category} {equipmentData.weapon_range}
                     </div>
                   </div>
-                  {equipment.damage && (
+                  {equipmentData.damage && (
                     <div className="bg-gray-700/50 p-3 rounded">
                       <div className="text-xs text-gray-400 mb-1">Damage</div>
                       <div className="text-sm font-bold text-green-300">
-                        {equipment.damage.damage_dice} {equipment.damage.damage_type}
+                        {equipmentData.damage.damage_dice} {equipmentData.damage.damage_type}
                       </div>
                     </div>
                   )}
                 </div>
 
-                {equipment.two_handed_damage && (
-                  <div className="bg-blue-900/30 p-3 rounded border border-blue-700">
-                    <div className="text-xs text-blue-400 mb-1">Versatile (Two-Handed)</div>
-                    <div className="text-sm font-bold text-blue-300">
-                      {equipment.two_handed_damage.damage_dice} {equipment.two_handed_damage.damage_type}
+                {equipmentData.two_handed_damage && (
+                  <div className="bg-gray-700/50 p-3 rounded">
+                    <div className="text-xs text-gray-400 mb-1">Two-Handed Damage</div>
+                    <div className="text-sm font-bold text-green-300">
+                      {equipmentData.two_handed_damage.damage_dice} {equipmentData.two_handed_damage.damage_type}
                     </div>
                   </div>
                 )}
 
-                {equipment.range && (
+                {equipmentData.range && (
                   <div className="bg-gray-700/50 p-3 rounded">
                     <div className="text-xs text-gray-400 mb-1">Range</div>
-                    <div className="text-sm font-bold text-white">
-                      {equipment.range.normal} ft{equipment.range.long && ` / ${equipment.range.long} ft`}
+                    <div className="text-sm font-bold text-blue-300">
+                      {equipmentData.range.normal} ft{equipmentData.range.long && ` / ${equipmentData.range.long} ft`}
                     </div>
                   </div>
                 )}
 
-                {equipment.properties && equipment.properties.length > 0 && (
+                {equipmentData.properties && equipmentData.properties.length > 0 && (
                   <div className="bg-gray-700/50 p-3 rounded">
                     <div className="text-xs text-gray-400 mb-1">Properties</div>
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      {equipment.properties.map((prop, idx) => (
-                        <span key={idx} className="bg-gray-600 px-2 py-1 rounded text-xs text-gray-200">
+                    <div className="flex flex-wrap gap-1">
+                      {equipmentData.properties.map((prop: string, idx: number) => (
+                        <span key={idx} className="text-xs bg-blue-600/70 text-white px-2 py-1 rounded">
                           {prop}
                         </span>
                       ))}
@@ -166,10 +143,10 @@ export const EquipmentDetailModal: React.FC<EquipmentDetailModalProps> = ({ equi
                   </div>
                 )}
 
-                {equipment.mastery && (
-                  <div className="bg-purple-900/30 p-3 rounded border border-purple-700">
-                    <div className="text-xs text-purple-400 mb-1">Weapon Mastery (2024)</div>
-                    <div className="text-sm font-bold text-purple-300">{equipment.mastery}</div>
+                {equipmentData.mastery && (
+                  <div className="bg-gray-700/50 p-3 rounded">
+                    <div className="text-xs text-gray-400 mb-1">Weapon Mastery</div>
+                    <div className="text-sm font-bold text-purple-300">{equipmentData.mastery}</div>
                   </div>
                 )}
               </div>
@@ -184,47 +161,46 @@ export const EquipmentDetailModal: React.FC<EquipmentDetailModalProps> = ({ equi
                 <div className="grid grid-cols-2 gap-4">
                   <div className="bg-gray-700/50 p-3 rounded">
                     <div className="text-xs text-gray-400 mb-1">Category</div>
-                    <div className="text-sm font-bold text-white">{equipment.armor_category} Armor</div>
+                    <div className="text-sm font-bold text-white">{equipmentData.armor_category} Armor</div>
                   </div>
-                  {equipment.armor_class && (
+                  {equipmentData.armor_class && (
                     <div className="bg-gray-700/50 p-3 rounded">
                       <div className="text-xs text-gray-400 mb-1">Armor Class</div>
-                      <div className="text-sm font-bold text-blue-300">
-                        {equipment.armor_class.base}
-                        {equipment.armor_class.dex_bonus && (
-                          <span className="text-xs text-gray-400">
-                            {' '}+ DEX {equipment.armor_class.max_bonus && `(max +${equipment.armor_class.max_bonus})`}
-                          </span>
+                      <div className="text-sm font-bold text-green-300">
+                        {equipmentData.armor_class.base}
+                        {equipmentData.armor_class.dex_bonus && (
+                          <span> + DEX{equipmentData.armor_class.max_bonus && ` (max +${equipmentData.armor_class.max_bonus})`}</span>
                         )}
                       </div>
                     </div>
                   )}
                 </div>
 
-                {equipment.str_minimum && equipment.str_minimum > 0 && (
+                {equipmentData.str_minimum && equipmentData.str_minimum > 0 && (
                   <div className="bg-yellow-900/30 p-3 rounded border border-yellow-700">
                     <div className="text-xs text-yellow-400 mb-1">Strength Requirement</div>
-                    <div className="text-sm font-bold text-yellow-300">STR {equipment.str_minimum}</div>
+                    <div className="text-sm font-bold text-yellow-300">STR {equipmentData.str_minimum}</div>
                   </div>
                 )}
 
-                {equipment.stealth_disadvantage && (
+                {equipmentData.stealth_disadvantage && (
                   <div className="bg-red-900/30 p-3 rounded border border-red-700">
                     <div className="text-sm font-bold text-red-300">Stealth Disadvantage</div>
                     <div className="text-xs text-gray-400">This armor imposes disadvantage on Stealth checks</div>
                   </div>
                 )}
 
-                {equipment.don_time && (
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-gray-700/50 p-3 rounded">
-                      <div className="text-xs text-gray-400 mb-1">Don Time</div>
-                      <div className="text-sm font-bold text-white">{equipment.don_time}</div>
-                    </div>
-                    <div className="bg-gray-700/50 p-3 rounded">
-                      <div className="text-xs text-gray-400 mb-1">Doff Time</div>
-                      <div className="text-sm font-bold text-white">{equipment.doff_time}</div>
-                    </div>
+                {equipmentData.don_time && (
+                  <div className="bg-blue-900/30 p-3 rounded border border-blue-700">
+                    <div className="text-xs text-blue-400 mb-1">Don Time</div>
+                    <div className="text-sm font-bold text-blue-300">{equipmentData.don_time}</div>
+                  </div>
+                )}
+
+                {equipmentData.doff_time && (
+                  <div className="bg-blue-900/30 p-3 rounded border border-blue-700">
+                    <div className="text-xs text-blue-400 mb-1">Doff Time</div>
+                    <div className="text-sm font-bold text-blue-300">{equipmentData.doff_time}</div>
                   </div>
                 )}
               </div>
@@ -232,25 +208,23 @@ export const EquipmentDetailModal: React.FC<EquipmentDetailModalProps> = ({ equi
           )}
 
           {/* Container Contents */}
-          {equipment.contents && equipment.contents.length > 0 && (
-            <div>
-              <h4 className="text-lg font-bold text-yellow-300 mb-3">Contains</h4>
-              <div className="bg-gray-700/50 p-3 rounded">
-                <ul className="space-y-1 text-sm">
-                  {equipment.contents.map((item, idx) => (
-                    <li key={idx} className="text-gray-300">
-                      <span className="font-mono text-yellow-300">×{item.quantity}</span> {item.item_name}
-                    </li>
-                  ))}
-                </ul>
+          {equipmentData.contents && equipmentData.contents.length > 0 && (
+            <div className="bg-purple-900/30 p-3 rounded border border-purple-700">
+              <div className="text-xs text-purple-400 mb-2">Contents</div>
+              <div className="space-y-1">
+                {equipmentData.contents.map((item: { item_name: string; quantity: number }, idx: number) => (
+                  <div key={idx} className="text-sm text-gray-300">
+                    {item.item_name} (×{item.quantity})
+                  </div>
+                ))}
               </div>
             </div>
           )}
 
-          {equipment.capacity && (
-            <div className="bg-gray-700/50 p-3 rounded">
-              <div className="text-xs text-gray-400 mb-1">Capacity</div>
-              <div className="text-sm font-bold text-white">{equipment.capacity}</div>
+          {equipmentData.capacity && (
+            <div className="bg-indigo-900/30 p-3 rounded border border-indigo-700">
+              <div className="text-xs text-indigo-400 mb-1">Capacity</div>
+              <div className="text-sm font-bold text-indigo-300">{equipmentData.capacity}</div>
             </div>
           )}
         </div>

@@ -1,4 +1,7 @@
+/* eslint-disable no-console */
 // Dice sound effects manager for 5e Character Forge
+
+import diceSoundsData from '../data/diceSounds.json';
 
 type SoundKey = '1-die' | '2-dice' | 'many-dice';
 
@@ -88,7 +91,7 @@ class DiceSoundManager {
     const now = ctx.currentTime;
 
     // C5, E5, G5, C6 - Major chord ascending arpeggio
-    const notes = [523.25, 659.25, 783.99, 1046.5];
+    const notes = diceSoundsData.successNotes;
 
     notes.forEach((freq, i) => {
       this.playTone(ctx, freq, now + i * 0.1, 0.3, 'sine');
@@ -109,7 +112,7 @@ class DiceSoundManager {
     const now = ctx.currentTime;
 
     // G4, E4, D4, B3 - Descending sad tones
-    const notes = [392.0, 329.63, 293.66, 246.94];
+    const notes = diceSoundsData.failureNotes;
 
     notes.forEach((freq, i) => {
       this.playTone(ctx, freq, now + i * 0.15, 0.4, 'triangle');

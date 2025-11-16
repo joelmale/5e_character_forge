@@ -1,24 +1,12 @@
 // Spell management utilities for character creation and campaign play
 import { SpellcastingType, Class, Character, SpellSelectionData } from '../types/dnd';
-import { getLeveledSpellsByClass } from '../services/dataService';
+import { getCantripsByClass, getLeveledSpellsByClass, loadClasses, AppSpell } from '../services/dataService';
+import { SPELL_SLOT_TABLES } from '../data/spellSlots';
+import { SPELL_LEARNING_RULES } from '../data/spellLearning';
+import spellcastingTypesData from '../data/spellcastingTypes.json';
 
 // Map class slugs to spellcasting types
-const SPELLCASTING_TYPE_MAP: Record<string, SpellcastingType> = {
-  // Known Casters
-  'bard': 'known',
-  'sorcerer': 'known',
-  'warlock': 'known',
-  'ranger': 'known',
-
-  // Prepared Casters
-  'cleric': 'prepared',
-  'druid': 'prepared',
-  'paladin': 'prepared',
-  'artificer': 'prepared',
-
-  // Wizard (Special)
-  'wizard': 'wizard'
-};
+const SPELLCASTING_TYPE_MAP: Record<string, SpellcastingType> = spellcastingTypesData.SPELLCASTING_TYPE_MAP as Record<string, SpellcastingType>;
 
 /**
  * Get the spellcasting type for a given class
@@ -115,6 +103,108 @@ export function validateSpellSelection(
 }
 
 /**
+ * Check if a class has spellcasting available at the current level
+ */
+export function hasSpellcastingAtLevel(classSlug: string): boolean {
+  const allClasses = loadClasses();
+  const selectedClass = allClasses.find((c: Class) => c.slug === classSlug);
+
+  if (!selectedClass || !selectedClass.spellcasting) {
+    return false;
+  }
+
+  // Check if they have any spells available at this level
+  return selectedClass.spellcasting.cantripsKnown > 0 ||
+         selectedClass.spellcasting.spellsKnownOrPrepared > 0;
+}
+
+/**
+ * Get available spells for character creation
+ */
+export function getAvailableSpellsForCreation(classSlug: string, level: number) {
+  return {
+    cantrips: getCantripsByClass(classSlug),
+    spells: getLeveledSpellsByClass(classSlug, level)
+  };
+}
+
+/**
+ * Check if spell selections are complete for character creation
+ */
+export function areSpellSelectionsComplete(
+  spellSelection: SpellSelectionData,
+  classSlug: string,
+  level: number,
+  abilities: Record<string, number>
+): boolean {
+  const allClasses = loadClasses();
+  const selectedClass = allClasses.find(c => c.slug === classSlug);
+
+  if (!selectedClass?.spellcasting) {
+    return true; // Non-spellcasters are always "complete"
+  }
+
+  const spellcasting = selectedClass.spellcasting;
+  const spellcastingType = getSpellcastingType(classSlug);
+
+  // Check cantrips
+  const cantripsComplete = spellSelection.selectedCantrips.length === spellcasting.cantripsKnown;
+
+  let spellsComplete = false;
+  if (spellcastingType === 'known') {
+    spellsComplete = (spellSelection.knownSpells?.length || 0) === spellcasting.spellsKnownOrPrepared;
+  } else if (spellcastingType === 'prepared') {
+    spellsComplete = (spellSelection.preparedSpells?.length || 0) === spellcasting.spellsKnownOrPrepared;
+  } else if (spellcastingType === 'wizard') {
+    const spellbookComplete = (spellSelection.spellbook?.length || 0) === 6;
+    const maxPrepared = getMaxPreparedSpells(abilities, 'INT', level);
+    const dailyComplete = (spellSelection.dailyPrepared?.length || 0) === maxPrepared;
+    spellsComplete = spellbookComplete && dailyComplete;
+  }
+
+  return cantripsComplete && spellsComplete;
+}
+
+/**
+ * Clean up invalid spell selections when character data changes
+ */
+export function cleanupInvalidSpellSelections(
+  spellSelection: SpellSelectionData,
+  classSlug: string,
+  level: number,
+  abilities: Record<string, number>
+): SpellSelectionData {
+  const allClasses = loadClasses();
+  const selectedClass = allClasses.find(c => c.slug === classSlug);
+
+  if (!selectedClass?.spellcasting) {
+    return spellSelection;
+  }
+
+  const spellcasting = selectedClass.spellcasting;
+  const spellcastingType = getSpellcastingType(classSlug);
+  const updatedSelection = { ...spellSelection };
+
+  // Validate cantrips
+  updatedSelection.selectedCantrips = spellSelection.selectedCantrips.slice(0, spellcasting.cantripsKnown);
+
+  // Validate based on spellcasting type
+  if (spellcastingType === 'known') {
+    updatedSelection.knownSpells = (spellSelection.knownSpells || []).slice(0, spellcasting.spellsKnownOrPrepared);
+  } else if (spellcastingType === 'prepared') {
+    updatedSelection.preparedSpells = (spellSelection.preparedSpells || []).slice(0, spellcasting.spellsKnownOrPrepared);
+  } else if (spellcastingType === 'wizard') {
+    // Validate spellbook (6 spells)
+    updatedSelection.spellbook = (spellSelection.spellbook || []).slice(0, 6);
+    // Validate daily preparation
+    const maxPrepared = getMaxPreparedSpells(abilities, 'INT', level);
+    updatedSelection.dailyPrepared = (spellSelection.dailyPrepared || []).slice(0, maxPrepared);
+  }
+
+  return updatedSelection;
+}
+
+/**
  * Convert character creation spell selection to campaign character spellcasting data
  */
 export function migrateSpellSelectionToCharacter(
@@ -130,18 +220,24 @@ export function migrateSpellSelectionToCharacter(
   }
 
   const spellcasting = classData.spellcasting;
+  const slotRules = SPELL_SLOT_TABLES[classData.slug];
+  const learningRules = SPELL_LEARNING_RULES[classData.slug];
+
+  // Get correct spell slots for the character's level
+  const spellSlots = slotRules?.byLevel?.[characterLevel] || spellcasting.spellSlots;
+
   const baseSpellcasting = {
     ability: spellcasting.ability,
     spellSaveDC: calculateSpellSaveDC(abilities, spellcasting.ability),
     spellAttackBonus: calculateSpellAttackBonus(abilities, spellcasting.ability),
     cantripsKnown: spellSelection.selectedCantrips,
-    spellSlots: [...spellcasting.spellSlots],
-    usedSpellSlots: new Array(spellcasting.spellSlots.length).fill(0),
+    spellSlots: [...spellSlots],
+    usedSpellSlots: new Array(spellSlots.length).fill(0),
     spellcastingType,
     cantripChoicesByLevel: { [characterLevel]: spellSelection.selectedCantrips.join(',') }
   };
 
-  switch (spellcastingType) {
+  switch (learningRules?.type) {
     case 'known':
       return {
         ...baseSpellcasting,
@@ -151,11 +247,11 @@ export function migrateSpellSelectionToCharacter(
     case 'prepared':
       return {
         ...baseSpellcasting,
-        spellsKnown: getLeveledSpellsByClass(classData.slug, characterLevel).map((s: any) => s.slug),
+        spellsKnown: getLeveledSpellsByClass(classData.slug, characterLevel).map((s: AppSpell) => s.slug),
         preparedSpells: spellSelection.preparedSpells || spellSelection.selectedSpells || []
       };
 
-    case 'wizard':
+    case 'spellbook':
       return {
         ...baseSpellcasting,
         spellbook: spellSelection.spellbook || spellSelection.selectedSpells || [],

@@ -1,10 +1,7 @@
 // Test setup file for Vitest
-import { expect, afterEach } from 'vitest';
+import { afterEach } from 'vitest';
 import { cleanup } from '@testing-library/react';
-import * as matchers from '@testing-library/jest-dom/matchers';
-
-// Extend expect with jest-dom matchers
-expect.extend(matchers);
+import '@testing-library/jest-dom';
 
 // Cleanup after each test
 afterEach(() => {
@@ -27,14 +24,14 @@ Object.defineProperty(window, 'matchMedia', {
 });
 
 // Mock ResizeObserver
-(globalThis as any).ResizeObserver = class ResizeObserver {
+(globalThis as unknown as { ResizeObserver: new () => unknown }).ResizeObserver = class {
   observe() {}
   unobserve() {}
   disconnect() {}
 };
 
 // Mock IntersectionObserver
-(globalThis as any).IntersectionObserver = class IntersectionObserver {
+(globalThis as unknown as { IntersectionObserver: new () => unknown }).IntersectionObserver = class {
   observe() {}
   unobserve() {}
   disconnect() {}
