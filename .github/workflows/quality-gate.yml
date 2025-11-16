@@ -104,7 +104,7 @@ jobs:
       run: npm audit --audit-level moderate
 
     - name: Run Super Linter
-      uses: github/super-linter/slim@v5
+      uses: github/super-linter/slim@v7
       env:
         DEFAULT_BRANCH: master
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
