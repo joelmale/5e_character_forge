@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Dice6 } from 'lucide-react';
 import { AbilityName } from '../../types/dnd';
-import { createAbilityRoll, createAdvantageRoll, createDisadvantageRoll } from '../../services/diceService';
+import { createAbilityRoll, createAdvantageRoll, createDisadvantageRoll, DiceRoll } from '../../services/diceService';
 import { formatModifier } from '../../utils/formatters';
 import type { LayoutMode } from './AbilityScores';
 
@@ -13,7 +13,7 @@ interface AbilityScoreBlockProps {
     value: number | null;
     details?: Array<{ value: number; kept: boolean; critical?: 'success' | 'failure' }>
   }) => void;
-  onDiceRoll: (roll: any) => void;
+  onDiceRoll: (roll: DiceRoll) => void;
   layoutMode?: LayoutMode;
 }
 
@@ -73,7 +73,7 @@ export const AbilityScoreBlock: React.FC<AbilityScoreBlockProps> = ({
   };
 
   // Classic layout: Large circular design
-  if (layoutMode === 'classic') {
+  if (layoutMode === 'classic-dnd') {
     return (
       <div className="relative">
           <button
@@ -149,27 +149,43 @@ export const AbilityScoreBlock: React.FC<AbilityScoreBlockProps> = ({
     );
   }
 
-  // Modern layout: Compact rectangular design
+  // Modern layout: Circular design with overlapping modifier badge
   return (
-    <div className="relative">
+    <div className="relative flex flex-col items-center">
       <button
         onClick={() => handleRoll()}
         onContextMenu={(e) => {
           e.preventDefault();
           setShowMenu(!showMenu);
         }}
-        className="flex flex-col items-center p-2 bg-gray-700 hover:bg-red-700/70 rounded-lg transition-colors cursor-pointer relative"
+        className="flex flex-col items-center group cursor-pointer relative"
         title={`Roll ${name} check (${rollType}) - Right-click for options`}
       >
-        <div className="flex items-center gap-1 mb-1">
-          <Dice6 className="w-4 h-4 text-red-500" />
+        {/* Ability name */}
+        <span className="text-xs font-bold text-gray-400 uppercase mb-1">{name}</span>
+
+        {/* Circular ability score */}
+        <div className="relative w-16 h-16">
+          {/* Outer circle */}
+          <div className="absolute inset-0 rounded-full border-4 border-gray-600 bg-gray-800 group-hover:border-red-500 group-hover:bg-red-900/30 transition-all" />
+
+          {/* Score */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <span className="text-2xl font-bold text-white">{ability.score}</span>
+          </div>
+
+          {/* Roll indicator */}
           {getRollIcon() && (
-            <span className="text-xs font-bold text-green-400">{getRollIcon()}</span>
+            <div className="absolute -top-1 -right-1 w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
+              <span className="text-xs font-bold text-gray-900">{getRollIcon()}</span>
+            </div>
           )}
+
+          {/* Modifier badge overlapping bottom */}
+          <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 px-2 py-1 bg-yellow-600 rounded-full border-2 border-gray-800 text-xs font-bold text-white min-w-8 text-center">
+            {formatModifier(ability.modifier)}
+          </div>
         </div>
-        <span className="text-xs font-semibold text-gray-400">{name}</span>
-        <div className="text-xl font-extrabold text-yellow-300">{ability.score}</div>
-        <div className="text-xl font-extrabold text-yellow-300">{formatModifier(ability.modifier)}</div>
       </button>
 
       {showMenu && (

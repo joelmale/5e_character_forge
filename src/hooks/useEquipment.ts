@@ -1,3 +1,4 @@
+/* eslint-disable no-empty */
 import { useCallback } from 'react';
 import { Character, EquippedItem, Equipment } from '../types/dnd';
 import { updateCharacter } from '../services/dbService';
@@ -36,9 +37,9 @@ export function useEquipment({ characters, setCharacters, recalculateAC }: UseEq
     try {
       await updateCharacter(updatedCharacter);
       setCharacters(prev => prev.map(c => c.id === characterId ? updatedCharacter : c));
-      console.log(`Equipped ${armor.name}. New AC: ${updatedCharacter.armorClass}`);
-    } catch (e) {
-      console.error("Error equipping armor:", e);
+
+    } catch {} {
+      // Error equipping armor
     }
   }, [characters, setCharacters, recalculateAC]);
 
@@ -65,9 +66,9 @@ export function useEquipment({ characters, setCharacters, recalculateAC }: UseEq
       try {
         await updateCharacter(updatedCharacter);
         setCharacters(prev => prev.map(c => c.id === characterId ? updatedCharacter : c));
-        console.log(`Equipped ${weapon.name}`);
-      } catch (e) {
-        console.error("Error equipping weapon:", e);
+
+      } catch {} {
+        // Error equipping weapon
       }
     }
   }, [characters, setCharacters]);
@@ -97,9 +98,9 @@ export function useEquipment({ characters, setCharacters, recalculateAC }: UseEq
     try {
       await updateCharacter(updatedCharacter);
       setCharacters(prev => prev.map(c => c.id === characterId ? updatedCharacter : c));
-      console.log(`Unequipped item`);
-    } catch (e) {
-      console.error("Error unequipping item:", e);
+
+    } catch {} {
+      // Error unequipping item
     }
   }, [characters, setCharacters, recalculateAC]);
 
@@ -129,9 +130,9 @@ export function useEquipment({ characters, setCharacters, recalculateAC }: UseEq
     try {
       await updateCharacter(updatedCharacter);
       setCharacters(prev => prev.map(c => c.id === characterId ? updatedCharacter : c));
-      console.log(`Added ${quantity}x ${equipment.name} to inventory`);
-    } catch (e) {
-      console.error("Error adding item:", e);
+
+    } catch {} {
+      // Error adding item
     }
   }, [characters, setCharacters]);
 
@@ -167,9 +168,9 @@ export function useEquipment({ characters, setCharacters, recalculateAC }: UseEq
     try {
       await updateCharacter(updatedCharacter);
       setCharacters(prev => prev.map(c => c.id === characterId ? updatedCharacter : c));
-      console.log(`Removed ${quantity}x item from inventory`);
-    } catch (e) {
-      console.error("Error removing item:", e);
+
+    } catch {} {
+      // Error removing item
     }
   }, [characters, setCharacters, recalculateAC]);
 

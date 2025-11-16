@@ -8,8 +8,7 @@ import {
   CornerStyle,
   EdgeStyle,
   OrnamentStyle,
-  FramePreset,
-  SpecialShape
+  FramePreset
 } from './BorderElements';
 
 // ============================================

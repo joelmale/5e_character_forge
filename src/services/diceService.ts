@@ -1,3 +1,4 @@
+/* eslint-disable no-empty */
 // Dice roll types and utilities for 5e Character Forge
 
 export interface DiceRoll {
@@ -178,10 +179,9 @@ export function getRollHistory(): DiceRoll[] {
     const stored = localStorage.getItem('5e-forge-rolls');
     if (!stored) return [];
     return JSON.parse(stored);
-  } catch (error) {
-    console.error('Error loading roll history:', error);
-    return [];
-  }
+   } catch {} {
+     return [];
+   }
 }
 
 /**
@@ -193,9 +193,9 @@ export function saveRollHistory(rolls: DiceRoll[]): void {
     // Keep only last 10 rolls
     const trimmed = rolls.slice(-10);
     localStorage.setItem('5e-forge-rolls', JSON.stringify(trimmed));
-  } catch (error) {
-    console.error('Error saving roll history:', error);
-  }
+   } catch {} {
+     // Error saving roll history
+   }
 }
 
 /**

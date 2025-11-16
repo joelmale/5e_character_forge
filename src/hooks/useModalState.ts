@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { Equipment } from '../types/dnd';
 
 export interface ModalState {
   isOpen: boolean;
@@ -8,7 +9,7 @@ export interface ModalState {
 
 export function useModalState() {
   const [featureModal, setFeatureModal] = useState<{name: string, description: string, source?: string} | null>(null);
-  const [equipmentModal, setEquipmentModal] = useState<any>(null);
+  const [equipmentModal, setEquipmentModal] = useState<Equipment | { slug: string } | null>(null);
   const [cantripModalState, setCantripModalState] = useState<ModalState>({ isOpen: false });
   const [subclassModalState, setSubclassModalState] = useState<ModalState>({ isOpen: false });
   const [asiModalState, setAsiModalState] = useState<ModalState>({ isOpen: false });

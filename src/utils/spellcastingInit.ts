@@ -1,7 +1,7 @@
-import { Character } from '../types/dnd';
+import { Character, SpellLearningRules } from '../types/dnd';
 import { SPELL_SLOT_TABLES } from '../data/spellSlots';
 import { SPELL_LEARNING_RULES } from '../data/spellLearning';
-import { getCantripsByClass, getLeveledSpellsByClass } from '../services/dataService';
+import { getCantripsByClass, getLeveledSpellsByClass, AppSpell } from '../services/dataService';
 import { calculateSpellSaveDC, calculateSpellAttackBonus } from './spellUtils';
 
 function getSpellcastingAbility(classSlug: string): 'INT' | 'WIS' | 'CHA' {
@@ -53,8 +53,8 @@ function createPreparedCaster(
   abilities: Record<string, number>
 ): Character['spellcasting'] {
 
-  const cantrips = getCantripsByClass(classSlug).map((s: any) => s.slug);
-  const availableSpells = getLeveledSpellsByClass(classSlug, level).map((s: any) => s.slug);
+  const cantrips = getCantripsByClass(classSlug).map((s: AppSpell) => s.slug);
+  const availableSpells = getLeveledSpellsByClass(classSlug, level).map((s: AppSpell) => s.slug);
   const ability = getSpellcastingAbility(classSlug);
 
   return {
@@ -76,12 +76,12 @@ function createKnownCaster(
   level: number,
   spellSlots: number[],
   abilities: Record<string, number>,
-  learningRules: any
+  learningRules: SpellLearningRules
 ): Character['spellcasting'] {
 
-  const cantrips = getCantripsByClass(classSlug).map((s: any) => s.slug);
+  const cantrips = getCantripsByClass(classSlug).map((s: AppSpell) => s.slug);
   const spellsKnownLimit = learningRules.spellsKnown?.[level - 1] || 0;
-  const availableSpells = getLeveledSpellsByClass(classSlug, level).slice(0, spellsKnownLimit).map((s: any) => s.slug);
+  const availableSpells = getLeveledSpellsByClass(classSlug, level).slice(0, spellsKnownLimit).map((s: AppSpell) => s.slug);
   const ability = getSpellcastingAbility(classSlug);
 
   return {
@@ -104,7 +104,7 @@ function createSpellbookCaster(
   abilities: Record<string, number>
 ): Character['spellcasting'] {
 
-  const cantrips = getCantripsByClass(classSlug).map((s: any) => s.slug);
+  const cantrips = getCantripsByClass(classSlug).map((s: AppSpell) => s.slug);
   const ability = getSpellcastingAbility(classSlug);
 
   return {
@@ -136,19 +136,19 @@ export function updateSpellcastingOnLevelUp(
   const newSpellSlots = slotRules.byLevel?.[newLevel] || character.spellcasting.spellSlots;
 
   // Update cantrips known
-  const newCantrips = getCantripsByClass(classSlug).map((s: any) => s.slug);
+  const newCantrips = getCantripsByClass(classSlug).map((s: AppSpell) => s.slug);
 
   // Update spell access based on type
   let spellUpdates = {};
   switch (learningRules.type) {
     case 'prepared': {
-      const availableSpells = getLeveledSpellsByClass(classSlug, newLevel).map((s: any) => s.slug);
+      const availableSpells = getLeveledSpellsByClass(classSlug, newLevel).map((s: AppSpell) => s.slug);
       spellUpdates = { spellsKnown: availableSpells };
       break;
     }
     case 'known': {
       const spellsKnownLimit = learningRules.spellsKnown?.[newLevel - 1] || character.spellcasting.spellsKnown?.length || 0;
-      const knownSpells = getLeveledSpellsByClass(classSlug, newLevel).slice(0, spellsKnownLimit).map((s: any) => s.slug);
+      const knownSpells = getLeveledSpellsByClass(classSlug, newLevel).slice(0, spellsKnownLimit).map((s: AppSpell) => s.slug);
       spellUpdates = { spellsKnown: knownSpells };
       break;
     }

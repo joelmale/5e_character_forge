@@ -75,7 +75,7 @@ export const ClassicDndLayout: React.FC<CharacterSheetProps> = ({
                   setRollResult={setRollResult}
                   onDiceRoll={onDiceRoll}
                   onToggleInspiration={onToggleInspiration}
-                  layoutMode="classic"
+                  layoutMode="classic-dnd"
                 />
               </div>
 
@@ -126,7 +126,7 @@ export const ClassicDndLayout: React.FC<CharacterSheetProps> = ({
                     setRollResult={setRollResult}
                     onDiceRoll={onDiceRoll}
                     onUpdateCharacter={onUpdateCharacter}
-                    layoutMode="classic"
+                    layoutMode="classic-dnd"
                    />
                 </div>
 
@@ -139,7 +139,7 @@ export const ClassicDndLayout: React.FC<CharacterSheetProps> = ({
                     character={character}
                     setRollResult={setRollResult}
                     onDiceRoll={onDiceRoll}
-                    layoutMode="classic"
+                    layoutMode="classic-dnd"
                   />
                 </div>
               </div>

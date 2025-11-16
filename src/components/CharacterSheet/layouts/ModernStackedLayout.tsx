@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Shield, Sword, Dice6, Trophy, Zap, BookOpen, AlertTriangle, Coins, Sparkles, Package, Star, Activity, Dumbbell, ListChecks } from 'lucide-react';
 import { CharacterSheetProps } from '../../../types/components';
+import { Character } from '../../../types/dnd';
 import {
   CharacterHeader,
   CharacterStats,
@@ -29,9 +30,17 @@ export const ModernStackedLayout: React.FC<CharacterSheetProps> = ({
   onAddItem, onRemoveItem, setEquipmentModal
 }) => {
   const [showSpellPreparationModal, setShowSpellPreparationModal] = useState(false);
+  const [adjustMode, setAdjustMode] = useState(false);
+  const [panelOrder, setPanelOrder] = useState<string[]>([
+    'coreStats', 'abilityScores', 'skills', 'savingThrows',
+    'attacks', 'hitDice', 'experience', 'attunement',
+    'proficiencies', 'languages', 'conditions', 'coin',
+    'spellcasting', 'equipment', 'features'
+  ]);
+  const [draggedPanel, setDraggedPanel] = useState<string | null>(null);
 
   // Collapse state management
-  const getDefaultCollapsedState = (character: any) => ({
+  const getDefaultCollapsedState = (character: Character) => ({
     'coreStats': false,      // Always expanded - AC, HP, Initiative, etc.
     'abilityScores': false,  // Always expanded - STR, DEX, CON, etc.
     'skills': false,         // Always expanded - frequently referenced
@@ -59,7 +68,7 @@ export const ModernStackedLayout: React.FC<CharacterSheetProps> = ({
     if (saved) {
       try {
         setCollapsedSections(JSON.parse(saved));
-      } catch (_e) {
+      } catch {
         // Fall back to defaults if parsing fails
         setCollapsedSections(getDefaultCollapsedState(character));
       }
@@ -90,6 +99,235 @@ export const ModernStackedLayout: React.FC<CharacterSheetProps> = ({
       ...acc,
       [key]: true
     }), {}));
+  };
+
+  const toggleAdjustMode = () => {
+    if (!adjustMode) {
+      // Enter adjust mode - collapse all panels
+      collapseAll();
+      setAdjustMode(true);
+    } else {
+      // Exit adjust mode
+      setAdjustMode(false);
+      setDraggedPanel(null);
+    }
+  };
+
+  const handleDragStart = (panelId: string) => {
+    setDraggedPanel(panelId);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedPanel(null);
+  };
+
+  const handleDrop = (draggedPanelId: string, targetPanelId: string) => {
+    if (draggedPanelId === targetPanelId) return;
+
+    const draggedIndex = panelOrder.indexOf(draggedPanelId);
+    const targetIndex = panelOrder.indexOf(targetPanelId);
+
+    if (draggedIndex === -1 || targetIndex === -1) return;
+
+    // Create new array without the dragged item
+    const withoutDragged = panelOrder.filter(id => id !== draggedPanelId);
+
+    // Insert dragged item at target position
+    const newOrder = [
+      ...withoutDragged.slice(0, targetIndex),
+      draggedPanelId,
+      ...withoutDragged.slice(targetIndex)
+    ];
+
+    setPanelOrder(newOrder);
+    setDraggedPanel(null);
+  };
+
+  const getPanelConfig = (panelId: string) => {
+    const configs = {
+      coreStats: {
+        title: 'Core Stats',
+        icon: Activity,
+        className: 'border-red-500 bg-red-900',
+        badge: `${character.hitPoints}/${character.maxHitPoints} HP`,
+        content: (
+          <CharacterStats
+            character={character}
+            setRollResult={setRollResult}
+            onDiceRoll={onDiceRoll}
+            onUpdateCharacter={onUpdateCharacter}
+          />
+        )
+      },
+      abilityScores: {
+        title: 'Ability Scores',
+        icon: Dumbbell,
+        className: 'border-blue-500 bg-blue-900',
+        content: (
+          <AbilityScores
+            character={character}
+            setRollResult={setRollResult}
+            onDiceRoll={onDiceRoll}
+            onToggleInspiration={onToggleInspiration}
+          />
+        )
+      },
+      skills: {
+        title: 'Skills',
+        icon: ListChecks,
+        className: 'border-green-500 bg-green-900',
+        content: (
+          <SkillsSection
+            character={character}
+            setRollResult={setRollResult}
+            onDiceRoll={onDiceRoll}
+          />
+        )
+      },
+      savingThrows: {
+        title: 'Saving Throws',
+        icon: Shield,
+        className: 'border-yellow-500 bg-yellow-900',
+        content: (
+          <SavingThrows
+            character={character}
+            setRollResult={setRollResult}
+            onDiceRoll={onDiceRoll}
+          />
+        )
+      },
+      attacks: {
+        title: 'Attacks & Actions',
+        icon: Sword,
+        className: 'border-orange-500 bg-orange-900',
+        content: (
+          <AttacksAndActions
+            character={character}
+            setRollResult={setRollResult}
+            onDiceRoll={onDiceRoll as any}
+          />
+        )
+      },
+      hitDice: {
+        title: 'Hit Dice',
+        icon: Dice6,
+        className: 'border-purple-500 bg-purple-900',
+        badge: `${character.hitDice.current}/${character.hitDice.max}`,
+        content: (
+          <HitDice
+            character={character}
+            onUpdateCharacter={onUpdateCharacter}
+          />
+        )
+      },
+      experience: {
+        title: 'Experience',
+        icon: Trophy,
+        className: 'border-cyan-500 bg-cyan-900',
+        badge: character.level >= 20 ? 'Max Level' : `${character.experiencePoints} XP`,
+        content: (
+          <ExperiencePoints
+            character={character}
+            onUpdateCharacter={onUpdateCharacter}
+          />
+        )
+      },
+      attunement: {
+        title: 'Attunement Slots',
+        icon: Sparkles,
+        className: 'border-pink-500 bg-pink-900',
+        badge: character.level >= 6 ? `${character.level >= 17 ? 3 : character.level >= 11 ? 2 : 1}/3` : 'Locked',
+        content: (
+          <div className="text-sm text-gray-300">
+            <p>Attunement slots available based on character level.</p>
+            <p>Level 6-10: 1 slot, Level 11-16: 2 slots, Level 17+: 3 slots</p>
+          </div>
+        )
+      },
+      proficiencies: {
+        title: 'Proficiencies',
+        icon: Star,
+        className: 'border-indigo-500 bg-indigo-900',
+        content: (
+          <div className="text-sm text-gray-300">
+            <p>Armor: {character.proficiencies?.armor?.join(', ') || 'None'}</p>
+            <p>Weapons: {character.proficiencies?.weapons?.join(', ') || 'None'}</p>
+            <p>Tools: {character.proficiencies?.tools?.join(', ') || 'None'}</p>
+          </div>
+        )
+      },
+      languages: {
+        title: 'Languages',
+        icon: BookOpen,
+        className: 'border-teal-500 bg-teal-900',
+        content: (
+          <LanguagesPanel character={character} />
+        )
+      },
+      conditions: {
+        title: 'Conditions',
+        icon: AlertTriangle,
+        className: 'border-red-600 bg-red-900',
+        badge: character.conditions?.length || 0,
+        content: (
+          <Conditions
+            character={character}
+            onUpdateCharacter={onUpdateCharacter}
+          />
+        )
+      },
+      coin: {
+        title: 'Coin & Equipment',
+        icon: Coins,
+        className: 'border-amber-500 bg-amber-900',
+        content: (
+          <CoinManagement
+            character={character}
+            onUpdateCharacter={onUpdateCharacter}
+          />
+        )
+      },
+      spellcasting: {
+        title: 'Spellcasting',
+        icon: Zap,
+        className: 'border-violet-500 bg-violet-900',
+        content: (
+          <SpellcastingSection
+            character={character}
+            onUpdateCharacter={onUpdateCharacter}
+            onSpellPreparation={() => setShowSpellPreparationModal(true)}
+          />
+        )
+      },
+      equipment: {
+        title: 'Equipment',
+        icon: Package,
+        className: 'border-emerald-500 bg-emerald-900',
+        content: (
+          <EquipmentSection
+            character={character}
+            onEquipArmor={onEquipArmor}
+            onEquipWeapon={onEquipWeapon}
+            onUnequipItem={onUnequipItem}
+            onAddItem={onAddItem}
+            onRemoveItem={onRemoveItem}
+            setEquipmentModal={setEquipmentModal}
+          />
+        )
+      },
+      features: {
+        title: 'Features & Traits',
+        icon: Star,
+        className: 'border-rose-500 bg-rose-900',
+        content: (
+          <FeaturesSection
+            character={character}
+            onFeatureClick={onFeatureClick}
+          />
+        )
+      }
+    };
+    return configs[panelId as keyof typeof configs];
   };
 
   const handleSpellPreparationSave = (preparedSpells: string[]) => {
@@ -131,222 +369,47 @@ export const ModernStackedLayout: React.FC<CharacterSheetProps> = ({
           >
             Collapse All
           </button>
+          <button
+            onClick={toggleAdjustMode}
+            className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+              adjustMode
+                ? 'bg-green-600 hover:bg-green-500 text-white'
+                : 'bg-purple-600 hover:bg-purple-500 text-white'
+            }`}
+            title={adjustMode ? 'Exit layout adjustment mode' : 'Enter layout adjustment mode'}
+          >
+            {adjustMode ? 'Done' : 'Adjust Layout'}
+          </button>
           <span className="text-xs text-gray-400 self-center ml-4">
             {Object.values(collapsedSections).filter(Boolean).length} of {Object.keys(collapsedSections).length} sections collapsed
+            {adjustMode && ' • Adjust Mode Active'}
           </span>
         </div>
 
-        <CollapsibleSection
-          title="Core Stats"
-          icon={Activity}
-          isCollapsed={collapsedSections.coreStats}
-          onToggle={() => toggleSection('coreStats')}
-          className="border-red-500 bg-red-900"
-          badge={`${character.hitPoints}/${character.maxHitPoints} HP`}
-        >
-          <CharacterStats
-            character={character}
-            setRollResult={setRollResult}
-            onDiceRoll={onDiceRoll}
-            onUpdateCharacter={onUpdateCharacter}
-          />
-        </CollapsibleSection>
+        {/* Dynamic panel rendering based on custom order */}
+        {panelOrder.map(panelId => {
+          const config = getPanelConfig(panelId);
+          if (!config) return null;
 
-        <CollapsibleSection
-          title="Ability Scores"
-          icon={Dumbbell}
-          isCollapsed={collapsedSections.abilityScores}
-          onToggle={() => toggleSection('abilityScores')}
-          className="border-blue-500 bg-blue-900"
-        >
-          <AbilityScores
-            character={character}
-            setRollResult={setRollResult}
-            onDiceRoll={onDiceRoll}
-            onToggleInspiration={onToggleInspiration}
-          />
-        </CollapsibleSection>
-
-        <CollapsibleSection
-          title="Skills"
-          icon={ListChecks}
-          isCollapsed={collapsedSections.skills}
-          onToggle={() => toggleSection('skills')}
-          className="border-green-500 bg-green-900"
-        >
-          <SkillsSection
-            character={character}
-            setRollResult={setRollResult}
-            onDiceRoll={onDiceRoll}
-          />
-        </CollapsibleSection>
-
-        {character.spellcasting && (
-          <CollapsibleSection
-            title="Spellcasting"
-            icon={Sparkles}
-            isCollapsed={collapsedSections.spellcasting}
-            onToggle={() => toggleSection('spellcasting')}
-            className="border-purple-500 bg-purple-900"
-          >
-            <SpellcastingSection
-              character={character}
-              onUpdateCharacter={onUpdateCharacter}
-              onSpellPreparation={() => setShowSpellPreparationModal(true)}
-            />
-          </CollapsibleSection>
-        )}
-
-        <CollapsibleSection
-          title="Features & Traits"
-          icon={Star}
-          isCollapsed={collapsedSections.features}
-          onToggle={() => toggleSection('features')}
-          className="border-blue-500 bg-blue-900"
-        >
-          <FeaturesSection
-            character={character}
-            onFeatureClick={onFeatureClick}
-          />
-        </CollapsibleSection>
-
-        <CollapsibleSection
-          title="Coin Pouch"
-          icon={Coins}
-          isCollapsed={collapsedSections.coin}
-          onToggle={() => toggleSection('coin')}
-          className="border-yellow-500 bg-yellow-900"
-        >
-          <CoinManagement
-            character={character}
-            onUpdateCharacter={onUpdateCharacter}
-          />
-        </CollapsibleSection>
-
-        <CollapsibleSection
-          title="Inventory"
-          icon={Package}
-          isCollapsed={collapsedSections.equipment}
-          onToggle={() => toggleSection('equipment')}
-          className="border-yellow-500 bg-yellow-900"
-        >
-          <EquipmentSection
-            character={character}
-            onUpdateCharacter={onUpdateCharacter}
-            onEquipArmor={onEquipArmor}
-            onEquipWeapon={onEquipWeapon}
-            onUnequipItem={onUnequipItem}
-            onAddItem={onAddItem}
-            onRemoveItem={onRemoveItem}
-            setEquipmentModal={setEquipmentModal}
-          />
-        </CollapsibleSection>
-
-        <CollapsibleSection
-          title="Conditions"
-          icon={AlertTriangle}
-          isCollapsed={collapsedSections.conditions}
-          onToggle={() => toggleSection('conditions')}
-          className="border-red-500 bg-red-900"
-          badge={character.conditions?.length || 0}
-        >
-          <Conditions
-            character={character}
-            onUpdateCharacter={onUpdateCharacter}
-          />
-        </CollapsibleSection>
-
-        <CollapsibleSection
-          title="Experience Points"
-          icon={Trophy}
-          isCollapsed={collapsedSections.experience}
-          onToggle={() => toggleSection('experience')}
-          className="border-indigo-500 bg-indigo-900"
-        >
-          <ExperiencePoints
-            character={character}
-            onUpdateCharacter={onUpdateCharacter}
-          />
-        </CollapsibleSection>
-
-        <CollapsibleSection
-          title="Attacks & Actions"
-          icon={Sword}
-          isCollapsed={collapsedSections.attacks}
-          onToggle={() => toggleSection('attacks')}
-          className="border-red-500 bg-red-900"
-        >
-          <AttacksAndActions
-            character={character}
-            setRollResult={setRollResult}
-            onDiceRoll={onDiceRoll}
-          />
-        </CollapsibleSection>
-
-        <CollapsibleSection
-          title="Saving Throws"
-          icon={Shield}
-          isCollapsed={collapsedSections.savingThrows}
-          onToggle={() => toggleSection('savingThrows')}
-          className="border-orange-500 bg-orange-900"
-        >
-          <SavingThrows
-            character={character}
-            setRollResult={setRollResult}
-            onDiceRoll={onDiceRoll}
-            onUpdateCharacter={onUpdateCharacter}
-          />
-        </CollapsibleSection>
-
-        <CollapsibleSection
-          title="Hit Dice"
-          icon={Dice6}
-          isCollapsed={collapsedSections.hitDice}
-          onToggle={() => toggleSection('hitDice')}
-          className="border-purple-500 bg-purple-900"
-          badge={`${character.hitDice.current}/${character.hitDice.max}`}
-        >
-          <HitDice
-            character={character}
-            onUpdateCharacter={onUpdateCharacter}
-          />
-        </CollapsibleSection>
-
-        <CollapsibleSection
-          title="Attunement Slots"
-          icon={Zap}
-          isCollapsed={collapsedSections.attunement}
-          onToggle={() => toggleSection('attunement')}
-          className="border-cyan-500 bg-cyan-900"
-        >
-          <AttunementSlots
-            character={character}
-          />
-        </CollapsibleSection>
-
-        <CollapsibleSection
-          title="Active Equipment"
-          icon={Package}
-          isCollapsed={collapsedSections.proficiencies}
-          onToggle={() => toggleSection('proficiencies')}
-          className="border-emerald-500 bg-emerald-900"
-        >
-          <ActiveEquipmentPanel
-            character={character}
-          />
-        </CollapsibleSection>
-
-        <CollapsibleSection
-          title="Languages"
-          icon={BookOpen}
-          isCollapsed={true}
-          onToggle={() => toggleSection('languages')}
-          className="border-blue-500 bg-blue-900"
-        >
-          <LanguagesPanel
-            character={character}
-          />
-        </CollapsibleSection>
+          return (
+            <CollapsibleSection
+              key={panelId}
+              title={config.title}
+              icon={config.icon}
+              isCollapsed={collapsedSections[panelId] || (adjustMode && panelId !== 'coreStats' && panelId !== 'abilityScores')}
+              onToggle={() => !adjustMode && toggleSection(panelId)}
+              className={config.className}
+              {...((config as any).badge && { badge: (config as any).badge })}
+              isAdjustMode={adjustMode}
+              panelId={panelId}
+              onDragStart={handleDragStart}
+              onDragEnd={handleDragEnd}
+              onDrop={handleDrop}
+            >
+              {config.content}
+            </CollapsibleSection>
+          );
+        })}
 
         {character.spellcasting?.spellcastingType === 'prepared' && (
           <SpellPreparationModal

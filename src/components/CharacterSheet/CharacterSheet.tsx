@@ -11,7 +11,7 @@ import { ModernStackedLayout, ClassicDndLayout } from './layouts';
  * - User preference (desktop can choose between layouts)
  */
 export const CharacterSheet: React.FC<CharacterSheetProps> = (props) => {
-  const { layout } = useLayout();
+  const { layoutMode } = useLayout();
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
@@ -30,7 +30,7 @@ export const CharacterSheet: React.FC<CharacterSheetProps> = (props) => {
   }
 
   // Desktop uses selected layout
-  switch (layout) {
+  switch (layoutMode) {
     case 'classic-dnd':
       return <ClassicDndLayout {...props} />;
 

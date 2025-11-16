@@ -1,9 +1,31 @@
 import React, { useState } from 'react';
 import { Dice6 } from 'lucide-react';
 import { SkillName } from '../../types/dnd';
-import { createSkillRoll, createAdvantageRoll, createDisadvantageRoll } from '../../services/diceService';
+import { createSkillRoll, createAdvantageRoll, createDisadvantageRoll, DiceRoll } from '../../services/diceService';
 import { formatModifier } from '../../utils/formatters';
 import type { LayoutMode } from './AbilityScores';
+
+// Skill descriptions for tooltips
+const SKILL_DESCRIPTIONS: Record<SkillName, string> = {
+  Acrobatics: "Your Dexterity (Acrobatics) check covers your attempt to stay on your feet in a tricky situation, such as when you're trying to run across a sheet of ice, balance on a tightrope, or stay upright on a rocking ship's deck.",
+  AnimalHandling: "When there is any question whether you can calm down a domesticated animal, keep a mount from getting spooked, or intuit an animal's intentions, the DM might call for a Wisdom (Animal Handling) check.",
+  Arcana: "Your Intelligence (Arcana) check measures your ability to recall lore about spells, magic items, eldritch symbols, magical traditions, the planes of existence, and the inhabitants of those planes.",
+  Athletics: "Your Strength (Athletics) check covers difficult situations you encounter while climbing, jumping, or swimming. Examples include the following activities: You attempt to climb a sheer or slippery cliff, avoid hazards while swimming, or break free of bonds.",
+  Deception: "Your Charisma (Deception) check determines whether you can convincingly hide the truth, either verbally or through your actions. This deception can encompass everything from misleading others through ambiguity to telling outright lies.",
+  History: "Your Intelligence (History) check measures your ability to recall lore about historical events, legendary people, ancient kingdoms, past disputes, recent wars, and lost civilizations.",
+  Insight: "Your Wisdom (Insight) check decides whether you can determine the true intentions of a creature, such as when searching out a lie or predicting someone's next move. Doing so involves gleaning clues from body language, speech habits, and changes in mannerisms.",
+  Intimidation: "When you attempt to influence someone through overt threats, hostile actions, and physical violence, the DM might ask you to make a Charisma (Intimidation) check.",
+  Investigation: "When you look around for clues and make deductions based on those clues, you make an Intelligence (Investigation) check. You might deduce the location of a hidden object, discern from the appearance of a wound what kind of weapon dealt it, or determine the weakest point in a tunnel that could cause it to collapse.",
+  Medicine: "A Wisdom (Medicine) check lets you try to stabilize a dying companion or diagnose an illness. Medicine doesn't normally restore hit points, but it can prevent death or restore a creature to consciousness.",
+  Nature: "Your Intelligence (Nature) check measures your ability to recall lore about terrain, plants and animals, the weather, and natural cycles. You might identify the signs that owlbears live nearby, know how to find clean water in the desert, or predict the next storm.",
+  Perception: "Your Wisdom (Perception) check lets you spot, hear, or otherwise detect the presence of something. It measures your general awareness of your surroundings and the keenness of your senses.",
+  Performance: "Your Charisma (Performance) check determines how well you can delight an audience with music, dance, acting, storytelling, or some other form of entertainment.",
+  Persuasion: "When you attempt to influence someone or a group of people with tact, social graces, or good nature, the DM might ask you to make a Charisma (Persuasion) check.",
+  Religion: "Your Intelligence (Religion) check measures your ability to recall lore about deities, rites and prayers, religious hierarchies, holy symbols, and the practices of secret cults.",
+  SleightOfHand: "Whenever you attempt an act of legerdemain or manual trickery, such as planting something on someone else or concealing an object on your person, make a Dexterity (Sleight of Hand) check.",
+  Stealth: "Make a Dexterity (Stealth) check when you attempt to conceal yourself from enemies, slink past guards, slip away without being noticed, or sneak up on someone without being seen or heard.",
+  Survival: "The DM might ask you to make a Wisdom (Survival) check to follow tracks, hunt wild game, guide a group safely through frozen wastelands, identify signs that owlbears live nearby, predict the weather, or avoid quicksand and other natural hazards."
+};
 
 interface SkillEntryProps {
   name: SkillName;
@@ -13,7 +35,7 @@ interface SkillEntryProps {
     value: number | null;
     details?: Array<{ value: number; kept: boolean; critical?: 'success' | 'failure' }>
   }) => void;
-  onDiceRoll: (roll: any) => void;
+  onDiceRoll: (roll: DiceRoll) => void;
   layoutMode?: LayoutMode;
 }
 
@@ -74,7 +96,7 @@ export const SkillEntry: React.FC<SkillEntryProps> = ({
   };
 
   // Classic layout: Compact, traditional D&D skill checklist
-  if (layoutMode === 'classic') {
+  if (layoutMode === 'classic-dnd') {
     return (
       <div className="relative">
         <button
@@ -84,7 +106,7 @@ export const SkillEntry: React.FC<SkillEntryProps> = ({
             setShowMenu(!showMenu);
           }}
           className="flex items-center justify-between px-2 py-1 hover:bg-gray-700 rounded transition-colors cursor-pointer w-full group"
-          title={`Roll ${skillLabel} check (${rollType}) - Right-click for options`}
+          title={`${SKILL_DESCRIPTIONS[name]}\n\nRoll ${skillLabel} check (${rollType}) - Right-click for options`}
         >
           <div className="flex items-center gap-1.5">
             {/* Proficiency bubble */}
@@ -141,7 +163,7 @@ export const SkillEntry: React.FC<SkillEntryProps> = ({
     );
   }
 
-  // Modern layout: Original design
+  // Modern layout: Badge style
   return (
     <div className="relative">
       <button
@@ -150,20 +172,22 @@ export const SkillEntry: React.FC<SkillEntryProps> = ({
           e.preventDefault();
           setShowMenu(!showMenu);
         }}
-        className="flex items-center justify-between p-2 bg-gray-700/50 hover:bg-red-700/70 rounded transition-colors cursor-pointer w-full"
-        title={`Roll ${skillLabel} check (${rollType}) - Right-click for options`}
+        className={`flex items-center justify-between px-3 py-2 rounded-lg border transition-all cursor-pointer w-full text-sm font-medium ${
+          skill.proficient
+            ? 'bg-yellow-900/30 border-yellow-500/50 text-yellow-300 hover:bg-yellow-900/50 hover:border-yellow-400'
+            : 'bg-gray-800/50 border-gray-600 text-gray-300 hover:bg-gray-700 hover:border-gray-500 hover:text-white'
+        }`}
+        title={`${SKILL_DESCRIPTIONS[name]}\n\nRoll ${skillLabel} check (${rollType}) - Right-click for options`}
       >
         <div className="flex items-center gap-2">
-          <Dice6 className="w-4 h-4 text-red-500" />
           {getRollIcon() && (
             <span className="text-xs font-bold text-green-400">{getRollIcon()}</span>
           )}
-          <span className="font-mono text-lg w-8 text-yellow-400">{formatModifier(skill.value)}</span>
-          <span className="text-sm font-semibold text-white truncate">{skillLabel}</span>
+          <span className="truncate">
+            {skillLabel}
+          </span>
         </div>
-        {skill.proficient && (
-          <span className="text-xs bg-yellow-600 text-white px-1.5 py-0.5 rounded">Prof</span>
-        )}
+        <span className="font-mono font-bold text-yellow-300 ml-1">{formatModifier(skill.value)}</span>
       </button>
 
       {showMenu && (

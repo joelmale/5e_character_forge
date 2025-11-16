@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Shield, Zap, Dice6, BookOpen, UserIcon, Footprints } from 'lucide-react';
 import { Character } from '../../types/dnd';
-import { createInitiativeRoll, createAdvantageRoll, createDisadvantageRoll } from '../../services/diceService';
+import { createInitiativeRoll, createAdvantageRoll, createDisadvantageRoll, DiceRoll } from '../../services/diceService';
 import { formatModifier } from '../../utils/formatters';
 import type { LayoutMode } from './AbilityScores';
 
@@ -12,7 +12,7 @@ interface CharacterStatsProps {
     value: number | null;
     details?: Array<{ value: number; kept: boolean; critical?: 'success' | 'failure' }>
   }) => void;
-  onDiceRoll: (roll: any) => void;
+  onDiceRoll: (roll: DiceRoll) => void;
   onUpdateCharacter?: (character: Character) => void;
   layoutMode?: LayoutMode;
 }

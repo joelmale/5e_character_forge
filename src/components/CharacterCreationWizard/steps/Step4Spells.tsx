@@ -151,7 +151,7 @@ export const Step4Spells: React.FC<StepProps> = ({ data, updateData, nextStep, p
         <RandomizeButton
           onClick={() => {
             // Randomize spell selection - would need implementation
-            console.log('Randomize spell selection');
+
           }}
           title="Randomize spell selection"
         />

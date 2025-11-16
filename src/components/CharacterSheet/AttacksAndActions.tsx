@@ -1,6 +1,13 @@
 import React from 'react';
 import { Character, Equipment } from '../../types/dnd';
 import { loadEquipment } from '../../services/dataService';
+import { DiceRoll } from '../../services/diceService';
+
+type CustomRoll = DiceRoll & {
+  description: string;
+  damageNotation?: string;
+  damageType?: string;
+};
 
 interface AttacksAndActionsProps {
   character: Character;
@@ -9,7 +16,7 @@ interface AttacksAndActionsProps {
     value: number | null;
     details?: Array<{ value: number; kept: boolean; critical?: 'success' | 'failure' }>
   }) => void;
-  onDiceRoll: (roll: any) => void;
+  onDiceRoll: (roll: CustomRoll) => void;
 }
 
 // Helper function to calculate attack bonus for a weapon
@@ -79,13 +86,18 @@ export const AttacksAndActions: React.FC<AttacksAndActionsProps> = ({
     const rollText = `${isExtraAttack ? 'Extra Attack: ' : ''}${isOffHand ? 'Off-hand: ' : ''}${weapon.name} Attack`;
 
     // Create the roll object for the dice system
-    const roll = {
+    const roll: CustomRoll = {
       id: `attack-${Date.now()}`,
       notation: attackRoll,
       type: 'attack' as const,
       description: rollText,
       damageNotation: damageRoll,
-      damageType: weapon.damage?.damage_type || 'slashing'
+      damageType: weapon.damage?.damage_type || 'slashing',
+      label: rollText,
+      diceResults: [],
+      modifier: 0,
+      total: 0,
+      timestamp: 0
     };
 
     onDiceRoll(roll);
@@ -97,11 +109,16 @@ export const AttacksAndActions: React.FC<AttacksAndActionsProps> = ({
     const attackBonus = character.spellcasting.spellAttackBonus;
     const attackRoll = `1d20${attackBonus >= 0 ? '+' : ''}${attackBonus}`;
 
-    const roll = {
+    const roll: CustomRoll = {
       id: `spell-attack-${Date.now()}`,
       notation: attackRoll,
-      type: 'spell-attack' as const,
-      description: 'Spell Attack'
+      type: 'complex' as const,
+      description: 'Spell Attack',
+      label: 'Spell Attack',
+      diceResults: [],
+      modifier: 0,
+      total: 0,
+      timestamp: 0
     };
 
     onDiceRoll(roll);
@@ -113,11 +130,16 @@ export const AttacksAndActions: React.FC<AttacksAndActionsProps> = ({
     const attackBonus = character.spellcasting.spellAttackBonus;
     const attackRoll = `1d20${attackBonus >= 0 ? '+' : ''}${attackBonus}`;
 
-    const roll = {
+    const roll: CustomRoll = {
       id: `cantrip-attack-${cantripSlug}-${Date.now()}`,
       notation: attackRoll,
-      type: 'cantrip-attack' as const,
-      description: `${cantripSlug} Attack`
+      type: 'complex' as const,
+      description: `${cantripSlug} Attack`,
+      label: `${cantripSlug} Attack`,
+      diceResults: [],
+      modifier: 0,
+      total: 0,
+      timestamp: 0
     };
 
     onDiceRoll(roll);
@@ -129,11 +151,16 @@ export const AttacksAndActions: React.FC<AttacksAndActionsProps> = ({
     const saveBonus = modifier + (isProficient ? character.proficiencyBonus : 0);
     const saveRoll = `1d20${saveBonus >= 0 ? '+' : ''}${saveBonus}`;
 
-    const roll = {
+    const roll: CustomRoll = {
       id: `save-${ability}-${Date.now()}`,
       notation: saveRoll,
       type: 'saving-throw' as const,
-      description: `${ability} Saving Throw`
+      description: `${ability} Saving Throw`,
+      label: `${ability} Saving Throw`,
+      diceResults: [],
+      modifier: 0,
+      total: 0,
+      timestamp: 0
     };
 
     onDiceRoll(roll);
@@ -142,11 +169,16 @@ export const AttacksAndActions: React.FC<AttacksAndActionsProps> = ({
   const handleInitiative = () => {
     const initiativeRoll = `1d20${character.initiative >= 0 ? '+' : ''}${character.initiative}`;
 
-    const roll = {
+    const roll: CustomRoll = {
       id: `initiative-${Date.now()}`,
       notation: initiativeRoll,
       type: 'initiative' as const,
-      description: 'Initiative'
+      description: 'Initiative',
+      label: 'Initiative',
+      diceResults: [],
+      modifier: 0,
+      total: 0,
+      timestamp: 0
     };
 
     onDiceRoll(roll);
@@ -157,11 +189,16 @@ export const AttacksAndActions: React.FC<AttacksAndActionsProps> = ({
     const skillBonus = skill.value;
     const skillRoll = `1d20${skillBonus >= 0 ? '+' : ''}${skillBonus}`;
 
-    const roll = {
+    const roll: CustomRoll = {
       id: `skill-${skillName}-${Date.now()}`,
       notation: skillRoll,
       type: 'skill' as const,
-      description: `${skillName} (${ability}) Check`
+      description: `${skillName} (${ability}) Check`,
+      label: `${skillName} (${ability}) Check`,
+      diceResults: [],
+      modifier: 0,
+      total: 0,
+      timestamp: 0
     };
 
     onDiceRoll(roll);

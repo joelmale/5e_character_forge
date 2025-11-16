@@ -13,7 +13,9 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({
   return (
     <div className="space-y-4">
       <h2 className="text-xl font-bold text-red-500 border-b border-red-800 pb-1">Features & Traits</h2>
-        <div className="space-y-4">
+
+      {/* Personality section - full width row */}
+      <div className="grid grid-cols-1 gap-4">
         <div className="p-4 bg-gray-800 rounded-xl shadow-lg border-l-4 border-blue-500">
           <h3 className="text-lg font-bold text-blue-400 mb-2">Personality, Ideals, Bonds & Flaws</h3>
           <ul className="list-disc list-inside space-y-1 text-sm text-gray-300">
@@ -23,6 +25,10 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({
             <li><span className="font-semibold text-white">Flaws:</span> {character.featuresAndTraits.flaws}</li>
           </ul>
         </div>
+      </div>
+
+      {/* Other features - 4-column row */}
+      <div className="grid grid-cols-4 gap-4">
         <div className="p-4 bg-gray-800 rounded-xl shadow-lg border-l-4 border-green-500">
           <h3 className="text-lg font-bold text-green-400 mb-2">Racial Traits</h3>
           <div className="flex flex-wrap gap-2">
@@ -37,10 +43,6 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({
             ))}
           </div>
         </div>
-      </div>
-
-      {/* SRD Features Display - Always show vertically stacked */}
-      <div className="space-y-4">
         {/* Class Features */}
         {character.srdFeatures?.classFeatures && character.srdFeatures.classFeatures.length > 0 ? (
           <div className="p-4 bg-gray-800 rounded-xl shadow-lg border-l-4 border-orange-500">
@@ -105,38 +107,40 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({
             <p className="text-sm text-gray-500 italic">No subclass selected</p>
           </div>
         )}
-      </div>
 
-      {/* Legacy Class Features */}
-      {character.featuresAndTraits.classFeatures && character.featuresAndTraits.classFeatures.length > 0 && (
-        <div className="p-4 bg-gray-800 rounded-xl shadow-lg border-l-4 border-yellow-500">
-          <h3 className="text-lg font-bold text-yellow-400 mb-2">Other Class Features</h3>
-          <ul className="list-disc list-inside space-y-1 text-sm text-gray-300">
-            {character.featuresAndTraits.classFeatures.map((feature, index) => (
-              <li key={`lcf-${index}`}>
-                <button onClick={() => onFeatureClick(feature)} className="text-left hover:text-yellow-300 transition-colors cursor-pointer">
-                  {feature}
-                </button>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      {/* Selected Feats Display */}
-      {character.selectedFeats && character.selectedFeats.length > 0 && (
-        <div className="p-4 bg-gray-800 rounded-xl shadow-lg border-l-4 border-cyan-500">
-          <h3 className="text-lg font-bold text-cyan-400 mb-2">Feats</h3>
-          <div className="grid grid-cols-1 gap-2">
-            {character.selectedFeats.map((featSlug, index) => (
-              <div key={`feat-${index}`} className="p-2 bg-gray-700 rounded border border-cyan-700">
-                <div className="font-semibold text-cyan-300 text-sm">{featSlug}</div>
-                <p className="text-xs text-gray-400 mt-1">Feat</p>
-              </div>
-            ))}
+        {/* Legacy Class Features or Selected Feats */}
+        {character.featuresAndTraits.classFeatures && character.featuresAndTraits.classFeatures.length > 0 ? (
+          <div className="p-4 bg-gray-800 rounded-xl shadow-lg border-l-4 border-yellow-500">
+            <h3 className="text-lg font-bold text-yellow-400 mb-2">Other Class Features</h3>
+            <ul className="list-disc list-inside space-y-1 text-sm text-gray-300">
+              {character.featuresAndTraits.classFeatures.map((feature, index) => (
+                <li key={`lcf-${index}`}>
+                  <button onClick={() => onFeatureClick(feature)} className="text-left hover:text-yellow-300 transition-colors cursor-pointer">
+                    {feature}
+                  </button>
+                </li>
+              ))}
+            </ul>
           </div>
-        </div>
-      )}
+        ) : character.selectedFeats && character.selectedFeats.length > 0 ? (
+          <div className="p-4 bg-gray-800 rounded-xl shadow-lg border-l-4 border-cyan-500">
+            <h3 className="text-lg font-bold text-cyan-400 mb-2">Feats</h3>
+            <div className="grid grid-cols-1 gap-2">
+              {character.selectedFeats.map((featSlug, index) => (
+                <div key={`feat-${index}`} className="p-2 bg-gray-700 rounded border border-cyan-700">
+                  <div className="font-semibold text-cyan-300 text-sm">{featSlug}</div>
+                  <p className="text-xs text-gray-400 mt-1">Feat</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className="p-4 bg-gray-800 rounded-xl shadow-lg border-l-4 border-cyan-500">
+            <h3 className="text-lg font-bold text-cyan-400 mb-2">Feats</h3>
+            <p className="text-sm text-gray-500 italic">No additional features</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

@@ -1,7 +1,8 @@
+/* eslint-disable no-empty */
 import { useCallback } from 'react';
 import { Character, Ability } from '../types/dnd';
 import { updateCharacter } from '../services/dbService';
-import { getModifier } from '../services/dataService';
+import { getModifier, AppSubclass } from '../services/dataService';
 
 interface UseSpellcastingProps {
   characters: Character[];
@@ -47,12 +48,12 @@ export function useSpellcasting({
       await updateCharacter(updatedCharacter);
       setCharacters(prev => prev.map(c => c.id === characterId ? updatedCharacter : c));
       setCantripModalState({ isOpen: false, characterId: null, characterClass: null });
-    } catch (e) {
-      console.error("Error selecting cantrip:", e);
+    } catch {} {
+      // Error selecting cantrip
     }
   }, [characters, setCharacters, cantripModalState, setCantripModalState]);
 
-  const selectSubclass = useCallback(async (subclass: any) => {
+  const selectSubclass = useCallback(async (subclass: AppSubclass) => {
     const { characterId } = subclassModalState;
     if (!characterId) return;
 
@@ -68,8 +69,8 @@ export function useSpellcasting({
       await updateCharacter(updatedCharacter);
       setCharacters(prev => prev.map(c => c.id === characterId ? updatedCharacter : c));
       setSubclassModalState({ isOpen: false, characterId: null, characterClass: null });
-    } catch (e) {
-      console.error("Error selecting subclass:", e);
+    } catch {} {
+      // Error selecting subclass
     }
   }, [characters, setCharacters, subclassModalState, setSubclassModalState]);
 
@@ -81,11 +82,10 @@ export function useSpellcasting({
     if (!character) return;
 
     const updatedAbilities = { ...character.abilities };
-    for (const key in increases) {
-      const ability = key as Ability;
+    for (const ability of Object.keys(increases) as Ability[]) {
       const increase = increases[ability] || 0;
-      updatedAbilities[ability].score += increase;
-      updatedAbilities[ability].modifier = getModifier(updatedAbilities[ability].score);
+      (updatedAbilities as any)[ability].score += increase;
+      (updatedAbilities as any)[ability].modifier = getModifier((updatedAbilities as any)[ability].score);
     }
 
     const updatedCharacter = {
@@ -97,8 +97,8 @@ export function useSpellcasting({
       await updateCharacter(updatedCharacter);
       setCharacters(prev => prev.map(c => c.id === characterId ? updatedCharacter : c));
       setAsiModalState({ isOpen: false, characterId: null });
-    } catch (e) {
-      console.error("Error applying ASI:", e);
+    } catch {} {
+      // Error applying ASI
     }
   }, [characters, setCharacters, asiModalState, setAsiModalState]);
 

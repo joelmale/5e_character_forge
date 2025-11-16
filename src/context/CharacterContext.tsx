@@ -1,26 +1,8 @@
-import React, { createContext, useContext, ReactNode } from 'react';
-import { Character } from '../types/dnd';
+import React, { ReactNode } from 'react';
 import { useCharacterManagement } from '../hooks';
+import { CharacterContext } from './CharacterContextObject';
 
-interface CharacterContextType {
-  characters: Character[];
-  loading: boolean;
-  error: string | null;
-  loadCharacters: () => Promise<void>;
-  createCharacter: (character: Character) => Promise<boolean>;
-  removeCharacter: (id: string) => Promise<boolean>;
-  updateCharacter: (character: Character) => Promise<boolean>;
-}
-
-const CharacterContext = createContext<CharacterContextType | undefined>(undefined);
-
-export const useCharacterContext = () => {
-  const context = useContext(CharacterContext);
-  if (context === undefined) {
-    throw new Error('useCharacterContext must be used within a CharacterProvider');
-  }
-  return context;
-};
+// useCharacterContext hook moved to separate file to fix React refresh warning
 
 interface CharacterProviderProps {
   children: ReactNode;

@@ -1,8 +1,7 @@
+/* eslint-disable no-empty */
 import React, { useEffect, useRef, useState } from 'react';
 import type { DiceRoll } from '../../services/diceService';
-
-// Dynamic import for DiceBox to avoid bundling issues
-const DiceBox: any = null;
+import DiceBox from '@3d-dice/dice-box';
 
 interface DiceBox3DProps {
   latestRoll: DiceRoll | null;
@@ -13,12 +12,12 @@ export const DiceBox3D: React.FC<DiceBox3DProps> = ({
   latestRoll,
   onRollComplete,
 }) => {
-  const diceBoxRef = useRef<any>(null);
+  const diceBoxRef = useRef<DiceBox | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const clearTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastRollIdRef = useRef<string | null>(null);
 
-  const [isInitialized, setIsInitialized] = useState(false);
+  const [isInitialized] = useState(false);
   const [webGLSupported, setWebGLSupported] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [diceVisible, setDiceVisible] = useState(false);
@@ -28,23 +27,17 @@ export const DiceBox3D: React.FC<DiceBox3DProps> = ({
     let mounted = true;
 
     const initDiceSystem = async () => {
-      console.log('DiceBox3D: Starting initialization');
-
       // Check WebGL support
       const canvas = document.createElement('canvas');
       const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-      console.log('DiceBox3D: WebGL check result:', gl ? 'SUPPORTED' : 'NOT SUPPORTED');
 
       if (!gl) {
-        console.error('DiceBox3D: WebGL not supported, showing error message');
         if (mounted) {
           setWebGLSupported(false);
           setError('WebGL is not supported in your browser');
         }
         return;
       }
-
-      console.log('DiceBox3D: WebGL supported, proceeding with DiceBox initialization');
 
       try {
         // Create DiceBox instance with v1.1.0+ API (config object only)
@@ -70,36 +63,21 @@ export const DiceBox3D: React.FC<DiceBox3DProps> = ({
           lightIntensity: 1,
         };
 
-        console.log('DiceBox3D: Initializing DiceBox with config:', config);
-
         const diceBox = new DiceBox(config);
-        console.log('DiceBox3D: DiceBox instance created:', diceBox);
 
         // Wait for initialization to complete
-        console.log('DiceBox3D: Calling diceBox.init()...');
-        const initResult = await diceBox.init();
-        console.log('DiceBox3D: DiceBox init completed with result:', initResult);
+        await diceBox.init();
 
         if (!mounted) return;
 
         // Simple roll complete handler
-        diceBox.onRollComplete = (results) => {
-          console.log('DiceBox3D: Roll complete callback triggered with results:', results);
-
+        diceBox.onRollComplete = (_results) => {
           if (onRollComplete) {
-            console.log('DiceBox3D: Calling onRollComplete callback');
             onRollComplete();
-          } else {
-            console.log('DiceBox3D: No onRollComplete callback provided');
           }
         };
 
-        diceBoxRef.current = diceBox;
-        setIsInitialized(true);
-        console.log('DiceBox initialized successfully!');
-
-      } catch (err) {
-        console.error('Failed to initialize DiceBox:', err);
+      } catch {} {
         if (!mounted) return;
 
         const errorMessage = err instanceof Error ? err.message : 'Unknown error';
@@ -109,33 +87,22 @@ export const DiceBox3D: React.FC<DiceBox3DProps> = ({
         } else if (errorMessage.includes('theme config')) {
           setError('Dice theme configuration not found. Check theme files.');
         } else {
-          setError(`Failed to initialize 3D dice: ${errorMessage}`);
+          setError('Failed to initialize 3D dice. Check console for details.');
         }
       }
     };
 
     initDiceSystem();
 
+const diceBox = diceBoxRef.current;
     // Cleanup function
     return () => {
       mounted = false;
       // Only clear if the diceBox is fully initialized and has the clear method
-      if (diceBoxRef.current && typeof diceBoxRef.current.clear === 'function') {
+      if (diceBox && typeof diceBox.clear === 'function') {
         try {
-          diceBoxRef.current.clear();
-      } catch (err) {
-        console.error('DiceBox3D: Failed to initialize DiceBox:', err);
-        const errorMessage = err instanceof Error ? err.message : 'Unknown error';
-        console.error('DiceBox3D: Error message:', errorMessage);
-
-        if (errorMessage.includes('WebAssembly') || errorMessage.includes('wasm')) {
-          console.error('DiceBox3D: WebAssembly error detected');
-          setError('3D dice physics not available. WebAssembly support required.');
-        } else {
-          console.error('DiceBox3D: General initialization error');
-          setError('Failed to initialize 3D dice. Check console for details.');
-        }
-      }
+          diceBox.clear();
+      } catch {}
       }
     };
   }, [onRollComplete]);
@@ -166,36 +133,24 @@ export const DiceBox3D: React.FC<DiceBox3DProps> = ({
         // Use the notation from the roll
         rollNotation = latestRoll.notation;
 
-        console.log('DiceBox3D: Rolling dice with notation:', rollNotation, 'for roll:', latestRoll);
-        console.log('DiceBox3D: DiceBox instance available:', !!diceBoxRef.current);
-        console.log('DiceBox3D: DiceBox instance:', diceBoxRef.current);
-
         // Show the dice box first
-        console.log('DiceBox3D: Calling diceBox.show()...');
         diceBoxRef.current!.show();
         setDiceVisible(true);
-        console.log('DiceBox3D: DiceBox shown successfully');
 
         // Then roll the dice
-        console.log('DiceBox3D: Calling diceBox.roll() with notation:', rollNotation);
-        const result = await diceBoxRef.current!.roll(rollNotation);
-        console.log('DiceBox3D: Roll completed with result:', result);
+        await diceBoxRef.current!.roll(rollNotation);
 
         // Auto-clear after settle time + 10 seconds (give user time to see results)
         const totalTime = 2000 + 10000; // settleTimeout + 10s
         clearTimeoutRef.current = setTimeout(() => {
           if (diceBoxRef.current) {
-            console.log('DiceBox3D: Hiding and clearing dice after timeout');
             diceBoxRef.current.hide();
             diceBoxRef.current.clear();
             setDiceVisible(false);
           }
         }, totalTime);
 
-      } catch (err) {
-        console.error('DiceBox3D: Error rolling dice:', err);
-        console.error('DiceBox3D: Failed roll notation:', rollNotation);
-        console.error('DiceBox3D: Latest roll object:', latestRoll);
+      } catch {} {
         setError('Failed to roll dice. Check notation format.');
       }
     };
@@ -230,7 +185,6 @@ export const DiceBox3D: React.FC<DiceBox3DProps> = ({
   // Handle click to dismiss dice
   const handleContainerClick = () => {
     if (diceBoxRef.current && clearTimeoutRef.current) {
-      console.log('DiceBox3D: User clicked to dismiss dice');
       clearTimeout(clearTimeoutRef.current);
       diceBoxRef.current.hide();
       diceBoxRef.current.clear();

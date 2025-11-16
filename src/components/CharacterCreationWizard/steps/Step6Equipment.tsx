@@ -143,7 +143,7 @@ export const Step6Equipment: React.FC<StepProps & { skipToStep?: (step: number) 
         <RandomizeButton
           onClick={() => {
             // Randomize equipment choices - this would need implementation
-            console.log('Randomize equipment choices');
+
           }}
           title="Randomize equipment choices"
         />

@@ -120,10 +120,10 @@ export interface Character {
   };
 
   // Sprint 3: Character advancement
-  subclass?: string; // Subclass slug (e.g., "berserker")
+  subclass?: string | null; // Subclass slug (e.g., "berserker")
   experiencePoints?: number; // Current XP
   feats?: string[]; // Feat slugs (deprecated - use selectedFeats)
-  selectedFightingStyle?: string; // Fighting Style name (Fighter/Paladin/Ranger)
+  selectedFightingStyle?: string | null; // Fighting Style name (Fighter/Paladin/Ranger)
 
   // Sprint 5: Features, Subclasses, and Feats
   srdFeatures?: {
@@ -328,8 +328,8 @@ export interface CharacterCreationData {
   startingInventory?: EquippedItem[];
 
   // Sprint 5: Subclass, Fighting Style, and Feats
-  subclassSlug?: string;
-  selectedFightingStyle?: string;
+  subclassSlug?: string | null;
+  selectedFightingStyle?: string | null;
   selectedFeats?: string[]; // Array of feat slugs
 
   // Language selection

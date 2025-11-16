@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Shield, Dice6, Footprints, Plus } from 'lucide-react';
 import { Character } from '../../types/dnd';
-import { createInitiativeRoll, createAdvantageRoll, createDisadvantageRoll } from '../../services/diceService';
+import { createInitiativeRoll, createAdvantageRoll, createDisadvantageRoll, DiceRoll } from '../../services/diceService';
 import { formatModifier } from '../../utils/formatters';
 import { loadEquipment } from '../../services/dataService';
 import { HitDice } from './HitDice';
@@ -14,7 +14,7 @@ interface CombatStatsPanelProps {
     value: number | null;
     details?: Array<{ value: number; kept: boolean; critical?: 'success' | 'failure' }>
   }) => void;
-  onDiceRoll: (roll: any) => void;
+  onDiceRoll: (roll: DiceRoll) => void;
   onUpdateCharacter: (character: Character) => void;
 }
 

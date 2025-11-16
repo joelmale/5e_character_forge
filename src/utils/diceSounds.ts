@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 // Dice sound effects manager for 5e Character Forge
 
 import diceSoundsData from '../data/diceSounds.json';

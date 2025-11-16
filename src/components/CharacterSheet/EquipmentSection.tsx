@@ -10,7 +10,7 @@ interface EquipmentSectionProps {
   onUnequipItem: (characterId: string, itemSlug: string) => void;
   onAddItem: (characterId: string, equipmentSlug: string, quantity?: number) => void;
   onRemoveItem: (characterId: string, equipmentSlug: string, quantity?: number) => void;
-  setEquipmentModal: (item: any) => void;
+  setEquipmentModal: (item: { slug: string }) => void;
 }
 
 export const EquipmentSection: React.FC<EquipmentSectionProps> = ({

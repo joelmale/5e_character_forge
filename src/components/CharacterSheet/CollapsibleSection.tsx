@@ -1,5 +1,22 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { ChevronDown, ChevronRight } from 'lucide-react';
+
+// Add wiggle animation CSS
+const wiggleKeyframes = `
+  @keyframes wiggle {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(-0.5deg); }
+    75% { transform: rotate(0.5deg); }
+  }
+`;
+
+// Inject keyframes into document head if not already present
+if (typeof document !== 'undefined' && !document.getElementById('wiggle-keyframes')) {
+  const style = document.createElement('style');
+  style.id = 'wiggle-keyframes';
+  style.textContent = wiggleKeyframes;
+  document.head.appendChild(style);
+}
 
 interface CollapsibleSectionProps {
   title: string;
@@ -9,6 +26,11 @@ interface CollapsibleSectionProps {
   children: React.ReactNode;
   className?: string;
   badge?: string | number;
+  isAdjustMode?: boolean;
+  panelId?: string;
+  onDragStart?: (panelId: string) => void;
+  onDragEnd?: () => void;
+  onDrop?: (draggedPanelId: string, targetPanelId: string) => void;
 }
 
 export const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({
@@ -18,14 +40,80 @@ export const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({
   onToggle,
   children,
   className = '',
-  badge
+  badge,
+  isAdjustMode = false,
+  panelId,
+  onDragStart,
+  onDragEnd,
+  onDrop
 }) => {
+  const [showInitialWiggle, setShowInitialWiggle] = useState(false);
+
+  // Handle initial wiggle for 1.5 seconds after entering adjust mode
+  useEffect(() => {
+    if (isAdjustMode && isCollapsed) {
+      setShowInitialWiggle(true);
+      const timer = setTimeout(() => {
+        setShowInitialWiggle(false);
+      }, 1500);
+      return () => clearTimeout(timer);
+    } else {
+      setShowInitialWiggle(false);
+    }
+  }, [isAdjustMode, isCollapsed]);
+
+  const shouldWiggle = isAdjustMode && isCollapsed && showInitialWiggle;
+  const handleDragStart = (e: React.DragEvent) => {
+    if (panelId && onDragStart) {
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', panelId);
+      onDragStart(panelId);
+    }
+  };
+
+  const handleDragEnd = () => {
+    if (onDragEnd) {
+      onDragEnd();
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    const draggedPanelId = e.dataTransfer.getData('text/plain');
+    console.log('CollapsibleSection handleDrop:', { panelId, draggedPanelId, onDrop: !!onDrop });
+    if (panelId && onDrop && draggedPanelId !== panelId) {
+      console.log('Calling onDrop with:', draggedPanelId, panelId);
+      onDrop(draggedPanelId, panelId);
+    }
+  };
+
   return (
-    <div className={`rounded-xl shadow-lg border-l-4 ${className}`}>
+    <div
+      className={`rounded-xl shadow-lg border-l-4 ${className} ${
+        isAdjustMode && isCollapsed ? 'cursor-grab active:cursor-grabbing' : ''
+      }`}
+      style={shouldWiggle ? {
+        animation: 'wiggle 0.33s ease-in-out infinite'
+      } : undefined}
+      onDragOver={isAdjustMode ? handleDragOver : undefined}
+      onDrop={isAdjustMode ? handleDrop : undefined}
+    >
       {/* Header */}
       <button
-        onClick={onToggle}
-        className="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-gray-800/50 transition-colors group"
+        onClick={isAdjustMode && isCollapsed ? undefined : onToggle}
+        draggable={isAdjustMode && isCollapsed}
+        onDragStart={isAdjustMode && isCollapsed ? handleDragStart : undefined}
+        onDragEnd={isAdjustMode && isCollapsed ? handleDragEnd : undefined}
+        className={`w-full px-6 py-4 text-left flex items-center justify-between transition-colors group ${
+          isAdjustMode && isCollapsed
+            ? 'hover:bg-gray-700/70 cursor-grab active:cursor-grabbing'
+            : 'hover:bg-gray-800/50'
+        }`}
         aria-expanded={!isCollapsed}
         aria-controls={`section-${title.toLowerCase().replace(/\s+/g, '-')}`}
       >
@@ -40,9 +128,9 @@ export const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({
         </div>
         <div className="flex items-center gap-2">
           {isCollapsed ? (
-            <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-gray-300 transition-colors" />
+            <ChevronRight className="w-6 h-6 text-white group-hover:text-yellow-300 transition-colors" />
           ) : (
-            <ChevronDown className="w-5 h-5 text-gray-400 group-hover:text-gray-300 transition-colors" />
+            <ChevronDown className="w-6 h-6 text-white group-hover:text-yellow-300 transition-colors" />
           )}
         </div>
       </button>

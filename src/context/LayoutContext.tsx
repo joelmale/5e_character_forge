@@ -1,37 +1,23 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { ReactNode, useState, createContext } from 'react';
+import { LayoutMode } from '../components/CharacterSheet/AbilityScores';
 
-export type LayoutType = 'modern-stacked' | 'classic-dnd';
-
-interface LayoutContextType {
-  layout: LayoutType;
-  setLayout: (layout: LayoutType) => void;
+export interface LayoutContextType {
+  layoutMode: LayoutMode;
+  setLayoutMode: (mode: LayoutMode) => void;
 }
 
-const LayoutContext = createContext<LayoutContextType | undefined>(undefined);
+export const LayoutContext = createContext<LayoutContextType | undefined>(undefined);
 
-export const LayoutProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [layout, setLayoutState] = useState<LayoutType>(() => {
-    // Load from localStorage or default to modern-stacked
-    const saved = localStorage.getItem('character-sheet-layout');
-    return (saved as LayoutType) || 'modern-stacked';
-  });
+interface LayoutProviderProps {
+  children: ReactNode;
+}
 
-  const setLayout = (newLayout: LayoutType) => {
-    setLayoutState(newLayout);
-    localStorage.setItem('character-sheet-layout', newLayout);
-  };
+export const LayoutProvider: React.FC<LayoutProviderProps> = ({ children }) => {
+  const [layoutMode, setLayoutMode] = useState<LayoutMode>('classic-dnd');
 
   return (
-    <LayoutContext.Provider value={{ layout, setLayout }}>
+    <LayoutContext.Provider value={{ layoutMode, setLayoutMode }}>
       {children}
     </LayoutContext.Provider>
   );
-};
-
-export const useLayout = () => {
-  const context = useContext(LayoutContext);
-  if (!context) {
-    throw new Error('useLayout must be used within a LayoutProvider');
-  }
-  return context;
 };

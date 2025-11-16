@@ -455,9 +455,9 @@ export function transformClass(srdClass: SRDClass, year: number = 2014): Class {
           }
           return [];
         }).filter(arr => arr.length > 0);
-      } else if ((option.from as any).equipment_category) {
+      } else if ((option.from as { equipment_category: { name: string } }).equipment_category) {
         options = [[{
-          name: `Any ${(option.from as any).equipment_category.name}`,
+          name: `Any ${(option.from as { equipment_category: { name: string } }).equipment_category.name}`,
           type: 'gear' as const,
           quantity: 1
         }]];
@@ -1147,7 +1147,18 @@ const COMPREHENSIVE_RACES: Race[] = [
   }
 ];
 
-export const RACE_CATEGORIES: RaceCategory[] = raceCategoriesData.map((category: any) => ({
+interface RaceCategoryData {
+  name: string;
+  icon: string;
+  description: string;
+  filterCriteria: {
+    source?: string;
+    sources?: string[];
+    slugs?: string[];
+  };
+}
+
+export const RACE_CATEGORIES: RaceCategory[] = raceCategoriesData.map((category: RaceCategoryData) => ({
   name: category.name,
   icon: category.icon,
   description: category.description,
@@ -1163,22 +1174,31 @@ export const RACE_CATEGORIES: RaceCategory[] = raceCategoriesData.map((category:
 }));
 
 // Enhanced class data with rich descriptions and categorization
+interface EnhancedClassData {
+  [key: string]: Partial<Class>;
+}
 
+interface ClassCategoryData {
+  name: string;
+  icon: string;
+  description: string;
+  classSlugs: string[];
+}
 
 // Helper function to get enhanced class data
 export function getEnhancedClassData(classSlug: string): Partial<Class> | undefined {
-  return (enhancedClassData as any)[classSlug];
+  return (enhancedClassData as EnhancedClassData)[classSlug];
 }
 
 // Enhanced class categories with rich data
-export const CLASS_CATEGORIES: ClassCategory[] = classCategoriesData.map((category: any) => ({
+export const CLASS_CATEGORIES: ClassCategory[] = classCategoriesData.map((category: ClassCategoryData) => ({
   name: category.name,
   icon: category.icon,
   description: category.description,
   classes: loadClasses().filter(cls =>
     category.classSlugs.includes(cls.slug)
   ).map(cls => {
-    const enhanced = (enhancedClassData as any)[cls.slug];
+    const enhanced = (enhancedClassData as EnhancedClassData)[cls.slug];
     return enhanced ? { ...cls, ...enhanced } : cls;
   })
 }));
@@ -1311,6 +1331,12 @@ export const randomizeFightingStyle = (classSlug: string): string | undefined =>
   return getRandomElement(stylePool).name;
 };
 
+interface CantripsData {
+  [key: string]: {
+    [key: number]: number;
+  };
+}
+
 /**
  * Randomize spell selection for spellcasters
  */
@@ -1324,7 +1350,7 @@ export const randomizeSpells = (classSlug: string, level: number = 1): { selecte
   const spells = getLeveledSpellsByClass(classSlug, level);
 
   // Get cantrip limit for this class and level
-  const cantripLimit = (cantripsData as any)[classSlug]?.[level] || 0;
+  const cantripLimit = (cantripsData as CantripsData)[classSlug]?.[level] || 0;
   const spellLimit = SPELL_SLOTS_BY_CLASS[classSlug]?.[level]?.[0] || 0; // Level 1 spells
 
   const selectedCantrips = cantrips.length > 0 && cantripLimit > 0

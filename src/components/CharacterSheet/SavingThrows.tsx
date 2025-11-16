@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Character, AbilityName } from '../../types/dnd';
-import { createSavingThrowRoll, createAdvantageRoll, createDisadvantageRoll } from '../../services/diceService';
+import { createSavingThrowRoll, createAdvantageRoll, createDisadvantageRoll, DiceRoll } from '../../services/diceService';
 import { formatModifier } from '../../utils/formatters';
 import { loadClasses } from '../../services/dataService';
 import type { LayoutMode } from './AbilityScores';
@@ -12,7 +12,7 @@ interface SavingThrowsProps {
     value: number | null;
     details?: Array<{ value: number; kept: boolean; critical?: 'success' | 'failure' }>
   }) => void;
-  onDiceRoll: (roll: any) => void;
+  onDiceRoll: (roll: DiceRoll) => void;
   onUpdateCharacter?: (character: Character) => void;
   layoutMode?: LayoutMode;
 }

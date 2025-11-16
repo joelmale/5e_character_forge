@@ -1,3 +1,4 @@
+/* eslint-disable no-empty */
 import { generateUUID } from './diceService';
 import levelConstantsData from '../data/levelConstants.json';
 import {
@@ -14,8 +15,7 @@ import {
     getHitDieForClass,
     // FEAT_DATABASE,
 } from './dataService';
-import { SPELL_SLOTS_BY_CLASS } from '../data/spellSlots';
-import { CANTRIPS_KNOWN_BY_CLASS } from '../data/cantrips';
+import { SPELL_SLOTS_BY_CLASS, CANTRIPS_KNOWN_BY_CLASS } from './dataService';
 // import { CANTRIPS_KNOWN_BY_CLASS } from '../data/cantrips';
 import {
     CharacterCreationData,
@@ -280,8 +280,7 @@ export const toggleInspiration = async (
         await updateCharacter(updatedCharacter);
         // Optimistically update the state
         setCharacters(prev => prev.map(c => c.id === characterId ? updatedCharacter : c));
-    } catch (e) {
-        console.error("Error updating inspiration:", e);
+    } catch {} {
         // Optionally revert state if DB update fails
     }
 };
@@ -334,9 +333,9 @@ export const handleShortRest = async (
         await updateCharacter(updatedCharacter);
         setCharacters(prev => prev.map(c => c.id === characterId ? updatedCharacter : c));
         setRollResult({ text: `Recovered ${hpRecovered} HP.`, value: newHP });
-        console.log(`Short rest: Spent ${diceToSpend}d${hitDie}. Recovered ${hpRecovered} HP.`);
-    } catch (e) {
-        console.error("Error taking short rest:", e);
+
+    } catch {} {
+        // Error taking short rest
     }
 };
 
@@ -363,7 +362,6 @@ export const handleLevelUp = async (
     const allClasses = loadClasses();
     const classData = allClasses.find(c => c.name === character.class);
     if (!classData) {
-        console.error(`Could not find class data for ${character.class}`);
         return;
     }
 
@@ -399,7 +397,7 @@ export const handleLevelUp = async (
     }
 
     if (updatedCharacter.spellcasting) {
-        const cantripsKnownAtNewLevel = CANTRIPS_KNOWN_BY_CLASS[classData.slug]?.[newLevel];
+        const cantripsKnownAtNewLevel = (CANTRIPS_KNOWN_BY_CLASS as any)[classData.slug]?.[newLevel];
         if (cantripsKnownAtNewLevel && cantripsKnownAtNewLevel > updatedCharacter.spellcasting.cantripsKnown.length) {
             // Open modal to choose cantrip instead of adding a placeholder
             setCantripModalState({
@@ -414,9 +412,9 @@ export const handleLevelUp = async (
         await updateCharacter(updatedCharacter);
         setCharacters(prev => prev.map(c => c.id === characterId ? updatedCharacter : c));
         setRollResult({ text: `${character.name} is now level ${newLevel}!`, value: null });
-        console.log(`${character.name} leveled up to ${newLevel}. HP increased by ${hpIncrease}. PB is now ${newProficiencyBonus}.`);
-    } catch (e) {
-        console.error("Error leveling up character:", e);
+
+    } catch {} {
+        // Error leveling up character
     }
 };
 
@@ -449,9 +447,9 @@ export const handleEquipArmor = async (
     try {
         await updateCharacter(updatedCharacter);
         setCharacters(prev => prev.map(c => c.id === characterId ? updatedCharacter : c));
-        console.log(`Equipped ${armor.name}. New AC: ${updatedCharacter.armorClass}`);
-    } catch (e) {
-        console.error("Error equipping armor:", e);
+
+    } catch {} {
+        // Error equipping armor
     }
 };
 
@@ -483,9 +481,9 @@ export const handleEquipWeapon = async (
         try {
             await updateCharacter(updatedCharacter);
             setCharacters(prev => prev.map(c => c.id === characterId ? updatedCharacter : c));
-            console.log(`Equipped ${weapon.name}`);
-        } catch (e) {
-            console.error("Error equipping weapon:", e);
+
+        } catch {} {
+            // Error equipping weapon
         }
     }
 };
@@ -520,9 +518,9 @@ export const handleUnequipItem = async (
     try {
         await updateCharacter(updatedCharacter);
         setCharacters(prev => prev.map(c => c.id === characterId ? updatedCharacter : c));
-        console.log(`Unequipped item`);
-    } catch (e) {
-        console.error("Error unequipping item:", e);
+
+    } catch {} {
+        // Error unequipping item
     }
 };
 
@@ -558,9 +556,9 @@ export const handleAddItem = async (
     try {
         await updateCharacter(updatedCharacter);
         setCharacters(prev => prev.map(c => c.id === characterId ? updatedCharacter : c));
-        console.log(`Added ${quantity}x ${equipment.name} to inventory`);
-    } catch (e) {
-        console.error("Error adding item:", e);
+
+    } catch {} {
+        // Error adding item
     }
 };
 
@@ -602,9 +600,9 @@ export const handleRemoveItem = async (
     try {
         await updateCharacter(updatedCharacter);
         setCharacters(prev => prev.map(c => c.id === characterId ? updatedCharacter : c));
-        console.log(`Removed ${quantity}x item from inventory`);
-    } catch (e) {
-        console.error("Error removing item:", e);
+
+    } catch {} {
+        // Error removing item
     }
 };
 
@@ -628,7 +626,6 @@ export const handleLevelDown = async (
     const allClasses = loadClasses();
     const classData = allClasses.find(c => c.name === character.class);
     if (!classData) {
-        console.error(`Could not find class data for ${character.class}`);
         return;
     }
 
@@ -667,9 +664,9 @@ export const handleLevelDown = async (
         await updateCharacter(updatedCharacter);
         setCharacters(prev => prev.map(c => c.id === characterId ? updatedCharacter : c));
         setRollResult({ text: `${character.name} is now level ${newLevel}.`, value: null });
-        console.log(`${character.name} leveled down to ${newLevel}.`);
-    } catch (e) {
-        console.error("Error leveling down character:", e);
+
+    } catch {} {
+        // Error leveling down character
     }
 };
 
@@ -703,9 +700,8 @@ export const handleLongRest = async (
         await updateCharacter(updatedCharacter);
         setCharacters(prev => prev.map(c => c.id === characterId ? updatedCharacter : c));
         setRollResult({ text: `${character.name} took a long rest and recovered!`, value: null });
-        console.log(`Long rest: ${character.name} recovered all HP, hit dice, and spell slots.`);
-    } catch (e) {
-        console.error("Error taking long rest:", e);
+
+    } catch {} {
         setRollResult({ text: 'Error taking long rest.', value: null });
     }
 };

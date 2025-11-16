@@ -16,7 +16,6 @@ export function useCharacterManagement() {
     } catch (e) {
       const errorMessage = e instanceof Error ? e.message : 'Failed to load characters';
       setError(errorMessage);
-      console.error('Error loading characters:', e);
     } finally {
       setLoading(false);
     }
@@ -30,7 +29,6 @@ export function useCharacterManagement() {
     } catch (e) {
       const errorMessage = e instanceof Error ? e.message : 'Failed to create character';
       setError(errorMessage);
-      console.error('Error creating character:', e);
       return false;
     }
   }, [loadCharacters]);
@@ -43,7 +41,6 @@ export function useCharacterManagement() {
     } catch (e) {
       const errorMessage = e instanceof Error ? e.message : 'Failed to delete character';
       setError(errorMessage);
-      console.error('Error deleting character:', e);
       return false;
     }
   }, []);
@@ -56,7 +53,6 @@ export function useCharacterManagement() {
     } catch (e) {
       const errorMessage = e instanceof Error ? e.message : 'Failed to update character';
       setError(errorMessage);
-      console.error('Error updating character:', e);
       return false;
     }
   }, []);

@@ -1,6 +1,6 @@
 // Spell management utilities for character creation and campaign play
 import { SpellcastingType, Class, Character, SpellSelectionData } from '../types/dnd';
-import { getLeveledSpellsByClass, loadClasses } from '../services/dataService';
+import { getCantripsByClass, getLeveledSpellsByClass, loadClasses, AppSpell } from '../services/dataService';
 import { SPELL_SLOT_TABLES } from '../data/spellSlots';
 import { SPELL_LEARNING_RULES } from '../data/spellLearning';
 import spellcastingTypesData from '../data/spellcastingTypes.json';
@@ -107,7 +107,7 @@ export function validateSpellSelection(
  */
 export function hasSpellcastingAtLevel(classSlug: string): boolean {
   const allClasses = loadClasses();
-  const selectedClass = allClasses.find((c: any) => c.slug === classSlug);
+  const selectedClass = allClasses.find((c: Class) => c.slug === classSlug);
 
   if (!selectedClass || !selectedClass.spellcasting) {
     return false;
@@ -122,7 +122,6 @@ export function hasSpellcastingAtLevel(classSlug: string): boolean {
  * Get available spells for character creation
  */
 export function getAvailableSpellsForCreation(classSlug: string, level: number) {
-  const { getCantripsByClass, getLeveledSpellsByClass } = require('../services/dataService');
   return {
     cantrips: getCantripsByClass(classSlug),
     spells: getLeveledSpellsByClass(classSlug, level)
@@ -248,7 +247,7 @@ export function migrateSpellSelectionToCharacter(
     case 'prepared':
       return {
         ...baseSpellcasting,
-        spellsKnown: getLeveledSpellsByClass(classData.slug, characterLevel).map((s: any) => s.slug),
+        spellsKnown: getLeveledSpellsByClass(classData.slug, characterLevel).map((s: AppSpell) => s.slug),
         preparedSpells: spellSelection.preparedSpells || spellSelection.selectedSpells || []
       };
 

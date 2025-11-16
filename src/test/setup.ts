@@ -26,15 +26,20 @@ Object.defineProperty(window, 'matchMedia', {
   }),
 });
 
+interface CustomGlobal extends Window {
+  ResizeObserver: unknown;
+  IntersectionObserver: unknown;
+}
+
 // Mock ResizeObserver
-(globalThis as any).ResizeObserver = class ResizeObserver {
+(globalThis as CustomGlobal).ResizeObserver = class ResizeObserver {
   observe() {}
   unobserve() {}
   disconnect() {}
 };
 
 // Mock IntersectionObserver
-(globalThis as any).IntersectionObserver = class IntersectionObserver {
+(globalThis as CustomGlobal).IntersectionObserver = class IntersectionObserver {
   observe() {}
   unobserve() {}
   disconnect() {}

@@ -1,26 +1,8 @@
-import React, { createContext, useContext, ReactNode } from 'react';
-import { DiceRoll } from '../services/diceService';
+import React, { ReactNode } from 'react';
 import { useDiceRolling } from '../hooks';
+import { DiceContext } from './DiceContextObject';
 
-interface DiceContextType {
-  rollHistory: DiceRoll[];
-  latestRoll: DiceRoll | null;
-  rollDice: (roll: DiceRoll) => DiceRoll;
-  clearHistory: () => void;
-  createAndRollAbility: (ability: string, score: number) => DiceRoll;
-  createAndRollSkill: (skillLabel: string, value: number) => DiceRoll;
-  createAndRollInitiative: (modifier: number) => DiceRoll;
-}
 
-const DiceContext = createContext<DiceContextType | undefined>(undefined);
-
-export const useDiceContext = () => {
-  const context = useContext(DiceContext);
-  if (context === undefined) {
-    throw new Error('useDiceContext must be used within a DiceProvider');
-  }
-  return context;
-};
 
 interface DiceProviderProps {
   children: ReactNode;

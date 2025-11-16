@@ -63,7 +63,6 @@ export const CharacterCreationWizard: React.FC<WizardProps> = ({
       // Close wizard
       onClose();
     } catch (error) {
-      console.error('Error creating character:', error);
       setError(error instanceof Error ? error.message : 'An unexpected error occurred while creating the character.');
     }
   };
