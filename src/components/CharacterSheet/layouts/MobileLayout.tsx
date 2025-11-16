@@ -24,7 +24,7 @@ import {
 import { getSpellsForClass } from '../../../services/dataService';
 import { SpellPreparationModal } from '../../SpellPreparationModal';
 
-export const ModernStackedLayout: React.FC<CharacterSheetProps> = ({
+export const MobileLayout: React.FC<CharacterSheetProps> = ({
   character, onClose, onDelete, setRollResult, onDiceRoll, onToggleInspiration, onFeatureClick,
   onLongRest, onShortRest, onLevelUp, onLevelDown, onUpdateCharacter, onEquipArmor, onEquipWeapon, onUnequipItem,
   onAddItem, onRemoveItem, setEquipmentModal

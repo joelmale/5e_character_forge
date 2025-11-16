@@ -30,7 +30,8 @@ interface CollapsibleSectionProps {
   panelId?: string;
   onDragStart?: (panelId: string) => void;
   onDragEnd?: () => void;
-  onDrop?: (draggedPanelId: string, targetPanelId: string) => void;
+  onDrop?: (targetPanelId: string) => void;
+  isDragged?: boolean;
 }
 
 export const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({
@@ -45,17 +46,18 @@ export const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({
   panelId,
   onDragStart,
   onDragEnd,
-  onDrop
+  onDrop,
+  isDragged = false
 }) => {
   const [showInitialWiggle, setShowInitialWiggle] = useState(false);
 
-  // Handle initial wiggle for 1.5 seconds after entering adjust mode
+  // Handle initial wiggle for 0.5 seconds after entering adjust mode
   useEffect(() => {
     if (isAdjustMode && isCollapsed) {
       setShowInitialWiggle(true);
       const timer = setTimeout(() => {
         setShowInitialWiggle(false);
-      }, 1500);
+      }, 500);
       return () => clearTimeout(timer);
     } else {
       setShowInitialWiggle(false);
@@ -84,11 +86,18 @@ export const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
-    const draggedPanelId = e.dataTransfer.getData('text/plain');
-    console.log('CollapsibleSection handleDrop:', { panelId, draggedPanelId, onDrop: !!onDrop });
-    if (panelId && onDrop && draggedPanelId !== panelId) {
-      console.log('Calling onDrop with:', draggedPanelId, panelId);
-      onDrop(draggedPanelId, panelId);
+    console.log('handleDrop fired on panel:', panelId);
+    if (panelId && onDrop) {
+      const draggedPanelId = e.dataTransfer.getData('text/plain');
+      console.log('Dragged panel:', draggedPanelId, 'Target panel:', panelId);
+      if (draggedPanelId !== panelId) {
+        console.log('Calling onDrop with target:', panelId);
+        onDrop(panelId);
+      } else {
+        console.log('Same panel, not dropping');
+      }
+    } else {
+      console.log('Missing panelId or onDrop handler');
     }
   };
 
@@ -96,7 +105,7 @@ export const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({
     <div
       className={`rounded-xl shadow-lg border-l-4 ${className} ${
         isAdjustMode && isCollapsed ? 'cursor-grab active:cursor-grabbing' : ''
-      }`}
+      } ${isDragged ? 'opacity-50' : ''}`}
       style={shouldWiggle ? {
         animation: 'wiggle 0.33s ease-in-out infinite'
       } : undefined}

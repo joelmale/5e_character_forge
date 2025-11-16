@@ -4,7 +4,7 @@ import { Character, AbilityName } from '../../types/dnd';
 import { AbilityScoreBlock } from './index';
 import { DiceRoll } from '../../services/diceService';
 
-export type LayoutMode = 'modern-stacked' | 'classic-dnd';
+export type LayoutMode = 'modern-stacked' | 'classic-dnd' | 'mobile';
 
 interface AbilityScoresProps {
   character: Character;

@@ -15,7 +15,7 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({
       <h2 className="text-xl font-bold text-red-500 border-b border-red-800 pb-1">Features & Traits</h2>
 
       {/* Personality section - full width row */}
-      <div className="grid grid-cols-1 gap-4">
+      <div className="grid grid-cols-1 gap-2">
         <div className="p-4 bg-gray-800 rounded-xl shadow-lg border-l-4 border-blue-500">
           <h3 className="text-lg font-bold text-blue-400 mb-2">Personality, Ideals, Bonds & Flaws</h3>
           <ul className="list-disc list-inside space-y-1 text-sm text-gray-300">
@@ -28,7 +28,7 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({
       </div>
 
       {/* Other features - 4-column row */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-4 gap-2">
         <div className="p-4 bg-gray-800 rounded-xl shadow-lg border-l-4 border-green-500">
           <h3 className="text-lg font-bold text-green-400 mb-2">Racial Traits</h3>
           <div className="flex flex-wrap gap-2">

@@ -26,7 +26,6 @@ export const CharacterHeader: React.FC<CharacterHeaderProps> = ({
     <>
       {/* Header and Controls */}
       <div className="flex justify-between items-center border-b border-red-700 pb-3 gap-4">
-        <h1 className="text-3xl font-serif font-bold text-red-500 truncate">{character.name}</h1>
         <LayoutSelector />
         <div className="flex space-x-3">
           <button

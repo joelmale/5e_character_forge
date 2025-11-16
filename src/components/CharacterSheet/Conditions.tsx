@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { AlertTriangle, X, Plus } from 'lucide-react';
+import { AlertTriangle, X, Plus, EyeOff, Heart, VolumeX, Zap, Hand, Ban, Ghost, Mountain, Skull, ArrowDown, Lock, Star, Moon } from 'lucide-react';
 import { Character } from '../../types/dnd';
 
 interface ConditionsProps {
@@ -19,6 +19,24 @@ export const Conditions: React.FC<ConditionsProps> = ({
     'Incapacitated', 'Invisible', 'Paralyzed', 'Petrified', 'Poisoned',
     'Prone', 'Restrained', 'Stunned', 'Unconscious'
   ];
+
+  // Condition icons mapping
+  const conditionIcons: Record<string, React.ComponentType<{ className?: string }>> = {
+    'Blinded': EyeOff,
+    'Charmed': Heart,
+    'Deafened': VolumeX,
+    'Frightened': AlertTriangle,
+    'Grappled': Hand,
+    'Incapacitated': Ban,
+    'Invisible': Ghost,
+    'Paralyzed': Zap,
+    'Petrified': Mountain,
+    'Poisoned': Skull,
+    'Prone': ArrowDown,
+    'Restrained': Lock,
+    'Stunned': Star,
+    'Unconscious': Moon
+  };
 
   // Condition effects mapping
   const conditionEffects: Record<string, string> = {
@@ -120,19 +138,23 @@ export const Conditions: React.FC<ConditionsProps> = ({
         {/* Common Conditions */}
         <div>
           <h4 className="text-sm font-semibold text-red-300 mb-2">Common Conditions:</h4>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+          <div className="grid grid-cols-3 md:grid-cols-5 gap-2">
             {commonConditions
               .filter(condition => !activeConditions.includes(condition))
-              .map((condition, index) => (
-              <button
-                key={index}
-                onClick={() => addCondition(condition)}
-                className="px-2 py-1 bg-gray-800/50 hover:bg-red-800/70 rounded text-xs text-gray-300 hover:text-white transition-colors text-left"
-                title={`Add ${condition}`}
-              >
-                {condition}
-              </button>
-            ))}
+              .map((condition, index) => {
+                const IconComponent = conditionIcons[condition];
+                return (
+                  <button
+                    key={index}
+                    onClick={() => addCondition(condition)}
+                    className="flex items-center gap-1 px-2 py-1 bg-gray-800/50 hover:bg-red-800/70 rounded text-xs text-gray-300 hover:text-white transition-colors text-left"
+                    title={`Add ${condition}`}
+                  >
+                    {IconComponent && <IconComponent className="w-3 h-3 flex-shrink-0" />}
+                    <span className="truncate">{condition}</span>
+                  </button>
+                );
+              })}
           </div>
         </div>
       </div>

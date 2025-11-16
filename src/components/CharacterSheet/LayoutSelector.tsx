@@ -1,5 +1,5 @@
 import React from 'react';
-import { Layout, Layers } from 'lucide-react';
+import { Layout, Layers, Smartphone } from 'lucide-react';
 import { useLayout } from '../../context';
 import type { LayoutMode } from './AbilityScores';
 
@@ -9,6 +9,7 @@ export const LayoutSelector: React.FC = () => {
   const layouts: { value: LayoutMode; label: string; icon: React.ReactNode }[] = [
     { value: 'modern-stacked', label: 'Modern', icon: <Layers className="w-4 h-4" /> },
     { value: 'classic-dnd', label: 'Classic D&D', icon: <Layout className="w-4 h-4" /> },
+    { value: 'mobile', label: 'Mobile', icon: <Smartphone className="w-4 h-4" /> },
   ];
 
   return (
