@@ -12,7 +12,6 @@ WORKDIR /app
 COPY package*.json ./
 COPY tsconfig*.json ./
 COPY vite.config.ts ./
-COPY tailwind.config.js ./  # If exists
 COPY postcss.config.js ./
 
 # Install dependencies with cache mount for faster builds
