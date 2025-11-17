@@ -112,7 +112,11 @@ See [DEPLOYMENT.md](./DEPLOYMENT.md) for complete Docker Swarm deployment instru
 
 **Quick Start with Docker:**
 ```bash
-# Build the image
+# Fast build with BuildKit (recommended)
+export DOCKER_BUILDKIT=1
+npm run docker:build
+
+# Or standard build
 docker build -t 5e-character-forge .
 
 # Run locally
@@ -121,6 +125,14 @@ docker run -p 8080:80 5e-character-forge
 # Deploy to Swarm
 docker stack deploy -c docker-compose.yml character-forge
 ```
+
+**🚀 Build Optimizations:**
+- **90% smaller build context** (~30MB vs 352MB)
+- **BuildKit cache mounts** for faster incremental builds
+- **Layer optimization** for better Docker caching
+- **Development mode** with `docker-compose.dev.yml`
+
+See [DOCKER_OPTIMIZATIONS.md](./DOCKER_OPTIMIZATIONS.md) for technical details.
 
 **Live Demo:** https://character.nexusvtt.com
 
