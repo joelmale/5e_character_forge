@@ -234,6 +234,7 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
             subclassFeatures: subclassFeatures.map(f => ({ name: f.name, slug: f.slug, level: f.level, source: 'subclass' as const })),
         },
         selectedFeats: data.selectedFeats || [],
+        trinket: data.selectedTrinket,
     };
 };
 

@@ -76,8 +76,8 @@ const shouldShowStep = (stepIndex: number, data: CharacterCreationData): boolean
     case 4: // Choose Fighting Style - only for Fighter/Paladin/Ranger
       return ['fighter', 'paladin', 'ranger'].includes(data.classSlug);
 
-    case 5: // Select Spells - only for spellcasters
-      return hasSpellcastingAtLevel(data.classSlug);
+     case 5: // Select Spells - only for spellcasters
+       return hasSpellcastingAtLevel(data.classSlug, data.level);
 
     case 6: // Determine Abilities - always show
       return true;

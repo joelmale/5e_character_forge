@@ -105,7 +105,7 @@ export function validateSpellSelection(
 /**
  * Check if a class has spellcasting available at the current level
  */
-export function hasSpellcastingAtLevel(classSlug: string): boolean {
+export function hasSpellcastingAtLevel(classSlug: string, characterLevel: number = 1): boolean {
   const allClasses = loadClasses();
   const selectedClass = allClasses.find((c: Class) => c.slug === classSlug);
 
@@ -113,9 +113,8 @@ export function hasSpellcastingAtLevel(classSlug: string): boolean {
     return false;
   }
 
-  // Check if they have any spells available at this level
-  return selectedClass.spellcasting.cantripsKnown > 0 ||
-         selectedClass.spellcasting.spellsKnownOrPrepared > 0;
+  // Check if spellcasting is available at the character's current level
+  return selectedClass.spellcasting.level <= characterLevel;
 }
 
 /**

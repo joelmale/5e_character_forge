@@ -18,7 +18,7 @@ const RandomizeButton: React.FC<RandomizeButtonProps> = ({ onClick, title }) => 
   </button>
 );
 
-export const Step2Race: React.FC<StepProps> = ({ data, updateData, nextStep, prevStep, getNextStepLabel }) => {
+export const Step2Race: React.FC<StepProps> = ({ data, updateData, nextStep, prevStep, getNextStepLabel, openTraitModal }) => {
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set(['Core Races']));
   const [showRaceInfo, setShowRaceInfo] = useState(true);
 
@@ -124,16 +124,28 @@ export const Step2Race: React.FC<StepProps> = ({ data, updateData, nextStep, pre
               </div>
             </div>
 
-            <div>
-              <span className="font-semibold text-red-400">Racial Traits: </span>
-              <div className="flex flex-wrap gap-2 mt-1">
-                {selectedRace.racial_traits.map((trait, idx) => (
-                  <span key={idx} className="px-2 py-1 bg-green-700 text-white text-xs rounded">
-                    {trait}
-                  </span>
-                ))}
-              </div>
-            </div>
+             <div>
+               <span className="font-semibold text-red-400">Racial Traits: </span>
+               <div className="flex flex-wrap gap-2 mt-1">
+                 {selectedRace.racial_traits.map((trait, idx) => (
+                    <button
+                      key={idx}
+                      onClick={(e) => {
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        const position = {
+                          x: rect.left + rect.width / 2,
+                          y: rect.top + rect.height / 2
+                        };
+                        openTraitModal?.(trait, position);
+                      }}
+                      className="px-2 py-1 bg-green-700 hover:bg-green-600 text-white text-xs rounded transition-colors cursor-pointer"
+                      title={`Click to learn more about ${trait}`}
+                    >
+                      {trait}
+                    </button>
+                 ))}
+               </div>
+             </div>
 
             <div className="pt-2 border-t border-gray-600">
               <div className="font-semibold text-yellow-400 mb-1">Typical Roles:</div>

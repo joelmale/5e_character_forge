@@ -58,37 +58,36 @@ export const Step1Details: React.FC<StepProps> = ({ data, updateData, nextStep, 
             }}
             title="Randomize name, alignment, and background"
           />
-          <RandomizeAllButton
-            onClick={() => {
-              // Randomize the entire character
-              const level = randomizeLevel();
-              const identity = randomizeIdentity();
-              const race = randomizeRace();
-              const classAndSkills = randomizeClassAndSkills();
-              const fightingStyle = randomizeFightingStyle(classAndSkills.classSlug);
-              const spells = randomizeSpells(classAndSkills.classSlug, level);
-              const abilities = randomizeAbilities();
-              const feats = randomizeFeats();
-              const equipmentChoices = randomizeEquipmentChoices(classAndSkills.classSlug);
-              const additionalEquipment = randomizeAdditionalEquipment();
-              const languages = randomizeLanguages(race, identity.background);
-              const personality = randomizePersonality();
+            <RandomizeAllButton
+              onClick={() => {
+                // Randomize the entire character (preserve the selected level)
+                const level = data.level;
+                const identity = randomizeIdentity();
+                const race = randomizeRace();
+                const classAndSkills = randomizeClassAndSkills();
+                const fightingStyle = randomizeFightingStyle(classAndSkills.classSlug);
+                const spells = randomizeSpells(classAndSkills.classSlug, level);
+                const abilities = randomizeAbilities();
+                const feats = randomizeFeats();
+                const equipmentChoices = randomizeEquipmentChoices(classAndSkills.classSlug);
+                const additionalEquipment = randomizeAdditionalEquipment();
+                const languages = randomizeLanguages(race, identity.background);
+                const personality = randomizePersonality();
 
-              updateData({
-                level,
-                ...identity,
-                raceSlug: race,
-                ...classAndSkills,
-                selectedFightingStyle: fightingStyle,
-                spellSelection: spells,
-                ...abilities,
-                selectedFeats: feats,
-                equipmentChoices,
-                startingInventory: additionalEquipment,
-                knownLanguages: languages,
-                ...personality
-              });
-            }}
+                updateData({
+                  ...identity,
+                  raceSlug: race,
+                  ...classAndSkills,
+                  selectedFightingStyle: fightingStyle,
+                  spellSelection: spells,
+                  ...abilities,
+                  selectedFeats: feats,
+                  equipmentChoices,
+                  startingInventory: additionalEquipment,
+                  knownLanguages: languages,
+                  ...personality
+                });
+              }}
           />
         </div>
       </div>

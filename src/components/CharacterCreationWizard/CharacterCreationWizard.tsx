@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { WizardProps } from './types/wizard.types';
 import { useWizardState, useWizardNavigation } from './hooks';
 import { WizardHeader, WizardProgressBar, WizardStepContainer } from './components';
+import { getAllRaces } from '../../services/dataService';
+import RacialTraitModal from '../RacialTraitModal';
 import {
   Step0Level,
   Step1Details,
@@ -27,11 +29,35 @@ export const CharacterCreationWizard: React.FC<WizardProps> = ({
     setCurrentStep,
     creationData,
     updateData,
+    resetWizard,
     error,
     setError
   } = useWizardState();
 
   const { nextStep, prevStep, skipToStep, getNextStepLabel } = useWizardNavigation(currentStep, setCurrentStep, creationData);
+
+  // Reset wizard when it opens
+  useEffect(() => {
+    if (isOpen) {
+      resetWizard();
+    }
+  }, [isOpen, resetWizard]);
+
+  // Racial trait modal state
+  const [selectedTrait, setSelectedTrait] = useState<string | null>(null);
+  const [showTraitModal, setShowTraitModal] = useState(false);
+  const [modalPosition, setModalPosition] = useState<{ x: number; y: number } | null>(null);
+
+  const openTraitModal = (trait: string, position?: { x: number; y: number }) => {
+    setSelectedTrait(trait);
+    setModalPosition(position || null);
+    setShowTraitModal(true);
+  };
+
+  const closeTraitModal = () => {
+    setShowTraitModal(false);
+    setSelectedTrait(null);
+  };
 
   if (!isOpen) return null;
 
@@ -60,6 +86,9 @@ export const CharacterCreationWizard: React.FC<WizardProps> = ({
       // Notify parent component to refresh character list
       onCharacterCreated();
 
+      // Reset wizard state for next use
+      resetWizard();
+
       // Close wizard
       onClose();
     } catch (error) {
@@ -68,7 +97,7 @@ export const CharacterCreationWizard: React.FC<WizardProps> = ({
   };
 
   const renderStep = () => {
-    const commonProps = { data: creationData, updateData, nextStep, prevStep, stepIndex: currentStep, getNextStepLabel };
+    const commonProps = { data: creationData, updateData, nextStep, prevStep, stepIndex: currentStep, getNextStepLabel, openTraitModal };
 
     switch (currentStep) {
       case 0: return <Step0Level {...commonProps} />;
@@ -139,6 +168,17 @@ export const CharacterCreationWizard: React.FC<WizardProps> = ({
           {renderStep()}
         </WizardStepContainer>
       </div>
+
+      {/* Racial Trait Modal */}
+      {selectedTrait && (
+        <RacialTraitModal
+          isOpen={showTraitModal}
+          onClose={closeTraitModal}
+          traitName={selectedTrait}
+          raceName={creationData.raceSlug ? getAllRaces().find(r => r.slug === creationData.raceSlug)?.name || 'Unknown Race' : 'Unknown Race'}
+          position={modalPosition}
+        />
+      )}
     </div>
   );
 };

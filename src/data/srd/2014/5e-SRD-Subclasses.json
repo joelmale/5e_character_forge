@@ -1374,21 +1374,51 @@
     "subclass_levels": "/api/2014/subclasses/land/levels",
     "url": "/api/2014/subclasses/land"
   },
-  {
-    "index": "champion",
-    "class": {
-      "index": "fighter",
-      "name": "Fighter",
-      "url": "/api/2014/classes/fighter"
-    },
-    "name": "Champion",
-    "subclass_flavor": "Martial Archetype",
-    "desc": [
-      "The archetypal Champion focuses on the development of raw physical power honed to deadly perfection. Those who model themselves on this archetype combine rigorous training with physical excellence to deal devastating blows."
-    ],
-    "subclass_levels": "/api/2014/subclasses/champion/levels",
-    "url": "/api/2014/subclasses/champion"
-  },
+   {
+     "index": "champion",
+     "class": {
+       "index": "fighter",
+       "name": "Fighter",
+       "url": "/api/2014/classes/fighter"
+     },
+     "name": "Champion",
+     "subclass_flavor": "Martial Archetype",
+     "desc": [
+       "The archetypal Champion focuses on the development of raw physical power honed to deadly perfection. Those who model themselves on this archetype combine rigorous training with physical excellence to deal devastating blows."
+     ],
+     "subclass_levels": "/api/2014/subclasses/champion/levels",
+     "url": "/api/2014/subclasses/champion"
+   },
+   {
+     "index": "battle-master",
+     "class": {
+       "index": "fighter",
+       "name": "Fighter",
+       "url": "/api/2014/classes/fighter"
+     },
+     "name": "Battle Master",
+     "subclass_flavor": "Martial Archetype",
+     "desc": [
+       "Those who emulate the archetypal Battle Master employ martial techniques passed down through generations. To a Battle Master, combat is an academic field, sometimes including subjects beyond battle such as weaponsmithing and calligraphy. Not every fighter absorbs the lessons of history, theory, and artistry that are reflected in the Battle Master archetype, but those who do are well-rounded fighters of great skill and knowledge."
+     ],
+     "subclass_levels": "/api/2014/subclasses/battle-master/levels",
+     "url": "/api/2014/subclasses/battle-master"
+   },
+   {
+     "index": "eldritch-knight",
+     "class": {
+       "index": "fighter",
+       "name": "Fighter",
+       "url": "/api/2014/classes/fighter"
+     },
+     "name": "Eldritch Knight",
+     "subclass_flavor": "Martial Archetype",
+     "desc": [
+       "The archetypal Eldritch Knight combines the martial mastery common to all fighters with a careful study of magic. Eldritch Knights use magical techniques similar to those practiced by wizards. They focus their study on two of the eight schools of magic: abjuration and evocation. Abjuration spells grant an Eldritch Knight additional protection in battle, and evocation spells deal damage to many foes at once, extending the fighter's reach in combat."
+     ],
+     "subclass_levels": "/api/2014/subclasses/eldritch-knight/levels",
+     "url": "/api/2014/subclasses/eldritch-knight"
+   },
   {
     "index": "open-hand",
     "class": {

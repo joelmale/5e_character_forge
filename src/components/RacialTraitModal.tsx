@@ -7,6 +7,7 @@ interface RacialTraitModalProps {
   traitName: string;
   raceName: string;
   traitDescription?: string;
+  position?: { x: number; y: number } | null;
 }
 
 const RacialTraitModal: React.FC<RacialTraitModalProps> = ({
@@ -14,7 +15,8 @@ const RacialTraitModal: React.FC<RacialTraitModalProps> = ({
   onClose,
   traitName,
   raceName,
-  traitDescription
+  traitDescription,
+  position
 }) => {
   if (!isOpen) return null;
 
@@ -145,15 +147,50 @@ const RacialTraitModal: React.FC<RacialTraitModalProps> = ({
     return traitDescriptions[trait] || `This racial trait provides special abilities or bonuses to ${raceName} characters.`;
   };
 
+  // Calculate modal position
+  const getModalStyle = () => {
+    if (position) {
+      // Position near the click location with some offset
+      return {
+        position: 'fixed' as const,
+        left: Math.min(position.x + 10, window.innerWidth - 400), // 400px is approx modal width
+        top: Math.min(position.y + 10, window.innerHeight - 300), // 300px is approx modal height
+        zIndex: 60,
+      };
+    }
+    // Default centered position
+    return {
+      position: 'fixed' as const,
+      left: '50%',
+      top: '50%',
+      transform: 'translate(-50%, -50%)',
+      zIndex: 60,
+    };
+  };
+
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-gray-800 border border-gray-600 rounded-lg max-w-md w-full max-h-[80vh] overflow-y-auto">
+    <div
+      className="fixed inset-0 z-[60]"
+      onClick={(e) => {
+        e.stopPropagation();
+        onClose();
+      }}
+      style={position ? {} : { display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}
+    >
+      <div
+        className="bg-gray-800 border border-gray-600 rounded-lg max-w-md w-full max-h-[80vh] overflow-y-auto shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+        style={getModalStyle()}
+      >
         <div className="flex items-center justify-between p-4 border-b border-gray-600">
           <h3 className="text-lg font-bold text-yellow-300">{traitName}</h3>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-white transition-colors"
-          >
+           <button
+             onClick={(e) => {
+               e.stopPropagation();
+               onClose();
+             }}
+             className="text-gray-400 hover:text-white transition-colors"
+           >
             <X className="w-6 h-6" />
           </button>
         </div>
@@ -169,16 +206,7 @@ const RacialTraitModal: React.FC<RacialTraitModalProps> = ({
               {getTraitDescription(traitName)}
             </p>
           </div>
-        </div>
-
-        <div className="flex justify-end p-4 border-t border-gray-600">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded transition-colors"
-          >
-            Close
-          </button>
-        </div>
+         </div>
       </div>
     </div>
   );

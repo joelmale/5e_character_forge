@@ -84,7 +84,7 @@ export const Step3Class: React.FC<StepProps> = ({ data, updateData, nextStep, pr
                 {category.classes.map(_class => (
                   <button
                     key={_class.slug}
-                    onClick={() => updateData({ classSlug: _class.slug })}
+                     onClick={() => updateData({ classSlug: _class.slug, selectedSkills: [], subclassSlug: null })}
                     className={`p-3 rounded-lg text-left border-2 transition-all ${
                       data.classSlug === _class.slug
                         ? 'bg-red-800 border-red-500 shadow-md'
@@ -253,37 +253,45 @@ export const Step3Class: React.FC<StepProps> = ({ data, updateData, nextStep, pr
         return (
           <div className="bg-gray-700/50 border border-gray-600 rounded-lg p-4 space-y-3">
             <div>
-              <h4 className="text-lg font-bold text-yellow-300">Choose Subclass</h4>
+              <h4 className="text-lg font-bold text-yellow-300">Choose Martial Archetype (Sub-Class)</h4>
               <p className="text-xs text-gray-400 mt-1">
-                Select your {selectedClass.name} subclass specialization
+                Select your {selectedClass.name} specialization
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {availableSubclasses.map(subclass => (
-                <button
-                  key={subclass.slug}
-                  onClick={() => updateData({ subclassSlug: subclass.slug })}
-                  className={`p-3 rounded-lg text-left border-2 transition-all ${
-                    data.subclassSlug === subclass.slug
-                      ? 'bg-purple-800 border-purple-500 shadow-md'
-                      : 'bg-gray-700 border-gray-600 hover:bg-gray-600'
-                  }`}
-                >
-                  <p className="text-sm font-bold text-yellow-300">{subclass.name}</p>
-                  <p className="text-xs text-gray-400 mt-1">{subclass.subclassFlavor}</p>
-                  {subclass.desc && subclass.desc.length > 0 && (
-                    <p className="text-xs text-gray-500 mt-2 line-clamp-2">
-                      {subclass.desc[0]}
-                    </p>
-                  )}
-                </button>
-              ))}
-            </div>
+            {data.level >= 3 ? (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {availableSubclasses.map(subclass => (
+                    <button
+                      key={subclass.slug}
+                      onClick={() => updateData({ subclassSlug: subclass.slug })}
+                      className={`p-3 rounded-lg text-left border-2 transition-all ${
+                        data.subclassSlug === subclass.slug
+                          ? 'bg-purple-800 border-purple-500 shadow-md'
+                          : 'bg-gray-700 border-gray-600 hover:bg-gray-600'
+                      }`}
+                    >
+                      <p className="text-sm font-bold text-yellow-300">{subclass.name}</p>
+                      <p className="text-xs text-gray-400 mt-1">{subclass.subclassFlavor}</p>
+                      {subclass.desc && subclass.desc.length > 0 && (
+                        <p className="text-xs text-gray-500 mt-2 line-clamp-2">
+                          {subclass.desc[0]}
+                        </p>
+                      )}
+                    </button>
+                  ))}
+                </div>
 
-            {!data.subclassSlug && (
-              <div className="text-xs text-yellow-400 mt-2">
-                ⚠️ Please select a subclass
+                {!data.subclassSlug && (
+                  <div className="text-xs text-yellow-400 mt-2">
+                    ⚠️ Please select a subclass
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-lg text-gray-400">This specialization is selected at level 3</p>
               </div>
             )}
           </div>
@@ -296,12 +304,12 @@ export const Step3Class: React.FC<StepProps> = ({ data, updateData, nextStep, pr
         </button>
         <button
           onClick={nextStep}
-          disabled={
-            !data.classSlug ||
-            !selectedClass ||
-            data.selectedSkills.length < (selectedClass.num_skill_choices || 0) ||
-            (getSubclassesByClass(data.classSlug).length > 0 && !data.subclassSlug)
-          }
+           disabled={
+             !data.classSlug ||
+             !selectedClass ||
+             data.selectedSkills.length < (selectedClass.num_skill_choices || 0) ||
+             (getSubclassesByClass(data.classSlug).length > 0 && data.level >= 3 && !data.subclassSlug)
+           }
           className="px-4 py-2 bg-red-600 hover:bg-red-500 rounded-lg text-white flex items-center disabled:bg-gray-600 disabled:cursor-not-allowed"
         >
           Next: {getNextStepLabel?.() || 'Continue'} <ArrowRight className="w-4 h-4 ml-2" />

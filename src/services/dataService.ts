@@ -419,6 +419,7 @@ export function transformClass(srdClass: SRDClass, year: number = 2014): Class {
     }
 
     spellcasting = {
+      level: srdClass.spellcasting.level || 1,
       ability,
       type,
       cantripsKnown,

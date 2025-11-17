@@ -4,6 +4,8 @@ import { Plus, Trash2, BookOpen, Shield, Download, Upload } from 'lucide-react';
 // REFACTORED: Loader2 import removed - was unused
 import { CharacterCreationWizard } from './components/CharacterCreationWizard';
 import { CharacterSheet } from './components/CharacterSheet';
+import NewCharacterModal from './components/NewCharacterModal';
+import ManualEntryScreen from './components/ManualEntryScreen';
 
 
 import { DiceBox3D } from './components/DiceSystem/DiceBox3D';
@@ -150,6 +152,10 @@ const App: React.FC = () => {
   const [subclassModalState, setSubclassModalState] = useState<{isOpen: boolean, characterId: string | null, characterClass: string | null}>({ isOpen: false, characterId: null, characterClass: null });
   const [asiModalState, setAsiModalState] = useState<{isOpen: boolean, characterId: string | null}>({ isOpen: false, characterId: null });
 
+  // New character creation modal states
+  const [isNewCharacterModalOpen, setIsNewCharacterModalOpen] = useState<boolean>(false);
+  const [creationMethod, setCreationMethod] = useState<'wizard' | 'personality' | 'manual' | null>(null);
+
   const selectedCharacter = useMemo(() => {
     return characters.find(c => c.id === selectedCharacterId);
   }, [characters, selectedCharacterId]);
@@ -210,6 +216,36 @@ const App: React.FC = () => {
       return newSet;
     });
   }, []);
+
+  // Delete all selected characters
+  const handleDeleteSelectedCharacters = useCallback(async () => {
+    if (selectedCharacterIds.size === 0) return;
+
+    const selectedCount = selectedCharacterIds.size;
+    const characterNames = characters
+      .filter(c => selectedCharacterIds.has(c.id))
+      .map(c => c.name)
+      .join(', ');
+
+    if (!window.confirm(`Are you sure you want to delete ${selectedCount} selected character${selectedCount !== 1 ? 's' : ''}? This action cannot be undone.\n\nCharacters: ${characterNames}`)) {
+      return;
+    }
+
+    try {
+      // Delete all selected characters
+      for (const characterId of selectedCharacterIds) {
+        await deleteCharacter(characterId);
+      }
+
+      // Clear selection and reload characters
+      setSelectedCharacterIds(new Set());
+      setSelectedCharacterId(null);
+      await loadCharacters();
+      setRollResult({ text: `Successfully deleted ${selectedCount} character${selectedCount !== 1 ? 's' : ''}.`, value: null });
+    } catch (error) {
+      setRollResult({ text: 'Error deleting selected characters.', value: null });
+    }
+  }, [selectedCharacterIds, characters, loadCharacters]);
 
   // CRUD Operations
   const handleDeleteCharacter = useCallback(async (id: string) => {
@@ -521,6 +557,29 @@ const App: React.FC = () => {
     }
   }, []);
 
+  // New character creation handlers
+  const handleSelectManualEntry = useCallback(() => {
+    setIsNewCharacterModalOpen(false);
+    setCreationMethod('manual');
+  }, []);
+
+  const handleSelectWizard = useCallback(() => {
+    setIsNewCharacterModalOpen(false);
+    setCreationMethod('wizard');
+    setIsWizardOpen(true);
+  }, []);
+
+  const handleSelectPersonality = useCallback(() => {
+    setIsNewCharacterModalOpen(false);
+    setCreationMethod('personality');
+    // TODO: Open personality wizard
+  }, []);
+
+  const handleBackToModal = useCallback(() => {
+    setCreationMethod(null);
+    setIsNewCharacterModalOpen(true);
+  }, []);
+
   // Equipment management handlers
   const recalculateAC = useCallback((character: Character): number => {
     let armorClass = 10 + character.abilities.DEX.modifier; // Default unarmored
@@ -823,33 +882,42 @@ const App: React.FC = () => {
           <h1 className="text-4xl font-extrabold text-red-500 mb-4 md:mb-0">
             The Character Forge
           </h1>
-          <div className="flex flex-col space-y-3 md:space-y-0 md:flex-row md:space-x-3 w-full md:w-auto">
+           <div className="flex flex-col space-y-3 md:space-y-0 md:flex-row md:space-x-3 w-full md:w-auto">
+              <button
+               onClick={() => setIsNewCharacterModalOpen(true)}
+               className="w-full md:w-auto px-6 py-3 bg-red-600 hover:bg-red-500 rounded-xl text-white font-bold shadow-red-800/50 shadow-lg transition-all flex items-center justify-center"
+             >
+               <Plus className="w-5 h-5 mr-2" />
+               New Character
+             </button>
              <button
-              onClick={() => setIsWizardOpen(true)}
-              className="w-full md:w-auto px-6 py-3 bg-red-600 hover:bg-red-500 rounded-xl text-white font-bold shadow-red-800/50 shadow-lg transition-all flex items-center justify-center"
-            >
-              <Plus className="w-5 h-5 mr-2" />
-              New Character Wizard
-            </button>
-            <button
-              onClick={handleExportData}
-              disabled={characters.length === 0}
-              className="w-full md:w-auto px-6 py-3 bg-blue-600 hover:bg-blue-500 rounded-xl text-white font-bold shadow-blue-800/50 shadow-lg transition-all flex items-center justify-center disabled:bg-gray-600 disabled:cursor-not-allowed"
-            >
-              <Download className="w-5 h-5 mr-2" />
-              Export Data
-            </button>
-            <label className="w-full md:w-auto px-6 py-3 bg-green-600 hover:bg-green-500 rounded-xl text-white font-bold shadow-green-800/50 shadow-lg transition-all flex items-center justify-center cursor-pointer">
-              <Upload className="w-5 h-5 mr-2" />
-              Import Data
-              <input
-                type="file"
-                accept="application/json"
-                onChange={handleImportData}
-                className="hidden"
-              />
-            </label>
-          </div>
+               onClick={handleExportData}
+               disabled={characters.length === 0}
+               className="w-full md:w-auto px-6 py-3 bg-blue-600 hover:bg-blue-500 rounded-xl text-white font-bold shadow-blue-800/50 shadow-lg transition-all flex items-center justify-center disabled:bg-gray-600 disabled:cursor-not-allowed"
+             >
+               <Download className="w-5 h-5 mr-2" />
+               Export Data
+             </button>
+             <button
+               onClick={handleDeleteSelectedCharacters}
+               disabled={selectedCharacterIds.size === 0}
+               className="w-full md:w-auto px-6 py-3 bg-red-700 hover:bg-red-600 rounded-xl text-white font-bold shadow-red-900/50 shadow-lg transition-all flex items-center justify-center disabled:bg-gray-600 disabled:cursor-not-allowed"
+               title={selectedCharacterIds.size > 0 ? `Delete ${selectedCharacterIds.size} selected character${selectedCharacterIds.size !== 1 ? 's' : ''}` : 'Select characters to delete'}
+             >
+               <Trash2 className="w-5 h-5 mr-2" />
+               Delete Selected ({selectedCharacterIds.size})
+             </button>
+             <label className="w-full md:w-auto px-6 py-3 bg-green-600 hover:bg-green-500 rounded-xl text-white font-bold shadow-green-800/50 shadow-lg transition-all flex items-center justify-center cursor-pointer">
+               <Upload className="w-5 h-5 mr-2" />
+               Import Data
+               <input
+                 type="file"
+                 accept="application/json"
+                 onChange={handleImportData}
+                 className="hidden"
+               />
+             </label>
+           </div>
         </header>
 
         {/* Enhanced Dice Roll Display */}
@@ -941,13 +1009,49 @@ const App: React.FC = () => {
           )}
         </section>
 
+        {/* New Character Creation Modal */}
+        <NewCharacterModal
+          isOpen={isNewCharacterModalOpen}
+          onClose={() => setIsNewCharacterModalOpen(false)}
+          onSelectManualEntry={handleSelectManualEntry}
+          onSelectWizard={handleSelectWizard}
+          onSelectPersonality={handleSelectPersonality}
+        />
+
+        {/* Manual Entry Screen */}
+        {creationMethod === 'manual' && (
+          <ManualEntryScreen onBack={handleBackToModal} />
+        )}
+
         {/* Character Creation Wizard */}
         <CharacterCreationWizard
           isOpen={isWizardOpen}
-          onClose={() => setIsWizardOpen(false)}
-          onCharacterCreated={loadCharacters}
+          onClose={() => {
+            setIsWizardOpen(false);
+            setCreationMethod(null);
+          }}
+          onCharacterCreated={() => {
+            loadCharacters();
+            setCreationMethod(null);
+          }}
           setRollResult={setRollResult}
         />
+
+        {/* TODO: Personality Wizard */}
+        {creationMethod === 'personality' && (
+          <div className="min-h-screen bg-gray-900 text-gray-100 font-sans flex items-center justify-center">
+            <div className="text-center p-12 bg-gray-800 rounded-xl">
+              <h2 className="text-2xl font-bold text-yellow-300 mb-4">Personality Wizard</h2>
+              <p className="text-gray-300 mb-6">Coming soon! This will guide character creation based on personality preferences.</p>
+              <button
+                onClick={handleBackToModal}
+                className="px-6 py-3 bg-purple-600 hover:bg-purple-500 rounded-lg text-white"
+              >
+                Back to Options
+              </button>
+            </div>
+          </div>
+        )}
 
         {cantripModalState.isOpen && (() => {
           const character = characters.find(c => c.id === cantripModalState.characterId);

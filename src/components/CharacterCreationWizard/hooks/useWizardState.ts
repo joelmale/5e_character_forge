@@ -12,11 +12,19 @@ export const useWizardState = () => {
     setCreationData(prev => ({ ...prev, ...updates }));
   }, []);
 
+  const resetWizard = useCallback(() => {
+    setCurrentStep(0);
+    setCreationData(initialCreationData);
+    setIsLoading(false);
+    setError(null);
+  }, []);
+
   return {
     currentStep,
     setCurrentStep,
     creationData,
     updateData,
+    resetWizard,
     isLoading,
     setIsLoading,
     error,

@@ -142,6 +142,7 @@ export interface Character {
   };
   equippedArmor?: string; // Equipment slug of equipped armor
   equippedWeapons?: string[]; // Equipment slugs of equipped weapons (primary, offhand, etc.)
+  trinket?: TrinketData; // Optional trinket rolled during character creation
 
   // Combat state
   temporaryHitPoints?: number;
@@ -335,6 +336,9 @@ export interface CharacterCreationData {
   // Language selection
   knownLanguages?: string[]; // Array of selected language names
 
+  // Trinket selection
+  selectedTrinket?: TrinketData;
+
   // Custom text for traits
   personality: string;
   ideals: string;
@@ -384,6 +388,7 @@ export interface Class {
 
   // Sprint 2: Spellcasting configuration
   spellcasting?: {
+    level: number; // Level at which spellcasting is gained (usually 1, but 2 for some classes)
     ability: 'INT' | 'WIS' | 'CHA'; // Spellcasting ability modifier
     type: SpellcastingType; // How spells are learned/prepared
     cantripsKnown: number; // Number of cantrips at level 1
@@ -414,6 +419,18 @@ export interface ClassCategory {
   icon: string;
   description: string;
   classes: Class[];
+}
+
+// Trinket data structure
+export interface TrinketData {
+  roll: number;
+  description: string;
+  short_name: string;
+  source: string;
+  type: string;
+  tags: string[];
+  roleplay_prompt: string;
+  dm_hook: string;
 }
 
 export type ClassWithDefaults = Omit<Class, 'num_skill_choices' | 'equipment_choices'> & {

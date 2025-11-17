@@ -15,6 +15,7 @@ export interface StepProps {
   stepIndex: number;
   skipToStep?: (step: number) => void;
   getNextStepLabel?: () => string;
+  openTraitModal?: (trait: string, position?: { x: number; y: number }) => void;
 }
 
 export interface EquipmentBrowserProps extends StepProps {

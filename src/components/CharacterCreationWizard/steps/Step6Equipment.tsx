@@ -1,9 +1,10 @@
 import React from 'react';
-import { ArrowLeft, ArrowRight, Shuffle, ChevronDown } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Shuffle, ChevronDown, Dice6, Info } from 'lucide-react';
 import { StepProps } from '../types/wizard.types';
-import { EquipmentPackage } from '../../../types/dnd';
+import { EquipmentPackage, TrinketData } from '../../../types/dnd';
 import { loadClasses, BACKGROUNDS, EQUIPMENT_PACKAGES } from '../../../services/dataService';
 import { validateEquipmentChoices } from '../../../utils/equipmentSelectionUtils';
+import trinketTable from '../../../data/trinketTable.json';
 
 interface EquipmentPackDisplayProps {
   pack: EquipmentPackage;
@@ -111,6 +112,10 @@ export const Step6Equipment: React.FC<StepProps & { skipToStep?: (step: number) 
   const allClasses = loadClasses();
   const selectedClass = allClasses.find(c => c.slug === data.classSlug);
 
+  // Trinket rolling state
+  const [useExtendedTrinkets, setUseExtendedTrinkets] = React.useState(false);
+  const [rolledTrinket, setRolledTrinket] = React.useState<TrinketData | null>(data.selectedTrinket || null);
+
   if (!selectedClass) {
     return <div>Loading...</div>;
   }
@@ -130,6 +135,18 @@ export const Step6Equipment: React.FC<StepProps & { skipToStep?: (step: number) 
   };
 
   const allChoicesMade = validateEquipmentChoices(data.equipmentChoices || []);
+
+  // Trinket rolling function
+  const rollForTrinket = () => {
+    const maxRoll = useExtendedTrinkets ? 200 : 100;
+    const roll = Math.floor(Math.random() * maxRoll) + 1;
+    const trinket = (trinketTable as TrinketData[]).find(t => t.roll === roll);
+
+    if (trinket) {
+      updateData({ selectedTrinket: trinket });
+      setRolledTrinket(trinket);
+    }
+  };
 
   return (
     <div className='space-y-6'>
@@ -232,13 +249,125 @@ export const Step6Equipment: React.FC<StepProps & { skipToStep?: (step: number) 
         return null;
       })()}
 
-      {!allChoicesMade && (
-        <div className="text-xs text-yellow-400">
-          ⚠️ Please make all equipment choices before continuing
-        </div>
-      )}
+       {!allChoicesMade && (
+         <div className="text-xs text-yellow-400">
+           ⚠️ Please make all equipment choices before continuing
+         </div>
+       )}
 
-      <div className='flex justify-between items-center gap-3'>
+       {/* Fighter Build Recommendations */}
+       {selectedClass?.slug === 'fighter' && (
+         <div className="bg-gray-700/50 border border-gray-600 rounded-lg p-4 space-y-4">
+           <h4 className="text-lg font-bold text-yellow-300">Fighter Build Recommendations</h4>
+           <p className="text-xs text-gray-400">
+             Choose your starting equipment based on your preferred playstyle. Each build optimizes for different combat roles.
+           </p>
+
+           {/* Build 1: The Defender (Tank) */}
+           <div className="border border-green-600 rounded-lg p-3 bg-green-900/10">
+             <h5 className="font-semibold text-green-400 text-sm">Build 1: The Defender (Tank)</h5>
+             <p className="text-xs text-gray-300 mt-1">Highest possible Armor Class from level 1. You are the party's protector.</p>
+             <div className="text-xs text-gray-400 mt-2 space-y-1">
+               <p><strong>Choice 1:</strong> (a) Chain Mail → Gives you 16 AC right away</p>
+               <p><strong>Choice 2:</strong> (a) Martial weapon + shield → Shield gives +2 AC bonus</p>
+               <p><strong>Choice 3:</strong> (b) Two handaxes → Strength-based ranged backup</p>
+               <p><strong>Choice 4:</strong> (a) Dungeoneer's pack → Crowbar and utility items</p>
+               <p className="text-yellow-300 font-medium mt-2">Result: 18 AC, solid melee weapon, ranged backup</p>
+             </div>
+           </div>
+
+           {/* Build 2: The Striker (Two-Handed Damage) */}
+           <div className="border border-red-600 rounded-lg p-3 bg-red-900/10">
+             <h5 className="font-semibold text-red-400 text-sm">Build 2: The Striker (Two-Handed Damage)</h5>
+             <p className="text-xs text-gray-300 mt-1">Maximum damage output, sacrificing some AC for power.</p>
+             <div className="text-xs text-gray-400 mt-2 space-y-1">
+               <p><strong>Choice 1:</strong> (a) Chain Mail → Best armor available (16 AC)</p>
+               <p><strong>Choice 2:</strong> (b) Two martial weapons → Greatsword/Maul (2d6 damage)</p>
+               <p><strong>Choice 3:</strong> (b) Two handaxes → Strength-based ranged backup</p>
+               <p><strong>Choice 4:</strong> (a) Dungeoneer's pack → Utility items</p>
+               <p className="text-yellow-300 font-medium mt-2">Result: 16 AC, highest damage dice, ranged backups</p>
+             </div>
+           </div>
+
+           {/* Build 3: The Archer (Dexterity-Based) */}
+           <div className="border border-blue-600 rounded-lg p-3 bg-blue-900/10">
+             <h5 className="font-semibold text-blue-400 text-sm">Build 3: The Archer (Dexterity-Based)</h5>
+             <p className="text-xs text-gray-300 mt-1">Ranged combat specialist using high Dexterity.</p>
+             <div className="text-xs text-gray-400 mt-2 space-y-1">
+               <p><strong>Choice 1:</strong> (b) Leather armor + longbow + 20 arrows</p>
+               <p><strong>Choice 2:</strong> (a) Rapier + shield → Finesse melee backup</p>
+               <p><strong>Choice 3:</strong> (a) Light crossbow → Sell for 25 gp</p>
+               <p><strong>Choice 4:</strong> (a) Dungeoneer's pack → Rope/pitons for positioning</p>
+               <p className="text-yellow-300 font-medium mt-2">Result: 14 AC, best bow, finesse melee option</p>
+             </div>
+           </div>
+
+           {/* Build 4: Gold Option */}
+           <div className="border border-yellow-600 rounded-lg p-3 bg-yellow-900/10">
+             <h5 className="font-semibold text-yellow-400 text-sm">Pro-Tip: The Gold Option</h5>
+             <p className="text-xs text-gray-300 mt-1">Take starting gold instead of equipment for maximum flexibility.</p>
+             <div className="text-xs text-gray-400 mt-2 space-y-1">
+               <p><strong>Average Gold:</strong> 175 gp (5d4 × 10)</p>
+               <p><strong>Can Buy:</strong> Chain Mail (50 gp) + Greatsword (50 gp) + 2 Handaxes (10 gp) + Dungeoneer's Pack (12 gp)</p>
+               <p><strong>Remaining:</strong> 53 gp for javelins, potions, etc.</p>
+               <p className="text-yellow-300 font-medium mt-2">Advantage: More flexibility, potentially better gear</p>
+             </div>
+           </div>
+         </div>
+       )}
+
+       {/* Trinket Rolling Section */}
+       <div className="bg-gray-700/50 border border-gray-600 rounded-lg p-4 space-y-3">
+         <h4 className="text-lg font-bold text-yellow-300">Roll for Trinket</h4>
+         <p className="text-xs text-gray-400">
+           Optionally roll for a trinket from the Player's Handbook. Extended trinkets include additional items from The Wild Beyond the Witchlight.
+         </p>
+
+         {/* Extended Trinkets Checkbox */}
+         <label className="flex items-center space-x-2 cursor-pointer">
+           <input
+             type="checkbox"
+             checked={useExtendedTrinkets}
+             onChange={(e) => setUseExtendedTrinkets(e.target.checked)}
+             className="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500 focus:ring-2"
+           />
+           <span className="text-sm text-gray-300">Extended Trinkets</span>
+           <span title="Trinkets from The Wild Beyond the Witchlight">
+             <Info className="w-4 h-4 text-gray-400" />
+           </span>
+         </label>
+
+         {/* Roll Button */}
+         <button
+           onClick={rollForTrinket}
+           className="flex items-center space-x-2 px-4 py-2 bg-purple-600 hover:bg-purple-500 rounded-lg text-white transition-colors"
+         >
+           <Dice6 className="w-4 h-4" />
+           <span>Roll d{useExtendedTrinkets ? '200' : '100'}</span>
+         </button>
+
+         {/* Rolled Trinket Display */}
+         {rolledTrinket && (
+           <div className="bg-gray-800/50 border border-gray-600 rounded-lg p-3 space-y-2">
+             <div className="flex items-center justify-between">
+               <h5 className="text-sm font-semibold text-yellow-300">
+                 {rolledTrinket.short_name} (Roll: {rolledTrinket.roll})
+               </h5>
+               <span className="text-xs text-gray-500">{rolledTrinket.source}</span>
+             </div>
+             <p className="text-sm text-gray-300 leading-relaxed">
+               {rolledTrinket.description}
+             </p>
+             <div className="border-t border-gray-600 pt-2">
+               <p className="text-xs text-blue-300 italic">
+                 {rolledTrinket.roleplay_prompt}
+               </p>
+             </div>
+           </div>
+         )}
+       </div>
+
+       <div className='flex justify-between items-center gap-3'>
         <button onClick={prevStep} className="px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded-lg text-white flex items-center">
           <ArrowLeft className="w-4 h-4 mr-2" /> Back
         </button>

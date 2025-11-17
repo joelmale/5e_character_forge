@@ -215,6 +215,15 @@ Located in `/src/data/srd/`:
 - Manual chunks: React vendor bundle separated
 - Output: `dist/`
 
+### Tailwind CSS v4 Configuration
+
+**Setup:**
+- Uses Tailwind CSS v4.1.17 with CSS-first configuration
+- PostCSS plugin: `@tailwindcss/postcss`
+- CSS import: `@import "tailwindcss";` in `src/index.css`
+- Custom theme values defined using `@theme` directive in CSS
+- No `tailwind.config.js` file needed (removed for v4 compatibility)
+
 ### Docker Deployment
 
 ```bash
