@@ -4,19 +4,56 @@ on:
   push:
     branches: [ master, main ]
     tags: [ 'v*' ]
+  pull_request:
+    branches: [ master, main ]
 
 jobs:
+  # Quality checks before building
+  quality-check:
+    name: Quality Checks
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' || (github.event_name == 'push' && !contains(github.event.head_commit.message, 'skip ci'))
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v6
+      with:
+        node-version: '20'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run linting
+      run: npm run lint
+
+    - name: Run tests
+      run: npm test -- --run --coverage
+
+    - name: Build check
+      run: npm run build
+
+  # Docker build and push
   build-and-push:
     name: Build and Push Docker Image
     runs-on: ubuntu-latest
+    needs: quality-check
     if: github.event_name == 'push' && !contains(github.event.head_commit.message, 'skip ci')
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
 
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v3
+
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
+      with:
+        buildkitd-flags: --allow-insecure-entitlement security.insecure
 
     - name: Log in to Docker Hub
       uses: docker/login-action@v3
@@ -33,16 +70,29 @@ jobs:
           type=ref,event=branch
           type=ref,event=tag
           type=sha,prefix={{branch}}-
+          type=raw,value=latest,enable={{is_default_branch}}
 
     - name: Build and push Docker image
       uses: docker/build-push-action@v6
       with:
         context: .
+        platforms: linux/amd64,linux/arm64
         push: true
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
+        cache-from: |
+          type=gha,scope=build
+          type=registry,ref=joelmale/5e-character-forge:latest
+        cache-to: type=gha,mode=max,scope=build
+        build-args: |
+          BUILDKIT_INLINE_CACHE=1
+        provenance: false
+        sbom: false
+
+    - name: Generate artifact attestation
+      uses: actions/attest-build-provenance@v1
+      with:
+        subject-path: /tmp/digest.txt
 
     - name: Trigger deployment webhook
       if: github.ref == 'refs/heads/master'
