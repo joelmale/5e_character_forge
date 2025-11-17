@@ -108,14 +108,14 @@ export const SkillEntry: React.FC<SkillEntryProps> = ({
           title={`${SKILL_DESCRIPTIONS[name]}\n\nRoll ${skillLabel} check (${rollType}) - Right-click for options`}
         >
           <div className="flex items-center gap-1.5">
-            {/* Proficiency bubble */}
-            <div className={`w-3 h-3 rounded-full border ${skill.proficient ? 'bg-yellow-500 border-yellow-500' : 'border-gray-500'}`} />
-            {/* Roll indicator */}
-            {getRollIcon() && (
-              <span className="text-xs font-bold text-green-400">{getRollIcon()}</span>
-            )}
-            <span className="text-xs font-medium text-gray-300 group-hover:text-white">{skillLabel}</span>
-          </div>
+             {/* Proficiency bubble */}
+             <div className={`w-3 h-3 rounded-full border ${skill.proficient ? 'bg-yellow-500 border-yellow-500' : 'border-gray-500'}`} />
+             {/* Roll indicator */}
+             {getRollIcon() && (
+               <span className="text-xs font-bold text-green-400">{getRollIcon()}</span>
+             )}
+             <span className="text-xs font-medium text-gray-300 group-hover:text-white">{skillLabel}</span>
+           </div>
           <span className="font-mono text-sm font-bold text-yellow-300">{formatModifier(skill.value)}</span>
         </button>
 
@@ -179,13 +179,17 @@ export const SkillEntry: React.FC<SkillEntryProps> = ({
         title={`${SKILL_DESCRIPTIONS[name]}\n\nRoll ${skillLabel} check (${rollType}) - Right-click for options`}
       >
         <div className="flex items-center gap-2">
-          {getRollIcon() && (
-            <span className="text-xs font-bold text-green-400">{getRollIcon()}</span>
-          )}
-          <span className="truncate">
-            {skillLabel}
-          </span>
-        </div>
+           {getRollIcon() && (
+             <span className="text-xs font-bold text-green-400">{getRollIcon()}</span>
+           )}
+           <span className="truncate">
+             {skillLabel}
+           </span>
+           {/* Proficiency indicator */}
+           {skill.proficient && (
+             <span className="text-yellow-400">●</span>
+           )}
+         </div>
         <span className="font-mono font-bold text-yellow-300 ml-1">{formatModifier(skill.value)}</span>
       </button>
 

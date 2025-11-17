@@ -38,14 +38,28 @@ export const getAllCharacters = async (): Promise<Character[]> => {
 };
 
 export const addCharacter = async (character: Character): Promise<string> => {
+  console.log('💾 [DB] Adding character:', {
+    id: character.id,
+    name: character.name,
+    race: character.race,
+    class: character.class,
+    level: character.level
+  });
+
   const db = await openDB();
   return new Promise((resolve, reject) => {
     const transaction = db.transaction([STORE_NAME], 'readwrite');
     const objectStore = transaction.objectStore(STORE_NAME);
     const request = objectStore.add(character);
 
-    request.onerror = () => reject(request.error);
-    request.onsuccess = () => resolve(character.id);
+    request.onerror = () => {
+      console.error('❌ [DB] Failed to add character:', request.error);
+      reject(request.error);
+    };
+    request.onsuccess = () => {
+      console.log('✅ [DB] Character added successfully');
+      resolve(character.id);
+    };
   });
 };
 
