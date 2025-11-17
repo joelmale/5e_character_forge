@@ -6,12 +6,30 @@ import { migrateSpellSelectionToCharacter } from '../utils/spellUtils';
  * Calculate final character stats from character creation data
  */
 export const calculateCharacterStats = (data: CharacterCreationData): Character => {
+  console.log('🔧 [CharacterCreation] Starting stat calculation');
+  console.log('📊 [CharacterCreation] Input data:', {
+    raceSlug: data.raceSlug,
+    classSlug: data.classSlug,
+    level: data.level,
+    background: data.background,
+    abilities: data.abilities,
+    selectedSkills: data.selectedSkills
+  });
+
   const raceData = getAllRaces().find(r => r.slug === data.raceSlug);
   const classData = loadClasses().find(c => c.slug === data.classSlug);
 
+  console.log('🔍 [CharacterCreation] Data lookup results:', {
+    raceData: raceData ? { name: raceData.name, slug: raceData.slug } : null,
+    classData: classData ? { name: classData.name, slug: classData.slug } : null
+  });
+
   if (!raceData || !classData) {
+    console.error('❌ [CharacterCreation] Missing race or class data - throwing error');
     throw new Error("Incomplete creation data.");
   }
+
+  console.log('✅ [CharacterCreation] Data validation passed, proceeding with character creation');
 
   const finalAbilities: Character['abilities'] = {} as Character['abilities'];
 

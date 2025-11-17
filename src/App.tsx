@@ -6,6 +6,7 @@ import { CharacterCreationWizard } from './components/CharacterCreationWizard';
 import { CharacterSheet } from './components/CharacterSheet';
 import NewCharacterModal from './components/NewCharacterModal';
 import ManualEntryScreen from './components/ManualEntryScreen';
+import PersonalityWizard from './components/PersonalityWizard';
 
 
 import { DiceBox3D } from './components/DiceSystem/DiceBox3D';
@@ -147,7 +148,7 @@ const App: React.FC = () => {
     details?: Array<{ value: number; kept: boolean; critical?: 'success' | 'failure' }>
   }>({ text: 'Ready to Roll!', value: null });
   const [featureModal, setFeatureModal] = useState<{name: string, description: string, source?: string} | null>(null);
-  const [equipmentModal, setEquipmentModal] = useState<Equipment | null>(null);
+  const [equipmentModal, setEquipmentModal] = useState<Equipment | { slug: string } | null>(null);
   const [cantripModalState, setCantripModalState] = useState<{isOpen: boolean, characterId: string | null, characterClass: string | null}>({ isOpen: false, characterId: null, characterClass: null });
   const [subclassModalState, setSubclassModalState] = useState<{isOpen: boolean, characterId: string | null, characterClass: string | null}>({ isOpen: false, characterId: null, characterClass: null });
   const [asiModalState, setAsiModalState] = useState<{isOpen: boolean, characterId: string | null}>({ isOpen: false, characterId: null });
@@ -184,6 +185,8 @@ const App: React.FC = () => {
       }
     }
   }, []);
+
+
 
   // Handle dice roll - use DiceContext's rollDice function
   const handleDiceRoll = useCallback((roll: DiceRoll) => {
@@ -572,8 +575,90 @@ const App: React.FC = () => {
   const handleSelectPersonality = useCallback(() => {
     setIsNewCharacterModalOpen(false);
     setCreationMethod('personality');
-    // TODO: Open personality wizard
   }, []);
+
+  const handlePersonalityComplete = useCallback(async (characterData: any) => {
+    console.log('🚀 [App] Starting personality character creation');
+    console.log('📦 [App] Received character data:', {
+      raceSlug: characterData?.raceSlug,
+      classSlug: characterData?.classSlug,
+      background: characterData?.background,
+      level: characterData?.level,
+      abilities: characterData?.abilities,
+      selectedSkills: characterData?.selectedSkills
+    });
+
+    // Validate received data
+    if (!characterData) {
+      console.error('❌ [App] No character data received');
+      setRollResult({
+        text: 'Error: No character data received.',
+        value: null
+      });
+      return;
+    }
+
+    if (!characterData.raceSlug || !characterData.classSlug) {
+      console.error('❌ [App] Missing required slugs:', {
+        raceSlug: characterData.raceSlug,
+        classSlug: characterData.classSlug
+      });
+      setRollResult({
+        text: 'Error: Missing required character data.',
+        value: null
+      });
+      return;
+    }
+
+    // Create the character directly from the summary screen
+    try {
+      console.log('🔧 [App] Importing utilities...');
+      const { calculateCharacterStats } = await import('./utils/characterCreationUtils');
+      const { addCharacter } = await import('./services/dbService');
+      const { generateUUID } = await import('./services/diceService');
+
+      console.log('⚡ [App] Calculating character stats...');
+      const character = calculateCharacterStats(characterData);
+      console.log('✅ [App] Character stats calculated:', {
+        name: character.name,
+        race: character.race,
+        class: character.class,
+        level: character.level
+      });
+
+      console.log('🆔 [App] Generating UUID...');
+      const characterWithId = {
+        ...character,
+        id: generateUUID()
+      };
+      console.log('✅ [App] Character with ID created:', {
+        id: characterWithId.id,
+        name: characterWithId.name
+      });
+
+      console.log('💾 [App] Saving to database...');
+      const savedId = await addCharacter(characterWithId);
+      console.log('✅ [App] Character saved successfully with ID:', savedId);
+
+      console.log('🔄 [App] Refreshing character list...');
+      await loadCharacters();
+      console.log('✅ [App] Character list refreshed');
+
+      console.log('🎉 [App] Character creation complete');
+      setCreationMethod(null);
+
+      setRollResult({
+        text: `Character "${characterWithId.name || 'Unnamed Hero'}" created successfully from personality profile!`,
+        value: null
+      });
+    } catch (error) {
+      console.error('❌ [App] Character creation failed:', error);
+      setRollResult({
+        text: `Error creating character from personality profile: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        value: null
+      });
+    }
+  }, [loadCharacters]);
 
   const handleBackToModal = useCallback(() => {
     setCreationMethod(null);
@@ -1037,20 +1122,14 @@ const App: React.FC = () => {
           setRollResult={setRollResult}
         />
 
-        {/* TODO: Personality Wizard */}
+        {/* Personality Wizard */}
         {creationMethod === 'personality' && (
-          <div className="min-h-screen bg-gray-900 text-gray-100 font-sans flex items-center justify-center">
-            <div className="text-center p-12 bg-gray-800 rounded-xl">
-              <h2 className="text-2xl font-bold text-yellow-300 mb-4">Personality Wizard</h2>
-              <p className="text-gray-300 mb-6">Coming soon! This will guide character creation based on personality preferences.</p>
-              <button
-                onClick={handleBackToModal}
-                className="px-6 py-3 bg-purple-600 hover:bg-purple-500 rounded-lg text-white"
-              >
-                Back to Options
-              </button>
-            </div>
-          </div>
+          <PersonalityWizard
+            isOpen={creationMethod === 'personality'}
+            onClose={() => setCreationMethod(null)}
+            onComplete={handlePersonalityComplete}
+            onBack={handleBackToModal}
+          />
         )}
 
         {cantripModalState.isOpen && (() => {

@@ -88,11 +88,11 @@ export const AbilityScoreBlock: React.FC<AbilityScoreBlockProps> = ({
             <span className="text-xs font-bold text-gray-400 uppercase mb-1 font-eb-garamond">{name}</span>
           <div className="relative w-16 h-16">
             {/* Outer circle */}
-            <div className="absolute inset-0 rounded-full border-4 border-gray-600 bg-gray-800 group-hover:border-red-500 group-hover:bg-red-900/30 transition-all" />
-            {/* Score */}
-            <div className="absolute inset-0 flex items-center justify-center">
-              <span className="text-2xl font-bold text-white">{ability.score}</span>
-            </div>
+             <div className="absolute inset-0 rounded-full border-4 border-gray-600 bg-gray-800 group-hover:border-red-500 group-hover:bg-red-900/30 transition-all" />
+           {/* Score */}
+           <div className="absolute inset-0 flex items-center justify-center">
+             <span className="text-2xl font-bold text-white">{ability.score}</span>
+           </div>
             {/* Roll indicator */}
             {getRollIcon() && (
               <div className="absolute -top-1 -right-1 w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">

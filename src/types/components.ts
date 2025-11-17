@@ -1,5 +1,5 @@
 // Shared component interfaces extracted from App.tsx
-import { Character, CharacterCreationData, Equipment, Feature } from './dnd';
+import { Character, CharacterCreationData, Equipment, Feature, AbilityName, SkillName } from './dnd';
 import { DiceRoll } from '../services/diceService';
 
 export interface CharacterSheetProps {
