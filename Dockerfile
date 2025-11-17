@@ -16,7 +16,7 @@ COPY postcss.config.js ./
 
 # Install dependencies with cache mount for faster builds
 RUN --mount=type=cache,target=/root/.npm \
-    npm ci --only=production && \
+    npm ci && \
     npm cache clean --force
 
 # Copy source code in smaller chunks for better layer caching
