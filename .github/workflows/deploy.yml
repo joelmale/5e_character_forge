@@ -46,7 +46,7 @@ jobs:
 
     - name: Trigger deployment webhook
       if: github.ref == 'refs/heads/master'
-      uses: joelwmale/webhook-action@v2.1.0
+      uses: joelwmale/webhook-action@2.4.1
       with:
         url: ${{ secrets.SWARM_WEBHOOK_URL }}
         headers: '{"Authorization": "Bearer ${{ secrets.SWARM_WEBHOOK_TOKEN }}"}'
