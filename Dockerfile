@@ -21,7 +21,6 @@ RUN --mount=type=cache,target=/root/.npm \
     npm cache clean --force
 
 # Copy source code in smaller chunks for better layer caching
-COPY public ./public/
 COPY src ./src/
 COPY index.html ./
 
