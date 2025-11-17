@@ -19,6 +19,8 @@ export default defineConfig({
     outDir: 'dist',
     sourcemap: false,
     minify: 'terser',
+    reportCompressedSize: false, // Faster builds
+    chunkSizeWarningLimit: 1000, // Reduce warnings
     terserOptions: {
       compress: {
         drop_console: true,
@@ -31,5 +33,8 @@ export default defineConfig({
         },
       },
     },
+  },
+  esbuild: {
+    drop: ['console', 'debugger'], // Remove in production builds
   },
 });

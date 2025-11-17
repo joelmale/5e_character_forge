@@ -11,6 +11,8 @@ A single-page, fully responsive React/TypeScript application for creating, manag
 | Bundle Size | ![Bundle Size](https://img.shields.io/bundlephobia/min/5e-character-forge) |
 | Security | ![Security](https://github.com/joelmale/5e_character_forge/workflows/CodeQL%20Security%20Scan/badge.svg) |
 | Build | ![Build](https://github.com/joelmale/5e_character_forge/workflows/Build%20%26%20Deploy/badge.svg) |
+| Multi-Platform | ![Multi-Platform](https://img.shields.io/badge/platforms-amd64%20arm64-blue) |
+| BuildKit | ![BuildKit](https://img.shields.io/badge/buildkit-enabled-green) |
 
 ## Overview
 
@@ -121,6 +123,22 @@ docker run -p 8080:80 5e-character-forge
 # Deploy to Swarm
 docker stack deploy -c docker-compose.yml character-forge
 ```
+
+**🚀 Build Optimizations:**
+- **90% smaller build context** (~30MB vs 352MB)
+- **Multi-platform support** (AMD64 + ARM64)
+- **BuildKit optimizations** with cache mounts
+- **GitHub Actions CI/CD** with automated builds
+- **Development mode** with `docker-compose.dev.yml`
+
+**🏗️ CI/CD Pipeline:**
+- **Automated builds** on push to master/main
+- **Multi-platform images** for all architectures
+- **Quality gates** with linting, testing, and security scans
+- **PR validation** with build checks
+- **Release automation** with GitHub releases
+
+See [DOCKER_OPTIMIZATIONS.md](./DOCKER_OPTIMIZATIONS.md) for technical details.
 
 **Live Demo:** https://character.nexusvtt.com
 

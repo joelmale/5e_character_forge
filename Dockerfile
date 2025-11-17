@@ -1,19 +1,31 @@
+# Multi-stage Docker build optimized for speed
+# - Uses BuildKit cache mounts for npm and Vite
+# - Copies files in layers for better caching
+# - Excludes unnecessary files via .dockerignore
+
 # Stage 1: Build the application
 FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Copy package files
+# Copy package files and configs first for better caching
 COPY package*.json ./
+COPY tsconfig*.json ./
+COPY vite.config.ts ./
+COPY postcss.config.js ./
 
-# Install dependencies
-RUN npm ci
+# Install dependencies with cache mount for faster builds
+RUN --mount=type=cache,target=/root/.npm \
+    npm ci && \
+    npm cache clean --force
 
-# Copy source code
-COPY . .
+# Copy source code in smaller chunks for better layer caching
+COPY src ./src/
+COPY index.html ./
 
-# Build the application
-RUN npm run build
+# Build with cache mount
+RUN --mount=type=cache,target=/app/node_modules/.vite \
+    npm run build
 
 # Stage 2: Serve with Nginx
 FROM nginx:alpine
