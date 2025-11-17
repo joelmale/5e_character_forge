@@ -22,7 +22,10 @@ This project includes several optimizations to speed up Docker container builds:
 ### BuildKit Features
 - Cache mounts for npm and Vite build cache
 - Inline cache for faster subsequent builds
-- Build script with optimized flags
+- Optimized build script with BuildKit flags
+- Multi-platform builds (amd64/arm64) with buildx
+- Builder stage caching for production deployments
+- Local cache persistence across builds
 
 ## 🛠️ Usage
 
@@ -38,6 +41,12 @@ export DOCKER_BUILDKIT=1
 
 # Use optimized build script
 npm run docker:build
+```
+
+### Multi-Platform Build & Push
+```bash
+# Build and push for both amd64 and arm64 platforms
+npm run docker:build-push
 ```
 
 ### Development Build
