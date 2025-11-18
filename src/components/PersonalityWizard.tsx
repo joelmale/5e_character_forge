@@ -2,6 +2,9 @@ import React, { useState, useCallback } from 'react';
 import { ArrowLeft, ArrowRight, Heart, Shield, Zap, Sparkles } from 'lucide-react';
 import { generateCharacterProfile, CharacterProfile } from '../data/characterProfiles';
 import PersonalitySummary from './PersonalitySummary';
+import CharacterFinalization from './CharacterFinalization';
+import { loadClasses, getAllRaces, BACKGROUNDS } from '../services/dataService';
+import { CharacterCreationData } from '../types/dnd';
 
 interface PersonalityWizardProps {
   isOpen: boolean;
@@ -103,8 +106,110 @@ const PersonalityWizard: React.FC<PersonalityWizardProps> = ({ isOpen, onClose, 
   }, []);
 
   const handleProfileComplete = useCallback((enhancedProfile: CharacterProfile & { selectedClass?: string; selectedRace?: string; selectedBackground?: string }) => {
+    console.log('🎯 [PersonalityWizard] Profile complete, calling onComplete with:', {
+      selectedClass: enhancedProfile.selectedClass,
+      selectedRace: enhancedProfile.selectedRace,
+      selectedBackground: enhancedProfile.selectedBackground,
+      profileName: enhancedProfile.name
+    });
     onComplete(enhancedProfile);
   }, [onComplete]);
+
+  const handleFinalizeCharacter = useCallback((finalizationData: {
+    name: string;
+    alignment: string;
+    personality: string;
+    ideals: string;
+    bonds: string;
+    flaws: string;
+  }) => {
+    console.log('🎉 [PersonalityWizard] Finalizing character creation');
+    console.log('📝 [PersonalityWizard] Finalization data:', finalizationData);
+    console.log('📊 [PersonalityWizard] Selected options:', {
+      selectedClass,
+      selectedRace,
+      selectedBackground
+    });
+
+    // Extract base class/race name (remove subclass/variant in parentheses)
+    const extractBaseName = (fullName: string): string => {
+      const parenIndex = fullName.indexOf(' (');
+      return parenIndex > 0 ? fullName.substring(0, parenIndex) : fullName;
+    };
+
+    const allClasses = loadClasses();
+    const allRaces = getAllRaces();
+
+    const baseClassName = extractBaseName(selectedClass || '');
+    const baseRaceName = extractBaseName(selectedRace || '');
+
+    const selectedClassData = allClasses.find(c => c.name === baseClassName);
+    const selectedRaceData = allRaces.find(r => r.name === baseRaceName);
+
+    if (!selectedClassData || !selectedRaceData) {
+      console.error('❌ [PersonalityWizard] Failed to find class/race data');
+      alert('Error: Could not find class or race data. Please try again.');
+      return;
+    }
+
+    // Get proficient skills from class (take first N skills as defaults)
+    const numSkills = selectedClassData.num_skill_choices || 0;
+    const defaultSkills = selectedClassData.skill_proficiencies?.slice(0, numSkills) || [];
+
+    // Get background skills
+    const backgroundData = BACKGROUNDS.find(bg => bg.name === selectedBackground);
+    const backgroundSkills = backgroundData?.skill_proficiencies || [];
+
+    // Combine and deduplicate skills
+    const selectedSkills = [...new Set([...defaultSkills, ...backgroundSkills])];
+
+    // Create complete CharacterCreationData structure
+    const characterData: CharacterCreationData = {
+      name: finalizationData.name,
+      level: 1,
+      raceSlug: selectedRaceData.slug,
+      classSlug: selectedClassData.slug,
+      abilities: {
+        STR: 15, DEX: 14, CON: 13, INT: 12, WIS: 10, CHA: 8 // Standard array
+      },
+      abilityScoreMethod: 'standard-array' as const,
+      background: selectedBackground || '',
+      alignment: finalizationData.alignment,
+
+      selectedSkills: selectedSkills as any[],
+      equipmentChoices: [],
+      hpCalculationMethod: 'max' as const,
+
+      spellSelection: {
+        selectedCantrips: [],
+        knownSpells: [],
+        preparedSpells: []
+      },
+
+      subclassSlug: null,
+      selectedFightingStyle: null,
+      selectedFeats: [],
+      knownLanguages: [],
+
+      // Custom text for traits
+      personality: finalizationData.personality,
+      ideals: finalizationData.ideals,
+      bonds: finalizationData.bonds,
+      flaws: finalizationData.flaws
+    };
+
+    console.log('📦 [PersonalityWizard] Complete character data created:', {
+      name: characterData.name,
+      raceSlug: characterData.raceSlug,
+      classSlug: characterData.classSlug,
+      background: characterData.background,
+      alignment: characterData.alignment,
+      skills: characterData.selectedSkills
+    });
+
+    console.log('🚀 [PersonalityWizard] Calling onComplete...');
+    onComplete(characterData);
+  }, [selectedClass, selectedRace, selectedBackground, onComplete]);
 
   const generateProfile = (world?: WorldChoice): CharacterProfile => {
     // Use the ref which is updated synchronously
@@ -138,7 +243,12 @@ const PersonalityWizard: React.FC<PersonalityWizardProps> = ({ isOpen, onClose, 
 
     // Generate dynamic profile based on all choices
     const profile = generateCharacterProfile(archetype, combat, social, finalWorld);
-    console.log('✅ [generateProfile] Generated profile:', profile.name);
+    console.log('✅ [generateProfile] Generated profile:', {
+      name: profile.name,
+      recommendedClasses: profile.recommendedClasses.map(c => c.class),
+      recommendedRaces: profile.recommendedRaces.map(r => r.race),
+      recommendedBackgrounds: profile.recommendedBackgrounds.map(b => b.background)
+    });
     return profile;
   };
 
@@ -181,8 +291,21 @@ const PersonalityWizard: React.FC<PersonalityWizardProps> = ({ isOpen, onClose, 
             selectedClass={selectedClass || undefined}
             selectedRace={selectedRace || undefined}
             selectedBackground={selectedBackground || undefined}
-            onCreateCharacter={onComplete}
+            onContinue={() => setCurrentStep(7)}
             onBack={() => setCurrentStep(5)}
+          />
+        ) : (
+          <WelcomeStep onChoice={handlePathChoice} />
+        );
+      case 7:
+        return completedProfile ? (
+          <CharacterFinalization
+            profile={completedProfile}
+            selectedClass={selectedClass || ''}
+            selectedRace={selectedRace || ''}
+            selectedBackground={selectedBackground || ''}
+            onCreateCharacter={handleFinalizeCharacter}
+            onBack={() => setCurrentStep(6)}
           />
         ) : (
           <WelcomeStep onChoice={handlePathChoice} />
@@ -214,14 +337,14 @@ const PersonalityWizard: React.FC<PersonalityWizardProps> = ({ isOpen, onClose, 
         {/* Progress Indicator */}
         <div className="mb-8">
           <div className="flex items-center justify-center space-x-2">
-            {[0, 1, 2, 3, 4, 5, 6].map((step) => (
+            {[0, 1, 2, 3, 4, 5, 6, 7].map((step) => (
               <React.Fragment key={step}>
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
                   currentStep >= step ? 'bg-purple-600' : 'bg-gray-600'
                 }`}>
                   <span className="text-sm font-bold">{step + 1}</span>
                 </div>
-                {step < 6 && (
+                {step < 7 && (
                   <div className={`h-1 w-8 ${
                     currentStep > step ? 'bg-purple-600' : 'bg-gray-600'
                   }`}></div>
@@ -463,16 +586,19 @@ const ProfileDisplay: React.FC<{
   const [selectedBackground, setSelectedBackground] = React.useState<string | null>(initialBackground || null);
 
   const handleClassSelect = (className: string) => {
+    console.log('📝 [ProfileDisplay] Class selected:', className);
     setSelectedClass(className);
     onClassSelect?.(className);
   };
 
   const handleRaceSelect = (raceName: string) => {
+    console.log('📝 [ProfileDisplay] Race selected:', raceName);
     setSelectedRace(raceName);
     onRaceSelect?.(raceName);
   };
 
   const handleBackgroundSelect = (backgroundName: string) => {
+    console.log('📝 [ProfileDisplay] Background selected:', backgroundName);
     setSelectedBackground(backgroundName);
     onBackgroundSelect?.(backgroundName);
   };

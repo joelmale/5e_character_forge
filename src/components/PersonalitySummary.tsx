@@ -9,7 +9,7 @@ interface PersonalitySummaryProps {
   selectedClass?: string;
   selectedRace?: string;
   selectedBackground?: string;
-  onCreateCharacter: (characterData: any) => void;
+  onContinue: () => void;
   onBack: () => void;
 }
 
@@ -18,9 +18,20 @@ const PersonalitySummary: React.FC<PersonalitySummaryProps> = ({
   selectedClass,
   selectedRace,
   selectedBackground,
-  onCreateCharacter,
+  onContinue,
   onBack
 }) => {
+  // Debug logging for initial props
+  console.log('🎨 [PersonalitySummary] Component initialized with:', {
+    profileName: profile.name,
+    selectedClass,
+    selectedRace,
+    selectedBackground,
+    recommendedClasses: profile.recommendedClasses.map(c => c.class),
+    recommendedRaces: profile.recommendedRaces.map(r => r.race),
+    recommendedBackgrounds: profile.recommendedBackgrounds.map(b => b.background)
+  });
+
   // Editable state
   const [editingClass, setEditingClass] = useState(false);
   const [editingRace, setEditingRace] = useState(false);
@@ -30,10 +41,23 @@ const PersonalitySummary: React.FC<PersonalitySummaryProps> = ({
   const [currentRace, setCurrentRace] = useState(selectedRace || profile.recommendedRaces[0]?.race || '');
   const [currentBackground, setCurrentBackground] = useState(selectedBackground || profile.recommendedBackgrounds[0]?.background || '');
 
+  console.log('🎨 [PersonalitySummary] Initial state set to:', {
+    currentClass,
+    currentRace,
+    currentBackground
+  });
+
   // Calculate character preview
   const characterPreview = useMemo(() => {
+    // Extract base class name (remove subclass in parentheses)
+    const extractBaseName = (fullName: string): string => {
+      const parenIndex = fullName.indexOf(' (');
+      return parenIndex > 0 ? fullName.substring(0, parenIndex) : fullName;
+    };
+
     const allClasses = loadClasses();
-    const selectedClassData = allClasses.find(c => c.name === currentClass);
+    const baseClassName = extractBaseName(currentClass);
+    const selectedClassData = allClasses.find(c => c.name === baseClassName);
 
     // Base ability scores (standard array)
     const baseAbilities = { STR: 15, DEX: 14, CON: 13, INT: 12, WIS: 10, CHA: 8 };
@@ -68,109 +92,10 @@ const PersonalitySummary: React.FC<PersonalitySummaryProps> = ({
   const availableRaces = getAllRaces().map(race => race.name).sort();
   const availableBackgrounds = ['Acolyte', 'Criminal', 'Entertainer', 'Folk Hero', 'Guild Artisan', 'Hermit', 'Noble', 'Outlander', 'Sage', 'Sailor', 'Soldier', 'Urchin'];
 
-  const handleCreateCharacter = useCallback(() => {
-    console.log('🔍 [PersonalitySummary] Starting character creation');
-    console.log('📊 [PersonalitySummary] Current selections:', {
-      currentClass,
-      currentRace,
-      currentBackground
-    });
-
-    // Validate selections
-    if (!currentClass || !currentRace || !currentBackground) {
-      console.error('❌ [PersonalitySummary] Validation failed: Missing selections');
-      alert('Please select a class, race, and background before creating your character.');
-      return;
-    }
-
-    // Get proper class and race data
-    const allClasses = loadClasses();
-    const allRaces = getAllRaces();
-    console.log('📋 [PersonalitySummary] Loaded data:', {
-      classesCount: allClasses.length,
-      racesCount: allRaces.length,
-      classNames: allClasses.slice(0, 3).map(c => c.name),
-      raceNames: allRaces.slice(0, 3).map(r => r.name)
-    });
-
-    const selectedClassData = allClasses.find(c => c.name === currentClass);
-    const selectedRaceData = allRaces.find(r => r.name === currentRace);
-
-    console.log('🔍 [PersonalitySummary] Lookup results:', {
-      selectedClass,
-      selectedClassData: selectedClassData ? { name: selectedClassData.name, slug: selectedClassData.slug } : null,
-      selectedRace,
-      selectedRaceData: selectedRaceData ? { name: selectedRaceData.name, slug: selectedRaceData.slug } : null
-    });
-
-    if (!selectedClassData || !selectedRaceData) {
-      console.error('❌ [PersonalitySummary] Data lookup failed');
-      alert('Invalid class or race selection. Please try different options.');
-      return;
-    }
-
-    console.log('✅ [PersonalitySummary] Data validation passed, proceeding with creation');
-
-    // Get proficient skills from class (take first N skills as defaults)
-    const numSkills = selectedClassData.num_skill_choices || 0;
-    const defaultSkills = selectedClassData.skill_proficiencies?.slice(0, numSkills) || [];
-    console.log('🎯 [PersonalitySummary] Class skills:', { numSkills, defaultSkills, availableSkills: selectedClassData.skill_proficiencies });
-
-    // Get background skills
-    const backgroundData = BACKGROUNDS.find(bg => bg.name === currentBackground);
-    const backgroundSkills = backgroundData?.skill_proficiencies || [];
-    console.log('🎯 [PersonalitySummary] Background skills:', { backgroundData: backgroundData ? backgroundData.name : null, backgroundSkills });
-
-    // Combine and deduplicate skills
-    const selectedSkills = [...new Set([...defaultSkills, ...backgroundSkills])];
-    console.log('🎯 [PersonalitySummary] Final skills:', selectedSkills);
-
-    // Create complete CharacterCreationData structure
-    const characterData: CharacterCreationData = {
-      name: '',
-      level: 1,
-      raceSlug: selectedRaceData.slug,
-      classSlug: selectedClassData.slug,
-      abilities: {
-        STR: 15, DEX: 14, CON: 13, INT: 12, WIS: 10, CHA: 8 // Standard array
-      },
-      abilityScoreMethod: 'standard-array' as const,
-      background: currentBackground,
-      alignment: '',
-
-      selectedSkills: selectedSkills as any[], // Type assertion needed
-      equipmentChoices: [], // Will be populated by the character creation system
-      hpCalculationMethod: 'max' as const,
-
-      spellSelection: {
-        selectedCantrips: [],
-        knownSpells: [],
-        preparedSpells: []
-      },
-
-      subclassSlug: null,
-      selectedFightingStyle: null,
-      selectedFeats: [],
-      knownLanguages: [],
-
-      // Custom text for traits
-      personality: '',
-      ideals: '',
-      bonds: '',
-      flaws: ''
-    };
-
-    console.log('📦 [PersonalitySummary] Character data created:', {
-      raceSlug: characterData.raceSlug,
-      classSlug: characterData.classSlug,
-      background: characterData.background,
-      selectedSkills: characterData.selectedSkills,
-      abilities: characterData.abilities
-    });
-
-    console.log('🚀 [PersonalitySummary] Calling onCreateCharacter...');
-    onCreateCharacter(characterData);
-  }, [currentClass, currentRace, currentBackground, onCreateCharacter]);
+  const handleContinue = useCallback(() => {
+    console.log('➡️ [PersonalitySummary] Proceeding to finalization step');
+    onContinue();
+  }, [onContinue]);
 
   const getProfileIcon = () => {
     switch (profile.name.toLowerCase()) {
@@ -405,10 +330,10 @@ const PersonalitySummary: React.FC<PersonalitySummaryProps> = ({
             Back to Personality
           </button>
           <button
-            onClick={handleCreateCharacter}
+            onClick={handleContinue}
             className="px-6 py-3 bg-purple-600 hover:bg-purple-500 rounded-lg text-white font-semibold transition-colors flex items-center"
           >
-            Create Character
+            Continue to Customization
             <ArrowRight className="w-4 h-4 ml-2" />
           </button>
         </div>
