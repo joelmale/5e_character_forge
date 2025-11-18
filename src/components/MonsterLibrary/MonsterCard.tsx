@@ -1,0 +1,241 @@
+import React from 'react';
+import { Eye, Star, Edit2, Trash2, Plus, Minus } from 'lucide-react';
+import { Monster, UserMonster } from '../../types/dnd';
+import { useMonsterContext } from '../../hooks';
+
+interface MonsterCardProps {
+  monster: Monster | UserMonster;
+  onView: () => void;
+  selectionMode: boolean;
+  isSelected: boolean;
+  quantity?: number;
+  onToggleSelection: () => void;
+  onSetQuantity?: (quantity: number) => void;
+  onEdit?: () => void;
+}
+
+const getCRColor = (cr: number): string => {
+  if (cr <= 4) return 'bg-green-600';
+  if (cr <= 10) return 'bg-yellow-600';
+  if (cr <= 16) return 'bg-orange-600';
+  return 'bg-red-600';
+};
+
+const getACDisplay = (armorClass: Monster['armor_class']): string => {
+  if (Array.isArray(armorClass) && armorClass.length > 0) {
+    return armorClass[0].value.toString();
+  }
+  return '10';
+};
+
+const getSpeedDisplay = (speed: Monster['speed']): string => {
+  if (speed.walk) return speed.walk;
+  if (speed.fly) return `fly ${speed.fly}`;
+  if (speed.swim) return `swim ${speed.swim}`;
+  return '0 ft.';
+};
+
+export const MonsterCard: React.FC<MonsterCardProps> = ({
+  monster,
+  onView,
+  selectionMode,
+  isSelected,
+  quantity = 0,
+  onToggleSelection,
+  onSetQuantity,
+  onEdit,
+}) => {
+  const { isFavorited, toggleFavorite, deleteCustomMonster } = useMonsterContext();
+  const isFav = isFavorited(monster.index);
+  const isCustom = 'isCustom' in monster && monster.isCustom;
+
+  const handleDelete = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!isCustom) return;
+
+    if (window.confirm(`Delete "${monster.name}"? This action cannot be undone.`)) {
+      await deleteCustomMonster((monster as UserMonster).id);
+    }
+  };
+
+  const handleFavoriteClick = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    await toggleFavorite(monster.index);
+  };
+
+  const handleCardClick = () => {
+    if (selectionMode) {
+      onToggleSelection();
+    } else {
+      onView();
+    }
+  };
+
+  return (
+    <div
+      className={`bg-gray-800 rounded-xl shadow-xl hover:shadow-purple-700/30 transition-all duration-300 overflow-hidden cursor-pointer ${
+        isSelected ? 'ring-4 ring-blue-500' : ''
+      }`}
+      onClick={handleCardClick}
+    >
+      <div className="p-5">
+        {/* Header with name and favorite */}
+        <div className="flex items-start justify-between mb-2">
+          <div className="flex-grow">
+            <div className="flex items-center gap-2">
+              <h3 className="text-2xl font-bold text-purple-400">{monster.name}</h3>
+              {isCustom && (
+                <span className="px-2 py-0.5 bg-green-600 text-white text-xs rounded-full">
+                  Custom
+                </span>
+              )}
+            </div>
+            <p className="text-sm text-gray-400">
+              {monster.size} {monster.type}
+              {monster.subtype && ` (${monster.subtype})`}
+            </p>
+          </div>
+
+          {!selectionMode && (
+            <button
+              onClick={handleFavoriteClick}
+              className="ml-2 p-1 hover:scale-110 transition-transform"
+              title={isFav ? 'Remove from favorites' : 'Add to favorites'}
+            >
+              <Star
+                className={`w-5 h-5 ${
+                  isFav ? 'fill-yellow-400 text-yellow-400' : 'text-gray-500'
+                }`}
+              />
+            </button>
+          )}
+
+          {selectionMode && (
+            <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+              <input
+                type="checkbox"
+                checked={isSelected}
+                onChange={(e) => {
+                  e.stopPropagation();
+                  onToggleSelection();
+                }}
+                className="w-5 h-5 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500 focus:ring-2 cursor-pointer"
+                onClick={(e) => e.stopPropagation()}
+              />
+              {isSelected && onSetQuantity && (
+                <div className="flex items-center gap-1 bg-gray-700 rounded-lg px-2 py-1">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onSetQuantity(Math.max(1, quantity - 1));
+                    }}
+                    className="p-1 hover:bg-gray-600 rounded transition-colors"
+                    title="Decrease quantity"
+                  >
+                    <Minus className="w-4 h-4 text-blue-400" />
+                  </button>
+                  <span className="px-2 font-bold text-blue-400 min-w-[2rem] text-center">
+                    {quantity}
+                  </span>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onSetQuantity(quantity + 1);
+                    }}
+                    className="p-1 hover:bg-gray-600 rounded transition-colors"
+                    title="Increase quantity"
+                  >
+                    <Plus className="w-4 h-4 text-blue-400" />
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* CR Badge */}
+        <div className="mb-3">
+          <span
+            className={`inline-block px-3 py-1 ${getCRColor(
+              monster.challenge_rating
+            )} text-white text-sm font-bold rounded-full`}
+          >
+            CR {monster.challenge_rating} ({monster.xp.toLocaleString()} XP)
+          </span>
+        </div>
+
+        {/* Quick Stats Grid */}
+        <div className="grid grid-cols-3 gap-2 text-center text-xs font-medium bg-gray-700/50 p-3 rounded-lg mb-3">
+          <div>
+            AC:{' '}
+            <span className="text-yellow-300 block text-lg font-bold">
+              {getACDisplay(monster.armor_class)}
+            </span>
+          </div>
+          <div>
+            HP:{' '}
+            <span className="text-green-400 block text-lg font-bold">{monster.hit_points}</span>
+          </div>
+          <div>
+            Speed:{' '}
+            <span className="text-blue-300 block text-sm font-bold">
+              {getSpeedDisplay(monster.speed)}
+            </span>
+          </div>
+        </div>
+
+        {/* Additional Info */}
+        <div className="text-xs text-gray-400 space-y-1">
+          {monster.legendary_actions && monster.legendary_actions.length > 0 && (
+            <div className="flex items-center gap-1">
+              <span className="text-yellow-500">⚡</span>
+              <span>Legendary Actions</span>
+            </div>
+          )}
+          {monster.special_abilities && monster.special_abilities.length > 0 && (
+            <div className="flex items-center gap-1">
+              <span className="text-purple-500">✨</span>
+              <span>{monster.special_abilities.length} Special Abilities</span>
+            </div>
+          )}
+        </div>
+
+        {/* Action Buttons (only when not in selection mode) */}
+        {!selectionMode && (
+          <div className="mt-4 space-y-2">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onView();
+              }}
+              className="w-full py-2 bg-purple-600 hover:bg-purple-500 rounded-lg text-white font-semibold transition-colors flex items-center justify-center text-sm"
+            >
+              <Eye className="w-4 h-4 mr-2" /> View Stat Block
+            </button>
+
+            {/* Edit/Delete buttons for custom monsters */}
+            {isCustom && onEdit && (
+              <div className="flex gap-2">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onEdit();
+                  }}
+                  className="flex-1 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg text-white font-semibold transition-colors flex items-center justify-center text-sm"
+                >
+                  <Edit2 className="w-4 h-4 mr-1" /> Edit
+                </button>
+                <button
+                  onClick={handleDelete}
+                  className="flex-1 py-2 bg-red-600 hover:bg-red-500 rounded-lg text-white font-semibold transition-colors flex items-center justify-center text-sm"
+                >
+                  <Trash2 className="w-4 h-4 mr-1" /> Delete
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
