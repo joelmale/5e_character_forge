@@ -120,6 +120,52 @@ const worldModifiers: Record<string, { description: string, question: string }> 
   }
 };
 
+// Archetype + Combat Style Class Recommendations
+// Maps "${archetype}-${combatStyle}" to appropriate class recommendations
+const archetypeCombatClasses: Record<string, string[]> = {
+  // GUARDIAN (STR/CON martial protector)
+  "guardian-frontline": ["Paladin (Oath of Devotion)", "Fighter (Champion)", "Barbarian (Totem Warrior)"],
+  "guardian-skirmisher": ["Fighter (Battle Master)", "Paladin (Vengeance)", "Ranger (Hunter)"],
+  "guardian-overwhelming": ["Barbarian (Berserker)", "Paladin (Vengeance)", "Fighter (Champion)"],
+  "guardian-tactical": ["Fighter (Battle Master)", "Paladin (Devotion)", "Cleric (War Domain)"],
+
+  // PRECISIONIST (DEX tactical/sneaky)
+  "precisionist-frontline": ["Fighter (Eldritch Knight)", "Monk (Open Hand)", "Ranger (Hunter)"],
+  "precisionist-skirmisher": ["Rogue (Swashbuckler)", "Monk (Way of Shadow)", "Ranger (Gloom Stalker)"],
+  "precisionist-overwhelming": ["Rogue (Assassin)", "Ranger (Hunter)", "Monk (Open Hand)"],
+  "precisionist-tactical": ["Rogue (Mastermind)", "Ranger (Hunter)", "Fighter (Battle Master)"],
+
+  // SURVIVOR (WIS/CON adaptive/resourceful)
+  "survivor-frontline": ["Ranger (Hunter)", "Druid (Circle of the Moon)", "Cleric (Life Domain)"],
+  "survivor-skirmisher": ["Ranger (Gloom Stalker)", "Druid (Circle of the Land)", "Monk (Open Hand)"],
+  "survivor-overwhelming": ["Druid (Circle of the Moon)", "Ranger (Beast Master)", "Barbarian (Totem Warrior)"],
+  "survivor-tactical": ["Ranger (Hunter)", "Druid (Circle of the Land)", "Cleric (Life Domain)"],
+
+  // SCHOLAR (INT studied magic)
+  "scholar-frontline": ["Fighter (Eldritch Knight)", "Wizard (Bladesinging)", "Artificer (Armorer)"],
+  "scholar-skirmisher": ["Wizard (Bladesinging)", "Artificer (Battle Smith)", "Rogue (Arcane Trickster)"],
+  "scholar-overwhelming": ["Wizard (Evocation)", "Artificer (Artillerist)", "Wizard (War Magic)"],
+  "scholar-tactical": ["Wizard (School of Divination)", "Artificer (Artillerist)", "Bard (College of Lore)"],
+
+  // PRODIGY (CHA innate magic)
+  "prodigy-frontline": ["Paladin (Oath of Devotion)", "Warlock (Hexblade)", "Bard (College of Valor)"],
+  "prodigy-skirmisher": ["Bard (College of Swords)", "Warlock (Archfey)", "Rogue (Arcane Trickster)"],
+  "prodigy-overwhelming": ["Sorcerer (Draconic Bloodline)", "Warlock (Fiend)", "Paladin (Oath of Vengeance)"],
+  "prodigy-tactical": ["Bard (College of Lore)", "Sorcerer (Divine Soul)", "Warlock (Great Old One)"],
+
+  // ORACLE (WIS divine magic)
+  "oracle-frontline": ["Cleric (Life Domain)", "Paladin (Oath of Devotion)", "Cleric (War Domain)"],
+  "oracle-skirmisher": ["Cleric (Trickery Domain)", "Monk (Open Hand)", "Ranger (Hunter)"],
+  "oracle-overwhelming": ["Cleric (Light Domain)", "Paladin (Oath of Vengeance)", "Druid (Circle of the Moon)"],
+  "oracle-tactical": ["Cleric (Life Domain)", "Druid (Circle of the Land)", "Paladin (Oath of Devotion)"],
+
+  // WILDHEART (WIS nature magic)
+  "wildheart-frontline": ["Druid (Circle of the Moon)", "Barbarian (Totem Warrior)", "Ranger (Beast Master)"],
+  "wildheart-skirmisher": ["Ranger (Hunter)", "Druid (Circle of the Moon)", "Monk (Way of the Four Elements)"],
+  "wildheart-overwhelming": ["Druid (Circle of the Moon)", "Barbarian (Storm Herald)", "Ranger (Hunter)"],
+  "wildheart-tactical": ["Druid (Circle of the Land)", "Ranger (Hunter)", "Druid (Circle of the Shepherd)"]
+};
+
 // Generate dynamic profile based on all choices
 export function generateCharacterProfile(archetype: string, combat: string, social: string, world: string): CharacterProfile {
   const base = baseArchetypes[archetype];
@@ -143,9 +189,20 @@ export function generateCharacterProfile(archetype: string, combat: string, soci
   const fullDescription = `${base.description} ${worldMod.description}`;
 
   // Generate class recommendations based on archetype and combat style
-  const recommendedClasses = combatMod.classes.map(cls => ({
+  const combinationKey = `${archetype}-${combat}`;
+  const classesForCombination = archetypeCombatClasses[combinationKey] || combatMod.classes;
+
+  console.log('🎭 [generateCharacterProfile] Class recommendation lookup:', {
+    archetype,
+    combat,
+    combinationKey,
+    foundInMapping: !!archetypeCombatClasses[combinationKey],
+    recommendedClasses: classesForCombination
+  });
+
+  const recommendedClasses = classesForCombination.map(cls => ({
     class: cls,
-    reason: `Combines your core nature with your preferred combat approach`
+    reason: `Combines your ${base.name} nature with your ${combat} combat approach`
   }));
 
   // Generate race recommendations based on social approach
