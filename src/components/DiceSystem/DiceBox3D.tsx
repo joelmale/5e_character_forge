@@ -63,15 +63,22 @@ export const DiceBox3D: React.FC<DiceBox3DProps> = ({
           lightIntensity: 1,
         };
 
+        console.log('🎲 DiceBox config:', config);
+
+        console.log('🎲 Initializing DiceBox...');
         const diceBox = new DiceBox(config);
 
         // Wait for initialization to complete
         await diceBox.init();
 
-        if (!mounted) return;
+        if (!mounted) {
+          console.log('🎲 Component unmounted during init');
+          return;
+        }
 
         // Store the diceBox instance in ref
         diceBoxRef.current = diceBox;
+        console.log('🎲 DiceBox initialized successfully, methods:', Object.getOwnPropertyNames(diceBox));
 
         // Mark as initialized
         setIsInitialized(true);
@@ -133,18 +140,32 @@ const diceBox = diceBoxRef.current;
 
     // Roll the dice
     const rollDice = async () => {
-      let rollNotation = '';
-
       try {
-        // Use the notation from the roll
-        rollNotation = latestRoll.notation;
+        // Extract just the dice notation (remove modifiers)
+        // The 3D dice library only handles dice, not modifiers
+        const diceNotation = latestRoll.notation.replace(/[+-]\d+/, '');
+
+        console.log('🎲 Rolling dice with notation:', diceNotation, 'from original:', latestRoll.notation);
 
         // Show the dice box first
-        diceBoxRef.current!.show();
-        setDiceVisible(true);
+        if (diceBoxRef.current) {
+          console.log('🎲 DiceBox methods available:', typeof diceBoxRef.current.roll, typeof diceBoxRef.current.show);
 
-        // Then roll the dice
-        await diceBoxRef.current!.roll(rollNotation);
+          // Try to roll the dice directly
+          console.log('🎲 Rolling dice with notation:', diceNotation);
+          try {
+            await diceBoxRef.current.roll(diceNotation);
+            setDiceVisible(true);
+            console.log('🎲 Dice roll completed');
+          } catch (rollError) {
+            console.error('❌ Roll failed:', rollError);
+            throw rollError;
+          }
+        } else {
+          console.error('❌ DiceBox not initialized');
+          setError('3D dice system not ready. Please refresh the page.');
+          return;
+        }
 
         // Auto-clear after settle time + 10 seconds (give user time to see results)
         const totalTime = 2000 + 10000; // settleTimeout + 10s
@@ -156,7 +177,8 @@ const diceBox = diceBoxRef.current;
           }
         }, totalTime);
 
-      } catch {} {
+      } catch (err) {
+        console.error('❌ Dice roll failed:', err);
         setError('Failed to roll dice. Check notation format.');
       }
     };
@@ -209,19 +231,18 @@ const diceBox = diceBoxRef.current;
         zIndex: 9999,
         top: 0,
         left: 0,
+        backgroundColor: diceVisible ? 'rgba(0, 0, 0, 0.5)' : 'transparent',
       }}
       onClick={handleContainerClick}
     >
-      <canvas
-        id="dice-canvas"
-        className="w-full h-full"
-        style={{
-          display: 'block',
-          position: 'absolute',
-          top: 0,
-          left: 0,
-        }}
-      />
+      {diceVisible && (
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+          <div className="text-white text-center mb-4">
+            <div className="text-2xl font-bold mb-2">🎲 Rolling Dice...</div>
+            <div className="text-sm opacity-75">Click anywhere to dismiss</div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
