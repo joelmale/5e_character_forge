@@ -192,6 +192,7 @@ export function generateCharacterProfile(archetype: string, combat: string, soci
   const combinationKey = `${archetype}-${combat}`;
   const classesForCombination = archetypeCombatClasses[combinationKey] || combatMod.classes;
 
+  console.log('🎭 [generateCharacterProfile] Class recommendation lookup:', {
     archetype,
     combat,
     combinationKey,

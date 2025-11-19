@@ -21,6 +21,7 @@ const PersonalitySummary: React.FC<PersonalitySummaryProps> = ({
   onBack
 }) => {
   // Debug logging for initial props
+  console.log('Debug info:', {
     profileName: profile.name,
     selectedClass,
     selectedRace,
@@ -39,6 +40,7 @@ const PersonalitySummary: React.FC<PersonalitySummaryProps> = ({
   const [currentRace, setCurrentRace] = useState(selectedRace || profile.recommendedRaces[0]?.race || '');
   const [currentBackground, setCurrentBackground] = useState(selectedBackground || profile.recommendedBackgrounds[0]?.background || '');
 
+  console.log('Current selections:', {
     currentClass,
     currentRace,
     currentBackground
