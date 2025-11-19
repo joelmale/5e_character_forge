@@ -372,21 +372,26 @@ const diceBox = diceBoxRef.current;
         zIndex: 9999,
         top: 0,
         left: 0,
-        backgroundColor: diceVisible ? 'rgba(0, 0, 0, 0.5)' : 'transparent',
+        backgroundColor: diceVisible ? 'rgba(0, 0, 0, 0.7)' : 'transparent',
+        backdropFilter: diceVisible ? 'blur(2px)' : 'none',
       }}
       onClick={handleContainerClick}
     >
       <canvas
         id="dice-canvas"
-        className="w-full h-full"
         style={{
           display: diceVisible ? 'block' : 'none',
           position: 'absolute',
-          top: 0,
-          left: 0,
-          zIndex: 10000,
-          backgroundColor: 'rgba(255, 0, 0, 0.1)', // Temporary red background for debugging
-          border: diceVisible ? '2px solid red' : 'none', // Temporary border for debugging
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: '600px',
+          height: '400px',
+          zIndex: 10001,
+          backgroundColor: 'rgba(0, 0, 0, 0.9)', // Dark background to see dice
+          border: diceVisible ? '4px solid lime' : 'none', // Bright border
+          borderRadius: '12px',
+          boxShadow: diceVisible ? '0 0 20px rgba(0, 255, 0, 0.5)' : 'none',
         }}
       />
       {diceVisible && (
