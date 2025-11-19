@@ -11,6 +11,8 @@ import { ModernStackedLayout, ClassicDndLayout, MobileLayout } from './layouts';
  * - User preference (desktop can choose between layouts)
  */
 export const CharacterSheet: React.FC<CharacterSheetProps> = (props) => {
+  console.log('📄 [CHARACTER SHEET] CharacterSheet component rendered for:', props.character.name);
+
   const { layoutMode } = useLayout();
   const [isMobile, setIsMobile] = useState(false);
 

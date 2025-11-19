@@ -138,6 +138,8 @@ const formatModifier = (mod: number): string => mod >= 0 ? `+${mod}` : `${mod}`;
 
 /** Main Application Component */
 const App: React.FC = () => {
+  console.log('🏠 [PAGE LOAD] App component mounted');
+
   // Use DiceContext for dice rolling functionality
   const { rollHistory, latestRoll, rollDice, clearHistory } = useDiceContext();
 
@@ -1148,7 +1150,10 @@ const App: React.FC = () => {
                     {/* Actions */}
                     <div className="flex justify-between items-center mt-4 space-x-3">
                       <button
-                        onClick={() => setSelectedCharacterId(char.id)}
+                        onClick={() => {
+                          console.log('📖 [CHARACTER] Opening character sheet for:', char.name, char.id);
+                          setSelectedCharacterId(char.id);
+                        }}
                         className="flex-grow py-2 bg-red-600 hover:bg-red-500 rounded-lg text-white font-semibold transition-colors flex items-center justify-center text-sm"
                       >
                         <BookOpen className="w-4 h-4 mr-2" /> View Sheet

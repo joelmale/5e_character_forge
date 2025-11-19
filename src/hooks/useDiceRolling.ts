@@ -13,6 +13,8 @@ export function useDiceRolling() {
   }, []);
 
   const rollDice = useCallback((roll: DiceRoll) => {
+    console.log('🎲 [DICE PROCESSING] Processing dice roll:', roll.label, roll.notation);
+
     // Add to history
     const updatedHistory = addRollToHistory(roll);
     setRollHistory(updatedHistory);

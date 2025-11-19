@@ -12,7 +12,7 @@ export const DiceBox3D: React.FC<DiceBox3DProps> = ({
   latestRoll,
   onRollComplete,
 }) => {
-  console.log('🎲 DiceBox3D component rendered, latestRoll:', latestRoll?.notation);
+  console.log('🎲 [STEP 1] DiceBox3D component rendered, latestRoll:', latestRoll?.notation);
 
   const diceBoxRef = useRef<DiceBox | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -26,18 +26,19 @@ export const DiceBox3D: React.FC<DiceBox3DProps> = ({
 
   // Check WebGL support and initialize DiceBox
   useEffect(() => {
+    console.log('🎲 [STEP 2] useEffect for initialization triggered');
     let mounted = true;
 
     const initDiceSystem = async () => {
-      console.log('🎲 Starting DiceBox initialization...');
+      console.log('🎲 [STEP 3] initDiceSystem function called');
 
       // Check WebGL support
       const canvas = document.createElement('canvas');
       const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-      console.log('🎲 WebGL check result:', !!gl);
+      console.log('🎲 [STEP 4] WebGL check result:', !!gl);
 
       if (!gl) {
-        console.log('🎲 WebGL not supported');
+        console.log('🎲 [STEP 5] WebGL not supported, exiting');
         if (mounted) {
           setWebGLSupported(false);
           setError('WebGL is not supported in your browser');
@@ -45,10 +46,12 @@ export const DiceBox3D: React.FC<DiceBox3DProps> = ({
         return;
       }
 
+      console.log('🎲 [STEP 6] WebGL supported, proceeding with DiceBox setup');
+
       try {
         // Check if container exists
         const containerElement = document.getElementById('dice-box');
-        console.log('🎲 Container element exists:', !!containerElement);
+        console.log('🎲 [STEP 7] Container element exists:', !!containerElement);
 
         // Create DiceBox instance with minimal config first
         const config = {
@@ -58,7 +61,7 @@ export const DiceBox3D: React.FC<DiceBox3DProps> = ({
           theme: 'default',
           offscreen: false,
         };
-        console.log('🎲 Using minimal DiceBox config:', config);
+        console.log('🎲 [STEP 8] Using minimal DiceBox config:', config);
 
         console.log('🎲 DiceBox config:', config);
 
@@ -67,18 +70,19 @@ export const DiceBox3D: React.FC<DiceBox3DProps> = ({
 
         let diceBox;
         try {
+          console.log('🎲 [STEP 9] Calling DiceBox constructor...');
           diceBox = new DiceBox(config);
-          console.log('🎲 DiceBox constructor succeeded');
+          console.log('🎲 [STEP 10] DiceBox constructor succeeded');
         } catch (constructorError) {
-          console.error('🎲 DiceBox constructor failed:', constructorError);
+          console.error('🎲 [STEP 10-FAILED] DiceBox constructor failed:', constructorError);
           throw constructorError;
         }
 
-        console.log('🎲 DiceBox created, calling init()...');
+        console.log('🎲 [STEP 11] DiceBox created, calling init()...');
 
         // Wait for initialization to complete
         await diceBox.init();
-        console.log('🎲 DiceBox.init() completed successfully');
+        console.log('🎲 [STEP 12] DiceBox.init() completed successfully');
 
         if (!mounted) {
           console.log('🎲 Component unmounted during init');
@@ -87,12 +91,11 @@ export const DiceBox3D: React.FC<DiceBox3DProps> = ({
 
         // Store the diceBox instance in ref
         diceBoxRef.current = diceBox;
-        console.log('🎲 DiceBox initialized successfully, methods:', Object.getOwnPropertyNames(diceBox));
-        console.log('🎲 DiceBox instance:', diceBox);
+        console.log('🎲 [STEP 13] DiceBox stored in ref, methods:', Object.getOwnPropertyNames(diceBox));
 
         // Mark as initialized
         setIsInitialized(true);
-        console.log('🎲 DiceBox marked as initialized, isInitialized should be true now');
+        console.log('🎲 [STEP 14] DiceBox marked as initialized, isInitialized should be true now');
 
         // Simple roll complete handler
         diceBox.onRollComplete = (_results) => {
@@ -135,7 +138,7 @@ const diceBox = diceBoxRef.current;
 
   // Handle dice rolls
   useEffect(() => {
-    console.log('🎲 Dice roll useEffect triggered:', {
+    console.log('🎲 [STEP 15] Dice roll useEffect triggered:', {
       isInitialized,
       hasDiceBox: !!diceBoxRef.current,
       hasLatestRoll: !!latestRoll,
@@ -149,9 +152,16 @@ const diceBox = diceBoxRef.current;
       !latestRoll ||
       lastRollIdRef.current === latestRoll.id
     ) {
-      console.log('🎲 Skipping dice roll due to conditions not met');
+      console.log('🎲 [STEP 16] Skipping dice roll due to conditions:', {
+        isInitialized,
+        hasDiceBox: !!diceBoxRef.current,
+        hasLatestRoll: !!latestRoll,
+        isDuplicate: lastRollIdRef.current === latestRoll?.id
+      });
       return;
     }
+
+    console.log('🎲 [STEP 17] All conditions met, proceeding with dice roll');
 
     lastRollIdRef.current = latestRoll.id;
 
@@ -162,11 +172,13 @@ const diceBox = diceBoxRef.current;
 
     // Roll the dice
     const rollDice = async () => {
+      console.log('🎲 [STEP 18] rollDice function called');
+
       try {
         // Extract just the dice notation (remove modifiers)
         // The 3D dice library only handles dice, not modifiers
         const diceNotation = latestRoll.notation.replace(/[+-]\d+/, '');
-        console.log('🎲 Original notation:', latestRoll.notation, 'Cleaned notation:', diceNotation);
+        console.log('🎲 [STEP 19] Original notation:', latestRoll.notation, 'Cleaned notation:', diceNotation);
 
         console.log('🎲 Rolling dice with notation:', diceNotation, 'from original:', latestRoll.notation);
 
@@ -176,7 +188,7 @@ const diceBox = diceBoxRef.current;
 
           // Try to roll the dice directly
           console.log('🎲 Rolling dice with notation:', diceNotation);
-          console.log('🎲 DiceBox instance details:', {
+          console.log('🎲 [STEP 20] DiceBox instance details:', {
             exists: !!diceBoxRef.current,
             type: typeof diceBoxRef.current,
             methods: diceBoxRef.current ? Object.getOwnPropertyNames(diceBoxRef.current) : 'N/A',
@@ -199,53 +211,68 @@ const diceBox = diceBoxRef.current;
             console.log('🎲 DiceBox prototype:', Object.getPrototypeOf(diceBoxRef.current));
 
             // Make sure the dice box is visible first
+            console.log('🎲 [STEP 21] Checking show method availability');
             if (typeof diceBoxRef.current.show === 'function') {
+              console.log('🎲 [STEP 22] Calling show() method');
               diceBoxRef.current.show();
-              console.log('🎲 Called show() method successfully');
+              console.log('🎲 [STEP 23] Called show() method successfully');
             } else {
-              console.warn('⚠️ show() method not available');
+              console.warn('⚠️ [STEP 22] show() method not available');
             }
 
             // Try the roll method with different approaches
+            console.log('🎲 [STEP 24] Checking roll method availability');
             if (typeof diceBoxRef.current.roll === 'function') {
-              console.log('🎲 Calling roll() method with:', diceNotation);
+              console.log('🎲 [STEP 25] Calling roll() method with:', diceNotation);
 
               // Try different roll method signatures
               try {
+                console.log('🎲 [STEP 26] Trying string notation');
                 // Method 1: String notation
                 const rollResult = diceBoxRef.current.roll(diceNotation);
-                console.log('🎲 roll() with string returned:', rollResult);
+                console.log('🎲 [STEP 27] roll() with string returned:', rollResult);
 
                 if (rollResult && typeof rollResult.then === 'function') {
+                  console.log('🎲 [STEP 28] Awaiting string notation promise');
                   await rollResult;
-                  console.log('🎲 roll() promise resolved');
+                  console.log('🎲 [STEP 29] roll() string promise resolved');
+                } else {
+                  console.log('🎲 [STEP 28] String notation did not return a promise');
                 }
               } catch (stringError) {
-                console.warn('🎲 String notation failed, trying alternatives:', stringError);
+                console.warn('🎲 [STEP 26-FAILED] String notation failed, trying alternatives:', stringError);
 
                 try {
+                  console.log('🎲 [STEP 30] Trying array notation');
                   // Method 2: Array notation (some libraries expect this)
                   const rollResult2 = diceBoxRef.current.roll([diceNotation]);
-                  console.log('🎲 roll() with array returned:', rollResult2);
+                  console.log('🎲 [STEP 31] roll() with array returned:', rollResult2);
 
                   if (rollResult2 && typeof rollResult2.then === 'function') {
+                    console.log('🎲 [STEP 32] Awaiting array notation promise');
                     await rollResult2;
-                    console.log('🎲 roll() array promise resolved');
+                    console.log('🎲 [STEP 33] roll() array promise resolved');
+                  } else {
+                    console.log('🎲 [STEP 32] Array notation did not return a promise');
                   }
                 } catch (arrayError) {
-                  console.warn('🎲 Array notation also failed:', arrayError);
+                  console.warn('🎲 [STEP 30-FAILED] Array notation also failed:', arrayError);
 
                   // Method 3: Try with empty array
                   try {
+                    console.log('🎲 [STEP 34] Trying empty array notation');
                     const rollResult3 = diceBoxRef.current.roll([]);
-                    console.log('🎲 roll() with empty array returned:', rollResult3);
+                    console.log('🎲 [STEP 35] roll() with empty array returned:', rollResult3);
 
                     if (rollResult3 && typeof rollResult3.then === 'function') {
+                      console.log('🎲 [STEP 36] Awaiting empty array promise');
                       await rollResult3;
-                      console.log('🎲 roll() empty array promise resolved');
+                      console.log('🎲 [STEP 37] roll() empty array promise resolved');
+                    } else {
+                      console.log('🎲 [STEP 36] Empty array did not return a promise');
                     }
                   } catch (emptyArrayError) {
-                    console.error('🎲 All roll methods failed');
+                    console.error('🎲 [STEP 34-FAILED] All roll methods failed');
                     throw emptyArrayError;
                   }
                 }
@@ -256,11 +283,12 @@ const diceBox = diceBoxRef.current;
               return;
             }
 
+            console.log('🎲 [STEP 38] Setting diceVisible to true');
             setDiceVisible(true);
-            console.log('🎲 Dice roll process completed successfully');
+            console.log('🎲 [STEP 39] Dice roll process completed successfully');
           } catch (rollError) {
-            console.error('❌ Roll failed with error:', rollError);
-            console.error('❌ Error stack:', rollError instanceof Error ? rollError.stack : 'No stack trace');
+            console.error('❌ [STEP ROLL-FAILED] Roll failed with error:', rollError);
+            console.error('❌ [STEP ROLL-FAILED] Error stack:', rollError instanceof Error ? rollError.stack : 'No stack trace');
             // Don't throw here, just log the error and continue
             setError('Failed to roll dice. Check console for details.');
             return;
