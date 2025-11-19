@@ -12,6 +12,8 @@ export const DiceBox3D: React.FC<DiceBox3DProps> = ({
   latestRoll,
   onRollComplete,
 }) => {
+  console.log('🎲 DiceBox3D component rendered, latestRoll:', latestRoll?.notation);
+
   const diceBoxRef = useRef<DiceBox | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const clearTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -27,11 +29,15 @@ export const DiceBox3D: React.FC<DiceBox3DProps> = ({
     let mounted = true;
 
     const initDiceSystem = async () => {
+      console.log('🎲 Starting DiceBox initialization...');
+
       // Check WebGL support
       const canvas = document.createElement('canvas');
       const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+      console.log('🎲 WebGL check result:', !!gl);
 
       if (!gl) {
+        console.log('🎲 WebGL not supported');
         if (mounted) {
           setWebGLSupported(false);
           setError('WebGL is not supported in your browser');
@@ -82,6 +88,7 @@ export const DiceBox3D: React.FC<DiceBox3DProps> = ({
 
         // Mark as initialized
         setIsInitialized(true);
+        console.log('🎲 DiceBox marked as initialized');
 
         // Simple roll complete handler
         diceBox.onRollComplete = (_results) => {
@@ -91,9 +98,11 @@ export const DiceBox3D: React.FC<DiceBox3DProps> = ({
         };
 
       } catch (err) {
+        console.error('🎲 DiceBox initialization failed:', err);
         if (!mounted) return;
 
         const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+        console.log('🎲 Error message:', errorMessage);
 
         if (errorMessage.includes('WebAssembly') || errorMessage.includes('wasm')) {
           setError('3D dice physics not available. WebAssembly support required.');
@@ -122,12 +131,21 @@ const diceBox = diceBoxRef.current;
 
   // Handle dice rolls
   useEffect(() => {
+    console.log('🎲 Dice roll useEffect triggered:', {
+      isInitialized,
+      hasDiceBox: !!diceBoxRef.current,
+      hasLatestRoll: !!latestRoll,
+      rollId: latestRoll?.id,
+      lastRollId: lastRollIdRef.current
+    });
+
     if (
       !isInitialized ||
       !diceBoxRef.current ||
       !latestRoll ||
       lastRollIdRef.current === latestRoll.id
     ) {
+      console.log('🎲 Skipping dice roll due to conditions not met');
       return;
     }
 
@@ -153,13 +171,31 @@ const diceBox = diceBoxRef.current;
 
           // Try to roll the dice directly
           console.log('🎲 Rolling dice with notation:', diceNotation);
+          console.log('🎲 Available methods:', Object.getOwnPropertyNames(diceBoxRef.current));
           try {
-            await diceBoxRef.current.roll(diceNotation);
+            // Make sure the dice box is visible first
+            if (typeof diceBoxRef.current.show === 'function') {
+              diceBoxRef.current.show();
+              console.log('🎲 Called show() method');
+            }
+
+            // Try the roll method
+            if (typeof diceBoxRef.current.roll === 'function') {
+              console.log('🎲 Calling roll() method with:', diceNotation);
+              await diceBoxRef.current.roll(diceNotation);
+              console.log('🎲 roll() method completed');
+            } else {
+              console.error('❌ roll method not found on DiceBox');
+              throw new Error('roll method not available');
+            }
+
             setDiceVisible(true);
-            console.log('🎲 Dice roll completed');
+            console.log('🎲 Dice roll process completed');
           } catch (rollError) {
             console.error('❌ Roll failed:', rollError);
-            throw rollError;
+            // Don't throw here, just log the error and continue
+            setError('Failed to roll dice. Check notation format.');
+            return;
           }
         } else {
           console.error('❌ DiceBox not initialized');
@@ -185,6 +221,15 @@ const diceBox = diceBoxRef.current;
 
     rollDice();
   }, [latestRoll, isInitialized]);
+
+  // Debug: Log when component re-renders
+  console.log('🎲 DiceBox3D render:', {
+    isInitialized,
+    diceVisible,
+    latestRoll: latestRoll?.notation,
+    canvasExists: !!document.getElementById('dice-canvas'),
+    containerExists: !!document.getElementById('dice-box')
+  });
 
   if (!webGLSupported) {
     return (
@@ -235,6 +280,19 @@ const diceBox = diceBoxRef.current;
       }}
       onClick={handleContainerClick}
     >
+      <canvas
+        id="dice-canvas"
+        className="w-full h-full"
+        style={{
+          display: diceVisible ? 'block' : 'none',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          zIndex: 10000,
+          backgroundColor: 'rgba(255, 0, 0, 0.1)', // Temporary red background for debugging
+          border: diceVisible ? '2px solid red' : 'none', // Temporary border for debugging
+        }}
+      />
       {diceVisible && (
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
           <div className="text-white text-center mb-4">
