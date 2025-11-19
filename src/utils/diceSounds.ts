@@ -58,6 +58,12 @@ class DiceSoundManager {
   public playRollSound(diceCount: number): void {
     if (this.muted) return;
 
+    // Resume AudioContext if suspended (required by modern browsers)
+    if (this.audioContext && this.audioContext.state === 'suspended') {
+      this.audioContext.resume().catch(err => {
+      });
+    }
+
     let soundKey: SoundKey;
     if (diceCount === 1) {
       soundKey = '1-die';
@@ -84,6 +90,12 @@ class DiceSoundManager {
   public playCritSuccessSound(): void {
     if (this.muted || !this.audioContext) return;
 
+    // Resume AudioContext if suspended
+    if (this.audioContext.state === 'suspended') {
+      this.audioContext.resume().catch(err => {
+      });
+    }
+
     const ctx = this.audioContext;
     const now = ctx.currentTime;
 
@@ -104,6 +116,12 @@ class DiceSoundManager {
    */
   public playCritFailureSound(): void {
     if (this.muted || !this.audioContext) return;
+
+    // Resume AudioContext if suspended
+    if (this.audioContext.state === 'suspended') {
+      this.audioContext.resume().catch(err => {
+      });
+    }
 
     const ctx = this.audioContext;
     const now = ctx.currentTime;

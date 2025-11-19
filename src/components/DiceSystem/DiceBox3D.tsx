@@ -17,7 +17,7 @@ export const DiceBox3D: React.FC<DiceBox3DProps> = ({
   const clearTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastRollIdRef = useRef<string | null>(null);
 
-  const [isInitialized] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
   const [webGLSupported, setWebGLSupported] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [diceVisible, setDiceVisible] = useState(false);
@@ -69,6 +69,12 @@ export const DiceBox3D: React.FC<DiceBox3DProps> = ({
         await diceBox.init();
 
         if (!mounted) return;
+
+        // Store the diceBox instance in ref
+        diceBoxRef.current = diceBox;
+
+        // Mark as initialized
+        setIsInitialized(true);
 
         // Simple roll complete handler
         diceBox.onRollComplete = (_results) => {

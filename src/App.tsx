@@ -9,7 +9,7 @@ import ManualEntryScreen from './components/ManualEntryScreen';
 import PersonalityWizard from './components/PersonalityWizard';
 import { MonsterLibrary, MonsterStatBlock, CreateMonsterModal } from './components/MonsterLibrary';
 import { EncounterView } from './components/EncounterView';
-import { Monster, UserMonster } from './types/dnd';
+
 
 
 import { DiceBox3D } from './components/DiceSystem/DiceBox3D';
@@ -28,7 +28,7 @@ import { getAllCharacters, addCharacter, deleteCharacter, updateCharacter } from
 
 
 import levelConstantsData from './data/levelConstants.json';
-import { Ability, Character, CharacterCreationData, Equipment, EquippedItem, Feature } from './types/dnd';
+import { Ability, Character, CharacterCreationData, Equipment, EquippedItem, Feature, Monster, UserMonster } from './types/dnd';
 
 import { useDiceContext } from './hooks';
 
