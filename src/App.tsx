@@ -7,6 +7,9 @@ import { CharacterSheet } from './components/CharacterSheet';
 import NewCharacterModal from './components/NewCharacterModal';
 import ManualEntryScreen from './components/ManualEntryScreen';
 import PersonalityWizard from './components/PersonalityWizard';
+import { MonsterLibrary, MonsterStatBlock, CreateMonsterModal } from './components/MonsterLibrary';
+import { EncounterView } from './components/EncounterView';
+import { Monster, UserMonster } from './types/dnd';
 
 
 import { DiceBox3D } from './components/DiceSystem/DiceBox3D';
@@ -142,6 +145,12 @@ const App: React.FC = () => {
   const [selectedCharacterId, setSelectedCharacterId] = useState<string | null>(null);
   const [selectedCharacterIds, setSelectedCharacterIds] = useState<Set<string>>(new Set());
   const [isWizardOpen, setIsWizardOpen] = useState<boolean>(false);
+
+  // Monster Library state
+  const [activeTab, setActiveTab] = useState<'characters' | 'monsters'>('characters');
+  const [selectedMonster, setSelectedMonster] = useState<Monster | UserMonster | null>(null);
+  const [editingMonster, setEditingMonster] = useState<UserMonster | null>(null);
+  const [showEncounterView, setShowEncounterView] = useState(false);
   const [rollResult, setRollResult] = useState<{
     text: string;
     value: number | null;
@@ -926,6 +935,7 @@ const App: React.FC = () => {
     }
   }, [characters, asiModalState]);
 
+  // Full-screen views (CharacterSheet or MonsterStatBlock)
   if (selectedCharacter) {
     return (
       <>
@@ -958,14 +968,76 @@ const App: React.FC = () => {
     );
   }
 
+  if (selectedMonster) {
+    return (
+      <>
+        <MonsterStatBlock
+          monster={selectedMonster}
+          onClose={() => setSelectedMonster(null)}
+          onEdit={
+            'isCustom' in selectedMonster && selectedMonster.isCustom
+              ? () => {
+                  setEditingMonster(selectedMonster);
+                  setSelectedMonster(null);
+                }
+              : undefined
+          }
+        />
+        {editingMonster && (
+          <div className="fixed inset-0 z-[60]">
+            <CreateMonsterModal
+              isOpen={true}
+              onClose={() => setEditingMonster(null)}
+              editingMonster={editingMonster}
+            />
+          </div>
+        )}
+      </>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100 font-sans">
       <div className="max-w-7xl mx-auto p-4 md:p-8">
         {/* Header and Controls */}
-        <header className="flex flex-col md:flex-row justify-between items-center border-b border-red-700 pb-4 mb-8">
-          <h1 className="text-4xl font-extrabold text-red-500 mb-4 md:mb-0">
-            The Character Forge
-          </h1>
+        <header className="mb-8">
+          {/* Title and Tabs on same line */}
+          <div className="flex flex-col md:flex-row justify-between items-end mb-4 border-b border-red-700">
+            <h1 className="text-4xl font-extrabold text-red-500 mb-4 md:mb-0">
+              5e Character Forge
+            </h1>
+
+            {/* Folder-style Tab Navigation */}
+            <div className="flex gap-1 mb-[-1px]">
+              <button
+                onClick={() => setActiveTab('characters')}
+                className={`px-6 py-3 font-bold transition-all rounded-t-lg border-t-2 border-l-2 border-r-2 ${
+                  activeTab === 'characters'
+                    ? 'bg-gray-900 text-red-400 border-red-700 relative z-10'
+                    : 'bg-gray-800 text-gray-400 border-gray-700 hover:bg-gray-750 translate-y-1'
+                }`}
+                style={activeTab === 'characters' ? { borderBottom: '2px solid rgb(17, 24, 39)' } : {}}
+              >
+                <Shield className="w-4 h-4 inline-block mr-2" />
+                Characters
+              </button>
+              <button
+                onClick={() => setActiveTab('monsters')}
+                className={`px-6 py-3 font-bold transition-all rounded-t-lg border-t-2 border-l-2 border-r-2 ${
+                  activeTab === 'monsters'
+                    ? 'bg-gray-900 text-purple-400 border-purple-700 relative z-10'
+                    : 'bg-gray-800 text-gray-400 border-gray-700 hover:bg-gray-750 translate-y-1'
+                }`}
+                style={activeTab === 'monsters' ? { borderBottom: '2px solid rgb(17, 24, 39)' } : {}}
+              >
+                🐉 Monster Library
+              </button>
+            </div>
+          </div>
+
+          {/* Action Buttons (only show for characters tab) */}
+          {activeTab === 'characters' && (
+            <div className="pt-4">
            <div className="flex flex-col space-y-3 md:space-y-0 md:flex-row md:space-x-3 w-full md:w-auto">
               <button
                onClick={() => setIsNewCharacterModalOpen(true)}
@@ -1002,6 +1074,8 @@ const App: React.FC = () => {
                />
              </label>
            </div>
+            </div>
+          )}
         </header>
 
         {/* Enhanced Dice Roll Display */}
@@ -1032,9 +1106,10 @@ const App: React.FC = () => {
           )}
         </div>
 
-        {/* Character List */}
-        <section>
-          <h2 className="text-2xl font-bold text-gray-200 mb-4">Your Heroes ({characters.length})</h2>
+        {/* Main Content - Conditional based on active tab */}
+        {activeTab === 'characters' ? (
+          <section>
+            <h2 className="text-2xl font-bold text-gray-200 mb-4">Your Heroes ({characters.length})</h2>
 
           {characters.length === 0 ? (
             <div className="text-center p-12 bg-gray-800 rounded-xl border-2 border-dashed border-gray-700">
@@ -1091,7 +1166,17 @@ const App: React.FC = () => {
               ))}
             </div>
           )}
-        </section>
+          </section>
+        ) : (
+          showEncounterView ? (
+            <EncounterView onBack={() => setShowEncounterView(false)} />
+          ) : (
+            <MonsterLibrary
+              onSelectMonster={(monster) => setSelectedMonster(monster)}
+              onViewEncounter={() => setShowEncounterView(true)}
+            />
+          )
+        )}
 
         {/* New Character Creation Modal */}
         <NewCharacterModal

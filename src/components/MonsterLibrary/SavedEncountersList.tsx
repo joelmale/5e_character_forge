@@ -1,0 +1,91 @@
+import React from 'react';
+import { Trash2, Eye, Calendar } from 'lucide-react';
+import { useMonsterContext } from '../../hooks';
+
+export const SavedEncountersList: React.FC = () => {
+  const { encounters, loadEncounter, deleteEncounterById, allMonsters } = useMonsterContext();
+
+  const handleLoad = async (encounterId: string) => {
+    await loadEncounter(encounterId);
+  };
+
+  const handleDelete = async (encounterId: string, encounterName: string) => {
+    if (window.confirm(`Delete encounter "${encounterName}"? This action cannot be undone.`)) {
+      await deleteEncounterById(encounterId);
+    }
+  };
+
+  const getEncounterSummary = (monsterIds: string[]): string => {
+    // Count unique monsters
+    const monsterCounts = new Map<string, number>();
+    monsterIds.forEach((id) => {
+      monsterCounts.set(id, (monsterCounts.get(id) || 0) + 1);
+    });
+
+    // Get monster names
+    const monsterNames: string[] = [];
+    monsterCounts.forEach((count, monsterId) => {
+      const monster = allMonsters.find((m) => m.index === monsterId);
+      if (monster) {
+        monsterNames.push(count > 1 ? `${monster.name} x${count}` : monster.name);
+      }
+    });
+
+    if (monsterNames.length === 0) return 'No monsters';
+    if (monsterNames.length <= 3) return monsterNames.join(', ');
+    return `${monsterNames.slice(0, 3).join(', ')} +${monsterNames.length - 3} more`;
+  };
+
+  if (encounters.length === 0) {
+    return (
+      <div className="text-center p-8 bg-gray-800 rounded-xl border-2 border-dashed border-gray-700">
+        <div className="text-4xl mb-3">📖</div>
+        <p className="text-gray-400">No saved encounters yet</p>
+        <p className="text-sm text-gray-500 mt-2">
+          Create an encounter by selecting monsters and clicking "Save Encounter"
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      {encounters.map((encounter) => (
+        <div
+          key={encounter.id}
+          className="bg-gray-800 rounded-lg p-4 hover:bg-gray-750 transition-colors"
+        >
+          <div className="flex items-start justify-between">
+            <div className="flex-grow">
+              <h3 className="text-lg font-bold text-purple-400 mb-1">{encounter.name}</h3>
+              <p className="text-sm text-gray-400 mb-2">{getEncounterSummary(encounter.monsterIds)}</p>
+              <div className="flex items-center gap-2 text-xs text-gray-500">
+                <Calendar className="w-3 h-3" />
+                <span>Created {new Date(encounter.createdAt).toLocaleDateString()}</span>
+                <span className="mx-2">•</span>
+                <span>{encounter.monsterIds.length} monster{encounter.monsterIds.length !== 1 ? 's' : ''}</span>
+              </div>
+            </div>
+
+            <div className="flex gap-2">
+              <button
+                onClick={() => handleLoad(encounter.id)}
+                className="p-2 bg-purple-600 hover:bg-purple-700 rounded-lg transition-colors"
+                title="Load encounter"
+              >
+                <Eye className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => handleDelete(encounter.id, encounter.name)}
+                className="p-2 bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
+                title="Delete encounter"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};

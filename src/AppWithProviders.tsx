@@ -1,17 +1,19 @@
 import React from 'react';
-import { CharacterProvider, DiceProvider, ModalProvider, LayoutProvider } from './context';
+import { CharacterProvider, MonsterProvider, DiceProvider, ModalProvider, LayoutProvider } from './context';
 import App from './App';
 
 const AppWithProviders: React.FC = () => {
   return (
     <CharacterProvider>
-      <DiceProvider>
-        <ModalProvider>
-          <LayoutProvider>
-            <App />
-          </LayoutProvider>
-        </ModalProvider>
-      </DiceProvider>
+      <MonsterProvider>
+        <DiceProvider>
+          <ModalProvider>
+            <LayoutProvider>
+              <App />
+            </LayoutProvider>
+          </ModalProvider>
+        </DiceProvider>
+      </MonsterProvider>
     </CharacterProvider>
   );
 };

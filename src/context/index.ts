@@ -1,4 +1,5 @@
 export { CharacterProvider } from './CharacterContext';
+export { MonsterProvider } from './MonsterContext';
 export { DiceProvider } from './DiceContext';
 export { ModalProvider } from './ModalContext';
 export { LayoutProvider, LayoutContext, type LayoutContextType } from './LayoutContext';

@@ -14,6 +14,7 @@ import srdSubclasses2018 from '../data/srd/2018/5e-SRD-Subclasses.json';
 import srdSubclasses2020 from '../data/srd/2020/5e-SRD-Subclasses.json';
 import srdSubclasses2020egtw from '../data/srd/2020-egtw/5e-SRD-Subclasses.json';
 import srdFeats2014 from '../data/srd/2014/5e-SRD-Feats.json';
+import srdMonsters2014 from '../data/srd/2014/5e-SRD-Monsters.json';
 import featsData from '../data/feats.json';
 import alignmentsData from '../data/alignments.json';
 import backgroundsData from '../data/backgrounds.json';
@@ -27,7 +28,7 @@ import levelConstantsData from '../data/levelConstants.json';
 import spellcastingTypesData from '../data/spellcastingTypes.json';
 import racialLanguagesData from '../data/racialLanguages.json';
 import backgroundDefaultsData from '../data/backgroundDefaults.json';
-import { AbilityName, Race, Class, Equipment, Feature, Subclass, Feat, RaceCategory, ClassCategory, EquipmentPackage, EquipmentChoice, EquipmentItem, EquippedItem, SpellcastingType, SkillName } from '../types/dnd';
+import { AbilityName, Race, Class, Equipment, Feature, Subclass, Feat, RaceCategory, ClassCategory, EquipmentPackage, EquipmentChoice, EquipmentItem, EquippedItem, SpellcastingType, SkillName, Monster, MonsterType } from '../types/dnd';
 
 // Local type definitions for dataService
 interface Alignment {
@@ -1777,4 +1778,43 @@ export const getHitDieForClass = (classSlug: string): number => {
 
   return hitDice[baseClass] || 8; // Default to d8 if class not found
 };
+
+// ==================== Monster System ====================
+
+export interface MonsterTypeCategory {
+  type: MonsterType;
+  name: string;
+  icon: string;
+  description: string;
+}
+
+export const MONSTER_TYPE_CATEGORIES: MonsterTypeCategory[] = [
+  { type: 'aberration', name: 'Aberrations', icon: '👁️', description: 'Utterly alien beings' },
+  { type: 'beast', name: 'Beasts', icon: '🐻', description: 'Natural animals' },
+  { type: 'celestial', name: 'Celestials', icon: '✨', description: 'Divine beings from the Upper Planes' },
+  { type: 'construct', name: 'Constructs', icon: '🗿', description: 'Animated objects and golems' },
+  { type: 'dragon', name: 'Dragons', icon: '🐉', description: 'Ancient reptilian creatures' },
+  { type: 'elemental', name: 'Elementals', icon: '🔥', description: 'Beings of pure elemental energy' },
+  { type: 'fey', name: 'Fey', icon: '🧚', description: 'Magical creatures from the Feywild' },
+  { type: 'fiend', name: 'Fiends', icon: '😈', description: 'Evil beings from the Lower Planes' },
+  { type: 'giant', name: 'Giants', icon: '⛰️', description: 'Towering humanoid creatures' },
+  { type: 'humanoid', name: 'Humanoids', icon: '🧑', description: 'People and human-like creatures' },
+  { type: 'monstrosity', name: 'Monstrosities', icon: '🦎', description: 'Unnatural creatures and hybrids' },
+  { type: 'ooze', name: 'Oozes', icon: '💧', description: 'Amorphous blobs' },
+  { type: 'plant', name: 'Plants', icon: '🌿', description: 'Vegetation creatures' },
+  { type: 'undead', name: 'Undead', icon: '💀', description: 'Once-living creatures' },
+];
+
+/**
+ * Load and return all monsters from the SRD
+ * No transformation needed - use SRD format directly
+ */
+export const loadMonsters = (): Monster[] => {
+  return srdMonsters2014 as Monster[];
+};
+
+/**
+ * Monster database constant (334 SRD monsters)
+ */
+export const MONSTER_DATABASE = loadMonsters();
 

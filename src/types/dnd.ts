@@ -459,3 +459,211 @@ export interface SpellLearningRules {
   magicalSecrets?: number[];        // Bard magical secrets by level
   invocationsKnown?: number[];      // Warlock invocations by level
 }
+
+// ==================== Monster System ====================
+
+export type MonsterSize = 'Tiny' | 'Small' | 'Medium' | 'Large' | 'Huge' | 'Gargantuan';
+
+export type MonsterType =
+  | 'aberration'
+  | 'beast'
+  | 'celestial'
+  | 'construct'
+  | 'dragon'
+  | 'elemental'
+  | 'fey'
+  | 'fiend'
+  | 'giant'
+  | 'humanoid'
+  | 'monstrosity'
+  | 'ooze'
+  | 'plant'
+  | 'undead';
+
+export interface MonsterSpeed {
+  walk?: string;
+  fly?: string;
+  swim?: string;
+  burrow?: string;
+  climb?: string;
+  hover?: boolean;
+}
+
+export interface MonsterArmorClass {
+  type: 'dex' | 'natural' | 'armor' | 'condition';
+  value: number;
+  armor?: Array<{ name: string; url?: string }>;
+  spell?: { name: string; url?: string };
+  desc?: string;
+}
+
+export interface MonsterProficiency {
+  value: number;
+  proficiency: {
+    index: string;
+    name: string;
+    url: string;
+  };
+}
+
+export interface MonsterDamageType {
+  index: string;
+  name: string;
+  url: string;
+}
+
+export interface MonsterConditionImmunity {
+  index: string;
+  name: string;
+  url: string;
+}
+
+export interface MonsterAbilityDC {
+  dc_type: {
+    index: string;
+    name: string;
+    url: string;
+  };
+  dc_value: number;
+  success_type: string;
+}
+
+export interface MonsterDamage {
+  damage_type: {
+    index: string;
+    name: string;
+    url?: string;
+  };
+  damage_dice: string;
+}
+
+export interface MonsterUsage {
+  type: string;
+  times?: number;
+  rest_types?: string[];
+  dice?: string;
+  min_value?: number;
+}
+
+export interface MonsterAction {
+  name: string;
+  desc: string;
+  multiattack_type?: string;
+  attack_bonus?: number;
+  damage?: MonsterDamage[];
+  dc?: MonsterAbilityDC;
+  usage?: MonsterUsage;
+  attacks?: Array<{
+    name: string;
+    dc?: MonsterAbilityDC;
+    damage?: MonsterDamage[];
+  }>;
+  options?: {
+    choose: number;
+    from: {
+      option_set_type: string;
+      options: Array<{
+        option_type: string;
+        name: string;
+        desc: string;
+        attack_bonus?: number;
+        damage?: MonsterDamage[];
+        dc?: MonsterAbilityDC;
+      }>;
+    };
+  };
+}
+
+export interface MonsterSpecialAbility {
+  name: string;
+  desc: string;
+  attack_bonus?: number;
+  damage?: MonsterDamage[];
+  dc?: MonsterAbilityDC;
+  usage?: MonsterUsage;
+  spellcasting?: {
+    ability: {
+      index: string;
+      name: string;
+      url: string;
+    };
+    dc?: number;
+    modifier?: number;
+    components_required?: string[];
+    school?: string;
+    slots?: Record<string, number>;
+    spells?: Array<{
+      name: string;
+      level: number;
+      url: string;
+      usage?: MonsterUsage;
+      notes?: string;
+    }>;
+  };
+}
+
+export interface MonsterLegendaryAction {
+  name: string;
+  desc: string;
+  attack_bonus?: number;
+  damage?: MonsterDamage[];
+  dc?: MonsterAbilityDC;
+}
+
+export interface MonsterReaction {
+  name: string;
+  desc: string;
+  dc?: MonsterAbilityDC;
+}
+
+export interface Monster {
+  index: string;
+  name: string;
+  size: MonsterSize;
+  type: MonsterType;
+  subtype?: string;
+  alignment: string;
+  armor_class: MonsterArmorClass[];
+  hit_points: number;
+  hit_dice: string;
+  hit_points_roll: string;
+  speed: MonsterSpeed;
+  strength: number;
+  dexterity: number;
+  constitution: number;
+  intelligence: number;
+  wisdom: number;
+  charisma: number;
+  proficiencies: MonsterProficiency[];
+  damage_vulnerabilities: string[];
+  damage_resistances: string[];
+  damage_immunities: string[];
+  condition_immunities: MonsterConditionImmunity[];
+  senses: Record<string, string | number>;
+  languages: string;
+  challenge_rating: number;
+  proficiency_bonus: number;
+  xp: number;
+  special_abilities?: MonsterSpecialAbility[];
+  actions?: MonsterAction[];
+  legendary_actions?: MonsterLegendaryAction[];
+  reactions?: MonsterReaction[];
+  url?: string;
+  image?: string;
+  desc?: string[];
+}
+
+export interface UserMonster extends Monster {
+  id: string;
+  isCustom: true;
+  createdAt: number;
+  updatedAt: number;
+}
+
+export interface Encounter {
+  id: string;
+  name: string;
+  monsterIds: string[];
+  createdAt: number;
+  updatedAt: number;
+}
