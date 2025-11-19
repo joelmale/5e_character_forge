@@ -46,36 +46,39 @@ export const DiceBox3D: React.FC<DiceBox3DProps> = ({
       }
 
       try {
-        // Create DiceBox instance with v1.1.0+ API (config object only)
+        // Check if container exists
+        const containerElement = document.getElementById('dice-box');
+        console.log('🎲 Container element exists:', !!containerElement);
+
+        // Create DiceBox instance with minimal config first
         const config = {
           id: 'dice-canvas',
-          assetPath: '/assets/dice-box/',  // This should point to the directory containing themes/ and ammo/
+          assetPath: '/assets/dice-box/',
           container: '#dice-box',
           theme: 'default',
-          themeColor: '#1e3a8a',  // Dark blue
-          offscreen: false,  // Disable Web Worker to avoid CORS issues
-          scale: 6,
-          gravity: 1,
-          mass: 1,
-          friction: 0.8,
-          restitution: 0,
-          linearDamping: 0.4,
-          angularDamping: 0.4,
-          spinForce: 3,
-          throwForce: 4,
-          startingHeight: 8,
-          settleTimeout: 2000,
-          enableShadows: true,
-          lightIntensity: 1,
+          offscreen: false,
         };
+        console.log('🎲 Using minimal DiceBox config:', config);
 
         console.log('🎲 DiceBox config:', config);
 
         console.log('🎲 Initializing DiceBox...');
-        const diceBox = new DiceBox(config);
+        console.log('🎲 Creating DiceBox with config:', config);
+
+        let diceBox;
+        try {
+          diceBox = new DiceBox(config);
+          console.log('🎲 DiceBox constructor succeeded');
+        } catch (constructorError) {
+          console.error('🎲 DiceBox constructor failed:', constructorError);
+          throw constructorError;
+        }
+
+        console.log('🎲 DiceBox created, calling init()...');
 
         // Wait for initialization to complete
         await diceBox.init();
+        console.log('🎲 DiceBox.init() completed successfully');
 
         if (!mounted) {
           console.log('🎲 Component unmounted during init');
@@ -85,10 +88,11 @@ export const DiceBox3D: React.FC<DiceBox3DProps> = ({
         // Store the diceBox instance in ref
         diceBoxRef.current = diceBox;
         console.log('🎲 DiceBox initialized successfully, methods:', Object.getOwnPropertyNames(diceBox));
+        console.log('🎲 DiceBox instance:', diceBox);
 
         // Mark as initialized
         setIsInitialized(true);
-        console.log('🎲 DiceBox marked as initialized');
+        console.log('🎲 DiceBox marked as initialized, isInitialized should be true now');
 
         // Simple roll complete handler
         diceBox.onRollComplete = (_results) => {
@@ -162,6 +166,7 @@ const diceBox = diceBoxRef.current;
         // Extract just the dice notation (remove modifiers)
         // The 3D dice library only handles dice, not modifiers
         const diceNotation = latestRoll.notation.replace(/[+-]\d+/, '');
+        console.log('🎲 Original notation:', latestRoll.notation, 'Cleaned notation:', diceNotation);
 
         console.log('🎲 Rolling dice with notation:', diceNotation, 'from original:', latestRoll.notation);
 
