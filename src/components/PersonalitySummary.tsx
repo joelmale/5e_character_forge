@@ -1,8 +1,7 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import { ArrowLeft, ArrowRight, Edit3, Check, Sparkles, Heart, Shield, Zap } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Edit3, Sparkles, Heart, Shield, Zap } from 'lucide-react';
 import { CharacterProfile } from '../data/characterProfiles';
 import { loadClasses, getAllRaces, BACKGROUNDS, getModifier } from '../services/dataService';
-import { CharacterCreationData } from '../types/dnd';
 
 interface PersonalitySummaryProps {
   profile: CharacterProfile;
@@ -22,7 +21,6 @@ const PersonalitySummary: React.FC<PersonalitySummaryProps> = ({
   onBack
 }) => {
   // Debug logging for initial props
-  console.log('🎨 [PersonalitySummary] Component initialized with:', {
     profileName: profile.name,
     selectedClass,
     selectedRace,
@@ -41,7 +39,6 @@ const PersonalitySummary: React.FC<PersonalitySummaryProps> = ({
   const [currentRace, setCurrentRace] = useState(selectedRace || profile.recommendedRaces[0]?.race || '');
   const [currentBackground, setCurrentBackground] = useState(selectedBackground || profile.recommendedBackgrounds[0]?.background || '');
 
-  console.log('🎨 [PersonalitySummary] Initial state set to:', {
     currentClass,
     currentRace,
     currentBackground
@@ -93,7 +90,6 @@ const PersonalitySummary: React.FC<PersonalitySummaryProps> = ({
   const availableBackgrounds = ['Acolyte', 'Criminal', 'Entertainer', 'Folk Hero', 'Guild Artisan', 'Hermit', 'Noble', 'Outlander', 'Sage', 'Sailor', 'Soldier', 'Urchin'];
 
   const handleContinue = useCallback(() => {
-    console.log('➡️ [PersonalitySummary] Proceeding to finalization step');
     onContinue();
   }, [onContinue]);
 

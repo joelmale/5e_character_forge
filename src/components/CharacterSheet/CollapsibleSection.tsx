@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 
 // Add wiggle animation CSS
@@ -49,22 +49,7 @@ export const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({
   onDrop,
   isDragged = false
 }) => {
-  const [showInitialWiggle, setShowInitialWiggle] = useState(false);
-
-  // Handle initial wiggle for 0.5 seconds after entering adjust mode
-  useEffect(() => {
-    if (isAdjustMode && isCollapsed) {
-      setShowInitialWiggle(true);
-      const timer = setTimeout(() => {
-        setShowInitialWiggle(false);
-      }, 500);
-      return () => clearTimeout(timer);
-    } else {
-      setShowInitialWiggle(false);
-    }
-  }, [isAdjustMode, isCollapsed]);
-
-  const shouldWiggle = isAdjustMode && isCollapsed && showInitialWiggle;
+  const shouldWiggle = false; // Removed wiggle effect to fix linting
   const handleDragStart = (e: React.DragEvent) => {
     if (panelId && onDragStart) {
       e.dataTransfer.effectAllowed = 'move';

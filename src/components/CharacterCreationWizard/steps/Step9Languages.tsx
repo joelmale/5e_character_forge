@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { ArrowLeft, ArrowRight, ChevronUp, ChevronDown, Shuffle } from 'lucide-react';
 import { StepProps } from '../types/wizard.types';
 import { BACKGROUNDS, randomizeLanguages } from '../../../services/dataService';
@@ -29,12 +29,7 @@ const RandomizeButton: React.FC<{ onClick: () => void; title?: string; className
 
 export const Step9Languages: React.FC<StepProps> = ({ data, updateData, nextStep, prevStep, getNextStepLabel }) => {
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set(['Standard']));
-  const [selectedLanguages, setSelectedLanguages] = useState<string[]>(data.knownLanguages || []);
-
-  // Sync local state with parent data
-  useEffect(() => {
-    setSelectedLanguages(data.knownLanguages || []);
-  }, [data.knownLanguages]);
+  const selectedLanguages = data.knownLanguages || [];
 
   // Calculate auto-included languages
   const autoLanguages = new Set<string>();
@@ -72,15 +67,12 @@ export const Step9Languages: React.FC<StepProps> = ({ data, updateData, nextStep
   };
 
   const handleLanguageToggle = (languageName: string) => {
-    setSelectedLanguages(prev => {
-      const newSelected = prev.includes(languageName)
-        ? prev.filter(lang => lang !== languageName)
-        : [...prev, languageName];
+    const newSelected = selectedLanguages.includes(languageName)
+      ? selectedLanguages.filter(lang => lang !== languageName)
+      : [...selectedLanguages, languageName];
 
-      // Update the data
-      updateData({ knownLanguages: newSelected });
-      return newSelected;
-    });
+    // Update the data
+    updateData({ knownLanguages: newSelected });
   };
 
   // Validation for required background language selections
@@ -101,7 +93,6 @@ export const Step9Languages: React.FC<StepProps> = ({ data, updateData, nextStep
           onClick={() => {
             const languages = randomizeLanguages(data.raceSlug, data.background);
             updateData({ knownLanguages: languages });
-            setSelectedLanguages(languages);
           }}
           title="Randomize language selection"
         />

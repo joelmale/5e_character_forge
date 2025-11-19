@@ -87,7 +87,7 @@ export const AttacksAndActions: React.FC<AttacksAndActionsProps> = ({
 
     // Create the roll object for the dice system
     const roll: CustomRoll = {
-      id: `attack-${Date.now()}`,
+       id: `attack-${crypto.randomUUID()}`,
       notation: attackRoll,
       type: 'attack' as const,
       description: rollText,
@@ -110,7 +110,7 @@ export const AttacksAndActions: React.FC<AttacksAndActionsProps> = ({
     const attackRoll = `1d20${attackBonus >= 0 ? '+' : ''}${attackBonus}`;
 
     const roll: CustomRoll = {
-      id: `spell-attack-${Date.now()}`,
+      id: `spell-attack-${crypto.randomUUID()}`,
       notation: attackRoll,
       type: 'complex' as const,
       description: 'Spell Attack',
@@ -131,7 +131,7 @@ export const AttacksAndActions: React.FC<AttacksAndActionsProps> = ({
     const attackRoll = `1d20${attackBonus >= 0 ? '+' : ''}${attackBonus}`;
 
     const roll: CustomRoll = {
-      id: `cantrip-attack-${cantripSlug}-${Date.now()}`,
+      id: `cantrip-attack-${cantripSlug}-${crypto.randomUUID()}`,
       notation: attackRoll,
       type: 'complex' as const,
       description: `${cantripSlug} Attack`,
@@ -153,7 +153,7 @@ export const AttacksAndActions: React.FC<AttacksAndActionsProps> = ({
     const saveRoll = `1d20${saveBonus >= 0 ? '+' : ''}${saveBonus}`;
 
     const roll: CustomRoll = {
-      id: `save-${ability}-${Date.now()}`,
+      id: `save-${ability}-${crypto.randomUUID()}`,
       notation: saveRoll,
       type: 'saving-throw' as const,
       description: `${ability} Saving Throw`,
@@ -171,7 +171,7 @@ export const AttacksAndActions: React.FC<AttacksAndActionsProps> = ({
     const initiativeRoll = `1d20${character.initiative >= 0 ? '+' : ''}${character.initiative}`;
 
     const roll: CustomRoll = {
-      id: `initiative-${Date.now()}`,
+      id: `initiative-${crypto.randomUUID()}`,
       notation: initiativeRoll,
       type: 'initiative' as const,
       description: 'Initiative',
@@ -191,7 +191,7 @@ export const AttacksAndActions: React.FC<AttacksAndActionsProps> = ({
     const skillRoll = `1d20${skillBonus >= 0 ? '+' : ''}${skillBonus}`;
 
     const roll: CustomRoll = {
-      id: `skill-${skillName}-${Date.now()}`,
+      id: `skill-${skillName}-${crypto.randomUUID()}`,
       notation: skillRoll,
       type: 'skill' as const,
       description: `${skillName} (${ability}) Check`,

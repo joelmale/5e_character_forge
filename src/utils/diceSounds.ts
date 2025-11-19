@@ -23,7 +23,6 @@ class DiceSoundManager {
     try {
       this.audioContext = new (window.AudioContext || (window as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext || AudioContext)();
     } catch (e) {
-      console.warn('Web Audio API not supported', e);
     }
 
     // Preload dice rolling MP3 files
@@ -49,7 +48,6 @@ class DiceSoundManager {
 
     // Handle loading errors gracefully
     audio.addEventListener('error', () => {
-      console.warn(`Failed to load dice sound: ${url}`);
     });
   }
 
@@ -75,7 +73,6 @@ class DiceSoundManager {
       const clone = sound.cloneNode() as HTMLAudioElement;
       clone.volume = this.volume;
       clone.play().catch(err => {
-        console.warn('Audio playback failed:', err);
       });
     }
   }

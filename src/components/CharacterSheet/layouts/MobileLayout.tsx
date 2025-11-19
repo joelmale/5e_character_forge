@@ -57,22 +57,18 @@ export const MobileLayout: React.FC<CharacterSheetProps> = ({
     'features': true
   });
 
-  const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>(() =>
-    getDefaultCollapsedState(character)
-  );
-
-  // Load saved preferences
-  useEffect(() => {
+  const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>(() => {
     const saved = localStorage.getItem(`character-${character.id}-collapsed-sections`);
     if (saved) {
       try {
-        setCollapsedSections(JSON.parse(saved));
+        return JSON.parse(saved);
       } catch {
         // Fall back to defaults if parsing fails
-        setCollapsedSections(getDefaultCollapsedState(character));
+        return getDefaultCollapsedState(character);
       }
     }
-  }, [character.id, character]);
+    return getDefaultCollapsedState(character);
+  });
 
   // Save preferences
   useEffect(() => {

@@ -1,5 +1,5 @@
 // Spell Preparation Modal for Prepared Casters
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { X, Check, BookOpen } from 'lucide-react';
 import { Character } from '../types/dnd';
 import { AppSpell } from '../services/dataService';
@@ -26,12 +26,6 @@ export const SpellPreparationModal: React.FC<SpellPreparationModalProps> = ({
   // Calculate max prepared spells
   const maxPrepared = character.spellcasting ?
     Math.max(1, Math.floor((character.abilities[character.spellcasting.ability].score - 10) / 2) + character.level) : 0;
-
-  useEffect(() => {
-    if (isOpen) {
-      setSelectedSpells(character.spellcasting?.preparedSpells || []);
-    }
-  }, [isOpen, character.spellcasting?.preparedSpells]);
 
   const handleSpellToggle = (spellSlug: string) => {
     setSelectedSpells(prev => {

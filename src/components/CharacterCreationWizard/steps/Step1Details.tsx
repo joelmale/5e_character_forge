@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { XCircle, Shuffle } from 'lucide-react';
 import { StepProps } from '../types/wizard.types';
-import { ALIGNMENTS_DATA, BACKGROUNDS, ALIGNMENTS, randomizeIdentity, randomizeLevel, randomizeRace, randomizeClassAndSkills, randomizeFightingStyle, randomizeSpells, randomizeAbilities, randomizeFeats, randomizeEquipmentChoices, randomizeAdditionalEquipment, randomizeLanguages, randomizePersonality } from '../../../services/dataService';
+import { ALIGNMENTS_DATA, BACKGROUNDS, ALIGNMENTS, randomizeIdentity, randomizeRace, randomizeClassAndSkills, randomizeFightingStyle, randomizeSpells, randomizeAbilities, randomizeFeats, randomizeEquipmentChoices, randomizeAdditionalEquipment, randomizeLanguages, randomizePersonality } from '../../../services/dataService';
 
 interface RandomizeButtonProps {
   onClick: () => void;

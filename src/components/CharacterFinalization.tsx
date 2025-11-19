@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { ArrowLeft, ArrowRight, User, Heart, Target, Link2, Frown, Dices } from 'lucide-react';
 import { CharacterProfile } from '../data/characterProfiles';
 import {
@@ -46,22 +46,12 @@ const CharacterFinalization: React.FC<CharacterFinalizationProps> = ({
   onCreateCharacter,
   onBack
 }) => {
-  const [name, setName] = useState('');
-  const [alignment, setAlignment] = useState('True Neutral');
-  const [personality, setPersonality] = useState('');
-  const [ideals, setIdeals] = useState('');
-  const [bonds, setBonds] = useState('');
-  const [flaws, setFlaws] = useState('');
-
-  // Pre-fill fields with random values on mount
-  useEffect(() => {
-    const initialDetails = generateAllCharacterDetails(selectedRace);
-    setName(initialDetails.name);
-    setPersonality(initialDetails.personality);
-    setIdeals(initialDetails.ideals);
-    setBonds(initialDetails.bonds);
-    setFlaws(initialDetails.flaws);
-  }, []); // Only run once on mount
+  const [name, setName] = useState(() => generateAllCharacterDetails(selectedRace).name);
+  const [alignment, setAlignment] = useState('Neutral');
+  const [personality, setPersonality] = useState(() => generateAllCharacterDetails(selectedRace).personality);
+  const [ideals, setIdeals] = useState(() => generateAllCharacterDetails(selectedRace).ideals);
+  const [bonds, setBonds] = useState(() => generateAllCharacterDetails(selectedRace).bonds);
+  const [flaws, setFlaws] = useState(() => generateAllCharacterDetails(selectedRace).flaws);
 
   // Randomize handlers
   const randomizeName = () => setName(generateRandomName(selectedRace));
@@ -76,7 +66,7 @@ const CharacterFinalization: React.FC<CharacterFinalizationProps> = ({
       return;
     }
 
-    console.log('🎉 [CharacterFinalization] Creating character with:', {
+
       name,
       alignment,
       personality,

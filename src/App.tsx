@@ -25,7 +25,7 @@ import { getAllCharacters, addCharacter, deleteCharacter, updateCharacter } from
 
 
 import levelConstantsData from './data/levelConstants.json';
-import { Ability, Character, Equipment, EquippedItem, Feature } from './types/dnd';
+import { Ability, Character, CharacterCreationData, Equipment, EquippedItem, Feature } from './types/dnd';
 
 import { useDiceContext } from './hooks';
 
@@ -245,7 +245,7 @@ const App: React.FC = () => {
       setSelectedCharacterId(null);
       await loadCharacters();
       setRollResult({ text: `Successfully deleted ${selectedCount} character${selectedCount !== 1 ? 's' : ''}.`, value: null });
-    } catch (error) {
+    } catch {
       setRollResult({ text: 'Error deleting selected characters.', value: null });
     }
   }, [selectedCharacterIds, characters, loadCharacters]);
@@ -577,8 +577,7 @@ const App: React.FC = () => {
     setCreationMethod('personality');
   }, []);
 
-  const handlePersonalityComplete = useCallback(async (characterData: any) => {
-    console.log('🚀 [App] Starting personality character creation');
+  const handlePersonalityComplete = useCallback(async (characterData: CharacterCreationData) => {
     console.log('📦 [App] Received character data:', {
       raceSlug: characterData?.raceSlug,
       classSlug: characterData?.classSlug,
