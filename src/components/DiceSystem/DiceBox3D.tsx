@@ -176,30 +176,93 @@ const diceBox = diceBoxRef.current;
 
           // Try to roll the dice directly
           console.log('🎲 Rolling dice with notation:', diceNotation);
-          console.log('🎲 Available methods:', Object.getOwnPropertyNames(diceBoxRef.current));
+          console.log('🎲 DiceBox instance details:', {
+            exists: !!diceBoxRef.current,
+            type: typeof diceBoxRef.current,
+            methods: diceBoxRef.current ? Object.getOwnPropertyNames(diceBoxRef.current) : 'N/A',
+            allMethods: diceBoxRef.current ? Object.getOwnPropertyNames(Object.getPrototypeOf(diceBoxRef.current)) : 'N/A',
+            hasRoll: diceBoxRef.current ? typeof diceBoxRef.current.roll === 'function' : false,
+            hasShow: diceBoxRef.current ? typeof diceBoxRef.current.show === 'function' : false,
+            hasAdd: diceBoxRef.current ? typeof (diceBoxRef.current as any).add === 'function' : false,
+            hasThrow: diceBoxRef.current ? typeof (diceBoxRef.current as any).throw === 'function' : false
+          });
+
+          if (!diceBoxRef.current) {
+            console.error('❌ DiceBox ref is null');
+            setError('3D dice system not ready.');
+            return;
+          }
+
           try {
+            // Check DiceBox properties
+            console.log('🎲 DiceBox properties:', Object.keys(diceBoxRef.current));
+            console.log('🎲 DiceBox prototype:', Object.getPrototypeOf(diceBoxRef.current));
+
             // Make sure the dice box is visible first
             if (typeof diceBoxRef.current.show === 'function') {
               diceBoxRef.current.show();
-              console.log('🎲 Called show() method');
+              console.log('🎲 Called show() method successfully');
+            } else {
+              console.warn('⚠️ show() method not available');
             }
 
-            // Try the roll method
+            // Try the roll method with different approaches
             if (typeof diceBoxRef.current.roll === 'function') {
               console.log('🎲 Calling roll() method with:', diceNotation);
-              await diceBoxRef.current.roll(diceNotation);
-              console.log('🎲 roll() method completed');
+
+              // Try different roll method signatures
+              try {
+                // Method 1: String notation
+                const rollResult = diceBoxRef.current.roll(diceNotation);
+                console.log('🎲 roll() with string returned:', rollResult);
+
+                if (rollResult && typeof rollResult.then === 'function') {
+                  await rollResult;
+                  console.log('🎲 roll() promise resolved');
+                }
+              } catch (stringError) {
+                console.warn('🎲 String notation failed, trying alternatives:', stringError);
+
+                try {
+                  // Method 2: Array notation (some libraries expect this)
+                  const rollResult2 = diceBoxRef.current.roll([diceNotation]);
+                  console.log('🎲 roll() with array returned:', rollResult2);
+
+                  if (rollResult2 && typeof rollResult2.then === 'function') {
+                    await rollResult2;
+                    console.log('🎲 roll() array promise resolved');
+                  }
+                } catch (arrayError) {
+                  console.warn('🎲 Array notation also failed:', arrayError);
+
+                  // Method 3: Try with empty array
+                  try {
+                    const rollResult3 = diceBoxRef.current.roll([]);
+                    console.log('🎲 roll() with empty array returned:', rollResult3);
+
+                    if (rollResult3 && typeof rollResult3.then === 'function') {
+                      await rollResult3;
+                      console.log('🎲 roll() empty array promise resolved');
+                    }
+                  } catch (emptyArrayError) {
+                    console.error('🎲 All roll methods failed');
+                    throw emptyArrayError;
+                  }
+                }
+              }
             } else {
-              console.error('❌ roll method not found on DiceBox');
-              throw new Error('roll method not available');
+              console.error('❌ roll method not found on DiceBox instance');
+              setError('3D dice roll method not available.');
+              return;
             }
 
             setDiceVisible(true);
-            console.log('🎲 Dice roll process completed');
+            console.log('🎲 Dice roll process completed successfully');
           } catch (rollError) {
-            console.error('❌ Roll failed:', rollError);
+            console.error('❌ Roll failed with error:', rollError);
+            console.error('❌ Error stack:', rollError instanceof Error ? rollError.stack : 'No stack trace');
             // Don't throw here, just log the error and continue
-            setError('Failed to roll dice. Check notation format.');
+            setError('Failed to roll dice. Check console for details.');
             return;
           }
         } else {
