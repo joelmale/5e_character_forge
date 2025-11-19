@@ -23,7 +23,7 @@ export default defineConfig({
     chunkSizeWarningLimit: 1000, // Reduce warnings
     terserOptions: {
       compress: {
-        drop_console: true,
+        // drop_console: true, // Temporarily disabled for debugging
       },
     },
     rollupOptions: {
@@ -35,6 +35,6 @@ export default defineConfig({
     },
   },
   esbuild: {
-    drop: ['console', 'debugger'], // Remove in production builds
+    // drop: ['console', 'debugger'], // Temporarily disabled for debugging
   },
 });

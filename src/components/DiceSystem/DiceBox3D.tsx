@@ -12,7 +12,7 @@ export const DiceBox3D: React.FC<DiceBox3DProps> = ({
   latestRoll,
   onRollComplete,
 }) => {
-  console.log('🎲 [STEP 1] DiceBox3D component rendered, latestRoll:', latestRoll?.notation);
+  console.error('🎲 [STEP 1] DiceBox3D component rendered, latestRoll:', latestRoll?.notation);
 
   const diceBoxRef = useRef<DiceBox | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -138,7 +138,7 @@ const diceBox = diceBoxRef.current;
 
   // Handle dice rolls
   useEffect(() => {
-    console.log('🎲 [STEP 15] Dice roll useEffect triggered:', {
+    console.error('🎲 [STEP 15] Dice roll useEffect triggered:', {
       isInitialized,
       hasDiceBox: !!diceBoxRef.current,
       hasLatestRoll: !!latestRoll,
@@ -172,7 +172,7 @@ const diceBox = diceBoxRef.current;
 
     // Roll the dice
     const rollDice = async () => {
-      console.log('🎲 [STEP 18] rollDice function called');
+      console.error('🎲 [STEP 18] rollDice function called');
 
       try {
         // Extract just the dice notation (remove modifiers)
@@ -391,9 +391,11 @@ const diceBox = diceBoxRef.current;
       />
       {diceVisible && (
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-          <div className="text-white text-center mb-4">
-            <div className="text-2xl font-bold mb-2">🎲 Rolling Dice...</div>
-            <div className="text-sm opacity-75">Click anywhere to dismiss</div>
+          <div className="text-white text-center mb-4 bg-black bg-opacity-75 p-4 rounded-lg">
+            <div className="text-2xl font-bold mb-2 text-green-400">🎲 3D DICE ACTIVE</div>
+            <div className="text-sm opacity-75 mb-2">Rolling: {latestRoll?.notation || 'Unknown'}</div>
+            <div className="text-xs opacity-50">If you see this, 3D dice UI is working</div>
+            <div className="text-sm opacity-75 mt-2">Click anywhere to dismiss</div>
           </div>
         </div>
       )}
