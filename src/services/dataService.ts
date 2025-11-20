@@ -1810,7 +1810,12 @@ export const MONSTER_TYPE_CATEGORIES: MonsterTypeCategory[] = [
  * No transformation needed - use SRD format directly
  */
 export const loadMonsters = (): Monster[] => {
-  return srdMonsters2014 as Monster[];
+  return srdMonsters2014.map(monster => ({
+    ...monster,
+    senses: Object.fromEntries(
+      Object.entries(monster.senses || {}).filter(([_, value]) => value !== undefined)
+    ) as Record<string, string | number>
+  })) as Monster[];
 };
 
 /**

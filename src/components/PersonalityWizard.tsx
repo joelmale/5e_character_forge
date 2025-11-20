@@ -94,6 +94,47 @@ const PersonalityWizard: React.FC<PersonalityWizardProps> = ({ isOpen, onClose, 
     setCurrentStep(4); // Go to world question
   }, []);
 
+  const generateProfile = (world?: WorldChoice): CharacterProfile => {
+    // Use the ref which is updated synchronously
+    const currentChoices = choicesRef.current;
+    const archetype = currentChoices.skill || currentChoices.magic;
+    const combat = currentChoices.combat;
+    const social = currentChoices.social;
+    const finalWorld = world || currentChoices.world;
+
+    console.log('🔍 [generateProfile] Current choices:', {
+      currentChoices,
+      archetype,
+      combat,
+      social,
+      finalWorld,
+      passedWorld: world
+    });
+
+    if (!archetype || !combat || !social || !finalWorld) {
+      console.log('❌ [generateProfile] Missing choices - returning incomplete');
+      return {
+        name: 'Incomplete Profile',
+        description: 'Please complete all questions to generate your character profile.',
+        recommendedClasses: [],
+        recommendedRaces: [],
+        recommendedBackgrounds: [],
+        keyStats: [],
+        finalQuestion: 'What drives you to adventure?'
+      };
+    }
+
+    // Generate dynamic profile based on all choices
+    const profile = generateCharacterProfile(archetype, combat, social, finalWorld);
+    console.log('✅ [generateProfile] Generated profile:', {
+      name: profile.name,
+      recommendedClasses: profile.recommendedClasses.map(c => c.class),
+      recommendedRaces: profile.recommendedRaces.map(r => r.race),
+      recommendedBackgrounds: profile.recommendedBackgrounds.map(b => b.background)
+    });
+    return profile;
+  };
+
   const handleWorldChoice = useCallback((choice: WorldChoice) => {
     console.log('🌍 [handleWorldChoice] Called with choice:', choice);
     if (!choice) return;
@@ -210,47 +251,6 @@ const PersonalityWizard: React.FC<PersonalityWizardProps> = ({ isOpen, onClose, 
     console.log('🚀 [PersonalityWizard] Calling onComplete...');
     onComplete(characterData);
   }, [selectedClass, selectedRace, selectedBackground, onComplete]);
-
-  const generateProfile = (world?: WorldChoice): CharacterProfile => {
-    // Use the ref which is updated synchronously
-    const currentChoices = choicesRef.current;
-    const archetype = currentChoices.skill || currentChoices.magic;
-    const combat = currentChoices.combat;
-    const social = currentChoices.social;
-    const finalWorld = world || currentChoices.world;
-
-    console.log('🔍 [generateProfile] Current choices:', {
-      currentChoices,
-      archetype,
-      combat,
-      social,
-      finalWorld,
-      passedWorld: world
-    });
-
-    if (!archetype || !combat || !social || !finalWorld) {
-      console.log('❌ [generateProfile] Missing choices - returning incomplete');
-      return {
-        name: 'Incomplete Profile',
-        description: 'Please complete all questions to generate your character profile.',
-        recommendedClasses: [],
-        recommendedRaces: [],
-        recommendedBackgrounds: [],
-        keyStats: [],
-        finalQuestion: 'What drives you to adventure?'
-      };
-    }
-
-    // Generate dynamic profile based on all choices
-    const profile = generateCharacterProfile(archetype, combat, social, finalWorld);
-    console.log('✅ [generateProfile] Generated profile:', {
-      name: profile.name,
-      recommendedClasses: profile.recommendedClasses.map(c => c.class),
-      recommendedRaces: profile.recommendedRaces.map(r => r.race),
-      recommendedBackgrounds: profile.recommendedBackgrounds.map(b => b.background)
-    });
-    return profile;
-  };
 
   const renderStep = () => {
     switch (currentStep) {
