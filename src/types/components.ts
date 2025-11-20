@@ -25,6 +25,7 @@ export interface CharacterSheetProps {
   onAddItem: (characterId: string, equipmentSlug: string, quantity?: number) => void;
   onRemoveItem: (characterId: string, equipmentSlug: string, quantity?: number) => void;
   setEquipmentModal: (item: Equipment | null) => void;
+  onOpenDiceTray?: () => void;
 }
 
 export interface WizardProps {

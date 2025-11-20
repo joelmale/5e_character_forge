@@ -32,7 +32,7 @@ import { getSpellsForClass } from '../../../services/dataService';
 export const ClassicDndLayout: React.FC<CharacterSheetProps> = ({
   character, onClose, onDelete, setRollResult, onDiceRoll, onToggleInspiration, onFeatureClick,
   onLongRest, onShortRest, onLevelUp, onLevelDown, onUpdateCharacter, onEquipArmor, onEquipWeapon, onUnequipItem,
-  onAddItem, onRemoveItem, setEquipmentModal
+  onAddItem, onRemoveItem, setEquipmentModal, onOpenDiceTray
 }) => {
   const [showSpellPreparationModal, setShowSpellPreparationModal] = useState(false);
 
@@ -57,6 +57,7 @@ export const ClassicDndLayout: React.FC<CharacterSheetProps> = ({
           onLongRest={onLongRest}
           onLevelUp={onLevelUp}
           onLevelDown={onLevelDown}
+          onOpenDiceTray={onOpenDiceTray}
         />
 
         {/* 3-Column Traditional Layout */}
