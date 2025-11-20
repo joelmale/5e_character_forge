@@ -37,7 +37,7 @@ declare module '@3d-dice/dice-box' {
   }
 
   export default class DiceBox {
-    constructor(config: DiceBoxConfig);
+    constructor(container: string, config: DiceBoxConfig);
 
     init(): Promise<void>;
 

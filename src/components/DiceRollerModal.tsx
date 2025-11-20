@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import DiceBox from '@3d-dice/dice-box';
 import './DiceRollerModal.css';
+import { diceSounds } from '../utils/diceSounds';
 
 interface DiceRollerModalProps {
   isOpen: boolean;
@@ -47,10 +48,6 @@ export const DiceRollerModal: React.FC<DiceRollerModalProps> = ({
   const [diceBoxReady, setDiceBoxReady] = useState(false);
   const [modifier, setModifier] = useState<number>(0);
 
-  // Debug logging for diceBoxReady state
-  useEffect(() => {
-    console.log('🎲 [DiceRollerModal] diceBoxReady state changed to:', diceBoxReady);
-  }, [diceBoxReady]);
 
   // Initialize dice box when modal opens
   useEffect(() => {
@@ -64,19 +61,19 @@ export const DiceRollerModal: React.FC<DiceRollerModalProps> = ({
             container: '#dice-box-container',  // Changed from 'id' to 'container' per v1.1.x docs
             assetPath: '/assets/dice-box/',
             theme: 'default',
-            scale: 6,
-            gravity: 3,
+            scale: 8, // Increased scale for better visibility
+            gravity: 1, // Increased gravity for faster settling
             mass: 1,
             friction: 0.8,
-            restitution: 0.5,
-            linearDamping: 0.4,
-            angularDamping: 0.4,
-            spinForce: 4,
-            throwForce: 5,
-            startingHeight: 8,
-            settleTimeout: 5000,
-            offscreen: false,
-            delay: 0,
+            restitution: 0.8, // Increased restitution for more bounce
+            linearDamping: 0.4, // Added linear damping
+            angularDamping: 0.4,  // Added angular damping
+            spinForce: 4, // Increased spin for more dynamic rolls
+            throwForce: 7, // Increased throw force
+            startingHeight: 8, // Increased starting height
+            settleTimeout: 5000, // Reduced settle timeout
+            offscreen: false, // Ensure canvas is onscreen
+            delay: 0, 
           });
 
           console.log('🎲 [DiceRollerModal] DiceBox instance created, calling init()...');
@@ -145,7 +142,6 @@ export const DiceRollerModal: React.FC<DiceRollerModalProps> = ({
 
           // Set up roll complete callback
           box.onRollComplete = (results: DiceRollResult[]) => {
-            console.log('🎲 [DiceRollerModal] Roll complete:', results);
             setIsRolling(false);
 
             // Calculate total from all dice
@@ -224,34 +220,18 @@ export const DiceRollerModal: React.FC<DiceRollerModalProps> = ({
 
   const rollDice = useCallback(async () => {
     const notation = buildNotation();
-    console.log('🎲 [DiceRollerModal] rollDice called with notation:', notation);
-    console.log('🎲 [DiceRollerModal] diceBoxReady:', diceBoxReady);
-    console.log('🎲 [DiceRollerModal] diceBoxInstanceRef.current:', !!diceBoxInstanceRef.current);
 
-    if (!notation) {
-      console.warn('⚠️ [DiceRollerModal] No notation, aborting roll');
+    if (!notation || !diceBoxInstanceRef.current || !diceBoxReady) {
       return;
     }
 
-    if (!diceBoxInstanceRef.current) {
-      console.error('❌ [DiceRollerModal] DiceBox instance not found, aborting roll');
-      return;
-    }
-
-    if (!diceBoxReady) {
-      console.error('❌ [DiceRollerModal] DiceBox not ready, aborting roll');
-      return;
-    }
-
-    console.log('🎲 [DiceRollerModal] All checks passed, rolling dice...');
     setIsRolling(true);
     setLastResult(null);
 
     try {
       await diceBoxInstanceRef.current.clear();
 
-      // Build array of individual roll notations
-      // DiceBox doesn't support "2d6+1d8" syntax, so we need to roll each type separately
+      // Build array of individual dice notations
       const rollNotations: string[] = [];
       selectedDice.forEach((count, type) => {
         if (count > 0) {
@@ -259,17 +239,14 @@ export const DiceRollerModal: React.FC<DiceRollerModalProps> = ({
         }
       });
 
-      console.log('🎲 [DiceRollerModal] Rolling individual notations:', rollNotations);
+      // Calculate total number of dice for sound
+      const totalDice = Array.from(selectedDice.values()).reduce((sum, count) => sum + count, 0);
 
-      // Add all dice types without awaiting (so they're added simultaneously)
-      for (const rollNotation of rollNotations) {
-        console.log('🎲 [DiceRollerModal] Adding:', rollNotation);
-        diceBoxInstanceRef.current.add(rollNotation);  // No await - add all at once
-      }
+      // Play dice sound when roll starts
+      diceSounds.playRollSound(totalDice);
 
-      // Trigger the actual roll - all dice roll together
-      console.log('🎲 [DiceRollerModal] Triggering roll for all dice...');
-      await diceBoxInstanceRef.current.roll();
+      // Roll all dice simultaneously
+      await diceBoxInstanceRef.current.roll(rollNotations);
     } catch (error) {
       console.error('❌ [DiceRollerModal] Roll failed:', error);
       setIsRolling(false);
