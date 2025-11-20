@@ -85,20 +85,15 @@ export function createAbilityRoll(
   abilityScore: number
 ): DiceRoll {
   const modifier = calculateModifier(abilityScore);
-  const diceResults = rollDice(1, 20);
-  const dieValue = diceResults[0];
-  const total = dieValue + modifier;
-  const critical = detectCritical(dieValue, 20);
 
   return {
     id: generateUUID(),
     type: 'ability',
     label: `${abilityName} Check`,
     notation: modifier === 0 ? '1d20' : `1d20${modifier >= 0 ? '+' : ''}${modifier}`,
-    diceResults,
+    diceResults: [], // Will be filled by DiceBox results
     modifier,
-    total,
-    critical,
+    total: modifier, // Will be updated with actual total
     timestamp: Date.now(),
   };
 }
@@ -113,20 +108,14 @@ export function createSkillRoll(
   skillName: string,
   skillValue: number
 ): DiceRoll {
-  const diceResults = rollDice(1, 20);
-  const dieValue = diceResults[0];
-  const total = dieValue + skillValue;
-  const critical = detectCritical(dieValue, 20);
-
   return {
     id: generateUUID(),
     type: 'skill',
     label: skillName,
     notation: skillValue === 0 ? '1d20' : `1d20${skillValue >= 0 ? '+' : ''}${skillValue}`,
-    diceResults,
+    diceResults: [], // Will be filled by DiceBox results
     modifier: skillValue,
-    total,
-    critical,
+    total: skillValue, // Will be updated with actual total
     timestamp: Date.now(),
   };
 }
@@ -137,20 +126,14 @@ export function createSkillRoll(
  * @returns DiceRoll object
  */
 export function createInitiativeRoll(initiativeModifier: number): DiceRoll {
-  const diceResults = rollDice(1, 20);
-  const dieValue = diceResults[0];
-  const total = dieValue + initiativeModifier;
-  const critical = detectCritical(dieValue, 20);
-
   return {
     id: generateUUID(),
     type: 'initiative',
     label: 'Initiative',
     notation: initiativeModifier === 0 ? '1d20' : `1d20${initiativeModifier >= 0 ? '+' : ''}${initiativeModifier}`,
-    diceResults,
+    diceResults: [], // Will be filled by DiceBox results
     modifier: initiativeModifier,
-    total,
-    critical,
+    total: initiativeModifier, // Will be updated with actual total
     timestamp: Date.now(),
   };
 }
@@ -225,24 +208,19 @@ export function clearRollHistory(): void {
  * @returns DiceRoll object
  */
 export function createAdvantageRoll(label: string, modifier: number): DiceRoll {
-  const diceResults = rollDice(2, 20);
-  const highest = Math.max(...diceResults);
-  const total = highest + modifier;
-
   return {
     id: generateUUID(),
     type: 'complex',
     label: `${label} (Advantage)`,
     notation: modifier === 0 ? '2d20kh1' : `2d20kh1${modifier >= 0 ? '+' : ''}${modifier}`,
-    diceResults: [highest], // Only show the kept result
+    diceResults: [], // Will be filled by DiceBox results (kept dice)
     modifier,
-    total,
-    critical: detectCritical(highest, 20),
+    total: modifier, // Will be updated with actual total
     timestamp: Date.now(),
     pools: [{
       count: 2,
       sides: 20,
-      results: diceResults
+      results: [] // Will be filled by DiceBox results (all dice)
     }],
     expression: modifier === 0 ? '2d20kh1' : `2d20kh1${modifier >= 0 ? '+' : ''}${modifier}`
   };
@@ -255,24 +233,19 @@ export function createAdvantageRoll(label: string, modifier: number): DiceRoll {
  * @returns DiceRoll object
  */
 export function createDisadvantageRoll(label: string, modifier: number): DiceRoll {
-  const diceResults = rollDice(2, 20);
-  const lowest = Math.min(...diceResults);
-  const total = lowest + modifier;
-
   return {
     id: generateUUID(),
     type: 'complex',
     label: `${label} (Disadvantage)`,
     notation: modifier === 0 ? '2d20kl1' : `2d20kl1${modifier >= 0 ? '+' : ''}${modifier}`,
-    diceResults: [lowest], // Only show the kept result
+    diceResults: [], // Will be filled by DiceBox results (kept dice)
     modifier,
-    total,
-    critical: detectCritical(lowest, 20),
+    total: modifier, // Will be updated with actual total
     timestamp: Date.now(),
     pools: [{
       count: 2,
       sides: 20,
-      results: diceResults
+      results: [] // Will be filled by DiceBox results (all dice)
     }],
     expression: modifier === 0 ? '2d20kl1' : `2d20kl1${modifier >= 0 ? '+' : ''}${modifier}`
   };
@@ -344,20 +317,15 @@ export function createSavingThrowRoll(
   isProficient: boolean
 ): DiceRoll {
   const modifier = abilityModifier + (isProficient ? proficiencyBonus : 0);
-  const diceResults = rollDice(1, 20);
-  const dieValue = diceResults[0];
-  const total = dieValue + modifier;
-  const critical = detectCritical(dieValue, 20);
 
   return {
     id: generateUUID(),
     type: 'saving-throw',
     label: `${abilityName} Save`,
     notation: modifier === 0 ? '1d20' : `1d20${modifier >= 0 ? '+' : ''}${modifier}`,
-    diceResults,
+    diceResults: [], // Will be filled by DiceBox results
     modifier,
-    total,
-    critical,
+    total: modifier, // Will be updated with actual total
     timestamp: Date.now(),
   };
 }
@@ -375,20 +343,15 @@ export function createWeaponAttackRoll(
   proficiencyBonus: number
 ): DiceRoll {
   const modifier = abilityModifier + proficiencyBonus;
-  const diceResults = rollDice(1, 20);
-  const dieValue = diceResults[0];
-  const total = dieValue + modifier;
-  const critical = detectCritical(dieValue, 20);
 
   return {
     id: generateUUID(),
     type: 'attack',
     label: `${weaponName} Attack`,
     notation: modifier === 0 ? '1d20' : `1d20${modifier >= 0 ? '+' : ''}${modifier}`,
-    diceResults,
+    diceResults: [], // Will be filled by DiceBox results
     modifier,
-    total,
-    critical,
+    total: modifier, // Will be updated with actual total
     timestamp: Date.now(),
   };
 }

@@ -157,7 +157,7 @@ export const EncounterTabs: React.FC<EncounterTabsProps> = ({ monsters }) => {
           <div className="space-y-2 pb-4 border-b-2 border-red-700">
             <div className="flex gap-2">
               <span className="font-bold text-red-400">Armor Class</span>
-              <span className="text-gray-300">{getACText()}</span>
+              <span className="text-gray-300">{getACText(monster.armor_class)}</span>
             </div>
             <div className="flex gap-2">
               <span className="font-bold text-red-400">Hit Points</span>

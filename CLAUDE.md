@@ -142,15 +142,67 @@ Located in `/src/data/srd/`:
 ### Dice System
 
 **3D Dice Integration:**
-- Uses `@3d-dice/dice-box` library for physics-based 3D dice
+- Uses `@3d-dice/dice-box` v1.1.4 library for physics-based 3D dice
 - Configured in `/src/components/DiceSystem/DiceBox3D.tsx`
-- CORS headers required in dev server (see `vite.config.ts`)
+- Uses v1.1.x API with `container` property for initialization
+- CORS headers required in dev server (see `vite.config.ts`):
+  - `Cross-Origin-Embedder-Policy: require-corp`
+  - `Cross-Origin-Opener-Policy: same-origin`
 - Dice sounds managed in `/src/utils/diceSounds.ts`
 
+**DiceBox Configuration (v1.1.x API):**
+- **Container**: `'#dice-box'` selector
+- **Asset Path**: `/assets/dice-box/` for 3D models and textures
+- **Physics Settings**:
+  - Gravity: 1, Friction: 0.8, Restitution: 0.6
+  - Linear Damping: 0.4, Angular Damping: 0.4
+  - Spin Force: 3, Throw Force: 4, Starting Height: 8
+- **Visual Settings**: Enable Shadows, Scale: 6
+- **Timing**: Settle Timeout: 5000ms
+
+**Canvas Management:**
+- 50% viewport sizing (width/height) with proper canvas positioning
+- Lazy initialization on first roll to improve performance
+- Auto-hide after 5 seconds with opacity transitions
+- Click-to-dismiss overlay with backdrop blur effect
+
+**Roll Types Supported:**
+- `ability`: Ability checks (STR, DEX, CON, INT, WIS, CHA)
+- `skill`: Skill checks with proficiency tracking
+- `initiative`: Initiative rolls with DEX modifier
+- `saving-throw`: Saving throws with proficiency bonus
+- `attack`: Weapon/spell attack rolls
+- `complex`: Damage rolls, advantage/disadvantage, custom notations
+
 **Roll History:**
-- Rolls stored in memory (not persisted to IndexedDB)
-- Roll types: ability, skill, initiative, damage, spell attack
-- Components: `RollHistoryModal.tsx`, `RollHistoryTicker.tsx`
+- Persisted in localStorage (not IndexedDB) as `5e-forge-rolls`
+- Maximum 10 rolls retained (FIFO)
+- Roll data includes: ID, type, label, notation, results, modifier, total, critical status, timestamp
+- Components: `RollHistoryModal.tsx` (full history), `RollHistoryTicker.tsx` (recent rolls display)
+- **3D Visualization Sync**: DiceBox generates random results, then roll history is updated with actual dice values for perfect synchronization
+
+**Level-Aware Character Creation**:
+- **Level 1-2**: Class selection only, subclass preview (unlocked at level 3)
+- **Level 3+**: Class and subclass selection required
+- **Level 4+**: Ability Score Improvements and Feats available
+- **Dynamic UI**: Steps and options adapt based on selected character level
+
+**Sound Effects:**
+- Roll sounds based on dice count (1-4 dice variations)
+- Critical success/failure audio cues with 300ms delay
+- Sound files managed in `/src/utils/diceSounds.ts`
+
+**Error Handling:**
+- User-facing error display for DiceBox initialization failures
+- Graceful fallback if 3D dice unavailable
+- Console logging for debugging with 🎲 emoji prefixes
+
+**DiceRollerModal Integration:**
+- Standalone dice roller with its own DiceBox instance
+- Pre-calculates dice results for consistent 3D visualization
+- Supports multiple dice types simultaneously (d4, d6, d8, d10, d12, d20, d100)
+- Displays immediate results with modifier calculations
+- Results are synchronized between 3D dice and displayed values
 
 ## Critical Data Rules
 

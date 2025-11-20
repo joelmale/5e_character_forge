@@ -1,5 +1,5 @@
 import { CharacterCreationData, Character, AbilityName, SkillName } from '../types/dnd';
-import { getAllRaces, loadClasses, BACKGROUNDS, PROFICIENCY_BONUSES, getModifier, SKILL_TO_ABILITY, ALL_SKILLS, getHitDieForClass } from '../services/dataService';
+import { getAllRaces, loadClasses, loadEquipment, BACKGROUNDS, PROFICIENCY_BONUSES, getModifier, SKILL_TO_ABILITY, ALL_SKILLS, getHitDieForClass } from '../services/dataService';
 import { migrateSpellSelectionToCharacter } from '../utils/spellUtils';
 
 /**
@@ -44,14 +44,35 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
   const pb = PROFICIENCY_BONUSES[level - 1] || 2;
 
   // 2. Calculate Hit Points (Based on chosen method)
-  let hitDieValue: number;
-  if (data.hpCalculationMethod === 'rolled' && data.rolledHP) {
-    hitDieValue = data.rolledHP;
+  let maxHitPoints: number;
+
+  if (level === 1) {
+    // Level 1: Full hit die + CON modifier
+    let hitDieValue: number;
+    if (data.hpCalculationMethod === 'rolled' && data.rolledHP) {
+      hitDieValue = data.rolledHP;
+    } else {
+      // Default to max for level 1
+      hitDieValue = classData.hit_die;
+    }
+    maxHitPoints = hitDieValue + finalAbilities.CON.modifier;
   } else {
-    // Default to max for level 1
-    hitDieValue = classData.hit_die;
+    // Multi-level: Calculate HP for all levels
+    const conModifier = finalAbilities.CON.modifier;
+    const hitDie = classData.hit_die;
+
+    // Level 1: Full hit die + CON
+    let totalHP = hitDie + conModifier;
+
+    // Levels 2+: Average HP per level + CON
+    const avgHPPerLevel = Math.floor(hitDie / 2) + 1 + conModifier;
+    totalHP += avgHPPerLevel * (level - 1);
+
+    maxHitPoints = totalHP;
   }
-  const maxHitPoints = hitDieValue + finalAbilities.CON.modifier + (raceData.slug === 'dwarf' ? level : 0);
+
+  // Add racial bonuses (like Dwarf toughness)
+  maxHitPoints += (raceData.slug === 'dwarf' ? level : 0);
 
   // 3. Calculate Skills (from selected skills + background skills)
   const backgroundData = BACKGROUNDS.find(bg => bg.name === data.background);
@@ -69,6 +90,56 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
       value: modifier + (isProficient ? pb : 0),
     };
   });
+
+  // 3.5. Calculate Inventory from Equipment Choices
+  const inventory: Character['inventory'] = [];
+
+  // Add items from class equipment choices
+  if (data.equipmentChoices) {
+    data.equipmentChoices.forEach(choice => {
+      if (choice.selected !== null && choice.selected !== undefined) {
+        const selectedBundle = choice.options[choice.selected];
+        selectedBundle.forEach(item => {
+          // Try to find matching equipment in database
+          const equipmentSlug = item.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+          const foundEquipment = loadEquipment().find(eq =>
+            eq.slug === equipmentSlug || eq.name.toLowerCase() === item.name.toLowerCase()
+          );
+
+          if (foundEquipment) {
+            // Check if item already exists in inventory
+            const existingItem = inventory.find(inv => inv.equipmentSlug === foundEquipment.slug);
+            if (existingItem) {
+              existingItem.quantity += item.quantity;
+            } else {
+              inventory.push({
+                equipmentSlug: foundEquipment.slug,
+                quantity: item.quantity,
+                equipped: false, // Will be equipped manually by player
+              });
+            }
+          }
+        });
+      }
+    });
+  }
+
+  // Add custom starting inventory from equipment browser
+  if (data.startingInventory) {
+    data.startingInventory.forEach(item => {
+      // Check if item already exists in inventory
+      const existingItem = inventory.find(inv => inv.equipmentSlug === item.equipmentSlug);
+      if (existingItem) {
+        existingItem.quantity += item.quantity;
+      } else {
+        inventory.push({
+          equipmentSlug: item.equipmentSlug,
+          quantity: item.quantity,
+          equipped: item.equipped || false,
+        });
+      }
+    });
+  }
 
   // 4. Calculate Spellcasting Stats (if applicable)
   let spellcastingData: Character['spellcasting'] = undefined;
@@ -130,14 +201,15 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
     skills: finalSkills,
     languages: data.knownLanguages,
     featuresAndTraits,
-    selectedFeats: data.selectedFeats || [],
-    spellcasting: spellcastingData,
-    srdFeatures,
-    subclass: data.subclassSlug,
-    experiencePoints: 0,
-    feats: data.selectedFeats || [], // Legacy support
-    selectedFightingStyle: data.selectedFightingStyle,
-    inventory: [], // Would need to be populated from equipment choices
+     selectedFeats: data.selectedFeats || [],
+     spellcasting: spellcastingData,
+     srdFeatures,
+     subclass: data.subclassSlug,
+     experiencePoints: 0,
+     feats: data.selectedFeats || [], // Legacy support
+     selectedFightingStyle: data.selectedFightingStyle,
+     inventory,
+     trinket: data.selectedTrinket,
     currency: {
       cp: 0,
       sp: 0,

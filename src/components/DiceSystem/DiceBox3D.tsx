@@ -1,16 +1,18 @@
 /* eslint-disable no-empty */
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import type { DiceRoll } from '../../services/diceService';
 import DiceBox from '@3d-dice/dice-box';
 
 interface DiceBox3DProps {
   latestRoll: DiceRoll | null;
   onRollComplete?: () => void;
+  onRollResults?: (rollId: string, diceValues: number[], total: number) => void;
 }
 
 export const DiceBox3D: React.FC<DiceBox3DProps> = ({
   latestRoll,
   onRollComplete,
+  onRollResults,
 }) => {
   const diceBoxRef = useRef<DiceBox | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -42,15 +44,14 @@ export const DiceBox3D: React.FC<DiceBox3DProps> = ({
   };
 
   // Initialize DiceBox lazily on first roll
-  const initDiceBoxIfNeeded = async () => {
+  const initDiceBoxIfNeeded = useCallback(async () => {
     if (isInitialized || diceBoxRef.current) {
       return;
     }
 
     try {
       console.log('🎲 [DiceBox3D] Initializing DiceBox with v1.1.0+ API...');
-      const diceBox = new DiceBox({
-        container: '#dice-box',  // v1.1.x API uses 'container' property
+      const diceBox = new DiceBox('#dice-box', {
         assetPath: '/assets/dice-box/',
         offscreen: false,
         gravity: 1,
@@ -88,7 +89,7 @@ export const DiceBox3D: React.FC<DiceBox3DProps> = ({
       console.error('Failed to initialize 3D dice:', err);
       setError('Failed to initialize 3D dice');
     }
-  };
+  }, [isInitialized, onRollComplete]);
 
   // Handle dice rolls
   useEffect(() => {
@@ -107,25 +108,81 @@ export const DiceBox3D: React.FC<DiceBox3DProps> = ({
 
       lastRollIdRef.current = latestRoll.id;
 
-      // Extract just the dice notation (remove modifiers)
-      const diceNotation = latestRoll.notation.replace(/[+-]\d+$/, '').trim();
-      console.log('🎲 [DiceBox3D] Original notation:', latestRoll.notation, 'Parsed notation:', diceNotation);
+       // Determine the correct notation to use for DiceBox
+       let diceNotation: string;
 
-      // Clear previous dice first
-      await diceBoxRef.current.clear();
+       if (latestRoll.pools && latestRoll.pools.length > 0) {
+         // For complex rolls (advantage/disadvantage), use the pool info
+         const pool = latestRoll.pools[0];
+         diceNotation = `${pool.count}d${pool.sides}`;
+         console.log('🎲 [DiceBox3D] Complex roll - using notation:', diceNotation);
+       } else {
+         // For simple rolls, strip modifiers
+         diceNotation = latestRoll.notation.replace(/[+-]\d+$/, '').trim();
+         console.log('🎲 [DiceBox3D] Simple roll - using notation:', diceNotation);
+       }
 
-      // Show dice and ensure canvas is visible
-      setDiceVisible(true);
-      ensureCanvasVisible();
+       console.log('🎲 [DiceBox3D] Original notation:', latestRoll.notation, 'Final notation:', diceNotation);
 
-      console.log('🎲 [DiceBox3D] Rolling dice with notation:', diceNotation);
-      diceBoxRef.current.roll(diceNotation)
-        .then(results => {
-          console.log('🎲 [DiceBox3D] Dice roll succeeded with results:', results);
-        })
-        .catch(err => {
-          console.error('❌ [DiceBox3D] Dice roll failed:', err);
-        });
+       // Clear previous dice first
+       await diceBoxRef.current.clear();
+
+       // Show dice and ensure canvas is visible
+       setDiceVisible(true);
+       ensureCanvasVisible();
+
+       console.log('🎲 [DiceBox3D] Rolling dice randomly');
+
+       diceBoxRef.current.roll(diceNotation)
+         .then(results => {
+           console.log('🎲 [DiceBox3D] Dice roll succeeded with results:', results);
+
+           // Extract the actual dice values from DiceBox results
+           const diceValues = results.map(result => result.value);
+           console.log('🎲 [DiceBox3D] Extracted dice values:', diceValues);
+
+           // Calculate the total based on roll type
+           let actualTotal: number;
+           if (latestRoll.pools && latestRoll.pools.length > 0) {
+             // For complex rolls, apply the keep/drop logic
+             const pool = latestRoll.pools[0];
+             if (latestRoll.notation.includes('kh1')) {
+               // Keep highest
+               actualTotal = Math.max(...diceValues) + latestRoll.modifier;
+             } else if (latestRoll.notation.includes('kl1')) {
+               // Keep lowest
+               actualTotal = Math.min(...diceValues) + latestRoll.modifier;
+             } else {
+               // Default to sum
+               actualTotal = diceValues.reduce((sum, val) => sum + val, 0) + latestRoll.modifier;
+             }
+           } else {
+             // For simple rolls, just the die value + modifier
+             actualTotal = diceValues[0] + latestRoll.modifier;
+           }
+
+           console.log('🎲 [DiceBox3D] Calculated total:', actualTotal);
+
+           // Update the roll with real results
+           if (onRollResults) {
+             if (latestRoll.pools && latestRoll.pools.length > 0) {
+               // For complex rolls, update both diceResults and pools
+               const keptValues = latestRoll.notation.includes('kh1')
+                 ? [Math.max(...diceValues)]
+                 : latestRoll.notation.includes('kl1')
+                 ? [Math.min(...diceValues)]
+                 : diceValues;
+
+               onRollResults(latestRoll.id, keptValues, actualTotal);
+             } else {
+               // For simple rolls, just update diceResults
+               onRollResults(latestRoll.id, diceValues, actualTotal);
+             }
+           }
+         })
+         .catch(err => {
+           console.error('❌ [DiceBox3D] Dice roll failed:', err);
+         });
 
       // Auto-hide after 5 seconds
       const timer = setTimeout(() => {
@@ -139,7 +196,7 @@ export const DiceBox3D: React.FC<DiceBox3DProps> = ({
     };
 
     performRoll();
-  }, [latestRoll]);
+  }, [latestRoll, initDiceBoxIfNeeded]);
 
   if (error) {
     return (

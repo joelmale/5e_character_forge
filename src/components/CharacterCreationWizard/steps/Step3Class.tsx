@@ -41,7 +41,9 @@ export const Step3Class: React.FC<StepProps> = ({ data, updateData, nextStep, pr
   return (
     <div className='space-y-6'>
       <div className='flex justify-between items-center'>
-        <h3 className='text-xl font-bold text-red-300'>Select Class (Hit Die and Starting Proficiencies)</h3>
+        <h3 className='text-xl font-bold text-red-300'>
+          Select Class {data.level >= 3 ? '& Subclass ' : ''}(Hit Die and Starting Proficiencies)
+        </h3>
         <RandomizeButton
           onClick={() => {
             const classAndSkills = randomizeClassAndSkills();
@@ -253,52 +255,69 @@ export const Step3Class: React.FC<StepProps> = ({ data, updateData, nextStep, pr
         return (
           <div className="bg-gray-700/50 border border-gray-600 rounded-lg p-4 space-y-3">
             <div>
-              <h4 className="text-lg font-bold text-yellow-300">Choose Martial Archetype (Sub-Class)</h4>
+              <h4 className="text-lg font-bold text-yellow-300">
+                Choose {selectedClass.name} Subclass {data.level >= 3 ? '(Required)' : '(Level 3 Feature)'}
+              </h4>
               <p className="text-xs text-gray-400 mt-1">
-                Select your {selectedClass.name} specialization
+                {data.level >= 3
+                  ? `Select your ${selectedClass.name} specialization`
+                  : `Subclasses are chosen at level 3. This character will need to select one when they reach level 3.`
+                }
               </p>
             </div>
 
-            {data.level >= 3 ? (
-              <>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {availableSubclasses.map(subclass => (
-                    <button
-                      key={subclass.slug}
-                      onClick={() => updateData({ subclassSlug: subclass.slug })}
-                      className={`p-3 rounded-lg text-left border-2 transition-all ${
-                        data.subclassSlug === subclass.slug
-                          ? 'bg-purple-800 border-purple-500 shadow-md'
-                          : 'bg-gray-700 border-gray-600 hover:bg-gray-600'
-                      }`}
-                    >
-                      <p className="text-sm font-bold text-yellow-300">{subclass.name}</p>
-                      <p className="text-xs text-gray-400 mt-1">{subclass.subclassFlavor}</p>
-                      {subclass.desc && subclass.desc.length > 0 && (
-                        <p className="text-xs text-gray-500 mt-2 line-clamp-2">
-                          {subclass.desc[0]}
-                        </p>
-                      )}
-                    </button>
-                  ))}
-                </div>
+             {data.level >= 3 ? (
+               <>
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                   {availableSubclasses.map(subclass => (
+                     <button
+                       key={subclass.slug}
+                       onClick={() => updateData({ subclassSlug: subclass.slug })}
+                       className={`p-3 rounded-lg text-left border-2 transition-all ${
+                         data.subclassSlug === subclass.slug
+                           ? 'bg-purple-800 border-purple-500 shadow-md'
+                           : 'bg-gray-700 border-gray-600 hover:bg-gray-600'
+                       }`}
+                     >
+                       <p className="text-sm font-bold text-yellow-300">{subclass.name}</p>
+                       <p className="text-xs text-gray-400 mt-1">{subclass.subclassFlavor}</p>
+                       {subclass.desc && subclass.desc.length > 0 && (
+                         <p className="text-xs text-gray-500 mt-2 line-clamp-2">
+                           {subclass.desc[0]}
+                         </p>
+                       )}
+                     </button>
+                   ))}
+                 </div>
 
-                {!data.subclassSlug && (
-                  <div className="text-xs text-yellow-400 mt-2">
-                    ⚠️ Please select a subclass
-                  </div>
-                )}
-              </>
-            ) : (
-              <div className="text-center py-8">
-                <p className="text-lg text-gray-400">This specialization is selected at level 3</p>
-              </div>
-            )}
-          </div>
-        );
-      })()}
+                 {!data.subclassSlug && (
+                   <div className="text-xs text-yellow-400 mt-2">
+                     ⚠️ Please select a subclass
+                   </div>
+                 )}
+               </>
+             ) : (
+               <div className="text-sm text-gray-400 p-4 bg-gray-800/50 rounded-lg border border-gray-600">
+                 <div className="flex items-center gap-2 mb-2">
+                   <span className="text-yellow-300">🔒</span>
+                   <p className="font-semibold text-yellow-300">Subclass Selection Unlocked at Level 3</p>
+                 </div>
+                 <p className="mb-3">Characters choose their subclass specialization at level 3. This character will need to select a subclass when they reach level 3.</p>
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                   {availableSubclasses.map(subclass => (
+                     <div key={subclass.slug} className="p-2 bg-gray-800/50 rounded border border-gray-700">
+                       <p className="text-xs font-semibold text-gray-300">{subclass.name}</p>
+                       <p className="text-xs text-gray-500 mt-1">{subclass.subclassFlavor}</p>
+                     </div>
+                   ))}
+                 </div>
+               </div>
+             )}
+            </div>
+          );
+        })()}
 
-      <div className='flex justify-between'>
+       <div className='flex justify-between'>
         <button onClick={prevStep} className="px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded-lg text-white flex items-center">
           <ArrowLeft className="w-4 h-4 mr-2" /> Back
         </button>

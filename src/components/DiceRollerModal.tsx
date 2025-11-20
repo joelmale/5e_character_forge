@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import DiceBox from '@3d-dice/dice-box';
 import './DiceRollerModal.css';
 import { diceSounds } from '../utils/diceSounds';
+import { rollDice as rollDiceUtil } from '../services/diceService';
 
 interface DiceRollerModalProps {
   isOpen: boolean;
@@ -232,11 +233,16 @@ export const DiceRollerModal: React.FC<DiceRollerModalProps> = ({
     try {
       await diceBoxInstanceRef.current.clear();
 
-      // Build array of individual dice notations
+      // Build array of individual dice notations and pre-calculate results
       const rollNotations: string[] = [];
+      const allValues: number[] = [];
       selectedDice.forEach((count, type) => {
         if (count > 0) {
+          const diceType = type as 'd4' | 'd6' | 'd8' | 'd10' | 'd12' | 'd20' | 'd100';
+          const sides = parseInt(diceType.substring(1)); // Remove 'd' prefix
+          const values = rollDiceUtil(count, sides);
           rollNotations.push(`${count}${type}`);
+          allValues.push(...values);
         }
       });
 
@@ -246,8 +252,10 @@ export const DiceRollerModal: React.FC<DiceRollerModalProps> = ({
       // Play dice sound when roll starts
       diceSounds.playRollSound(totalDice);
 
-      // Roll all dice simultaneously
-      await diceBoxInstanceRef.current.roll(rollNotations);
+      console.log('🎲 [DiceRollerModal] Rolling with pre-calculated values:', allValues);
+
+      // Roll all dice with fixed values
+      await diceBoxInstanceRef.current.roll(rollNotations, { values: allValues });
     } catch (error) {
       console.error('❌ [DiceRollerModal] Roll failed:', error);
       setIsRolling(false);

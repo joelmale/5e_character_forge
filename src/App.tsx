@@ -142,7 +142,7 @@ const App: React.FC = () => {
   console.log('🏠 [PAGE LOAD] App component mounted');
 
   // Use DiceContext for dice rolling functionality
-  const { rollHistory, latestRoll, rollDice, clearHistory } = useDiceContext();
+  const { rollHistory, latestRoll, rollDice, clearHistory, updateRollWithRealResults } = useDiceContext();
 
   const [characters, setCharacters] = useState<Character[]>([]);
   const [selectedCharacterId, setSelectedCharacterId] = useState<string | null>(null);
@@ -976,7 +976,12 @@ const App: React.FC = () => {
               console.log('🎲 [App] State update triggered');
             }}
          />
-        <DiceBox3D latestRoll={latestRoll} />
+        <DiceBox3D
+          latestRoll={latestRoll}
+          onRollResults={(rollId, diceValues, total) => {
+            updateRollWithRealResults(rollId, diceValues, total);
+          }}
+        />
         <RollHistoryTicker rolls={rollHistory} />
         <RollHistoryModal rolls={rollHistory} onClear={clearHistory} />
         <FeatureModal feature={featureModal} onClose={() => setFeatureModal(null)} />

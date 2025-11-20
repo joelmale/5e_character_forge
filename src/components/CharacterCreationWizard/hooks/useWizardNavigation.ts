@@ -53,7 +53,18 @@ export const useWizardNavigation = (
     // Find the next visible step
     while (nextStepIndex < STEP_TITLES.length) {
       if (shouldShowStep(nextStepIndex, creationData)) {
-        return STEP_TITLES[nextStepIndex].split(':')[0].trim(); // Get the main title
+        let label = STEP_TITLES[nextStepIndex].split(':')[0].trim(); // Get the main title
+
+        // Make labels level-aware
+        if (nextStepIndex === 3) { // Class & Subclass step
+          if (creationData.level >= 3) {
+            label = 'Choose Class & Subclass';
+          } else {
+            label = 'Choose Class';
+          }
+        }
+
+        return label;
       }
       nextStepIndex++;
     }
@@ -70,14 +81,14 @@ const shouldShowStep = (stepIndex: number, data: CharacterCreationData): boolean
     case 0: // Character Level - always show
     case 1: // Character Details - always show
     case 2: // Choose Race - always show
-    case 3: // Choose Class & Subclass - always show
+    case 3: // Choose Class & Subclass - always show (but subclass UI is conditional)
       return true;
 
-    case 4: // Choose Fighting Style - only for Fighter/Paladin/Ranger
-      return ['fighter', 'paladin', 'ranger'].includes(data.classSlug);
+    case 4: // Choose Fighting Style - only for Fighter/Paladin/Ranger at level 2+
+      return ['fighter', 'paladin', 'ranger'].includes(data.classSlug) && data.level >= 2;
 
-     case 5: // Select Spells - only for spellcasters
-       return hasSpellcastingAtLevel(data.classSlug, data.level);
+    case 5: // Select Spells - only for spellcasters at appropriate level
+      return hasSpellcastingAtLevel(data.classSlug, data.level);
 
     case 6: // Determine Abilities - always show
       return true;

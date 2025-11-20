@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { DiceRoll, createAbilityRoll, createSkillRoll, createInitiativeRoll, getRollHistory, addRollToHistory, clearRollHistory } from '../services/diceService';
+import { DiceRoll, createAbilityRoll, createSkillRoll, createInitiativeRoll, getRollHistory, addRollToHistory, clearRollHistory, saveRollHistory } from '../services/diceService';
 import { diceSounds } from '../utils/diceSounds';
 
 export function useDiceRolling() {
@@ -38,6 +38,42 @@ export function useDiceRolling() {
     setRollHistory([]);
   }, []);
 
+  const updateRollWithRealResults = useCallback((rollId: string, realDiceResults: number[], realTotal?: number) => {
+    setRollHistory(prevHistory => {
+      const updatedHistory = prevHistory.map(roll => {
+        if (roll.id === rollId) {
+          const updatedRoll = {
+            ...roll,
+            diceResults: realDiceResults,
+            total: realTotal !== undefined ? realTotal : realDiceResults.reduce((sum, val) => sum + val, 0) + roll.modifier
+          };
+          console.log('🎲 [ROLL UPDATE] Updated roll with real results:', updatedRoll);
+          return updatedRoll;
+        }
+        return roll;
+      });
+
+      // Update localStorage
+      saveRollHistory(updatedHistory.slice(-10));
+
+      return updatedHistory;
+    });
+
+    // Also update latestRoll if it matches
+    setLatestRoll(prevLatest => {
+      if (prevLatest && prevLatest.id === rollId) {
+        const updatedRoll = {
+          ...prevLatest,
+          diceResults: realDiceResults,
+          total: realTotal !== undefined ? realTotal : realDiceResults.reduce((sum, val) => sum + val, 0) + prevLatest.modifier
+        };
+        console.log('🎲 [ROLL UPDATE] Updated latestRoll with real results:', updatedRoll);
+        return updatedRoll;
+      }
+      return prevLatest;
+    });
+  }, []);
+
   const createAndRollAbility = useCallback((ability: string, score: number) => {
     const roll = createAbilityRoll(ability, score);
     return rollDice(roll);
@@ -58,6 +94,7 @@ export function useDiceRolling() {
     latestRoll,
     rollDice,
     clearHistory,
+    updateRollWithRealResults,
     createAndRollAbility,
     createAndRollSkill,
     createAndRollInitiative,

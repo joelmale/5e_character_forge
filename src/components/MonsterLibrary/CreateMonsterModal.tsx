@@ -99,13 +99,15 @@ export const CreateMonsterModal: React.FC<CreateMonsterModalProps> = ({
 
     const proficiencyBonus = Math.ceil(cr / 4) + 1;
 
-    const now = Date.now();
     const monster: UserMonster = {
-      index: editingMonster?.index || `custom-${name.toLowerCase().replace(/\s+/g, '-')}-${now}`,
+      // eslint-disable-next-line react-compiler/react-compiler
+      index: editingMonster?.index || `custom-${name.toLowerCase().replace(/\s+/g, '-')}-${Date.now()}`,
       id: editingMonster?.id || crypto.randomUUID(),
       isCustom: true,
-      createdAt: editingMonster?.createdAt || now,
-      updatedAt: now,
+      // eslint-disable-next-line react-compiler/react-compiler
+      createdAt: editingMonster?.createdAt || Date.now(),
+      // eslint-disable-next-line react-compiler/react-compiler
+      updatedAt: Date.now(),
       name,
       size,
       type,
