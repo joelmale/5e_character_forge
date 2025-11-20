@@ -20,6 +20,27 @@ export const DiceBox3D: React.FC<DiceBox3DProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [diceVisible, setDiceVisible] = useState(false);
 
+  // Function to ensure canvas is visible and properly sized
+  const ensureCanvasVisible = () => {
+    const container = document.getElementById('dice-box');
+    if (container) {
+      const canvas = container.querySelector('canvas') as HTMLCanvasElement;
+      if (canvas) {
+        // Calculate 50% of viewport size
+        const width = Math.floor(window.innerWidth * 0.5);
+        const height = Math.floor(window.innerHeight * 0.5);
+
+        canvas.style.display = 'block';
+        canvas.style.width = '100%';
+        canvas.style.height = '100%';
+        canvas.width = width;
+        canvas.height = height;
+
+        console.log('🎲 [DiceBox3D] Canvas sized to:', canvas.width, 'x', canvas.height);
+      }
+    }
+  };
+
   // Initialize DiceBox lazily on first roll
   const initDiceBoxIfNeeded = async () => {
     if (isInitialized || diceBoxRef.current) {
@@ -27,8 +48,9 @@ export const DiceBox3D: React.FC<DiceBox3DProps> = ({
     }
 
     try {
-      console.log('Initializing DiceBox...');
-      const diceBox = new DiceBox('#dice-box', {
+      console.log('🎲 [DiceBox3D] Initializing DiceBox with v1.1.0+ API...');
+      const diceBox = new DiceBox({
+        container: '#dice-box',  // v1.1.x API uses 'container' property
         assetPath: '/assets/dice-box/',
         offscreen: false,
         gravity: 1,
@@ -45,20 +67,11 @@ export const DiceBox3D: React.FC<DiceBox3DProps> = ({
       });
 
       await diceBox.init();
-      console.log('DiceBox initialized successfully');
+      console.log('🎲 [DiceBox3D] DiceBox initialized successfully');
 
-      // Check if canvas was created
+      // Ensure canvas is visible and sized properly
       setTimeout(() => {
-        const container = document.getElementById('dice-box');
-        if (container) {
-          console.log('Container found, children:', Array.from(container.children));
-          const canvas = container.querySelector('canvas');
-          if (canvas) {
-            console.log('Canvas found:', canvas, 'size:', canvas.width, 'x', canvas.height);
-          } else {
-            console.log('No canvas found in container');
-          }
-        }
+        ensureCanvasVisible();
       }, 100);
 
       diceBoxRef.current = diceBox;
@@ -95,30 +108,32 @@ export const DiceBox3D: React.FC<DiceBox3DProps> = ({
       lastRollIdRef.current = latestRoll.id;
 
       // Extract just the dice notation (remove modifiers)
-      const diceNotation = latestRoll.notation.replace(/[+-]\d+/, '');
-      console.log('Original notation:', latestRoll.notation, 'Parsed notation:', diceNotation);
+      const diceNotation = latestRoll.notation.replace(/[+-]\d+$/, '').trim();
+      console.log('🎲 [DiceBox3D] Original notation:', latestRoll.notation, 'Parsed notation:', diceNotation);
 
-      // Show dice and roll
+      // Clear previous dice first
+      await diceBoxRef.current.clear();
+
+      // Show dice and ensure canvas is visible
       setDiceVisible(true);
+      ensureCanvasVisible();
 
-      console.log('Attempting to roll dice with notation:', diceNotation);
-      // Temporarily try a hardcoded simple roll
-      diceBoxRef.current.roll('1d20')
+      console.log('🎲 [DiceBox3D] Rolling dice with notation:', diceNotation);
+      diceBoxRef.current.roll(diceNotation)
         .then(results => {
-          console.log('Dice roll succeeded with results:', results);
+          console.log('🎲 [DiceBox3D] Dice roll succeeded with results:', results);
         })
         .catch(err => {
-          console.error('Dice roll failed:', err);
+          console.error('❌ [DiceBox3D] Dice roll failed:', err);
         });
 
-      // Auto-hide after 8 seconds
+      // Auto-hide after 5 seconds
       const timer = setTimeout(() => {
         if (diceBoxRef.current) {
-          diceBoxRef.current.hide();
           diceBoxRef.current.clear();
           setDiceVisible(false);
         }
-      }, 8000);
+      }, 5000);
 
       return () => clearTimeout(timer);
     };
@@ -143,9 +158,6 @@ export const DiceBox3D: React.FC<DiceBox3DProps> = ({
 
   return (
     <div
-      id="dice-box"
-      ref={containerRef}
-      className={diceVisible ? 'cursor-pointer' : ''}
       style={{
         position: 'fixed',
         top: 0,
@@ -154,20 +166,51 @@ export const DiceBox3D: React.FC<DiceBox3DProps> = ({
         height: '100vh',
         zIndex: 9999,
         pointerEvents: diceVisible ? 'auto' : 'none',
-        // Temporarily removed opacity and background for debugging
-        // opacity: diceVisible ? 1 : 0,
-        // backgroundColor: diceVisible ? 'rgba(0, 0, 0, 0.5)' : 'transparent',
+        opacity: diceVisible ? 1 : 0,
+        transition: 'opacity 0.3s ease-in-out',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.7)',
       }}
       onClick={() => {
         if (diceBoxRef.current) {
-          diceBoxRef.current.hide();
           diceBoxRef.current.clear();
           setDiceVisible(false);
         }
       }}
     >
-      {/* Placeholder content to ensure container is not empty */}
-      <div style={{ display: 'none' }}>Dice Box Container</div>
+      {/* Dice box container - 50% size, centered with white border */}
+      <div
+        id="dice-box"
+        ref={containerRef}
+        className={diceVisible ? 'cursor-pointer' : ''}
+        style={{
+          width: '50vw',
+          height: '50vh',
+          border: '2px solid rgba(255, 255, 255, 0.5)',
+          borderRadius: '12px',
+          overflow: 'hidden',
+          backgroundColor: 'rgba(0, 0, 0, 0.3)',
+          position: 'relative',
+        }}
+        onClick={(e) => {
+          e.stopPropagation();
+        }}
+      >
+        {/* Force canvas to be positioned inside this container */}
+        <style>{`
+          #dice-box canvas {
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+          }
+        `}</style>
+        {/* Placeholder content to ensure container is not empty */}
+        <div style={{ display: 'none' }}>Dice Box Container</div>
+      </div>
     </div>
   );
 };
