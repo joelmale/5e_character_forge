@@ -57,7 +57,8 @@ export const DiceRollerModal: React.FC<DiceRollerModalProps> = ({
           console.log('🎲 [DiceRollerModal] Initializing DiceBox with v1.1.0+ API...');
 
           // v1.1.0+ API - single config object
-          const box = new DiceBox({
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const box = new (DiceBox as any)({
             container: '#dice-box-container',  // Changed from 'id' to 'container' per v1.1.x docs
             assetPath: '/assets/dice-box/',
             theme: 'default',
@@ -75,6 +76,7 @@ export const DiceRollerModal: React.FC<DiceRollerModalProps> = ({
             offscreen: false, // Ensure canvas is onscreen
             delay: 0, 
           });
+          } as any);
 
           console.log('🎲 [DiceRollerModal] DiceBox instance created, calling init()...');
           await box.init();

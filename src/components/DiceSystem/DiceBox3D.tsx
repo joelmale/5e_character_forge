@@ -171,7 +171,6 @@ export const DiceBox3D: React.FC<DiceBox3DProps> = ({
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: 'rgba(0, 0, 0, 0.7)',
       }}
       onClick={() => {
         if (diceBoxRef.current) {
@@ -180,7 +179,7 @@ export const DiceBox3D: React.FC<DiceBox3DProps> = ({
         }
       }}
     >
-      {/* Dice box container - 50% size, centered with white border */}
+      {/* Dice box container - 50% size, centered with white border and backdrop blur */}
       <div
         id="dice-box"
         ref={containerRef}
@@ -191,7 +190,9 @@ export const DiceBox3D: React.FC<DiceBox3DProps> = ({
           border: '2px solid rgba(255, 255, 255, 0.5)',
           borderRadius: '12px',
           overflow: 'hidden',
-          backgroundColor: 'rgba(0, 0, 0, 0.3)',
+          backgroundColor: 'rgba(0, 0, 0, 0.25)',
+          backdropFilter: 'blur(10px)',
+          WebkitBackdropFilter: 'blur(10px)',
           position: 'relative',
         }}
         onClick={(e) => {
