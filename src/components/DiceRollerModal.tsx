@@ -147,7 +147,20 @@ export const DiceRollerModal: React.FC<DiceRollerModalProps> = ({
           box.onRollComplete = (results: DiceRollResult[]) => {
             console.log('🎲 [DiceRollerModal] Roll complete:', results);
             setIsRolling(false);
-            setLastResult(results[0]);
+
+            // Calculate total from all dice
+            const total = results.reduce((sum, die) => sum + die.value, 0);
+
+            // Store aggregated result
+            setLastResult({
+              qty: results.length,
+              sides: 0, // Mixed dice types
+              value: total,
+              groupId: results[0]?.groupId || 0,
+              rollId: results[0]?.rollId || '',
+              theme: results[0]?.theme || 'default',
+            });
+
             onRollComplete?.(results);
           };
 
@@ -236,28 +249,32 @@ export const DiceRollerModal: React.FC<DiceRollerModalProps> = ({
 
     try {
       await diceBoxInstanceRef.current.clear();
-      console.log('🎲 [DiceRollerModal] Rolling notation:', notation);
 
-      // Check canvas before roll
-      const canvas = document.querySelector('#dice-box-container canvas');
-      if (canvas) {
-        console.log('🎲 [DiceRollerModal] Canvas before roll - visible:', window.getComputedStyle(canvas).visibility);
+      // Build array of individual roll notations
+      // DiceBox doesn't support "2d6+1d8" syntax, so we need to roll each type separately
+      const rollNotations: string[] = [];
+      selectedDice.forEach((count, type) => {
+        if (count > 0) {
+          rollNotations.push(`${count}${type}`);
+        }
+      });
+
+      console.log('🎲 [DiceRollerModal] Rolling individual notations:', rollNotations);
+
+      // Add all dice types without awaiting (so they're added simultaneously)
+      for (const rollNotation of rollNotations) {
+        console.log('🎲 [DiceRollerModal] Adding:', rollNotation);
+        diceBoxInstanceRef.current.add(rollNotation);  // No await - add all at once
       }
 
-      await diceBoxInstanceRef.current.roll(notation);
-
-      // Check canvas after roll
-      setTimeout(() => {
-        const canvasAfter = document.querySelector('#dice-box-container canvas');
-        if (canvasAfter) {
-          console.log('🎲 [DiceRollerModal] Canvas after roll - visible:', window.getComputedStyle(canvasAfter).visibility);
-        }
-      }, 100);
+      // Trigger the actual roll - all dice roll together
+      console.log('🎲 [DiceRollerModal] Triggering roll for all dice...');
+      await diceBoxInstanceRef.current.roll();
     } catch (error) {
       console.error('❌ [DiceRollerModal] Roll failed:', error);
       setIsRolling(false);
     }
-  }, [buildNotation, diceBoxReady]);
+  }, [buildNotation, diceBoxReady, selectedDice]);
 
   const clearSelection = useCallback(() => {
     setSelectedDice(new Map());
@@ -338,9 +355,16 @@ export const DiceRollerModal: React.FC<DiceRollerModalProps> = ({
         {lastResult && (
           <div className="result-display">
             <span className="result-label">Result:</span>
-            <span className="result-value">{lastResult.value}</span>
+            <span className="result-value">
+              {lastResult.value + modifier}
+            </span>
             <span className="result-breakdown">
-              ({lastResult.qty}d{lastResult.sides})
+              ({buildNotation()})
+              {modifier !== 0 && (
+                <span className="ml-1">
+                  = {lastResult.value} {modifier > 0 ? '+' : ''}{modifier}
+                </span>
+              )}
             </span>
           </div>
         )}
