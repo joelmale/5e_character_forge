@@ -1,6 +1,6 @@
 /* eslint-disable no-empty */
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Plus, Trash2, BookOpen, Shield, Download, Upload } from 'lucide-react';
+import { Plus, Trash2, BookOpen, Shield, Download, Upload, Settings } from 'lucide-react';
 // REFACTORED: Loader2 import removed - was unused
 import { CharacterCreationWizard } from './components/CharacterCreationWizard';
 import { CharacterSheet } from './components/CharacterSheet';
@@ -9,7 +9,7 @@ import ManualEntryScreen from './components/ManualEntryScreen';
 import PersonalityWizard from './components/PersonalityWizard';
 import { MonsterLibrary, MonsterStatBlock, CreateMonsterModal } from './components/MonsterLibrary';
 import { EncounterView } from './components/EncounterView';
-import { Monster, UserMonster } from './types/dnd';
+
 
 
 import { DiceBox3D } from './components/DiceSystem/DiceBox3D';
@@ -19,6 +19,7 @@ import { EquipmentDetailModal } from './components/EquipmentDetailModal';
 import { ChooseCantripModal } from './components/ChooseCantripModal';
 import ChooseSubclassModal from './components/ChooseSubclassModal';
 import AbilityScoreIncreaseModal from './components/AbilityScoreIncreaseModal';
+import { DiceRollerModal } from './components/DiceRollerModal';
 import { generateUUID, DiceRoll } from './services/diceService';
 import { featureDescriptions } from './utils/featureDescriptions';
 import { loadClasses, loadEquipment, loadFeatures, getSubclassesByClass, PROFICIENCY_BONUSES, getModifier, getHitDieForClass, CANTRIPS_KNOWN_BY_CLASS, SPELL_SLOTS_BY_CLASS, AppSubclass } from './services/dataService';
@@ -28,7 +29,7 @@ import { getAllCharacters, addCharacter, deleteCharacter, updateCharacter } from
 
 
 import levelConstantsData from './data/levelConstants.json';
-import { Ability, Character, CharacterCreationData, Equipment, EquippedItem, Feature } from './types/dnd';
+import { Ability, Character, CharacterCreationData, Equipment, EquippedItem, Feature, Monster, UserMonster } from './types/dnd';
 
 import { useDiceContext } from './hooks';
 
@@ -138,6 +139,8 @@ const formatModifier = (mod: number): string => mod >= 0 ? `+${mod}` : `${mod}`;
 
 /** Main Application Component */
 const App: React.FC = () => {
+  console.log('🏠 [PAGE LOAD] App component mounted');
+
   // Use DiceContext for dice rolling functionality
   const { rollHistory, latestRoll, rollDice, clearHistory } = useDiceContext();
 
@@ -164,7 +167,15 @@ const App: React.FC = () => {
 
   // New character creation modal states
   const [isNewCharacterModalOpen, setIsNewCharacterModalOpen] = useState<boolean>(false);
-  const [creationMethod, setCreationMethod] = useState<'wizard' | 'personality' | 'manual' | null>(null);
+  const [creationMethod, setCreationMethod] = useState<'manual' | 'wizard' | 'personality' | null>(null);
+
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState<boolean>(false);
+  const [isDiceTrayModalOpen, setIsDiceTrayModalOpen] = useState<boolean>(false);
+
+  // Debug logging for dice tray modal state
+  useEffect(() => {
+    console.log('🎲 [App] isDiceTrayModalOpen state changed:', isDiceTrayModalOpen);
+  }, [isDiceTrayModalOpen]);
 
   const selectedCharacter = useMemo(() => {
     return characters.find(c => c.id === selectedCharacterId);
@@ -940,30 +951,45 @@ const App: React.FC = () => {
     return (
       <>
         <CharacterSheet
-          character={selectedCharacter}
-          onClose={() => setSelectedCharacterId(null)}
-          onDelete={handleDeleteCharacter}
-          setRollResult={setRollResult}
-          onDiceRoll={handleDiceRoll}
-          onToggleInspiration={handleToggleInspiration}
-          onFeatureClick={handleFeatureClick}
-          onLongRest={handleLongRest}
-          onShortRest={handleShortRest}
-          onLevelUp={handleLevelUp}
-          onLevelDown={handleLevelDown}
-          onUpdateCharacter={handleUpdateCharacter}
-          onEquipArmor={handleEquipArmor}
-          onEquipWeapon={handleEquipWeapon}
-          onUnequipItem={handleUnequipItem}
-          onAddItem={handleAddItem}
-          onRemoveItem={handleRemoveItem}
-          setEquipmentModal={setEquipmentModal}
-        />
+           character={selectedCharacter}
+           onClose={() => setSelectedCharacterId(null)}
+           onDelete={handleDeleteCharacter}
+           setRollResult={setRollResult}
+           onDiceRoll={handleDiceRoll}
+           onToggleInspiration={handleToggleInspiration}
+           onFeatureClick={handleFeatureClick}
+           onLongRest={handleLongRest}
+           onShortRest={handleShortRest}
+           onLevelUp={handleLevelUp}
+           onLevelDown={handleLevelDown}
+           onUpdateCharacter={handleUpdateCharacter}
+           onEquipArmor={handleEquipArmor}
+           onEquipWeapon={handleEquipWeapon}
+           onUnequipItem={handleUnequipItem}
+           onAddItem={handleAddItem}
+           onRemoveItem={handleRemoveItem}
+           setEquipmentModal={setEquipmentModal}
+            onOpenDiceTray={() => {
+              console.log('🎲 [App] onOpenDiceTray handler called in CharacterSheet');
+              console.log('🎲 [App] Setting isDiceTrayModalOpen to true...');
+              setIsDiceTrayModalOpen(true);
+              console.log('🎲 [App] State update triggered');
+            }}
+         />
         <DiceBox3D latestRoll={latestRoll} />
         <RollHistoryTicker rolls={rollHistory} />
         <RollHistoryModal rolls={rollHistory} onClear={clearHistory} />
         <FeatureModal feature={featureModal} onClose={() => setFeatureModal(null)} />
         <EquipmentDetailModal equipment={equipmentModal} onClose={() => setEquipmentModal(null)} />
+
+        {/* Dice Roller Modal - needs to be here when character sheet is open */}
+        <DiceRollerModal
+          isOpen={isDiceTrayModalOpen}
+          onClose={() => {
+            console.log('🎲 [App] Closing Dice Roller Modal from character sheet view');
+            setIsDiceTrayModalOpen(false);
+          }}
+        />
       </>
     );
   }
@@ -1038,14 +1064,14 @@ const App: React.FC = () => {
           {/* Action Buttons (only show for characters tab) */}
           {activeTab === 'characters' && (
             <div className="pt-4">
-           <div className="flex flex-col space-y-3 md:space-y-0 md:flex-row md:space-x-3 w-full md:w-auto">
-              <button
-               onClick={() => setIsNewCharacterModalOpen(true)}
-               className="w-full md:w-auto px-6 py-3 bg-red-600 hover:bg-red-500 rounded-xl text-white font-bold shadow-red-800/50 shadow-lg transition-all flex items-center justify-center"
-             >
-               <Plus className="w-5 h-5 mr-2" />
-               New Character
-             </button>
+            <div className="flex flex-col space-y-3 md:space-y-0 md:flex-row md:space-x-3 w-full md:w-auto">
+               <button
+                onClick={() => setIsNewCharacterModalOpen(true)}
+                className="w-full md:w-auto px-6 py-3 bg-red-600 hover:bg-red-500 rounded-xl text-white font-bold shadow-red-800/50 shadow-lg transition-all flex items-center justify-center"
+              >
+                <Plus className="w-5 h-5 mr-2" />
+                New Character
+              </button>
              <button
                onClick={handleExportData}
                disabled={characters.length === 0}
@@ -1063,17 +1089,24 @@ const App: React.FC = () => {
                <Trash2 className="w-5 h-5 mr-2" />
                Delete Selected ({selectedCharacterIds.size})
              </button>
-             <label className="w-full md:w-auto px-6 py-3 bg-green-600 hover:bg-green-500 rounded-xl text-white font-bold shadow-green-800/50 shadow-lg transition-all flex items-center justify-center cursor-pointer">
-               <Upload className="w-5 h-5 mr-2" />
-               Import Data
-               <input
-                 type="file"
-                 accept="application/json"
-                 onChange={handleImportData}
-                 className="hidden"
-               />
-             </label>
-           </div>
+              <label className="w-full md:w-auto px-6 py-3 bg-green-600 hover:bg-green-500 rounded-xl text-white font-bold shadow-green-800/50 shadow-lg transition-all flex items-center justify-center cursor-pointer">
+                <Upload className="w-5 h-5 mr-2" />
+                Import Data
+                <input
+                  type="file"
+                  accept="application/json"
+                  onChange={handleImportData}
+                  className="hidden"
+                />
+              </label>
+              <button
+                onClick={() => setIsSettingsModalOpen(true)}
+                className="w-full md:w-auto px-4 py-3 bg-gray-600 hover:bg-gray-500 rounded-xl text-white font-bold shadow-gray-800/50 shadow-lg transition-all flex items-center justify-center"
+                title="Settings"
+              >
+                <Settings className="w-5 h-5" />
+              </button>
+            </div>
             </div>
           )}
         </header>
@@ -1148,7 +1181,10 @@ const App: React.FC = () => {
                     {/* Actions */}
                     <div className="flex justify-between items-center mt-4 space-x-3">
                       <button
-                        onClick={() => setSelectedCharacterId(char.id)}
+                        onClick={() => {
+                          console.log('📖 [CHARACTER] Opening character sheet for:', char.name, char.id);
+                          setSelectedCharacterId(char.id);
+                        }}
                         className="flex-grow py-2 bg-red-600 hover:bg-red-500 rounded-lg text-white font-semibold transition-colors flex items-center justify-center text-sm"
                       >
                         <BookOpen className="w-4 h-4 mr-2" /> View Sheet
@@ -1256,6 +1292,33 @@ const App: React.FC = () => {
             />
           );
         })()}
+
+        {/* Settings Modal */}
+        {isSettingsModalOpen && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-gray-800 p-6 rounded-lg shadow-xl max-w-md w-full mx-4">
+              <h2 className="text-xl font-bold text-white mb-4">Settings</h2>
+              <p className="text-gray-300">Settings TODO</p>
+              <div className="mt-6 flex justify-end">
+                <button
+                  onClick={() => setIsSettingsModalOpen(false)}
+                  className="px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded text-white transition-colors"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Dice Roller Modal */}
+        <DiceRollerModal
+          isOpen={isDiceTrayModalOpen}
+          onClose={() => {
+            console.log('🎲 [App] Closing Dice Roller Modal from dashboard view');
+            setIsDiceTrayModalOpen(false);
+          }}
+        />
       </div>
     </div>
   );

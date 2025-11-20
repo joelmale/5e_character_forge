@@ -66,15 +66,6 @@ const CharacterFinalization: React.FC<CharacterFinalizationProps> = ({
       return;
     }
 
-    const characterData = {
-      name,
-      alignment,
-      personality,
-      ideals,
-      bonds,
-      flaws
-    };
-
     onCreateCharacter({
       name,
       alignment,

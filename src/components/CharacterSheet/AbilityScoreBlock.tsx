@@ -55,6 +55,8 @@ export const AbilityScoreBlock: React.FC<AbilityScoreBlockProps> = ({
           critical: roll.diceResults.length === 1 ? roll.critical : undefined
         }));
 
+    console.log('🎲 [DICE ROLL] Initiating dice roll:', roll.label, roll.notation);
+
     setRollResult({
       text: `${roll.label}: ${roll.notation}`,
       value: roll.total,

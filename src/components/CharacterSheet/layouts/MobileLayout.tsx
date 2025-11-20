@@ -26,7 +26,7 @@ import { SpellPreparationModal } from '../../SpellPreparationModal';
 export const MobileLayout: React.FC<CharacterSheetProps> = ({
   character, onClose, onDelete, setRollResult, onDiceRoll, onToggleInspiration, onFeatureClick,
   onLongRest, onShortRest, onLevelUp, onLevelDown, onUpdateCharacter, onEquipArmor, onEquipWeapon, onUnequipItem,
-  onAddItem, onRemoveItem, setEquipmentModal
+  onAddItem, onRemoveItem, setEquipmentModal, onOpenDiceTray
 }) => {
   const [showSpellPreparationModal, setShowSpellPreparationModal] = useState(false);
   const [adjustMode, setAdjustMode] = useState(false);
@@ -344,6 +344,7 @@ export const MobileLayout: React.FC<CharacterSheetProps> = ({
           onLongRest={onLongRest}
           onLevelUp={onLevelUp}
           onLevelDown={onLevelDown}
+          onOpenDiceTray={onOpenDiceTray}
         />
 
         {/* Global Section Controls */}

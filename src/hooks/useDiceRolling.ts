@@ -13,10 +13,13 @@ export function useDiceRolling() {
   }, []);
 
   const rollDice = useCallback((roll: DiceRoll) => {
+    console.error('🎲 [DICE PROCESSING] Processing dice roll:', roll.label, roll.notation);
+
     // Add to history
     const updatedHistory = addRollToHistory(roll);
     setRollHistory(updatedHistory);
     setLatestRoll(roll);
+    console.error('🎲 [DICE PROCESSING] latestRoll set to:', roll);
 
     // Play sounds
     diceSounds.playRollSound(roll.diceResults.length);

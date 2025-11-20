@@ -14,158 +14,132 @@ export const DiceBox3D: React.FC<DiceBox3DProps> = ({
 }) => {
   const diceBoxRef = useRef<DiceBox | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const clearTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastRollIdRef = useRef<string | null>(null);
 
-  const [isInitialized] = useState(false);
-  const [webGLSupported, setWebGLSupported] = useState(true);
+  const [isInitialized, setIsInitialized] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [diceVisible, setDiceVisible] = useState(false);
 
-  // Check WebGL support and initialize DiceBox
-  useEffect(() => {
-    let mounted = true;
+  // Function to ensure canvas is visible and properly sized
+  const ensureCanvasVisible = () => {
+    const container = document.getElementById('dice-box');
+    if (container) {
+      const canvas = container.querySelector('canvas') as HTMLCanvasElement;
+      if (canvas) {
+        // Calculate 50% of viewport size
+        const width = Math.floor(window.innerWidth * 0.5);
+        const height = Math.floor(window.innerHeight * 0.5);
 
-    const initDiceSystem = async () => {
-      // Check WebGL support
-      const canvas = document.createElement('canvas');
-      const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+        canvas.style.display = 'block';
+        canvas.style.width = '100%';
+        canvas.style.height = '100%';
+        canvas.width = width;
+        canvas.height = height;
 
-      if (!gl) {
-        if (mounted) {
-          setWebGLSupported(false);
-          setError('WebGL is not supported in your browser');
-        }
-        return;
+        console.log('🎲 [DiceBox3D] Canvas sized to:', canvas.width, 'x', canvas.height);
       }
+    }
+  };
 
-      try {
-        // Create DiceBox instance with v1.1.0+ API (config object only)
-        const config = {
-          id: 'dice-canvas',
-          assetPath: '/assets/dice-box/',  // This should point to the directory containing themes/ and ammo/
-          container: '#dice-box',
-          theme: 'default',
-          themeColor: '#1e3a8a',  // Dark blue
-          offscreen: false,  // Disable Web Worker to avoid CORS issues
-          scale: 6,
-          gravity: 1,
-          mass: 1,
-          friction: 0.8,
-          restitution: 0,
-          linearDamping: 0.4,
-          angularDamping: 0.4,
-          spinForce: 3,
-          throwForce: 4,
-          startingHeight: 8,
-          settleTimeout: 2000,
-          enableShadows: true,
-          lightIntensity: 1,
-        };
-
-        const diceBox = new DiceBox(config);
-
-        // Wait for initialization to complete
-        await diceBox.init();
-
-        if (!mounted) return;
-
-        // Simple roll complete handler
-        diceBox.onRollComplete = (_results) => {
-          if (onRollComplete) {
-            onRollComplete();
-          }
-        };
-
-      } catch (err) {
-        if (!mounted) return;
-
-        const errorMessage = err instanceof Error ? err.message : 'Unknown error';
-
-        if (errorMessage.includes('WebAssembly') || errorMessage.includes('wasm')) {
-          setError('3D dice physics not available. WebAssembly support required.');
-        } else if (errorMessage.includes('theme config')) {
-          setError('Dice theme configuration not found. Check theme files.');
-        } else {
-          setError('Failed to initialize 3D dice. Check console for details.');
-        }
-      }
-    };
-
-    initDiceSystem();
-
-const diceBox = diceBoxRef.current;
-    // Cleanup function
-    return () => {
-      mounted = false;
-      // Only clear if the diceBox is fully initialized and has the clear method
-      if (diceBox && typeof diceBox.clear === 'function') {
-        try {
-          diceBox.clear();
-      } catch {}
-      }
-    };
-  }, [onRollComplete]);
-
-  // Handle dice rolls
-  useEffect(() => {
-    if (
-      !isInitialized ||
-      !diceBoxRef.current ||
-      !latestRoll ||
-      lastRollIdRef.current === latestRoll.id
-    ) {
+  // Initialize DiceBox lazily on first roll
+  const initDiceBoxIfNeeded = async () => {
+    if (isInitialized || diceBoxRef.current) {
       return;
     }
 
-    lastRollIdRef.current = latestRoll.id;
+    try {
+      console.log('🎲 [DiceBox3D] Initializing DiceBox with v1.1.0+ API...');
+      const diceBox = new DiceBox({
+        container: '#dice-box',  // v1.1.x API uses 'container' property
+        assetPath: '/assets/dice-box/',
+        offscreen: false,
+        gravity: 1,
+        friction: 0.8,
+        restitution: 0.6,
+        linearDamping: 0.4,
+        angularDamping: 0.4,
+        spinForce: 3,
+        throwForce: 4,
+        startingHeight: 8,
+        settleTimeout: 5000,
+        enableShadows: true,
+        scale: 6
+      });
 
-    // Clear any existing timeout
-    if (clearTimeoutRef.current) {
-      clearTimeout(clearTimeoutRef.current);
+      await diceBox.init();
+      console.log('🎲 [DiceBox3D] DiceBox initialized successfully');
+
+      // Ensure canvas is visible and sized properly
+      setTimeout(() => {
+        ensureCanvasVisible();
+      }, 100);
+
+      diceBoxRef.current = diceBox;
+      setIsInitialized(true);
+
+      diceBox.onRollComplete = (results) => {
+        console.log('Roll completed:', results);
+        if (onRollComplete) {
+          onRollComplete();
+        }
+      };
+
+    } catch (err) {
+      console.error('Failed to initialize 3D dice:', err);
+      setError('Failed to initialize 3D dice');
+    }
+  };
+
+  // Handle dice rolls
+  useEffect(() => {
+    if (!latestRoll || lastRollIdRef.current === latestRoll.id) {
+      return;
     }
 
-    // Roll the dice
-    const rollDice = async () => {
-      let rollNotation = '';
+    const performRoll = async () => {
+      // Initialize DiceBox if needed
+      await initDiceBoxIfNeeded();
 
-      try {
-        // Use the notation from the roll
-        rollNotation = latestRoll.notation;
-
-        // Show the dice box first
-        diceBoxRef.current!.show();
-        setDiceVisible(true);
-
-        // Then roll the dice
-        await diceBoxRef.current!.roll(rollNotation);
-
-        // Auto-clear after settle time + 10 seconds (give user time to see results)
-        const totalTime = 2000 + 10000; // settleTimeout + 10s
-        clearTimeoutRef.current = setTimeout(() => {
-          if (diceBoxRef.current) {
-            diceBoxRef.current.hide();
-            diceBoxRef.current.clear();
-            setDiceVisible(false);
-          }
-        }, totalTime);
-
-      } catch {} {
-        setError('Failed to roll dice. Check notation format.');
+      if (!diceBoxRef.current) {
+        console.error('DiceBox not available after initialization');
+        return;
       }
+
+      lastRollIdRef.current = latestRoll.id;
+
+      // Extract just the dice notation (remove modifiers)
+      const diceNotation = latestRoll.notation.replace(/[+-]\d+$/, '').trim();
+      console.log('🎲 [DiceBox3D] Original notation:', latestRoll.notation, 'Parsed notation:', diceNotation);
+
+      // Clear previous dice first
+      await diceBoxRef.current.clear();
+
+      // Show dice and ensure canvas is visible
+      setDiceVisible(true);
+      ensureCanvasVisible();
+
+      console.log('🎲 [DiceBox3D] Rolling dice with notation:', diceNotation);
+      diceBoxRef.current.roll(diceNotation)
+        .then(results => {
+          console.log('🎲 [DiceBox3D] Dice roll succeeded with results:', results);
+        })
+        .catch(err => {
+          console.error('❌ [DiceBox3D] Dice roll failed:', err);
+        });
+
+      // Auto-hide after 5 seconds
+      const timer = setTimeout(() => {
+        if (diceBoxRef.current) {
+          diceBoxRef.current.clear();
+          setDiceVisible(false);
+        }
+      }, 5000);
+
+      return () => clearTimeout(timer);
     };
 
-    rollDice();
-  }, [latestRoll, isInitialized]);
-
-  if (!webGLSupported) {
-    return (
-      <div className="fixed top-4 right-4 p-4 bg-red-900/90 text-white rounded-lg shadow-xl z-50 max-w-sm">
-        <p className="font-bold">WebGL Not Supported</p>
-        <p className="text-sm mt-1">{error}</p>
-      </div>
-    );
-  }
+    performRoll();
+  }, [latestRoll]);
 
   if (error) {
     return (
@@ -182,40 +156,62 @@ const diceBox = diceBoxRef.current;
     );
   }
 
-  // Handle click to dismiss dice
-  const handleContainerClick = () => {
-    if (diceBoxRef.current && clearTimeoutRef.current) {
-      clearTimeout(clearTimeoutRef.current);
-      diceBoxRef.current.hide();
-      diceBoxRef.current.clear();
-      setDiceVisible(false);
-    }
-  };
-
   return (
     <div
-      id="dice-box"
-      ref={containerRef}
-      className={`fixed inset-0 ${diceVisible ? 'cursor-pointer' : 'pointer-events-none'}`}
       style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
         width: '100vw',
         height: '100vh',
         zIndex: 9999,
-        top: 0,
-        left: 0,
+        pointerEvents: diceVisible ? 'auto' : 'none',
+        opacity: diceVisible ? 1 : 0,
+        transition: 'opacity 0.3s ease-in-out',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
       }}
-      onClick={handleContainerClick}
+      onClick={() => {
+        if (diceBoxRef.current) {
+          diceBoxRef.current.clear();
+          setDiceVisible(false);
+        }
+      }}
     >
-      <canvas
-        id="dice-canvas"
-        className="w-full h-full"
+      {/* Dice box container - 50% size, centered with white border and backdrop blur */}
+      <div
+        id="dice-box"
+        ref={containerRef}
+        className={diceVisible ? 'cursor-pointer' : ''}
         style={{
-          display: 'block',
-          position: 'absolute',
-          top: 0,
-          left: 0,
+          width: '50vw',
+          height: '50vh',
+          border: '2px solid rgba(255, 255, 255, 0.5)',
+          borderRadius: '12px',
+          overflow: 'hidden',
+          backgroundColor: 'rgba(0, 0, 0, 0.25)',
+          backdropFilter: 'blur(10px)',
+          WebkitBackdropFilter: 'blur(10px)',
+          position: 'relative',
         }}
-      />
+        onClick={(e) => {
+          e.stopPropagation();
+        }}
+      >
+        {/* Force canvas to be positioned inside this container */}
+        <style>{`
+          #dice-box canvas {
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+          }
+        `}</style>
+        {/* Placeholder content to ensure container is not empty */}
+        <div style={{ display: 'none' }}>Dice Box Container</div>
+      </div>
     </div>
   );
 };
