@@ -74,9 +74,8 @@ export const DiceRollerModal: React.FC<DiceRollerModalProps> = ({
             startingHeight: 8, // Increased starting height
             settleTimeout: 5000, // Reduced settle timeout
             offscreen: false, // Ensure canvas is onscreen
-            delay: 0, 
+            delay: 0,
           });
-          } as any);
 
           console.log('🎲 [DiceRollerModal] DiceBox instance created, calling init()...');
           await box.init();
