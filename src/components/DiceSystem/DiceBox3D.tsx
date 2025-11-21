@@ -94,9 +94,15 @@ export const DiceBox3D: React.FC<DiceBox3DProps> = ({
 
   // Handle dice rolls
   useEffect(() => {
+    console.log('🎲 [DiceBox3D] useEffect triggered, latestRoll:', latestRoll);
+    console.log('🎲 [DiceBox3D] lastRollIdRef.current:', lastRollIdRef.current);
+
     if (!latestRoll || lastRollIdRef.current === latestRoll.id) {
+      console.log('🎲 [DiceBox3D] Skipping roll - no latestRoll or duplicate ID');
       return;
     }
+
+    console.log('🎲 [DiceBox3D] Starting roll for:', latestRoll.label, latestRoll.notation);
 
     const performRoll = async () => {
       // Initialize DiceBox if needed

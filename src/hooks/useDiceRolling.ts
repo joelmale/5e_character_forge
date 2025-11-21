@@ -14,6 +14,7 @@ export function useDiceRolling() {
 
   const rollDice = useCallback((roll: DiceRoll) => {
     console.error('🎲 [DICE PROCESSING] Processing dice roll:', roll.label, roll.notation);
+    console.error('🎲 [DICE PROCESSING] Call stack:', new Error().stack);
 
     // Add to history
     const updatedHistory = addRollToHistory(roll);

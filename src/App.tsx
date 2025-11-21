@@ -210,6 +210,8 @@ const App: React.FC = () => {
 
   // Handle dice roll - use DiceContext's rollDice function
   const handleDiceRoll = useCallback((roll: DiceRoll) => {
+    console.log('🎲 [App] handleDiceRoll called with:', roll.label, roll.notation);
+    console.log('🎲 [App] Call stack:', new Error().stack);
     rollDice(roll);
   }, [rollDice]);
 
