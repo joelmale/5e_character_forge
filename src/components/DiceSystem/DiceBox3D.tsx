@@ -51,7 +51,8 @@ export const DiceBox3D: React.FC<DiceBox3DProps> = ({
 
     try {
       console.log('🎲 [DiceBox3D] Initializing DiceBox with v1.1.0+ API...');
-      const diceBox = new DiceBox('#dice-box', {
+      const diceBox = new DiceBox({
+        container: '#dice-box',
         assetPath: '/assets/dice-box/',
         offscreen: false,
         gravity: 2, // Increased gravity for faster settling
