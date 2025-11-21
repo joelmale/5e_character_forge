@@ -20,8 +20,9 @@ type CombatChoice = 'frontline' | 'skirmisher' | 'overwhelming' | 'tactical' | n
 type SocialChoice = 'leader' | 'supporter' | 'independent' | 'mediator' | 'enforcer' | 'counselor' | null;
 type WorldChoice = 'guardian' | 'revolutionary' | 'pragmatist' | 'spiritual' | 'free_spirit' | 'justice' | null;
 
-const PersonalityWizard: React.FC<PersonalityWizardProps> = ({ isOpen, onClose, onComplete, onBack }) => {
+const PersonalityWizard: React.FC<PersonalityWizardProps> = ({ isOpen, onClose: _onClose, onComplete, onBack }) => {
   const [currentStep, setCurrentStep] = useState<number>(0);
+  const [selectedPath, setSelectedPath] = useState<PathChoice>(null);
   // Use a ref to store choices synchronously
   const choicesRef = React.useRef<{
     path: PathChoice;
@@ -63,6 +64,7 @@ const PersonalityWizard: React.FC<PersonalityWizardProps> = ({ isOpen, onClose, 
   const handlePathChoice = useCallback((choice: PathChoice) => {
     console.log('🎯 [handlePathChoice] Called with choice:', choice);
     choicesRef.current.path = choice;
+    setSelectedPath(choice);
     setCurrentStep(1);
   }, []);
 
@@ -145,16 +147,6 @@ const PersonalityWizard: React.FC<PersonalityWizardProps> = ({ isOpen, onClose, 
     setCompletedProfile(profile);
     setCurrentStep(5); // Go to profile display
   }, []);
-
-  const handleProfileComplete = useCallback((enhancedProfile: CharacterProfile & { selectedClass?: string; selectedRace?: string; selectedBackground?: string }) => {
-    console.log('🎯 [PersonalityWizard] Profile complete, calling onComplete with:', {
-      selectedClass: enhancedProfile.selectedClass,
-      selectedRace: enhancedProfile.selectedRace,
-      selectedBackground: enhancedProfile.selectedBackground,
-      profileName: enhancedProfile.name
-    });
-    onComplete(enhancedProfile);
-  }, [onComplete]);
 
   const handleFinalizeCharacter = useCallback((finalizationData: {
     name: string;
@@ -252,68 +244,7 @@ const PersonalityWizard: React.FC<PersonalityWizardProps> = ({ isOpen, onClose, 
     onComplete(characterData);
   }, [selectedClass, selectedRace, selectedBackground, onComplete]);
 
-  const renderStep = () => {
-    switch (currentStep) {
-      case 0:
-        return <WelcomeStep onChoice={handlePathChoice} />;
-      case 1:
-        return choicesRef.current.path === 'skill' ? (
-          <SkillPathStep onChoice={handleSkillChoice} />
-        ) : (
-          <MagicPathStep onChoice={handleMagicChoice} />
-        );
-      case 2:
-        return <CombatStyleStep onChoice={handleCombatChoice} />;
-      case 3:
-        return <SocialApproachStep onChoice={handleSocialChoice} />;
-      case 4:
-        return <WorldPhilosophyStep onChoice={handleWorldChoice} />;
-      case 5:
-        return completedProfile ? (
-          <ProfileDisplay
-            profile={completedProfile}
-            selectedClass={selectedClass}
-            selectedRace={selectedRace}
-            selectedBackground={selectedBackground}
-            onClassSelect={setSelectedClass}
-            onRaceSelect={setSelectedRace}
-            onBackgroundSelect={setSelectedBackground}
-            onContinue={() => setCurrentStep(6)}
-            onBack={() => setCurrentStep(4)}
-          />
-        ) : (
-          <WelcomeStep onChoice={handlePathChoice} />
-        );
-      case 6:
-        return completedProfile ? (
-          <PersonalitySummary
-            profile={completedProfile}
-            selectedClass={selectedClass || undefined}
-            selectedRace={selectedRace || undefined}
-            selectedBackground={selectedBackground || undefined}
-            onContinue={() => setCurrentStep(7)}
-            onBack={() => setCurrentStep(5)}
-          />
-        ) : (
-          <WelcomeStep onChoice={handlePathChoice} />
-        );
-      case 7:
-        return completedProfile ? (
-          <CharacterFinalization
-            profile={completedProfile}
-            selectedClass={selectedClass || ''}
-            selectedRace={selectedRace || ''}
-            selectedBackground={selectedBackground || ''}
-            onCreateCharacter={handleFinalizeCharacter}
-            onBack={() => setCurrentStep(6)}
-          />
-        ) : (
-          <WelcomeStep onChoice={handlePathChoice} />
-        );
-      default:
-        return <WelcomeStep onChoice={handlePathChoice} />;
-    }
-  };
+
 
   if (!isOpen) return null;
 
@@ -355,7 +286,68 @@ const PersonalityWizard: React.FC<PersonalityWizardProps> = ({ isOpen, onClose, 
         </div>
 
         {/* Content */}
-        {renderStep()}
+        {(() => {
+          switch (currentStep) {
+            case 0:
+              return <WelcomeStep onChoice={handlePathChoice} />;
+            case 1:
+              return selectedPath === 'skill' ? (
+                <SkillPathStep onChoice={handleSkillChoice} />
+              ) : (
+                <MagicPathStep onChoice={handleMagicChoice} />
+              );
+            case 2:
+              return <CombatStyleStep onChoice={handleCombatChoice} />;
+            case 3:
+              return <SocialApproachStep onChoice={handleSocialChoice} />;
+            case 4:
+              return <WorldPhilosophyStep onChoice={handleWorldChoice} />;
+            case 5:
+              return completedProfile ? (
+                <ProfileDisplay
+                  profile={completedProfile}
+                  selectedClass={selectedClass}
+                  selectedRace={selectedRace}
+                  selectedBackground={selectedBackground}
+                  onClassSelect={setSelectedClass}
+                  onRaceSelect={setSelectedRace}
+                  onBackgroundSelect={setSelectedBackground}
+                  onContinue={() => setCurrentStep(6)}
+                  onBack={() => setCurrentStep(4)}
+                />
+              ) : (
+                <WelcomeStep onChoice={handlePathChoice} />
+              );
+            case 6:
+              return completedProfile ? (
+                <PersonalitySummary
+                  profile={completedProfile}
+                  selectedClass={selectedClass || undefined}
+                  selectedRace={selectedRace || undefined}
+                  selectedBackground={selectedBackground || undefined}
+                  onContinue={() => setCurrentStep(7)}
+                  onBack={() => setCurrentStep(5)}
+                />
+              ) : (
+                <WelcomeStep onChoice={handlePathChoice} />
+              );
+            case 7:
+              return completedProfile ? (
+                <CharacterFinalization
+                  profile={completedProfile}
+                  selectedClass={selectedClass || ''}
+                  selectedRace={selectedRace || ''}
+                  selectedBackground={selectedBackground || ''}
+                  onCreateCharacter={handleFinalizeCharacter}
+                  onBack={() => setCurrentStep(6)}
+                />
+              ) : (
+                <WelcomeStep onChoice={handlePathChoice} />
+              );
+            default:
+              return <WelcomeStep onChoice={handlePathChoice} />;
+          }
+        })()}
         </div>
       </div>
     </div>

@@ -141,12 +141,11 @@ export const DiceBox3D: React.FC<DiceBox3DProps> = ({
            const diceValues = results.map(result => result.value);
            console.log('🎲 [DiceBox3D] Extracted dice values:', diceValues);
 
-           // Calculate the total based on roll type
-           let actualTotal: number;
-           if (latestRoll.pools && latestRoll.pools.length > 0) {
-             // For complex rolls, apply the keep/drop logic
-             const pool = latestRoll.pools[0];
-             if (latestRoll.notation.includes('kh1')) {
+            // Calculate the total based on roll type
+            let actualTotal: number;
+            if (latestRoll.pools && latestRoll.pools.length > 0) {
+              // For complex rolls, apply the keep/drop logic
+              if (latestRoll.notation.includes('kh1')) {
                // Keep highest
                actualTotal = Math.max(...diceValues) + latestRoll.modifier;
              } else if (latestRoll.notation.includes('kl1')) {
@@ -196,7 +195,7 @@ export const DiceBox3D: React.FC<DiceBox3DProps> = ({
     };
 
     performRoll();
-  }, [latestRoll, initDiceBoxIfNeeded]);
+  }, [latestRoll, initDiceBoxIfNeeded, onRollResults]);
 
   if (error) {
     return (

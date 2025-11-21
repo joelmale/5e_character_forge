@@ -26,7 +26,8 @@
       "WebFetch(domain:5e-spellbook.app)",
       "WebFetch(domain:github.com)",
       "WebSearch",
-      "Bash(timeout 10 npm run dev:*)"
+      "Bash(timeout 10 npm run dev:*)",
+      "Bash(docker push:*)"
     ],
     "deny": [],
     "ask": [],

@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 // Dice sound effects manager for 5e Character Forge
 
 import diceSoundsData from '../data/diceSounds.json';
@@ -22,7 +21,8 @@ class DiceSoundManager {
     // Create AudioContext for procedural sounds
     try {
       this.audioContext = new (window.AudioContext || (window as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext || AudioContext)();
-    } catch (e) {
+    } catch {
+      // AudioContext not supported
     }
 
     // Preload dice rolling MP3 files
@@ -60,7 +60,8 @@ class DiceSoundManager {
 
     // Resume AudioContext if suspended (required by modern browsers)
     if (this.audioContext && this.audioContext.state === 'suspended') {
-      this.audioContext.resume().catch(err => {
+      this.audioContext.resume().catch(() => {
+        // Resume failed, continue anyway
       });
     }
 
@@ -78,7 +79,8 @@ class DiceSoundManager {
       // Clone and play to allow overlapping sounds
       const clone = sound.cloneNode() as HTMLAudioElement;
       clone.volume = this.volume;
-      clone.play().catch(err => {
+      clone.play().catch(() => {
+        // Play failed, continue anyway
       });
     }
   }
@@ -87,12 +89,13 @@ class DiceSoundManager {
    * Play critical success sound (procedurally generated)
    * Ascending arpeggio with sparkly overtones
    */
-  public playCritSuccessSound(): void {
+   public playCritSuccessSound(): void {
     if (this.muted || !this.audioContext) return;
 
     // Resume AudioContext if suspended
     if (this.audioContext.state === 'suspended') {
-      this.audioContext.resume().catch(err => {
+      this.audioContext.resume().catch(() => {
+        // Resume failed, continue anyway
       });
     }
 
@@ -114,12 +117,13 @@ class DiceSoundManager {
    * Play critical failure sound (procedurally generated)
    * Descending tones with dull ending
    */
-  public playCritFailureSound(): void {
+   public playCritFailureSound(): void {
     if (this.muted || !this.audioContext) return;
 
     // Resume AudioContext if suspended
     if (this.audioContext.state === 'suspended') {
-      this.audioContext.resume().catch(err => {
+      this.audioContext.resume().catch(() => {
+        // Resume failed, continue anyway
       });
     }
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useRef, useState } from 'react';
 import { X, Plus, Trash2 } from 'lucide-react';
 import { UserMonster, MonsterSize, MonsterType } from '../../types/dnd';
 import { useMonsterContext } from '../../hooks';
@@ -19,77 +19,50 @@ export const CreateMonsterModal: React.FC<CreateMonsterModalProps> = ({
 }) => {
   const { createCustomMonster, updateCustomMonster } = useMonsterContext();
 
+  // Creation timestamp - generated when component mounts
+  const createdAtRef = useRef(new Date().getTime());
+
   // Basic Info
-  const [name, setName] = useState('');
-  const [size, setSize] = useState<MonsterSize>('Medium');
-  const [type, setType] = useState<MonsterType>('beast');
-  const [alignment, setAlignment] = useState('unaligned');
+  const [name, setName] = useState(editingMonster?.name || '');
+  const [size, setSize] = useState<MonsterSize>(editingMonster?.size || 'Medium');
+  const [type, setType] = useState<MonsterType>(editingMonster?.type || 'beast');
+  const [alignment, setAlignment] = useState(editingMonster?.alignment || 'unaligned');
 
   // Stats
-  const [ac, setAc] = useState(10);
-  const [hp, setHp] = useState(10);
-  const [hitDice, setHitDice] = useState('2d8');
+  const [ac, setAc] = useState(editingMonster?.armor_class?.[0]?.value || 10);
+  const [hp, setHp] = useState(editingMonster?.hit_points || 10);
+  const [hitDice, setHitDice] = useState(editingMonster?.hit_dice || '2d8');
 
   // Ability Scores
-  const [str, setStr] = useState(10);
-  const [dex, setDex] = useState(10);
-  const [con, setCon] = useState(10);
-  const [int, setInt] = useState(10);
-  const [wis, setWis] = useState(10);
-  const [cha, setCha] = useState(10);
+  const [str, setStr] = useState(editingMonster?.strength || 10);
+  const [dex, setDex] = useState(editingMonster?.dexterity || 10);
+  const [con, setCon] = useState(editingMonster?.constitution || 10);
+  const [int, setInt] = useState(editingMonster?.intelligence || 10);
+  const [wis, setWis] = useState(editingMonster?.wisdom || 10);
+  const [cha, setCha] = useState(editingMonster?.charisma || 10);
 
   // Speed
-  const [walkSpeed, setWalkSpeed] = useState('30 ft.');
-  const [flySpeed, setFlySpeed] = useState('');
-  const [swimSpeed, setSwimSpeed] = useState('');
-  const [burrowSpeed, setBurrowSpeed] = useState('');
-  const [climbSpeed, setClimbSpeed] = useState('');
-  const [hover, setHover] = useState(false);
+  const [walkSpeed, setWalkSpeed] = useState(editingMonster?.speed?.walk || '30 ft.');
+  const [flySpeed, setFlySpeed] = useState(editingMonster?.speed?.fly || '');
+  const [swimSpeed, setSwimSpeed] = useState(editingMonster?.speed?.swim || '');
+  const [burrowSpeed, setBurrowSpeed] = useState(editingMonster?.speed?.burrow || '');
+  const [climbSpeed, setClimbSpeed] = useState(editingMonster?.speed?.climb || '');
+  const [hover, setHover] = useState(editingMonster?.speed?.hover || false);
 
   // Challenge
-  const [cr, setCr] = useState(0);
-  const [xp, setXp] = useState(10);
+  const [cr, setCr] = useState(editingMonster?.challenge_rating || 0);
+  const [xp, setXp] = useState(editingMonster?.xp || 10);
 
   // Other
-  const [senses, setSenses] = useState('passive Perception 10');
-  const [languages, setLanguages] = useState('—');
+  const [senses, setSenses] = useState(editingMonster?.senses ? Object.entries(editingMonster.senses).map(([k, v]) => `${k} ${v}`).join(', ') : 'passive Perception 10');
+  const [languages, setLanguages] = useState(editingMonster?.languages || '—');
 
   // Abilities & Actions
-  const [specialAbilities, setSpecialAbilities] = useState<Array<{ name: string; desc: string }>>([]);
-  const [actions, setActions] = useState<Array<{ name: string; desc: string }>>([]);
-  const [legendaryActions, setLegendaryActions] = useState<Array<{ name: string; desc: string }>>([]);
+  const [specialAbilities, setSpecialAbilities] = useState(editingMonster?.special_abilities?.map(a => ({ name: a.name, desc: a.desc })) || []);
+  const [actions, setActions] = useState(editingMonster?.actions?.map(a => ({ name: a.name, desc: a.desc })) || []);
+  const [legendaryActions, setLegendaryActions] = useState(editingMonster?.legendary_actions?.map(a => ({ name: a.name, desc: a.desc })) || []);
 
-  // Load editing monster
-  useEffect(() => {
-    if (editingMonster) {
-      setName(editingMonster.name);
-      setSize(editingMonster.size);
-      setType(editingMonster.type);
-      setAlignment(editingMonster.alignment);
-      setAc(editingMonster.armor_class[0]?.value || 10);
-      setHp(editingMonster.hit_points);
-      setHitDice(editingMonster.hit_dice);
-      setStr(editingMonster.strength);
-      setDex(editingMonster.dexterity);
-      setCon(editingMonster.constitution);
-      setInt(editingMonster.intelligence);
-      setWis(editingMonster.wisdom);
-      setCha(editingMonster.charisma);
-      setWalkSpeed(editingMonster.speed.walk || '30 ft.');
-      setFlySpeed(editingMonster.speed.fly || '');
-      setSwimSpeed(editingMonster.speed.swim || '');
-      setBurrowSpeed(editingMonster.speed.burrow || '');
-      setClimbSpeed(editingMonster.speed.climb || '');
-      setHover(editingMonster.speed.hover || false);
-      setCr(editingMonster.challenge_rating);
-      setXp(editingMonster.xp);
-      setSenses(Object.entries(editingMonster.senses).map(([k, v]) => `${k} ${v}`).join(', ') || 'passive Perception 10');
-      setLanguages(editingMonster.languages);
-      setSpecialAbilities(editingMonster.special_abilities?.map(a => ({ name: a.name, desc: a.desc })) || []);
-      setActions(editingMonster.actions?.map(a => ({ name: a.name, desc: a.desc })) || []);
-      setLegendaryActions(editingMonster.legendary_actions?.map(a => ({ name: a.name, desc: a.desc })) || []);
-    }
-  }, [editingMonster]);
+
 
   const handleSave = async () => {
     if (!name.trim()) {
@@ -99,15 +72,13 @@ export const CreateMonsterModal: React.FC<CreateMonsterModalProps> = ({
 
     const proficiencyBonus = Math.ceil(cr / 4) + 1;
 
+    const now = new Date().getTime();
     const monster: UserMonster = {
-      // eslint-disable-next-line react-compiler/react-compiler
-      index: editingMonster?.index || `custom-${name.toLowerCase().replace(/\s+/g, '-')}-${Date.now()}`,
+      index: editingMonster?.index || `custom-${name.toLowerCase().replace(/\s+/g, '-')}-${now}`,
       id: editingMonster?.id || crypto.randomUUID(),
       isCustom: true,
-      // eslint-disable-next-line react-compiler/react-compiler
-      createdAt: editingMonster?.createdAt || Date.now(),
-      // eslint-disable-next-line react-compiler/react-compiler
-      updatedAt: Date.now(),
+      createdAt: editingMonster?.createdAt ?? createdAtRef.current,
+      updatedAt: now,
       name,
       size,
       type,
