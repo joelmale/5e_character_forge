@@ -21,6 +21,7 @@ RUN --mount=type=cache,target=/root/.npm \
 
 # Copy source code in smaller chunks for better layer caching
 COPY src ./src/
+COPY public ./public/
 COPY index.html ./
 
 # Build with cache mount
