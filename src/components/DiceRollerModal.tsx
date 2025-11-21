@@ -57,95 +57,45 @@ export const DiceRollerModal: React.FC<DiceRollerModalProps> = ({
 
   // Initialize dice box when modal opens
   useEffect(() => {
-    if (isOpen && diceBoxRef.current && !diceBoxInstanceRef.current) {
+    if (isOpen && !diceBoxInstanceRef.current) {
       const initDiceBox = async () => {
         try {
           console.log('🎲 [DiceRollerModal] Initializing DiceBox with v1.1.0+ API...');
 
-          // v1.1.0+ API - single config object
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const box = new (DiceBox as any)({
-            container: '#dice-box-container',  // Changed from 'id' to 'container' per v1.1.x docs
+          // Simplified config matching DiceBox3D
+          const box = new DiceBox({
+            container: '#dice-box-container',
             assetPath: '/assets/dice-box/',
-            theme: 'default',
-            scale: 8, // Increased scale for better visibility
-            gravity: 2, // Increased gravity for faster settling
-            mass: 1,
-            friction: 0.9, // Increased friction to slow down faster
-            restitution: 0.3, // Reduced bounce for quicker settle
-            linearDamping: 0.6, // Increased damping for faster energy loss
-            angularDamping: 0.6,  // Increased damping for faster spin reduction
-            spinForce: 3, // Reduced spin for faster settling
-            throwForce: 5, // Reduced throw force for faster settle
-            startingHeight: 6, // Reduced height for faster landing
-            settleTimeout: 2000, // Reduced settle timeout from 5s to 2s
-            offscreen: false, // Ensure canvas is onscreen
-            delay: 0,
+            offscreen: false,
+            gravity: 2,
+            friction: 0.9,
+            restitution: 0.3,
+            linearDamping: 0.6,
+            angularDamping: 0.6,
+            spinForce: 3,
+            throwForce: 4,
+            startingHeight: 6,
+            settleTimeout: 2000,
+            enableShadows: true,
+            scale: 6
           });
 
           console.log('🎲 [DiceRollerModal] DiceBox instance created, calling init()...');
           await box.init();
           console.log('🎲 [DiceRollerModal] DiceBox initialized successfully!');
 
-          // IMMEDIATE canvas check (synchronous)
-          const container = document.getElementById('dice-box-container');
-          if (container) {
-            console.log('🎲 [DiceRollerModal] Container found immediately after init');
-            console.log('🎲 [DiceRollerModal] Container children COUNT:', container.children.length);
-            console.log('🎲 [DiceRollerModal] Container children:', Array.from(container.children));
-
-            const containerStyles = window.getComputedStyle(container);
-            console.log('🎲 [DiceRollerModal] Container dimensions:', {
-              width: containerStyles.width,
-              height: containerStyles.height,
-              clientWidth: container.clientWidth,
-              clientHeight: container.clientHeight,
-              offsetWidth: container.offsetWidth,
-              offsetHeight: container.offsetHeight,
-            });
-            console.log('🎲 [DiceRollerModal] Container styles:', {
-              display: containerStyles.display,
-              position: containerStyles.position,
-              overflow: containerStyles.overflow,
-              flex: containerStyles.flex,
-            });
-
-            const canvas = container.querySelector('canvas');
-            if (canvas) {
-              console.log('✅ [DiceRollerModal] Canvas found immediately!');
-              const canvasStyles = window.getComputedStyle(canvas);
-              console.log('🎲 [DiceRollerModal] Canvas attributes:', {
-                width: canvas.width,
-                height: canvas.height,
-                clientWidth: canvas.clientWidth,
-                clientHeight: canvas.clientHeight,
-              });
-              console.log('🎲 [DiceRollerModal] Canvas computed styles:', {
-                width: canvasStyles.width,
-                height: canvasStyles.height,
-                display: canvasStyles.display,
-                visibility: canvasStyles.visibility,
-                opacity: canvasStyles.opacity,
-                position: canvasStyles.position,
-                zIndex: canvasStyles.zIndex,
-                top: canvasStyles.top,
-                left: canvasStyles.left,
-              });
-            } else {
-              console.error('❌ [DiceRollerModal] No canvas found immediately after init!');
-              // Check again after a delay
-              setTimeout(() => {
-                const canvasDelayed = container.querySelector('canvas');
-                if (canvasDelayed) {
-                  console.log('✅ [DiceRollerModal] Canvas appeared after delay');
-                } else {
-                  console.error('❌ [DiceRollerModal] Still no canvas after 500ms delay');
-                }
-              }, 500);
+          // Ensure canvas is visible and sized properly
+          setTimeout(() => {
+            const container = document.getElementById('dice-box-container');
+            if (container) {
+              const canvas = container.querySelector('canvas');
+              if (canvas) {
+                console.log('✅ [DiceRollerModal] Canvas ready');
+              } else {
+                console.warn('⚠️ [DiceRollerModal] Canvas not found');
+              }
             }
-          } else {
-            console.error('❌ [DiceRollerModal] Container not found in DOM after init!');
-          }
+          }, 100);
 
           // Set up roll complete callback
           box.onRollComplete = (results: DiceRollResult[]) => {
