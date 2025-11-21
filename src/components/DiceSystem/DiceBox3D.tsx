@@ -54,15 +54,15 @@ export const DiceBox3D: React.FC<DiceBox3DProps> = ({
       const diceBox = new DiceBox('#dice-box', {
         assetPath: '/assets/dice-box/',
         offscreen: false,
-        gravity: 1,
-        friction: 0.8,
-        restitution: 0.6,
-        linearDamping: 0.4,
-        angularDamping: 0.4,
+        gravity: 2, // Increased gravity for faster settling
+        friction: 0.9, // Increased friction to slow down faster
+        restitution: 0.3, // Reduced bounce for quicker settle
+        linearDamping: 0.6, // Increased damping for faster energy loss
+        angularDamping: 0.6, // Increased damping for faster spin reduction
         spinForce: 3,
         throwForce: 4,
-        startingHeight: 8,
-        settleTimeout: 5000,
+        startingHeight: 6, // Reduced height for faster landing
+        settleTimeout: 2000, // Reduced from 5000ms to 2000ms
         enableShadows: true,
         scale: 6
       });
@@ -184,13 +184,13 @@ export const DiceBox3D: React.FC<DiceBox3DProps> = ({
            console.error('❌ [DiceBox3D] Dice roll failed:', err);
          });
 
-      // Auto-hide after 5 seconds
+      // Auto-hide after 3 seconds (reduced from 5 for faster settling)
       const timer = setTimeout(() => {
         if (diceBoxRef.current) {
           diceBoxRef.current.clear();
           setDiceVisible(false);
         }
-      }, 5000);
+      }, 3000);
 
       return () => clearTimeout(timer);
     };

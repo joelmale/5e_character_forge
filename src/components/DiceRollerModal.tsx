@@ -26,14 +26,18 @@ interface DiceConfig {
   color?: string;
 }
 
+const getDiceIcon = (type: string, style: 'BW' | 'Color'): string => {
+  return `/assets/dice-icons/${type}_${style}_nobg.png`;
+};
+
 const DICE_TYPES: DiceConfig[] = [
-  { type: 'd4', label: 'D4', icon: '▲', color: '#FF6B6B' },
-  { type: 'd6', label: 'D6', icon: '□', color: '#4ECDC4' },
-  { type: 'd8', label: 'D8', icon: '◆', color: '#45B7D1' },
-  { type: 'd10', label: 'D10', icon: '◈', color: '#96CEB4' },
-  { type: 'd12', label: 'D12', icon: '⬟', color: '#FFEAA7' },
-  { type: 'd20', label: 'D20', icon: '⬢', color: '#DDA0DD' },
-  { type: 'd100', label: 'D100', icon: '%', color: '#98D8C8' },
+  { type: 'd4', label: 'D4', icon: '', color: '#FF6B6B' },
+  { type: 'd6', label: 'D6', icon: '', color: '#4ECDC4' },
+  { type: 'd8', label: 'D8', icon: '', color: '#45B7D1' },
+  { type: 'd10', label: 'D10', icon: '', color: '#96CEB4' },
+  { type: 'd12', label: 'D12', icon: '', color: '#FFEAA7' },
+  { type: 'd20', label: 'D20', icon: '', color: '#DDA0DD' },
+  { type: 'd100', label: 'D100', icon: '', color: '#98D8C8' },
 ];
 
 export const DiceRollerModal: React.FC<DiceRollerModalProps> = ({
@@ -48,6 +52,7 @@ export const DiceRollerModal: React.FC<DiceRollerModalProps> = ({
   const [lastResult, setLastResult] = useState<DiceRollResult | null>(null);
   const [diceBoxReady, setDiceBoxReady] = useState(false);
   const [modifier, setModifier] = useState<number>(0);
+  const [diceStyle, setDiceStyle] = useState<'BW' | 'Color'>('BW');
 
 
   // Initialize dice box when modal opens
@@ -64,16 +69,16 @@ export const DiceRollerModal: React.FC<DiceRollerModalProps> = ({
             assetPath: '/assets/dice-box/',
             theme: 'default',
             scale: 8, // Increased scale for better visibility
-            gravity: 1, // Increased gravity for faster settling
+            gravity: 2, // Increased gravity for faster settling
             mass: 1,
-            friction: 0.8,
-            restitution: 0.8, // Increased restitution for more bounce
-            linearDamping: 0.4, // Added linear damping
-            angularDamping: 0.4,  // Added angular damping
-            spinForce: 4, // Increased spin for more dynamic rolls
-            throwForce: 7, // Increased throw force
-            startingHeight: 8, // Increased starting height
-            settleTimeout: 5000, // Reduced settle timeout
+            friction: 0.9, // Increased friction to slow down faster
+            restitution: 0.3, // Reduced bounce for quicker settle
+            linearDamping: 0.6, // Increased damping for faster energy loss
+            angularDamping: 0.6,  // Increased damping for faster spin reduction
+            spinForce: 3, // Reduced spin for faster settling
+            throwForce: 5, // Reduced throw force for faster settle
+            startingHeight: 6, // Reduced height for faster landing
+            settleTimeout: 2000, // Reduced settle timeout from 5s to 2s
             offscreen: false, // Ensure canvas is onscreen
             delay: 0,
           });
@@ -282,6 +287,28 @@ export const DiceRollerModal: React.FC<DiceRollerModalProps> = ({
       <div className="dice-modal" onClick={(e) => e.stopPropagation()}>
         <div className="dice-modal-header">
           <h2>Dice Roller</h2>
+          <div className="dice-style-toggle">
+            <label className="toggle-option">
+              <input
+                type="radio"
+                name="diceStyle"
+                value="BW"
+                checked={diceStyle === 'BW'}
+                onChange={() => setDiceStyle('BW')}
+              />
+              <span>B&W</span>
+            </label>
+            <label className="toggle-option">
+              <input
+                type="radio"
+                name="diceStyle"
+                value="Color"
+                checked={diceStyle === 'Color'}
+                onChange={() => setDiceStyle('Color')}
+              />
+              <span>Color</span>
+            </label>
+          </div>
           <button className="close-button" onClick={onClose}>×</button>
         </div>
 
@@ -294,7 +321,7 @@ export const DiceRollerModal: React.FC<DiceRollerModalProps> = ({
                 onClick={() => quickRoll(dice.type)}
                 title={`Quick roll ${dice.label}`}
               >
-                <span className="dice-icon">{dice.icon}</span>
+                <img src={getDiceIcon(dice.type, diceStyle)} alt={dice.label} className="dice-icon" />
                 <span className="dice-label">{dice.label}</span>
               </button>
               <div className="dice-counter">
