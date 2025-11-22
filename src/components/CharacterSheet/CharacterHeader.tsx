@@ -115,11 +115,11 @@ export const CharacterHeader: React.FC<CharacterHeaderProps> = ({
 
       {/* Core Info Row */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3 text-center text-xs font-semibold">
-        <div className="p-2 bg-theme-secondary rounded-lg">Race: <span className="text-theme-primary block text-sm font-handwriting">{character.race}</span></div>
-        <div className="p-2 bg-theme-secondary rounded-lg">Class: <span className="text-theme-primary block text-sm font-handwriting">{character.class}</span></div>
-        <div className="p-2 bg-theme-secondary rounded-lg">Level: <span className="text-theme-primary block text-sm font-handwriting">{character.level}</span></div>
-        <div className="p-2 bg-theme-secondary rounded-lg col-span-2 md:col-span-1">Alignment: <span className="text-theme-primary block text-sm font-handwriting">{character.alignment}</span></div>
-        <div className="p-2 bg-theme-secondary rounded-lg col-span-2 md:col-span-1">Background: <span className="text-theme-primary block text-sm font-handwriting">{character.background}</span></div>
+        <div className="p-2 bg-theme-secondary rounded-lg"><span className="text-white">Race:</span> <span className="text-theme-primary block text-sm font-handwriting">{character.race}</span></div>
+        <div className="p-2 bg-theme-secondary rounded-lg"><span className="text-white">Class:</span> <span className="text-theme-primary block text-sm font-handwriting">{character.class}</span></div>
+        <div className="p-2 bg-theme-secondary rounded-lg"><span className="text-white">Level:</span> <span className="text-theme-primary block text-sm font-handwriting">{character.level}</span></div>
+        <div className="p-2 bg-theme-secondary rounded-lg col-span-2 md:col-span-1"><span className="text-white">Alignment:</span> <span className="text-theme-primary block text-sm font-handwriting">{character.alignment}</span></div>
+        <div className="p-2 bg-theme-secondary rounded-lg col-span-2 md:col-span-1"><span className="text-white">Background:</span> <span className="text-theme-primary block text-sm font-handwriting">{character.background}</span></div>
       </div>
     </>
   );
