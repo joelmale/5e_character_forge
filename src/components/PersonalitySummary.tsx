@@ -1,14 +1,19 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import { ArrowLeft, ArrowRight, Edit3, Sparkles, Heart, Shield, Zap, HelpCircle } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Edit3, Sparkles, Heart, Shield, Zap, HelpCircle, Pencil } from 'lucide-react';
 import { CharacterProfile } from '../data/characterProfiles';
-import { loadClasses, getAllRaces, BACKGROUNDS, getModifier } from '../services/dataService';
+import { loadClasses, getAllRaces, BACKGROUNDS, getModifier, getCantripsByClass, getLeveledSpellsByClass } from '../services/dataService';
+import { SpellSelectionData } from '../types/dnd';
+import { getSpellcastingType } from '../utils/spellUtils';
 import SkillTooltip from './SkillTooltip';
+import SpellEditModal from './SpellEditModal';
 
 interface PersonalitySummaryProps {
   profile: CharacterProfile;
   selectedClass?: string;
   selectedRace?: string;
   selectedBackground?: string;
+  spellSelection?: SpellSelectionData;
+  onSpellSelectionChange?: (selection: SpellSelectionData) => void;
   onContinue: () => void;
   onBack: () => void;
 }
@@ -18,6 +23,8 @@ const PersonalitySummary: React.FC<PersonalitySummaryProps> = ({
   selectedClass,
   selectedRace,
   selectedBackground,
+  spellSelection,
+  onSpellSelectionChange,
   onContinue,
   onBack
 }) => {
@@ -27,6 +34,7 @@ const PersonalitySummary: React.FC<PersonalitySummaryProps> = ({
     selectedClass,
     selectedRace,
     selectedBackground,
+    spellSelection,
     recommendedClasses: profile.recommendedClasses.map(c => c.class),
     recommendedRaces: profile.recommendedRaces.map(r => r.race),
     recommendedBackgrounds: profile.recommendedBackgrounds.map(b => b.background)
@@ -37,6 +45,7 @@ const PersonalitySummary: React.FC<PersonalitySummaryProps> = ({
   const [editingRace, setEditingRace] = useState(false);
   const [editingBackground, setEditingBackground] = useState(false);
   const [showArrayModal, setShowArrayModal] = useState(false);
+  const [showSpellModal, setShowSpellModal] = useState(false);
 
   const [currentClass, setCurrentClass] = useState(selectedClass || profile.recommendedClasses[0]?.class || '');
   const [currentRace, setCurrentRace] = useState(selectedRace || profile.recommendedRaces[0]?.race || '');
@@ -87,6 +96,69 @@ const PersonalitySummary: React.FC<PersonalitySummaryProps> = ({
       armorClass: 10 + abilities.DEX.modifier // Base AC + Dex modifier
     };
   }, [currentClass, currentBackground]);
+
+  // Compute spell information for display
+  const spellInfo = useMemo(() => {
+    const allClasses = loadClasses();
+    const extractBaseName = (fullName: string): string => {
+      const parenIndex = fullName.indexOf(' (');
+      return parenIndex > 0 ? fullName.substring(0, parenIndex) : fullName;
+    };
+    const baseClassName = extractBaseName(currentClass);
+    const selectedClassData = allClasses.find(c => c.name === baseClassName);
+
+    if (!selectedClassData) return null;
+
+    const spellcastingType = getSpellcastingType(selectedClassData.slug);
+    if (!spellcastingType || !spellSelection) return null;
+
+    const availableCantrips = getCantripsByClass(selectedClassData.slug);
+    const availableSpells = getLeveledSpellsByClass(selectedClassData.slug, 1);
+
+    const cantripNames = spellSelection.selectedCantrips
+      .map(slug => availableCantrips.find(s => s.slug === slug)?.name)
+      .filter(Boolean) as string[];
+
+    let spellNames: string[] = [];
+    let spellType = '';
+
+    if (spellcastingType === 'known') {
+      spellNames = (spellSelection.knownSpells || [])
+        .map(slug => availableSpells.find(s => s.slug === slug)?.name)
+        .filter(Boolean) as string[];
+      spellType = 'Known Spells';
+    } else if (spellcastingType === 'prepared') {
+      spellNames = (spellSelection.preparedSpells || [])
+        .map(slug => availableSpells.find(s => s.slug === slug)?.name)
+        .filter(Boolean) as string[];
+      spellType = 'Prepared Spells';
+    } else if (spellcastingType === 'wizard') {
+      const spellbookNames = (spellSelection.spellbook || [])
+        .map(slug => availableSpells.find(s => s.slug === slug)?.name)
+        .filter(Boolean) as string[];
+      const preparedNames = (spellSelection.preparedSpells || [])
+        .map(slug => availableSpells.find(s => s.slug === slug)?.name)
+        .filter(Boolean) as string[];
+
+      return {
+        hasspells: true,
+        cantrips: cantripNames,
+        spellbook: spellbookNames,
+        prepared: preparedNames,
+        spellcastingType,
+        classSlug: selectedClassData.slug
+      };
+    }
+
+    return {
+      hasSpells: cantripNames.length > 0 || spellNames.length > 0,
+      cantrips: cantripNames,
+      spells: spellNames,
+      spellType,
+      spellcastingType,
+      classSlug: selectedClassData.slug
+    };
+  }, [currentClass, spellSelection]);
 
   // Get actual data for dropdowns
   const availableClasses = loadClasses().map(cls => cls.name).sort();
@@ -305,6 +377,84 @@ const PersonalitySummary: React.FC<PersonalitySummaryProps> = ({
               These skills were chosen from a pool of the best stats given your choices.
             </p>
           </div>
+
+          {/* Spells Section (if spellcaster) */}
+          {spellInfo && (spellInfo.hasSpells || spellInfo.hasspells) && (
+            <div className="mb-6">
+              <div className="flex items-center justify-between mb-3">
+                <h4 className="text-md font-semibold text-blue-300">Spells</h4>
+                <button
+                  onClick={() => setShowSpellModal(true)}
+                  className="text-gray-400 hover:text-white transition-colors p-1"
+                  aria-label="Edit spells"
+                >
+                  <Pencil className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Cantrips */}
+              {spellInfo.cantrips && spellInfo.cantrips.length > 0 && (
+                <div className="mb-3">
+                  <h5 className="text-sm font-semibold text-gray-400 mb-2">Cantrips</h5>
+                  <div className="flex flex-wrap gap-2">
+                    {spellInfo.cantrips.map((spell, idx) => (
+                      <span key={idx} className="px-3 py-1 bg-blue-700 text-blue-200 text-sm rounded">
+                        {spell}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Wizard: Spellbook + Prepared */}
+              {spellInfo.spellcastingType === 'wizard' && (
+                <>
+                  {spellInfo.spellbook && spellInfo.spellbook.length > 0 && (
+                    <div className="mb-3">
+                      <h5 className="text-sm font-semibold text-gray-400 mb-2">Spellbook</h5>
+                      <div className="flex flex-wrap gap-2">
+                        {spellInfo.spellbook.map((spell, idx) => (
+                          <span key={idx} className="px-3 py-1 bg-purple-700 text-purple-200 text-sm rounded">
+                            {spell}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {spellInfo.prepared && spellInfo.prepared.length > 0 && (
+                    <div className="mb-3">
+                      <h5 className="text-sm font-semibold text-gray-400 mb-2">Prepared</h5>
+                      <div className="flex flex-wrap gap-2">
+                        {spellInfo.prepared.map((spell, idx) => (
+                          <span key={idx} className="px-3 py-1 bg-green-700 text-green-200 text-sm rounded">
+                            {spell}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+
+              {/* Known/Prepared Casters */}
+              {spellInfo.spellcastingType !== 'wizard' && spellInfo.spells && spellInfo.spells.length > 0 && (
+                <div className="mb-3">
+                  <h5 className="text-sm font-semibold text-gray-400 mb-2">{spellInfo.spellType}</h5>
+                  <div className="flex flex-wrap gap-2">
+                    {spellInfo.spells.map((spell, idx) => (
+                      <span key={idx} className="px-3 py-1 bg-purple-700 text-purple-200 text-sm rounded">
+                        {spell}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <p className="text-xs text-gray-400 mt-2">
+                Auto-selected based on your class. Click the pencil to customize.
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Key Stats Recommendations */}
@@ -399,6 +549,22 @@ const PersonalitySummary: React.FC<PersonalitySummaryProps> = ({
             </div>
           </div>
         </div>
+      )}
+
+      {/* Spell Edit Modal */}
+      {spellInfo && spellSelection && onSpellSelectionChange && (
+        <SpellEditModal
+          classSlug={spellInfo.classSlug}
+          level={1}
+          currentSelection={spellSelection}
+          abilities={{ STR: 15, DEX: 14, CON: 13, INT: 12, WIS: 10, CHA: 8 }}
+          isOpen={showSpellModal}
+          onClose={() => setShowSpellModal(false)}
+          onSave={(newSelection) => {
+            onSpellSelectionChange(newSelection);
+            setShowSpellModal(false);
+          }}
+        />
       )}
     </div>
   );

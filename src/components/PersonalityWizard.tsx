@@ -47,6 +47,11 @@ const PersonalityWizard: React.FC<PersonalityWizardProps> = ({ isOpen, onClose: 
   const [selectedClass, setSelectedClass] = useState<string | null>(null);
   const [selectedRace, setSelectedRace] = useState<string | null>(null);
   const [selectedBackground, setSelectedBackground] = useState<string | null>(null);
+  const [spellSelection, setSpellSelection] = useState<SpellSelectionData>({
+    selectedCantrips: [],
+    knownSpells: [],
+    preparedSpells: []
+  });
 
   // Reset wizard when opened
   React.useEffect(() => {
@@ -61,8 +66,75 @@ const PersonalityWizard: React.FC<PersonalityWizardProps> = ({ isOpen, onClose: 
         world: null,
       };
       setCompletedProfile(null);
+      setSpellSelection({
+        selectedCantrips: [],
+        knownSpells: [],
+        preparedSpells: []
+      });
     }
   }, [isOpen]);
+
+  // Auto-generate spell selection when class is selected
+  React.useEffect(() => {
+    if (!selectedClass) return;
+
+    const allClasses = loadClasses();
+    const extractBaseName = (fullName: string): string => {
+      const parenIndex = fullName.indexOf(' (');
+      return parenIndex > 0 ? fullName.substring(0, parenIndex) : fullName;
+    };
+    const baseClassName = extractBaseName(selectedClass);
+    const selectedClassData = allClasses.find(c => c.name === baseClassName);
+    if (!selectedClassData) return;
+
+    const spellcastingType = getSpellcastingType(selectedClassData.slug);
+    if (!spellcastingType) {
+      setSpellSelection({ selectedCantrips: [], knownSpells: [], preparedSpells: [] });
+      return;
+    }
+
+    const availableCantrips = getCantripsByClass(selectedClassData.slug);
+    const availableSpells = getLeveledSpellsByClass(selectedClassData.slug, 1);
+    const numCantrips = (cantripsData as any)[selectedClassData.slug]?.['1'] || 0;
+    const learningRules = SPELL_LEARNING_RULES[selectedClassData.slug];
+
+    let autoSpellSelection: SpellSelectionData = {
+      selectedCantrips: [],
+      knownSpells: [],
+      preparedSpells: []
+    };
+
+    // Randomly select cantrips
+    if (numCantrips > 0 && availableCantrips.length > 0) {
+      const shuffledCantrips = [...availableCantrips].sort(() => Math.random() - 0.5);
+      autoSpellSelection.selectedCantrips = shuffledCantrips.slice(0, numCantrips).map(s => s.slug);
+    }
+
+    if (spellcastingType === 'known' && learningRules?.spellsKnown) {
+      const numSpells = learningRules.spellsKnown[0] || 0;
+      if (numSpells > 0 && availableSpells.length > 0) {
+        const shuffledSpells = [...availableSpells].sort(() => Math.random() - 0.5);
+        autoSpellSelection.knownSpells = shuffledSpells.slice(0, numSpells).map(s => s.slug);
+      }
+    } else if (spellcastingType === 'prepared' && learningRules?.spellsPrepared) {
+      const numSpells = learningRules.spellsPrepared[0] || 0;
+      if (numSpells > 0 && availableSpells.length > 0) {
+        const shuffledSpells = [...availableSpells].sort(() => Math.random() - 0.5);
+        autoSpellSelection.preparedSpells = shuffledSpells.slice(0, numSpells).map(s => s.slug);
+      }
+    } else if (spellcastingType === 'wizard' && learningRules?.spellbookCapacity) {
+      const numSpellbookSpells = learningRules.spellbookCapacity[0] || 6;
+      if (availableSpells.length > 0) {
+        const shuffledSpells = [...availableSpells].sort(() => Math.random() - 0.5);
+        autoSpellSelection.spellbook = shuffledSpells.slice(0, numSpellbookSpells).map(s => s.slug);
+        const intMod = Math.floor((12 - 10) / 2);
+        const numPrepared = Math.max(1, intMod + 1);
+        autoSpellSelection.preparedSpells = autoSpellSelection.spellbook.slice(0, numPrepared);
+      }
+    }
+
+    setSpellSelection(autoSpellSelection);
+  }, [selectedClass]);
 
   const handlePathChoice = useCallback((choice: PathChoice) => {
     console.log('🎯 [handlePathChoice] Called with choice:', choice);
@@ -199,65 +271,6 @@ const PersonalityWizard: React.FC<PersonalityWizardProps> = ({ isOpen, onClose: 
     // Combine and deduplicate skills
     const selectedSkills = [...new Set([...defaultSkills, ...backgroundSkills])];
 
-    // Auto-select spells for spellcasters
-    const spellcastingType = getSpellcastingType(selectedClassData.slug);
-    let autoSpellSelection: SpellSelectionData = {
-      selectedCantrips: [],
-      knownSpells: [],
-      preparedSpells: []
-    };
-
-    if (spellcastingType) {
-      console.log('🔮 [PersonalityWizard] Auto-selecting spells for', selectedClassData.name);
-
-      const availableCantrips = getCantripsByClass(selectedClassData.slug);
-      const availableSpells = getLeveledSpellsByClass(selectedClassData.slug, 1);
-
-      // Get cantrip count for level 1
-      const numCantrips = (cantripsData as any)[selectedClassData.slug]?.['1'] || 0;
-
-      // Randomly select cantrips
-      if (numCantrips > 0 && availableCantrips.length > 0) {
-        const shuffledCantrips = [...availableCantrips].sort(() => Math.random() - 0.5);
-        autoSpellSelection.selectedCantrips = shuffledCantrips.slice(0, numCantrips).map(s => s.slug);
-        console.log(`  ✨ Selected ${numCantrips} cantrips:`, autoSpellSelection.selectedCantrips);
-      }
-
-      // Get spell count based on spellcasting type
-      const learningRules = SPELL_LEARNING_RULES[selectedClassData.slug];
-
-      if (spellcastingType === 'known' && learningRules?.spellsKnown) {
-        const numSpells = learningRules.spellsKnown[0] || 0;
-        if (numSpells > 0 && availableSpells.length > 0) {
-          const shuffledSpells = [...availableSpells].sort(() => Math.random() - 0.5);
-          autoSpellSelection.knownSpells = shuffledSpells.slice(0, numSpells).map(s => s.slug);
-          console.log(`  📖 Selected ${numSpells} known spells:`, autoSpellSelection.knownSpells);
-        }
-      } else if (spellcastingType === 'prepared' && learningRules?.spellsPrepared) {
-        const numSpells = learningRules.spellsPrepared[0] || 0;
-        if (numSpells > 0 && availableSpells.length > 0) {
-          const shuffledSpells = [...availableSpells].sort(() => Math.random() - 0.5);
-          autoSpellSelection.preparedSpells = shuffledSpells.slice(0, numSpells).map(s => s.slug);
-          console.log(`  📋 Selected ${numSpells} prepared spells:`, autoSpellSelection.preparedSpells);
-        }
-      } else if (spellcastingType === 'wizard' && learningRules?.spellbookCapacity) {
-        // Wizard gets 6 spells in spellbook at level 1
-        const numSpellbookSpells = learningRules.spellbookCapacity[0] || 6;
-        if (availableSpells.length > 0) {
-          const shuffledSpells = [...availableSpells].sort(() => Math.random() - 0.5);
-          autoSpellSelection.spellbook = shuffledSpells.slice(0, numSpellbookSpells).map(s => s.slug);
-
-          // Wizard prepares INT mod + level spells (INT is 12 from standard array, so +1 mod + 1 level = 2 spells)
-          const intMod = Math.floor((12 - 10) / 2);
-          const numPrepared = Math.max(1, intMod + 1);
-          autoSpellSelection.preparedSpells = autoSpellSelection.spellbook.slice(0, numPrepared);
-
-          console.log(`  📚 Selected ${numSpellbookSpells} spellbook spells:`, autoSpellSelection.spellbook);
-          console.log(`  📝 Prepared ${numPrepared} spells:`, autoSpellSelection.preparedSpells);
-        }
-      }
-    }
-
     // Create complete CharacterCreationData structure
     const characterData: CharacterCreationData = {
       name: finalizationData.name,
@@ -275,7 +288,7 @@ const PersonalityWizard: React.FC<PersonalityWizardProps> = ({ isOpen, onClose: 
       equipmentChoices: [],
       hpCalculationMethod: 'max' as const,
 
-      spellSelection: autoSpellSelection,
+      spellSelection: spellSelection,
 
       subclassSlug: null,
       selectedFightingStyle: null,
@@ -383,6 +396,8 @@ const PersonalityWizard: React.FC<PersonalityWizardProps> = ({ isOpen, onClose: 
                   selectedClass={selectedClass || undefined}
                   selectedRace={selectedRace || undefined}
                   selectedBackground={selectedBackground || undefined}
+                  spellSelection={spellSelection}
+                  onSpellSelectionChange={setSpellSelection}
                   onContinue={() => setCurrentStep(7)}
                   onBack={() => setCurrentStep(5)}
                 />
