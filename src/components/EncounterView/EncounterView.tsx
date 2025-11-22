@@ -49,10 +49,10 @@ export const EncounterView: React.FC<EncounterViewProps> = ({ onBack }) => {
         <div className="text-center">
           <div className="text-6xl mb-4">🐉</div>
           <h2 className="text-2xl font-bold mb-2">No Monsters Selected</h2>
-          <p className="text-gray-400 mb-6">Select monsters from the library to create an encounter</p>
+          <p className="text-theme-muted mb-6">Select monsters from the library to create an encounter</p>
           <button
             onClick={onBack}
-            className="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
+            className="px-6 py-3 bg-accent-purple hover:bg-purple-700 text-white rounded-lg transition-colors"
           >
             Back to Library
           </button>
@@ -69,14 +69,14 @@ export const EncounterView: React.FC<EncounterViewProps> = ({ onBack }) => {
           <div className="flex items-center gap-4">
             <button
               onClick={onBack}
-              className="p-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors"
+              className="p-2 bg-theme-secondary hover:bg-theme-tertiary rounded-lg transition-colors"
               title="Back to library"
             >
               <ArrowLeft className="w-6 h-6" />
             </button>
             <div>
               <h1 className="text-4xl font-bold">Encounter</h1>
-              <p className="text-gray-400 mt-1">
+              <p className="text-theme-muted mt-1">
                 {totalMonsters} monster{totalMonsters !== 1 ? 's' : ''}
                 {uniqueMonsters !== totalMonsters && (
                   <span className="ml-1">({uniqueMonsters} unique)</span>
@@ -88,14 +88,14 @@ export const EncounterView: React.FC<EncounterViewProps> = ({ onBack }) => {
           <div className="flex gap-3">
             <button
               onClick={() => setShowSaveModal(true)}
-              className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors flex items-center gap-2"
+              className="px-4 py-2 bg-accent-green hover:bg-accent-green-dark text-white rounded-lg transition-colors flex items-center gap-2"
             >
               <Save className="w-5 h-5" />
               Save Encounter
             </button>
             <button
               onClick={handleClear}
-              className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors flex items-center gap-2"
+              className="px-4 py-2 bg-accent-red hover:bg-accent-red-dark text-white rounded-lg transition-colors flex items-center gap-2"
             >
               <Trash2 className="w-5 h-5" />
               Clear
@@ -104,13 +104,13 @@ export const EncounterView: React.FC<EncounterViewProps> = ({ onBack }) => {
         </div>
 
         {/* View Mode Toggle */}
-        <div className="bg-gray-800 rounded-lg p-1 inline-flex">
+        <div className="bg-theme-secondary rounded-lg p-1 inline-flex">
           <button
             onClick={() => setEncounterViewMode('grid')}
             className={`px-4 py-2 rounded-lg transition-colors flex items-center gap-2 ${
               encounterViewMode === 'grid'
-                ? 'bg-purple-600 text-white'
-                : 'text-gray-400 hover:text-white'
+                ? 'bg-accent-purple text-white'
+                : 'text-theme-muted hover:text-white'
             }`}
           >
             <Grid className="w-5 h-5" />
@@ -120,8 +120,8 @@ export const EncounterView: React.FC<EncounterViewProps> = ({ onBack }) => {
             onClick={() => setEncounterViewMode('tabs')}
             className={`px-4 py-2 rounded-lg transition-colors flex items-center gap-2 ${
               encounterViewMode === 'tabs'
-                ? 'bg-purple-600 text-white'
-                : 'text-gray-400 hover:text-white'
+                ? 'bg-accent-purple text-white'
+                : 'text-theme-muted hover:text-white'
             }`}
           >
             <List className="w-5 h-5" />

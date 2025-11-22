@@ -13,7 +13,11 @@
     "test:ui": "vitest --ui",
     "size-limit": "size-limit",
     "docker:build": "bash ./scripts/fast-build.sh",
-    "docker:build-push": "bash ./scripts/docker-build-push.sh"
+    "docker:build-push": "bash ./scripts/docker-build-push.sh",
+    "docker:run": "docker stop 5e-forge 2>/dev/null || true && docker rm 5e-forge 2>/dev/null || true && docker run -d --name 5e-forge -p 8080:80 joelmale/5e-character-forge:latest && echo '✅ Container started at http://localhost:8080'",
+    "docker:stop": "docker stop 5e-forge && docker rm 5e-forge && echo '✅ Container stopped and removed'",
+    "docker:logs": "docker logs -f 5e-forge",
+    "docker:restart": "docker restart 5e-forge && echo '✅ Container restarted'"
   },
   "dependencies": {
     "@3d-dice/dice-box": "^1.1.4",

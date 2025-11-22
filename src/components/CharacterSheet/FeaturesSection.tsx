@@ -19,9 +19,9 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({
         <h2 className="text-xl font-bold text-red-500 border-b border-red-800 pb-1">Features & Traits</h2>
         <div className="space-y-4">
           {/* Personality section */}
-          <div className="p-4 bg-gray-800 rounded-xl shadow-lg border-l-4 border-blue-500">
-            <h3 className="text-lg font-bold text-blue-400 mb-2">Personality, Ideals, Bonds & Flaws</h3>
-            <ul className="list-disc list-inside space-y-1 text-sm text-gray-300">
+          <div className="p-4 bg-theme-secondary rounded-xl shadow-lg border-l-4 border-blue-500">
+            <h3 className="text-lg font-bold text-accent-blue-light mb-2">Personality, Ideals, Bonds & Flaws</h3>
+            <ul className="list-disc list-inside space-y-1 text-sm text-theme-tertiary">
               <li><span className="font-semibold text-white">Personality:</span> {character.featuresAndTraits.personality}</li>
               <li><span className="font-semibold text-white">Ideals:</span> {character.featuresAndTraits.ideals}</li>
               <li><span className="font-semibold text-white">Bonds:</span> {character.featuresAndTraits.bonds}</li>
@@ -30,14 +30,14 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({
           </div>
 
           {/* Racial Traits */}
-          <div className="p-4 bg-gray-800 rounded-xl shadow-lg border-l-4 border-green-500">
-            <h3 className="text-lg font-bold text-green-400 mb-2">Racial Traits</h3>
+          <div className="p-4 bg-theme-secondary rounded-xl shadow-lg border-l-4 border-green-500">
+            <h3 className="text-lg font-bold text-accent-green-light mb-2">Racial Traits</h3>
             <div className="flex flex-wrap gap-2">
               {character.featuresAndTraits.racialTraits.map((trait, index) => (
                 <button
                   key={`r-${index}`}
                   onClick={() => onFeatureClick(trait)}
-                  className="px-2 py-1 bg-green-700 text-white text-xs rounded hover:bg-green-600 transition-colors cursor-pointer"
+                  className="px-2 py-1 bg-accent-green-dark text-white text-xs rounded hover:bg-accent-green transition-colors cursor-pointer"
                 >
                   {trait}
                 </button>
@@ -47,9 +47,9 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({
 
           {/* Class Features */}
           {character.srdFeatures?.classFeatures && character.srdFeatures.classFeatures.length > 0 && (
-            <div className="p-4 bg-gray-800 rounded-xl shadow-lg border-l-4 border-orange-500">
+            <div className="p-4 bg-theme-secondary rounded-xl shadow-lg border-l-4 border-orange-500">
               <h3 className="text-lg font-bold text-orange-400 mb-2">Class Features</h3>
-              <div className="space-y-2 text-sm text-gray-300 max-h-60 overflow-y-auto">
+              <div className="space-y-2 text-sm text-theme-tertiary max-h-60 overflow-y-auto">
                 {character.srdFeatures.classFeatures
                   .reduce((unique, feature) => {
                     const existing = unique.find(f => f.name === feature.name);
@@ -67,7 +67,7 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({
                       </span>
                       <button
                         onClick={() => onFeatureClick(feature.name)}
-                        className="text-left hover:text-yellow-300 transition-colors cursor-pointer flex-1"
+                        className="text-left hover:text-accent-yellow-light transition-colors cursor-pointer flex-1"
                       >
                         {feature.name}
                       </button>
@@ -79,9 +79,9 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({
 
           {/* Subclass Features */}
           {character.srdFeatures?.subclassFeatures && character.srdFeatures.subclassFeatures.length > 0 && (
-            <div className="p-4 bg-gray-800 rounded-xl shadow-lg border-l-4 border-purple-500">
-              <h3 className="text-lg font-bold text-purple-400 mb-2">Subclass Features</h3>
-              <div className="space-y-2 text-sm text-gray-300 max-h-60 overflow-y-auto">
+            <div className="p-4 bg-theme-secondary rounded-xl shadow-lg border-l-4 border-accent-purple">
+              <h3 className="text-lg font-bold text-accent-purple-light mb-2">Subclass Features</h3>
+              <div className="space-y-2 text-sm text-theme-tertiary max-h-60 overflow-y-auto">
                 {character.srdFeatures.subclassFeatures.map((feature, index) => (
                   <div key={`scf-${index}`} className="flex items-start gap-2">
                     <span className="text-xs bg-purple-700 text-white px-1.5 py-0.5 rounded font-mono">
@@ -89,7 +89,7 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({
                     </span>
                     <button
                       onClick={() => onFeatureClick(feature.name)}
-                      className="text-left hover:text-yellow-300 transition-colors cursor-pointer flex-1"
+                      className="text-left hover:text-accent-yellow-light transition-colors cursor-pointer flex-1"
                     >
                       {feature.name}
                     </button>
@@ -101,12 +101,12 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({
 
           {/* Legacy Class Features */}
           {character.featuresAndTraits.classFeatures && character.featuresAndTraits.classFeatures.length > 0 && (
-            <div className="p-4 bg-gray-800 rounded-xl shadow-lg border-l-4 border-yellow-500">
-              <h3 className="text-lg font-bold text-yellow-400 mb-2">Other Class Features</h3>
-              <ul className="list-disc list-inside space-y-1 text-sm text-gray-300">
+            <div className="p-4 bg-theme-secondary rounded-xl shadow-lg border-l-4 border-yellow-500">
+              <h3 className="text-lg font-bold text-accent-yellow-light mb-2">Other Class Features</h3>
+              <ul className="list-disc list-inside space-y-1 text-sm text-theme-tertiary">
                 {character.featuresAndTraits.classFeatures.map((feature, index) => (
                   <li key={`lcf-${index}`}>
-                    <button onClick={() => onFeatureClick(feature)} className="text-left hover:text-yellow-300 transition-colors cursor-pointer">
+                    <button onClick={() => onFeatureClick(feature)} className="text-left hover:text-accent-yellow-light transition-colors cursor-pointer">
                       {feature}
                     </button>
                   </li>
@@ -117,13 +117,13 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({
 
           {/* Selected Feats Display */}
           {character.selectedFeats && character.selectedFeats.length > 0 && (
-            <div className="p-4 bg-gray-800 rounded-xl shadow-lg border-l-4 border-cyan-500">
+            <div className="p-4 bg-theme-secondary rounded-xl shadow-lg border-l-4 border-cyan-500">
               <h3 className="text-lg font-bold text-cyan-400 mb-2">Feats</h3>
               <div className="grid grid-cols-1 gap-2">
                 {character.selectedFeats.map((featSlug, index) => (
-                  <div key={`feat-${index}`} className="p-2 bg-gray-700 rounded border border-cyan-700">
+                  <div key={`feat-${index}`} className="p-2 bg-theme-tertiary rounded border border-cyan-700">
                     <div className="font-semibold text-cyan-300 text-sm">{featSlug}</div>
-                    <p className="text-xs text-gray-400 mt-1">Feat</p>
+                    <p className="text-xs text-theme-muted mt-1">Feat</p>
                   </div>
                 ))}
               </div>
@@ -141,9 +141,9 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({
 
       {/* Personality section - full width row */}
       <div className="grid grid-cols-1 gap-2">
-        <div className="p-4 bg-gray-800 rounded-xl shadow-lg border-l-4 border-blue-500">
-          <h3 className="text-lg font-bold text-blue-400 mb-2">Personality, Ideals, Bonds & Flaws</h3>
-          <ul className="list-disc list-inside space-y-1 text-sm text-gray-300">
+        <div className="p-4 bg-theme-secondary rounded-xl shadow-lg border-l-4 border-blue-500">
+          <h3 className="text-lg font-bold text-accent-blue-light mb-2">Personality, Ideals, Bonds & Flaws</h3>
+          <ul className="list-disc list-inside space-y-1 text-sm text-theme-tertiary">
             <li><span className="font-semibold text-white">Personality:</span> {character.featuresAndTraits.personality}</li>
             <li><span className="font-semibold text-white">Ideals:</span> {character.featuresAndTraits.ideals}</li>
             <li><span className="font-semibold text-white">Bonds:</span> {character.featuresAndTraits.bonds}</li>
@@ -154,14 +154,14 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({
 
       {/* Other features - 4-column row */}
       <div className="grid grid-cols-4 gap-2">
-        <div className="p-4 bg-gray-800 rounded-xl shadow-lg border-l-4 border-green-500">
-          <h3 className="text-lg font-bold text-green-400 mb-2">Racial Traits</h3>
+        <div className="p-4 bg-theme-secondary rounded-xl shadow-lg border-l-4 border-green-500">
+          <h3 className="text-lg font-bold text-accent-green-light mb-2">Racial Traits</h3>
           <div className="flex flex-wrap gap-2">
             {character.featuresAndTraits.racialTraits.map((trait, index) => (
               <button
                 key={`r-${index}`}
                 onClick={() => onFeatureClick(trait)}
-                className="px-2 py-1 bg-green-700 text-white text-xs rounded hover:bg-green-600 transition-colors cursor-pointer"
+                className="px-2 py-1 bg-accent-green-dark text-white text-xs rounded hover:bg-accent-green transition-colors cursor-pointer"
               >
                 {trait}
               </button>
@@ -170,9 +170,9 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({
         </div>
         {/* Class Features */}
         {character.srdFeatures?.classFeatures && character.srdFeatures.classFeatures.length > 0 ? (
-          <div className="p-4 bg-gray-800 rounded-xl shadow-lg border-l-4 border-orange-500">
+          <div className="p-4 bg-theme-secondary rounded-xl shadow-lg border-l-4 border-orange-500">
             <h3 className="text-lg font-bold text-orange-400 mb-2">Class Features</h3>
-            <div className="space-y-2 text-sm text-gray-300 max-h-60 overflow-y-auto">
+            <div className="space-y-2 text-sm text-theme-tertiary max-h-60 overflow-y-auto">
               {/* Deduplicate features by name, keeping the highest level version */}
               {character.srdFeatures.classFeatures
                 .reduce((unique, feature) => {
@@ -191,7 +191,7 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({
                     </span>
                     <button
                       onClick={() => onFeatureClick(feature.name)}
-                      className="text-left hover:text-yellow-300 transition-colors cursor-pointer flex-1"
+                      className="text-left hover:text-accent-yellow-light transition-colors cursor-pointer flex-1"
                     >
                       {feature.name}
                     </button>
@@ -200,17 +200,17 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({
             </div>
           </div>
         ) : (
-          <div className="p-4 bg-gray-800 rounded-xl shadow-lg border-l-4 border-orange-500">
+          <div className="p-4 bg-theme-secondary rounded-xl shadow-lg border-l-4 border-orange-500">
             <h3 className="text-lg font-bold text-orange-400 mb-2">Class Features</h3>
-            <p className="text-sm text-gray-500 italic">No class features available</p>
+            <p className="text-sm text-theme-disabled italic">No class features available</p>
           </div>
         )}
 
         {/* Subclass Features */}
         {character.srdFeatures?.subclassFeatures && character.srdFeatures.subclassFeatures.length > 0 ? (
-          <div className="p-4 bg-gray-800 rounded-xl shadow-lg border-l-4 border-purple-500">
-            <h3 className="text-lg font-bold text-purple-400 mb-2">Subclass Features</h3>
-            <div className="space-y-2 text-sm text-gray-300 max-h-60 overflow-y-auto">
+          <div className="p-4 bg-theme-secondary rounded-xl shadow-lg border-l-4 border-accent-purple">
+            <h3 className="text-lg font-bold text-accent-purple-light mb-2">Subclass Features</h3>
+            <div className="space-y-2 text-sm text-theme-tertiary max-h-60 overflow-y-auto">
               {character.srdFeatures.subclassFeatures.map((feature, index) => (
                 <div key={`scf-${index}`} className="flex items-start gap-2">
                   <span className="text-xs bg-purple-700 text-white px-1.5 py-0.5 rounded font-mono">
@@ -218,7 +218,7 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({
                   </span>
                   <button
                     onClick={() => onFeatureClick(feature.name)}
-                    className="text-left hover:text-yellow-300 transition-colors cursor-pointer flex-1"
+                    className="text-left hover:text-accent-yellow-light transition-colors cursor-pointer flex-1"
                   >
                     {feature.name}
                   </button>
@@ -227,20 +227,20 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({
             </div>
           </div>
         ) : (
-          <div className="p-4 bg-gray-800 rounded-xl shadow-lg border-l-4 border-purple-500">
-            <h3 className="text-lg font-bold text-purple-400 mb-2">Subclass Features</h3>
-            <p className="text-sm text-gray-500 italic">No subclass selected</p>
+          <div className="p-4 bg-theme-secondary rounded-xl shadow-lg border-l-4 border-accent-purple">
+            <h3 className="text-lg font-bold text-accent-purple-light mb-2">Subclass Features</h3>
+            <p className="text-sm text-theme-disabled italic">No subclass selected</p>
           </div>
         )}
 
         {/* Legacy Class Features or Selected Feats */}
         {character.featuresAndTraits.classFeatures && character.featuresAndTraits.classFeatures.length > 0 ? (
-          <div className="p-4 bg-gray-800 rounded-xl shadow-lg border-l-4 border-yellow-500">
-            <h3 className="text-lg font-bold text-yellow-400 mb-2">Other Class Features</h3>
-            <ul className="list-disc list-inside space-y-1 text-sm text-gray-300">
+          <div className="p-4 bg-theme-secondary rounded-xl shadow-lg border-l-4 border-yellow-500">
+            <h3 className="text-lg font-bold text-accent-yellow-light mb-2">Other Class Features</h3>
+            <ul className="list-disc list-inside space-y-1 text-sm text-theme-tertiary">
               {character.featuresAndTraits.classFeatures.map((feature, index) => (
                 <li key={`lcf-${index}`}>
-                  <button onClick={() => onFeatureClick(feature)} className="text-left hover:text-yellow-300 transition-colors cursor-pointer">
+                  <button onClick={() => onFeatureClick(feature)} className="text-left hover:text-accent-yellow-light transition-colors cursor-pointer">
                     {feature}
                   </button>
                 </li>
@@ -248,21 +248,21 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({
             </ul>
           </div>
         ) : character.selectedFeats && character.selectedFeats.length > 0 ? (
-          <div className="p-4 bg-gray-800 rounded-xl shadow-lg border-l-4 border-cyan-500">
+          <div className="p-4 bg-theme-secondary rounded-xl shadow-lg border-l-4 border-cyan-500">
             <h3 className="text-lg font-bold text-cyan-400 mb-2">Feats</h3>
             <div className="grid grid-cols-1 gap-2">
               {character.selectedFeats.map((featSlug, index) => (
-                <div key={`feat-${index}`} className="p-2 bg-gray-700 rounded border border-cyan-700">
+                <div key={`feat-${index}`} className="p-2 bg-theme-tertiary rounded border border-cyan-700">
                   <div className="font-semibold text-cyan-300 text-sm">{featSlug}</div>
-                  <p className="text-xs text-gray-400 mt-1">Feat</p>
+                  <p className="text-xs text-theme-muted mt-1">Feat</p>
                 </div>
               ))}
             </div>
           </div>
         ) : (
-          <div className="p-4 bg-gray-800 rounded-xl shadow-lg border-l-4 border-cyan-500">
+          <div className="p-4 bg-theme-secondary rounded-xl shadow-lg border-l-4 border-cyan-500">
             <h3 className="text-lg font-bold text-cyan-400 mb-2">Feats</h3>
-            <p className="text-sm text-gray-500 italic">No additional features</p>
+            <p className="text-sm text-theme-disabled italic">No additional features</p>
           </div>
         )}
       </div>

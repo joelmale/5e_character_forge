@@ -206,12 +206,12 @@ export const DiceBox3D: React.FC<DiceBox3DProps> = ({
 
   if (error) {
     return (
-      <div className="fixed top-4 right-4 p-4 bg-red-900/90 text-white rounded-lg shadow-xl z-50 max-w-sm">
+      <div className="fixed top-4 right-4 p-4 bg-red-900/90 text-theme-primary rounded-lg shadow-xl z-50 max-w-sm">
         <p className="font-bold">Dice Error</p>
         <p className="text-sm mt-1">{error}</p>
         <button
           onClick={() => setError(null)}
-          className="mt-2 px-3 py-1 bg-gray-700 hover:bg-gray-600 rounded text-sm"
+          className="mt-2 px-3 py-1 bg-theme-tertiary hover:bg-theme-quaternary rounded text-sm"
         >
           Dismiss
         </button>

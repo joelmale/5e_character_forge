@@ -34,7 +34,7 @@ export const AttunementSlots: React.FC<AttunementSlotsProps> = ({
 
   return (
     <div className="bg-cyan-900 rounded-xl shadow-lg border-l-4 border-yellow-500 p-4">
-      <h3 className="text-lg font-bold text-yellow-400 mb-4 flex items-center gap-2">
+      <h3 className="text-lg font-bold text-accent-yellow-light mb-4 flex items-center gap-2">
         <Zap className="w-5 h-5" />
         Attunement Slots
       </h3>
@@ -45,7 +45,7 @@ export const AttunementSlots: React.FC<AttunementSlotsProps> = ({
           <div className="text-3xl font-bold text-white mb-1">
             {availableSlots} / {maxSlots}
           </div>
-          <div className="text-sm text-gray-400">Available Slots</div>
+          <div className="text-sm text-theme-muted">Available Slots</div>
         </div>
 
         {/* Visual Slot Display */}
@@ -55,8 +55,8 @@ export const AttunementSlots: React.FC<AttunementSlotsProps> = ({
               key={index}
               className={`w-8 h-8 rounded-full border-2 flex items-center justify-center ${
                 index < usedSlots
-                  ? 'bg-yellow-500 border-yellow-400 text-cyan-900'
-                  : 'bg-gray-700 border-gray-600 text-gray-500'
+                  ? 'bg-accent-yellow border-yellow-400 text-cyan-900'
+                  : 'bg-theme-tertiary border-theme-primary text-theme-disabled'
               }`}
             >
               {index < usedSlots ? (
@@ -76,9 +76,9 @@ export const AttunementSlots: React.FC<AttunementSlotsProps> = ({
               {attunedItems.map((item, index) => {
                 const equipment = loadEquipment().find(eq => eq.slug === item.equipmentSlug);
                 return (
-                  <div key={index} className="flex items-center gap-2 p-2 bg-gray-800/50 rounded">
-                    <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                    <span className="text-sm text-gray-300">{equipment?.name || item.equipmentSlug}</span>
+                  <div key={index} className="flex items-center gap-2 p-2 bg-theme-secondary/50 rounded">
+                    <Star className="w-4 h-4 text-accent-yellow-light fill-current" />
+                    <span className="text-sm text-theme-tertiary">{equipment?.name || item.equipmentSlug}</span>
                   </div>
                 );
               })}
@@ -87,27 +87,27 @@ export const AttunementSlots: React.FC<AttunementSlotsProps> = ({
         )}
 
         {/* Info Text */}
-        <div className="text-xs text-gray-500 text-center">
+        <div className="text-xs text-theme-disabled text-center">
           Attunement slots unlock at levels 6, 10, 14, 18, and 20
         </div>
 
         {/* Level Requirements */}
         <div className="grid grid-cols-2 gap-2 text-xs">
-          <div className="bg-gray-800/50 p-2 rounded text-center">
+          <div className="bg-theme-secondary/50 p-2 rounded text-center">
             <div className="text-cyan-400 font-semibold">Level 6+</div>
-            <div className="text-gray-300">1 slot</div>
+            <div className="text-theme-tertiary">1 slot</div>
           </div>
-          <div className="bg-gray-800/50 p-2 rounded text-center">
+          <div className="bg-theme-secondary/50 p-2 rounded text-center">
             <div className="text-cyan-400 font-semibold">Level 10+</div>
-            <div className="text-gray-300">2 slots</div>
+            <div className="text-theme-tertiary">2 slots</div>
           </div>
-          <div className="bg-gray-800/50 p-2 rounded text-center">
+          <div className="bg-theme-secondary/50 p-2 rounded text-center">
             <div className="text-cyan-400 font-semibold">Level 14+</div>
-            <div className="text-gray-300">3 slots</div>
+            <div className="text-theme-tertiary">3 slots</div>
           </div>
-          <div className="bg-gray-800/50 p-2 rounded text-center">
+          <div className="bg-theme-secondary/50 p-2 rounded text-center">
             <div className="text-cyan-400 font-semibold">Level 18+</div>
-            <div className="text-gray-300">4 slots</div>
+            <div className="text-theme-tertiary">4 slots</div>
           </div>
         </div>
       </div>

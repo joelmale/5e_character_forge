@@ -28,13 +28,13 @@ export const CharacterHeader: React.FC<CharacterHeaderProps> = ({
   return (
     <>
       {/* Header and Controls */}
-      <div className="flex justify-between items-center border-b border-red-700 pb-3 gap-4">
+      <div className="flex justify-between items-center border-b border-accent-red-dark pb-3 gap-4">
         {/* Player Name and Details */}
         <div className="flex flex-col">
-          <h1 className="text-2xl font-serif font-bold text-red-400">
+          <h1 className="text-2xl font-serif font-bold text-accent-red-light">
             {character.name}
           </h1>
-          <div className="text-sm text-gray-300">
+          <div className="text-sm text-theme-tertiary">
             {character.race} {character.class} • Level {character.level}
           </div>
         </div>
@@ -60,12 +60,12 @@ export const CharacterHeader: React.FC<CharacterHeaderProps> = ({
                <Dice6 className="w-4 h-4" />
                Dice Rolling Tray
              </button>
-             <label className="flex items-center gap-1 text-xs text-gray-300">
+             <label className="flex items-center gap-1 text-xs text-theme-tertiary">
                <input
                  type="checkbox"
                  checked={rollOnSheet}
                  onChange={(e) => setRollOnSheet(e.target.checked)}
-                 className="w-3 h-3 text-indigo-600 bg-gray-700 border-gray-600 rounded focus:ring-indigo-500"
+                 className="w-3 h-3 text-indigo-600 bg-theme-tertiary border-theme-primary rounded focus:ring-indigo-500"
                />
                Roll on sheet
                {/* TODO: Implement functionality to turn on/off character sheet rolls */}
@@ -77,21 +77,21 @@ export const CharacterHeader: React.FC<CharacterHeaderProps> = ({
            <div className="grid grid-cols-2 gap-2">
             <button
               onClick={() => onShortRest(character.id)}
-              className="px-2 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg transition-colors flex items-center justify-center"
+              className="px-2 py-2 bg-accent-blue hover:bg-accent-blue-light rounded-lg transition-colors flex items-center justify-center"
               title="Take a Short Rest (recover HP with hit dice)"
             >
               <Tent className="w-5 h-5 text-white" />
             </button>
             <button
               onClick={() => onLongRest(character.id)}
-              className="px-2 py-2 bg-green-600 hover:bg-green-500 rounded-lg transition-colors flex items-center justify-center"
+              className="px-2 py-2 bg-accent-green hover:bg-accent-green rounded-lg transition-colors flex items-center justify-center"
               title="Take a Long Rest (recover all HP and spell slots)"
             >
               <Tent className="w-5 h-5 text-white" />
             </button>
             <button
               onClick={() => onLevelUp(character.id)}
-              className="px-2 py-2 bg-purple-600 hover:bg-purple-500 rounded-lg transition-colors flex items-center justify-center"
+              className="px-2 py-2 bg-accent-purple hover:bg-accent-purple-light rounded-lg transition-colors flex items-center justify-center"
               title="Level up your character"
             >
               <TrendingUp className="w-5 h-5 text-white" />
@@ -107,19 +107,19 @@ export const CharacterHeader: React.FC<CharacterHeaderProps> = ({
             )}
           </div>
           <div className="flex space-x-3 ml-4">
-            <button onClick={onClose} className="px-4 py-2 text-sm bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors font-medium">Back to List</button>
-            <button onClick={() => onDelete(character.id)} className="px-2 py-2 bg-red-800 hover:bg-red-700 rounded-lg transition-colors" title="Delete Character"><Trash2 className="w-5 h-5 text-white" /></button>
+            <button onClick={onClose} className="px-4 py-2 text-sm bg-theme-tertiary hover:bg-theme-quaternary rounded-lg transition-colors font-medium">Back to List</button>
+            <button onClick={() => onDelete(character.id)} className="px-2 py-2 bg-accent-red-darker hover:bg-accent-red-dark rounded-lg transition-colors" title="Delete Character"><Trash2 className="w-5 h-5 text-white" /></button>
           </div>
         </div>
       </div>
 
       {/* Core Info Row */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3 text-center text-xs font-semibold">
-        <div className="p-2 bg-gray-800 rounded-lg">Race: <span className="text-yellow-400 block text-sm">{character.race}</span></div>
-        <div className="p-2 bg-gray-800 rounded-lg">Class: <span className="text-yellow-400 block text-sm">{character.class}</span></div>
-        <div className="p-2 bg-gray-800 rounded-lg">Level: <span className="text-yellow-400 block text-sm">{character.level}</span></div>
-        <div className="p-2 bg-gray-800 rounded-lg col-span-2 md:col-span-1">Alignment: <span className="text-yellow-400 block text-sm">{character.alignment}</span></div>
-        <div className="p-2 bg-gray-800 rounded-lg col-span-2 md:col-span-1">Background: <span className="text-yellow-400 block text-sm">{character.background}</span></div>
+        <div className="p-2 bg-theme-secondary rounded-lg">Race: <span className="text-accent-yellow-light block text-sm">{character.race}</span></div>
+        <div className="p-2 bg-theme-secondary rounded-lg">Class: <span className="text-accent-yellow-light block text-sm">{character.class}</span></div>
+        <div className="p-2 bg-theme-secondary rounded-lg">Level: <span className="text-accent-yellow-light block text-sm">{character.level}</span></div>
+        <div className="p-2 bg-theme-secondary rounded-lg col-span-2 md:col-span-1">Alignment: <span className="text-accent-yellow-light block text-sm">{character.alignment}</span></div>
+        <div className="p-2 bg-theme-secondary rounded-lg col-span-2 md:col-span-1">Background: <span className="text-accent-yellow-light block text-sm">{character.background}</span></div>
       </div>
     </>
   );

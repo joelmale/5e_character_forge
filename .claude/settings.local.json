@@ -27,7 +27,10 @@
       "WebFetch(domain:github.com)",
       "WebSearch",
       "Bash(timeout 10 npm run dev:*)",
-      "Bash(docker push:*)"
+      "Bash(docker push:*)",
+      "Bash(docker image inspect:*)",
+      "Bash(chmod:*)",
+      "Bash(./migrate-theme.sh)"
     ],
     "deny": [],
     "ask": [],

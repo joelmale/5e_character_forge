@@ -145,9 +145,9 @@ export function createInitiativeRoll(initiativeModifier: number): DiceRoll {
  */
 export function formatDiceRoll(roll: DiceRoll): string {
   const criticalClass = roll.critical === 'success'
-    ? 'text-green-400 font-bold'
+    ? 'text-accent-green-light font-bold'
     : roll.critical === 'failure'
-    ? 'text-red-400 font-bold'
+    ? 'text-accent-red-light font-bold'
     : '';
 
   return `<span class="${criticalClass}">${roll.label}: ${roll.notation} → ${roll.total}</span>`;

@@ -111,31 +111,31 @@ export const SavingThrows: React.FC<SavingThrowsProps> = ({
                     e.preventDefault();
                     setActiveMenuAbility(isMenuOpen ? null : abilityName);
                   }}
-                  className="flex items-center justify-between px-2 py-1 hover:bg-gray-700 rounded transition-colors cursor-pointer w-full group"
+                  className="flex items-center justify-between px-2 py-1 hover:bg-theme-tertiary rounded transition-colors cursor-pointer w-full group"
                   title={`Roll ${abilityName} saving throw (${rollTypes[abilityName]}) - Right-click for options`}
                 >
                   <div className="flex items-center gap-1.5">
                     {/* Proficiency bubble */}
-                    <div className={`w-3 h-3 rounded-full border ${isProficient ? 'bg-yellow-500 border-yellow-500' : 'border-gray-500'}`} />
+                    <div className={`w-3 h-3 rounded-full border ${isProficient ? 'bg-accent-yellow border-yellow-500' : 'border-gray-500'}`} />
                     {/* Roll indicator */}
                     {getRollIcon(abilityName) && (
-                      <span className="text-xs font-bold text-green-400">{getRollIcon(abilityName)}</span>
+                      <span className="text-xs font-bold text-accent-green-light">{getRollIcon(abilityName)}</span>
                     )}
-                    <span className="text-xs font-medium text-gray-300 group-hover:text-white">{abilityName}</span>
+                    <span className="text-xs font-medium text-theme-tertiary group-hover:text-white">{abilityName}</span>
                   </div>
-                  <span className="font-mono text-sm font-bold text-yellow-300">{formatModifier(saveModifier)}</span>
+                  <span className="font-mono text-sm font-bold text-accent-yellow-light">{formatModifier(saveModifier)}</span>
                 </button>
 
                 {/* Roll type menu */}
                 {isMenuOpen && (
                   <>
-                    <div className="absolute top-full left-0 mt-1 bg-gray-800 border border-gray-600 rounded-lg shadow-lg z-50 min-w-32">
+                    <div className="absolute top-full left-0 mt-1 bg-theme-secondary border border-theme-primary rounded-lg shadow-lg z-50 min-w-32">
                       <button
                         onClick={() => {
                           setRollTypes({ ...rollTypes, [abilityName]: 'normal' });
                           handleRoll(abilityName, 'normal');
                         }}
-                        className="w-full text-left px-3 py-2 text-sm hover:bg-gray-700 first:rounded-t-lg"
+                        className="w-full text-left px-3 py-2 text-sm hover:bg-theme-tertiary first:rounded-t-lg"
                       >
                         Normal
                       </button>
@@ -144,7 +144,7 @@ export const SavingThrows: React.FC<SavingThrowsProps> = ({
                           setRollTypes({ ...rollTypes, [abilityName]: 'advantage' });
                           handleRoll(abilityName, 'advantage');
                         }}
-                        className="w-full text-left px-3 py-2 text-sm hover:bg-gray-700 text-green-400"
+                        className="w-full text-left px-3 py-2 text-sm hover:bg-theme-tertiary text-accent-green-light"
                       >
                         Advantage
                       </button>
@@ -153,7 +153,7 @@ export const SavingThrows: React.FC<SavingThrowsProps> = ({
                           setRollTypes({ ...rollTypes, [abilityName]: 'disadvantage' });
                           handleRoll(abilityName, 'disadvantage');
                         }}
-                        className="w-full text-left px-3 py-2 text-sm hover:bg-gray-700 text-red-400 last:rounded-b-lg"
+                        className="w-full text-left px-3 py-2 text-sm hover:bg-theme-tertiary text-accent-red-light last:rounded-b-lg"
                       >
                         Disadvantage
                       </button>
@@ -191,31 +191,31 @@ export const SavingThrows: React.FC<SavingThrowsProps> = ({
                   e.preventDefault();
                   setActiveMenuAbility(isMenuOpen ? null : abilityName);
                 }}
-                className="flex items-center justify-between p-2 bg-gray-700/50 hover:bg-red-700/70 rounded transition-colors cursor-pointer w-full"
+                className="flex items-center justify-between p-2 bg-theme-tertiary/50 hover:bg-accent-red-dark/70 rounded transition-colors cursor-pointer w-full"
                 title={`Roll ${abilityName} saving throw (${rollTypes[abilityName]}) - Right-click for options`}
               >
                 <div className="flex items-center gap-2">
                   {isProficient && (
-                    <div className="w-2 h-2 rounded-full bg-yellow-500" />
+                    <div className="w-2 h-2 rounded-full bg-accent-yellow" />
                   )}
                   {getRollIcon(abilityName) && (
-                    <span className="text-xs font-bold text-green-400">{getRollIcon(abilityName)}</span>
+                    <span className="text-xs font-bold text-accent-green-light">{getRollIcon(abilityName)}</span>
                   )}
                   <span className="text-sm font-semibold text-white">{abilityName}</span>
                 </div>
-                <span className="font-mono text-lg font-bold text-yellow-300">{formatModifier(saveModifier)}</span>
+                <span className="font-mono text-lg font-bold text-accent-yellow-light">{formatModifier(saveModifier)}</span>
               </button>
 
               {/* Roll type menu */}
               {isMenuOpen && (
                 <>
-                  <div className="absolute top-full left-0 mt-1 bg-gray-800 border border-gray-600 rounded-lg shadow-lg z-50 min-w-32">
+                  <div className="absolute top-full left-0 mt-1 bg-theme-secondary border border-theme-primary rounded-lg shadow-lg z-50 min-w-32">
                     <button
                       onClick={() => {
                         setRollTypes({ ...rollTypes, [abilityName]: 'normal' });
                         handleRoll(abilityName, 'normal');
                       }}
-                      className="w-full text-left px-3 py-2 text-sm hover:bg-gray-700 first:rounded-t-lg"
+                      className="w-full text-left px-3 py-2 text-sm hover:bg-theme-tertiary first:rounded-t-lg"
                     >
                       Normal
                     </button>
@@ -224,7 +224,7 @@ export const SavingThrows: React.FC<SavingThrowsProps> = ({
                         setRollTypes({ ...rollTypes, [abilityName]: 'advantage' });
                         handleRoll(abilityName, 'advantage');
                       }}
-                      className="w-full text-left px-3 py-2 text-sm hover:bg-gray-700 text-green-400"
+                      className="w-full text-left px-3 py-2 text-sm hover:bg-theme-tertiary text-accent-green-light"
                     >
                       Advantage
                     </button>
@@ -233,7 +233,7 @@ export const SavingThrows: React.FC<SavingThrowsProps> = ({
                         setRollTypes({ ...rollTypes, [abilityName]: 'disadvantage' });
                         handleRoll(abilityName, 'disadvantage');
                       }}
-                      className="w-full text-left px-3 py-2 text-sm hover:bg-gray-700 text-red-400 last:rounded-b-lg"
+                      className="w-full text-left px-3 py-2 text-sm hover:bg-theme-tertiary text-accent-red-light last:rounded-b-lg"
                     >
                       Disadvantage
                     </button>

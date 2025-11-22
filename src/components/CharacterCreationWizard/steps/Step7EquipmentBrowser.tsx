@@ -12,7 +12,7 @@ const RandomizeButton: React.FC<{ onClick: () => void; title?: string; className
   return (
     <button
       onClick={onClick}
-      className={`px-3 py-2 bg-purple-600 hover:bg-purple-500 rounded-lg text-white text-sm font-medium transition-colors flex items-center gap-2 ${className}`}
+      className={`px-3 py-2 bg-accent-purple hover:bg-accent-purple-light rounded-lg text-white text-sm font-medium transition-colors flex items-center gap-2 ${className}`}
       title={title}
     >
       <Shuffle className="w-4 h-4" />
@@ -66,8 +66,8 @@ export const Step7EquipmentBrowser: React.FC<EquipmentBrowserProps> = ({
     <div className="space-y-4">
       <div className='flex justify-between items-start'>
         <div className='flex-1'>
-          <h3 className="text-xl font-bold text-yellow-300 mb-2">Customize Starting Equipment</h3>
-          <p className="text-sm text-gray-400">
+          <h3 className="text-xl font-bold text-accent-yellow-light mb-2">Customize Starting Equipment</h3>
+          <p className="text-sm text-theme-muted">
             Browse and add additional equipment to your starting inventory. You already have your class equipment package.
           </p>
         </div>
@@ -87,14 +87,14 @@ export const Step7EquipmentBrowser: React.FC<EquipmentBrowserProps> = ({
           placeholder="Search equipment..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-yellow-500 focus:outline-none"
+          className="w-full px-4 py-2 bg-theme-tertiary text-white rounded-lg border border-theme-primary focus:border-yellow-500 focus:outline-none"
         />
 
         <div className="flex gap-2 flex-wrap">
           <select
             value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.target.value)}
-            className="px-3 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-yellow-500 focus:outline-none"
+            className="px-3 py-2 bg-theme-tertiary text-white rounded-lg border border-theme-primary focus:border-yellow-500 focus:outline-none"
           >
             {categories.map(cat => (
               <option key={cat} value={cat}>{cat}</option>
@@ -104,7 +104,7 @@ export const Step7EquipmentBrowser: React.FC<EquipmentBrowserProps> = ({
           <select
             value={yearFilter}
             onChange={(e) => setYearFilter(e.target.value === 'all' ? 'all' : parseInt(e.target.value))}
-            className="px-3 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-yellow-500 focus:outline-none"
+            className="px-3 py-2 bg-theme-tertiary text-white rounded-lg border border-theme-primary focus:border-yellow-500 focus:outline-none"
           >
             <option value="all">All Editions</option>
             <option value="2014">2014 SRD</option>
@@ -114,7 +114,7 @@ export const Step7EquipmentBrowser: React.FC<EquipmentBrowserProps> = ({
       </div>
 
       {/* Equipment List */}
-      <div className="bg-gray-700/30 rounded-lg p-4 max-h-[400px] overflow-y-auto">
+      <div className="bg-theme-tertiary/30 rounded-lg p-4 max-h-[400px] overflow-y-auto">
         <div className="grid grid-cols-1 gap-2">
           {filteredEquipment.slice(0, 50).map(eq => {
             const inInventory = checkIsInInventory(eq.slug);
@@ -123,37 +123,37 @@ export const Step7EquipmentBrowser: React.FC<EquipmentBrowserProps> = ({
             return (
               <div
                 key={`${eq.slug}-${eq.year}`}
-                className="bg-gray-700/50 p-3 rounded-lg hover:bg-gray-700 transition-colors"
+                className="bg-theme-tertiary/50 p-3 rounded-lg hover:bg-theme-tertiary transition-colors"
               >
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex-grow min-w-0">
                     <div className="text-left">
                       <div className="font-semibold text-white">{displayInfo.name}</div>
-                      <div className="text-xs text-gray-400 flex items-center gap-2 flex-wrap">
+                      <div className="text-xs text-theme-muted flex items-center gap-2 flex-wrap">
                         <span>{displayInfo.category}</span>
                         <span>•</span>
                         <span>{displayInfo.cost}</span>
                         <span>•</span>
                         <span>{displayInfo.weight}</span>
-                        <span className="bg-gray-600 px-2 py-0.5 rounded">{displayInfo.year}</span>
+                        <span className="bg-theme-quaternary px-2 py-0.5 rounded">{displayInfo.year}</span>
                       </div>
                     </div>
                   </div>
                   <div className="flex items-center gap-2 flex-shrink-0">
                     {inInventory > 0 && (
-                      <span className="text-sm font-mono text-yellow-300">×{inInventory}</span>
+                      <span className="text-sm font-mono text-accent-yellow-light">×{inInventory}</span>
                     )}
                     <div className="flex gap-1">
                       <button
                         onClick={() => handleAddToInventory(eq.slug)}
-                        className="px-3 py-1 bg-green-600 hover:bg-green-500 rounded text-sm"
+                        className="px-3 py-1 bg-accent-green hover:bg-accent-green rounded text-sm"
                       >
                         +
                       </button>
                       {inInventory > 0 && (
                         <button
                           onClick={() => handleRemoveFromInventory(eq.slug)}
-                          className="px-3 py-1 bg-red-600 hover:bg-red-500 rounded text-sm"
+                          className="px-3 py-1 bg-accent-red hover:bg-accent-red-light rounded text-sm"
                         >
                           −
                         </button>
@@ -166,22 +166,22 @@ export const Step7EquipmentBrowser: React.FC<EquipmentBrowserProps> = ({
           })}
         </div>
         {filteredEquipment.length > 50 && (
-          <p className="text-center text-xs text-gray-400 mt-3">
+          <p className="text-center text-xs text-theme-muted mt-3">
             Showing first 50 results. Refine your search to see more.
           </p>
         )}
         {filteredEquipment.length === 0 && (
-          <p className="text-center text-gray-400 py-8">No equipment found matching your filters.</p>
+          <p className="text-center text-theme-muted py-8">No equipment found matching your filters.</p>
         )}
       </div>
 
       {/* Current Custom Additions */}
       {data.startingInventory && data.startingInventory.length > 0 && (
-        <div className="bg-yellow-900/20 border border-yellow-700 rounded-lg p-4">
-          <h4 className="text-sm font-semibold text-yellow-400 mb-2">
+        <div className="bg-accent-yellow-darker/20 border border-accent-yellow-dark rounded-lg p-4">
+          <h4 className="text-sm font-semibold text-accent-yellow-light mb-2">
             Custom Equipment Added ({data.startingInventory.length} items)
           </h4>
-          <div className="text-xs text-gray-400">
+          <div className="text-xs text-theme-muted">
             These items will be added to your starting inventory along with your class equipment package.
           </div>
         </div>
@@ -191,13 +191,13 @@ export const Step7EquipmentBrowser: React.FC<EquipmentBrowserProps> = ({
       <div className="flex justify-between pt-4">
         <button
           onClick={prevStep}
-          className="px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded-lg text-white flex items-center"
+          className="px-4 py-2 bg-theme-quaternary hover:bg-theme-hover rounded-lg text-white flex items-center"
         >
           <ArrowLeft className="w-4 h-4 mr-2" /> Back
         </button>
         <button
           onClick={() => skipToStep?.(11)}
-          className="px-4 py-2 bg-red-600 hover:bg-red-500 rounded-lg text-white flex items-center"
+          className="px-4 py-2 bg-accent-red hover:bg-accent-red-light rounded-lg text-white flex items-center"
         >
           Next: {getNextStepLabel?.() || 'Continue'} <ArrowRight className="w-4 h-4 ml-2" />
         </button>

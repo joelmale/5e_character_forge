@@ -87,35 +87,35 @@ export const AbilityScoreBlock: React.FC<AbilityScoreBlockProps> = ({
             className="flex flex-col items-center w-full group"
             title={`Roll ${name} check (${rollType}) - Right-click for options`}
           >
-            <span className="text-xs font-bold text-gray-400 uppercase mb-1 font-eb-garamond">{name}</span>
+            <span className="text-xs font-bold text-theme-muted uppercase mb-1 font-eb-garamond">{name}</span>
           <div className="relative w-16 h-16">
             {/* Outer circle */}
-             <div className="absolute inset-0 rounded-full border-4 border-gray-600 bg-gray-800 group-hover:border-red-500 group-hover:bg-red-900/30 transition-all" />
+             <div className="absolute inset-0 rounded-full border-4 border-theme-primary bg-theme-secondary group-hover:border-red-500 group-hover:bg-red-900/30 transition-all" />
            {/* Score */}
            <div className="absolute inset-0 flex items-center justify-center">
              <span className="text-2xl font-bold text-white">{ability.score}</span>
            </div>
             {/* Roll indicator */}
             {getRollIcon() && (
-              <div className="absolute -top-1 -right-1 w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
+              <div className="absolute -top-1 -right-1 w-5 h-5 bg-accent-green rounded-full flex items-center justify-center">
                 <span className="text-xs font-bold text-gray-900">{getRollIcon()}</span>
               </div>
             )}
           </div>
           {/* Modifier below */}
-          <div className="mt-1 px-3 py-1 bg-gray-700 rounded text-sm font-bold text-yellow-300">
+          <div className="mt-1 px-3 py-1 bg-theme-tertiary rounded text-sm font-bold text-accent-yellow-light">
             {formatModifier(ability.modifier)}
           </div>
         </button>
 
       {showMenu && (
-        <div className="absolute top-full left-0 mt-1 bg-gray-800 border border-gray-600 rounded-lg shadow-lg z-50 min-w-32">
+        <div className="absolute top-full left-0 mt-1 bg-theme-secondary border border-theme-primary rounded-lg shadow-lg z-50 min-w-32">
           <button
             onClick={() => {
               setRollType('normal');
               handleRoll('normal');
             }}
-            className="w-full text-left px-3 py-2 text-sm hover:bg-gray-700 first:rounded-t-lg"
+            className="w-full text-left px-3 py-2 text-sm hover:bg-theme-tertiary first:rounded-t-lg"
           >
             Normal
           </button>
@@ -124,7 +124,7 @@ export const AbilityScoreBlock: React.FC<AbilityScoreBlockProps> = ({
               setRollType('advantage');
               handleRoll('advantage');
             }}
-            className="w-full text-left px-3 py-2 text-sm hover:bg-gray-700 text-green-400"
+            className="w-full text-left px-3 py-2 text-sm hover:bg-theme-tertiary text-accent-green-light"
           >
             Advantage
           </button>
@@ -133,7 +133,7 @@ export const AbilityScoreBlock: React.FC<AbilityScoreBlockProps> = ({
               setRollType('disadvantage');
               handleRoll('disadvantage');
             }}
-            className="w-full text-left px-3 py-2 text-sm hover:bg-gray-700 text-red-400 last:rounded-b-lg"
+            className="w-full text-left px-3 py-2 text-sm hover:bg-theme-tertiary text-accent-red-light last:rounded-b-lg"
           >
             Disadvantage
           </button>
@@ -164,12 +164,12 @@ export const AbilityScoreBlock: React.FC<AbilityScoreBlockProps> = ({
         title={`Roll ${name} check (${rollType}) - Right-click for options`}
       >
         {/* Ability name */}
-        <span className="text-xs font-bold text-gray-400 uppercase mb-1">{name}</span>
+        <span className="text-xs font-bold text-theme-muted uppercase mb-1">{name}</span>
 
         {/* Circular ability score */}
         <div className="relative w-16 h-16">
           {/* Outer circle */}
-          <div className="absolute inset-0 rounded-full border-4 border-gray-600 bg-gray-800 group-hover:border-red-500 group-hover:bg-red-900/30 transition-all" />
+          <div className="absolute inset-0 rounded-full border-4 border-theme-primary bg-theme-secondary group-hover:border-red-500 group-hover:bg-red-900/30 transition-all" />
 
           {/* Score */}
           <div className="absolute inset-0 flex items-center justify-center">
@@ -178,26 +178,26 @@ export const AbilityScoreBlock: React.FC<AbilityScoreBlockProps> = ({
 
           {/* Roll indicator */}
           {getRollIcon() && (
-            <div className="absolute -top-1 -right-1 w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
+            <div className="absolute -top-1 -right-1 w-5 h-5 bg-accent-green rounded-full flex items-center justify-center">
               <span className="text-xs font-bold text-gray-900">{getRollIcon()}</span>
             </div>
           )}
 
           {/* Modifier badge overlapping bottom */}
-          <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 px-2 py-1 bg-yellow-600 rounded-full border-2 border-gray-800 text-xs font-bold text-white min-w-8 text-center">
+          <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 px-2 py-1 bg-accent-yellow-dark rounded-full border-2 border-theme-tertiary text-xs font-bold text-white min-w-8 text-center">
             {formatModifier(ability.modifier)}
           </div>
         </div>
       </button>
 
       {showMenu && (
-        <div className="absolute top-full left-0 mt-1 bg-gray-800 border border-gray-600 rounded-lg shadow-lg z-50 min-w-32">
+        <div className="absolute top-full left-0 mt-1 bg-theme-secondary border border-theme-primary rounded-lg shadow-lg z-50 min-w-32">
           <button
             onClick={() => {
               setRollType('normal');
               handleRoll('normal');
             }}
-            className="w-full text-left px-3 py-2 text-sm hover:bg-gray-700 first:rounded-t-lg"
+            className="w-full text-left px-3 py-2 text-sm hover:bg-theme-tertiary first:rounded-t-lg"
           >
             Normal
           </button>
@@ -206,7 +206,7 @@ export const AbilityScoreBlock: React.FC<AbilityScoreBlockProps> = ({
               setRollType('advantage');
               handleRoll('advantage');
             }}
-            className="w-full text-left px-3 py-2 text-sm hover:bg-gray-700 text-green-400"
+            className="w-full text-left px-3 py-2 text-sm hover:bg-theme-tertiary text-accent-green-light"
           >
             Advantage
           </button>
@@ -215,7 +215,7 @@ export const AbilityScoreBlock: React.FC<AbilityScoreBlockProps> = ({
               setRollType('disadvantage');
               handleRoll('disadvantage');
             }}
-            className="w-full text-left px-3 py-2 text-sm hover:bg-gray-700 text-red-400 last:rounded-b-lg"
+            className="w-full text-left px-3 py-2 text-sm hover:bg-theme-tertiary text-accent-red-light last:rounded-b-lg"
           >
             Disadvantage
           </button>

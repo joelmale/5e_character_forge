@@ -57,22 +57,22 @@ export const MonsterFilters: React.FC = () => {
     filters.showSRDOnly;
 
   return (
-    <div className="bg-gray-800 rounded-xl p-4 space-y-4">
+    <div className="bg-theme-secondary rounded-xl p-4 space-y-4">
       {/* Search and Toggle */}
       <div className="flex gap-3 items-center">
         <div className="flex-grow relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-theme-muted w-5 h-5" />
           <input
             type="text"
             placeholder="Search monsters..."
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-500"
+            className="w-full pl-10 pr-4 py-2 bg-theme-tertiary text-white rounded-lg border border-theme-primary focus:outline-none focus:ring-2 focus:ring-purple-500"
           />
           {searchInput && (
             <button
               onClick={() => setSearchInput('')}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white"
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-theme-muted hover:text-white"
             >
               <X className="w-4 h-4" />
             </button>
@@ -81,7 +81,7 @@ export const MonsterFilters: React.FC = () => {
 
         <button
           onClick={() => setIsExpanded(!isExpanded)}
-          className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors whitespace-nowrap"
+          className="px-4 py-2 bg-theme-tertiary text-white rounded-lg hover:bg-theme-quaternary transition-colors whitespace-nowrap"
         >
           {isExpanded ? 'Hide' : 'Show'} Filters
         </button>
@@ -92,7 +92,7 @@ export const MonsterFilters: React.FC = () => {
               clearFilters();
               setSearchInput('');
             }}
-            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors whitespace-nowrap"
+            className="px-4 py-2 bg-accent-red text-white rounded-lg hover:bg-accent-red-dark transition-colors whitespace-nowrap"
           >
             Clear All
           </button>
@@ -101,10 +101,10 @@ export const MonsterFilters: React.FC = () => {
 
       {/* Expanded Filters */}
       {isExpanded && (
-        <div className="space-y-4 pt-4 border-t border-gray-700">
+        <div className="space-y-4 pt-4 border-t border-theme-secondary">
           {/* Quick CR Ranges */}
           <div>
-            <label className="block text-sm font-semibold text-gray-300 mb-2">
+            <label className="block text-sm font-semibold text-theme-tertiary mb-2">
               Quick CR Ranges
             </label>
             <div className="flex flex-wrap gap-2">
@@ -114,8 +114,8 @@ export const MonsterFilters: React.FC = () => {
                   onClick={() => handleQuickCRRange(range.min, range.max)}
                   className={`px-3 py-1 rounded-lg text-sm transition-colors ${
                     filters.crMin === range.min && filters.crMax === range.max
-                      ? 'bg-purple-600 text-white'
-                      : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                      ? 'bg-accent-purple text-white'
+                      : 'bg-theme-tertiary text-theme-tertiary hover:bg-theme-quaternary'
                   }`}
                 >
                   {range.label}
@@ -127,7 +127,7 @@ export const MonsterFilters: React.FC = () => {
           {/* CR Range Sliders */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-semibold text-gray-300 mb-2">
+              <label className="block text-sm font-semibold text-theme-tertiary mb-2">
                 Min CR: {filters.crMin}
               </label>
               <input
@@ -140,7 +140,7 @@ export const MonsterFilters: React.FC = () => {
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-300 mb-2">
+              <label className="block text-sm font-semibold text-theme-tertiary mb-2">
                 Max CR: {filters.crMax}
               </label>
               <input
@@ -156,7 +156,7 @@ export const MonsterFilters: React.FC = () => {
 
           {/* Monster Types */}
           <div>
-            <label className="block text-sm font-semibold text-gray-300 mb-2">
+            <label className="block text-sm font-semibold text-theme-tertiary mb-2">
               Creature Types
             </label>
             <div className="flex flex-wrap gap-2">
@@ -166,8 +166,8 @@ export const MonsterFilters: React.FC = () => {
                   onClick={() => handleTypeToggle(category.type)}
                   className={`px-3 py-1.5 rounded-lg text-sm transition-colors flex items-center gap-1 ${
                     filters.types.includes(category.type)
-                      ? 'bg-purple-600 text-white'
-                      : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                      ? 'bg-accent-purple text-white'
+                      : 'bg-theme-tertiary text-theme-tertiary hover:bg-theme-quaternary'
                   }`}
                   title={category.description}
                 >
@@ -180,7 +180,7 @@ export const MonsterFilters: React.FC = () => {
 
           {/* Monster Sizes */}
           <div>
-            <label className="block text-sm font-semibold text-gray-300 mb-2">
+            <label className="block text-sm font-semibold text-theme-tertiary mb-2">
               Size
             </label>
             <div className="flex flex-wrap gap-2">
@@ -190,8 +190,8 @@ export const MonsterFilters: React.FC = () => {
                   onClick={() => handleSizeToggle(size)}
                   className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${
                     filters.sizes.includes(size)
-                      ? 'bg-purple-600 text-white'
-                      : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                      ? 'bg-accent-purple text-white'
+                      : 'bg-theme-tertiary text-theme-tertiary hover:bg-theme-quaternary'
                   }`}
                 >
                   {size}
@@ -207,9 +207,9 @@ export const MonsterFilters: React.FC = () => {
                 type="checkbox"
                 checked={filters.showFavoritesOnly}
                 onChange={(e) => setFilters({ showFavoritesOnly: e.target.checked })}
-                className="w-4 h-4 text-purple-600 bg-gray-700 border-gray-600 rounded focus:ring-purple-500"
+                className="w-4 h-4 text-accent-purple bg-theme-tertiary border-theme-primary rounded focus:ring-purple-500"
               />
-              <span className="text-sm text-gray-300">Favorites Only</span>
+              <span className="text-sm text-theme-tertiary">Favorites Only</span>
             </label>
 
             <label className="flex items-center gap-2 cursor-pointer">
@@ -217,9 +217,9 @@ export const MonsterFilters: React.FC = () => {
                 type="checkbox"
                 checked={filters.showCustomOnly}
                 onChange={(e) => setFilters({ showCustomOnly: e.target.checked })}
-                className="w-4 h-4 text-purple-600 bg-gray-700 border-gray-600 rounded focus:ring-purple-500"
+                className="w-4 h-4 text-accent-purple bg-theme-tertiary border-theme-primary rounded focus:ring-purple-500"
               />
-              <span className="text-sm text-gray-300">Custom Only</span>
+              <span className="text-sm text-theme-tertiary">Custom Only</span>
             </label>
 
             <label className="flex items-center gap-2 cursor-pointer">
@@ -227,9 +227,9 @@ export const MonsterFilters: React.FC = () => {
                 type="checkbox"
                 checked={filters.showSRDOnly}
                 onChange={(e) => setFilters({ showSRDOnly: e.target.checked })}
-                className="w-4 h-4 text-purple-600 bg-gray-700 border-gray-600 rounded focus:ring-purple-500"
+                className="w-4 h-4 text-accent-purple bg-theme-tertiary border-theme-primary rounded focus:ring-purple-500"
               />
-              <span className="text-sm text-gray-300">SRD Only</span>
+              <span className="text-sm text-theme-tertiary">SRD Only</span>
             </label>
 
             <label className="flex items-center gap-2 cursor-pointer">
@@ -239,9 +239,9 @@ export const MonsterFilters: React.FC = () => {
                 onChange={(e) =>
                   setFilters({ hasLegendaryActions: e.target.checked ? true : null })
                 }
-                className="w-4 h-4 text-purple-600 bg-gray-700 border-gray-600 rounded focus:ring-purple-500"
+                className="w-4 h-4 text-accent-purple bg-theme-tertiary border-theme-primary rounded focus:ring-purple-500"
               />
-              <span className="text-sm text-gray-300">Has Legendary Actions</span>
+              <span className="text-sm text-theme-tertiary">Has Legendary Actions</span>
             </label>
           </div>
         </div>

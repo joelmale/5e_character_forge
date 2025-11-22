@@ -69,7 +69,7 @@ const AbilityScoreIncreaseModal: React.FC<AbilityScoreIncreaseModalProps> = ({ i
           <button
             onClick={handleApply}
             disabled={points > 0}
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded disabled:bg-gray-400"
+            className="bg-accent-blue-light hover:bg-blue-700 text-white font-bold py-2 px-4 rounded disabled:bg-gray-400"
           >
             Apply
           </button>

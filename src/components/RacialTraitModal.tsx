@@ -178,18 +178,18 @@ const RacialTraitModal: React.FC<RacialTraitModalProps> = ({
       style={position ? {} : { display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}
     >
       <div
-        className="bg-gray-800 border border-gray-600 rounded-lg max-w-md w-full max-h-[80vh] overflow-y-auto shadow-2xl"
+        className="bg-theme-secondary border border-theme-primary rounded-lg max-w-md w-full max-h-[80vh] overflow-y-auto shadow-2xl"
         onClick={(e) => e.stopPropagation()}
         style={getModalStyle()}
       >
-        <div className="flex items-center justify-between p-4 border-b border-gray-600">
-          <h3 className="text-lg font-bold text-yellow-300">{traitName}</h3>
+        <div className="flex items-center justify-between p-4 border-b border-theme-primary">
+          <h3 className="text-lg font-bold text-accent-yellow-light">{traitName}</h3>
            <button
              onClick={(e) => {
                e.stopPropagation();
                onClose();
              }}
-             className="text-gray-400 hover:text-white transition-colors"
+             className="text-theme-muted hover:text-white transition-colors"
            >
             <X className="w-6 h-6" />
           </button>
@@ -197,12 +197,12 @@ const RacialTraitModal: React.FC<RacialTraitModalProps> = ({
 
         <div className="p-4 space-y-3">
           <div>
-            <span className="text-sm text-gray-400">From: </span>
+            <span className="text-sm text-theme-muted">From: </span>
             <span className="text-sm text-blue-300">{raceName}</span>
           </div>
 
           <div>
-            <p className="text-sm text-gray-300 leading-relaxed">
+            <p className="text-sm text-theme-tertiary leading-relaxed">
               {getTraitDescription(traitName)}
             </p>
           </div>

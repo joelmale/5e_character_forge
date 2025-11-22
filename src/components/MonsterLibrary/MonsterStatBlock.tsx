@@ -22,12 +22,12 @@ const CollapsibleSection: React.FC<{
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
   return (
-    <div className="border-b border-gray-700 last:border-b-0">
+    <div className="border-b border-theme-secondary last:border-b-0">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex justify-between items-center p-4 hover:bg-gray-700/30 transition-colors"
+        className="w-full flex justify-between items-center p-4 hover:bg-theme-tertiary/30 transition-colors"
       >
-        <h3 className="text-lg font-bold text-red-400">{title}</h3>
+        <h3 className="text-lg font-bold text-accent-red-light">{title}</h3>
         {isOpen ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
       </button>
       {isOpen && <div className="p-4 pt-0">{children}</div>}
@@ -92,7 +92,7 @@ export const MonsterStatBlock: React.FC<MonsterStatBlockProps> = ({ monster, onC
   return (
     <div className="fixed inset-0 bg-black bg-opacity-90 z-50 overflow-y-auto">
       <div className="min-h-screen p-4 md:p-8">
-        <div className="max-w-4xl mx-auto bg-gray-900 rounded-xl shadow-2xl overflow-hidden">
+        <div className="max-w-4xl mx-auto bg-theme-primary rounded-xl shadow-2xl overflow-hidden">
           {/* Header */}
           <div className="bg-gradient-to-r from-purple-900 to-red-900 p-6">
             <div className="flex justify-between items-start">
@@ -100,12 +100,12 @@ export const MonsterStatBlock: React.FC<MonsterStatBlockProps> = ({ monster, onC
                 <div className="flex items-center gap-3 mb-2">
                   <h1 className="text-4xl font-bold text-white">{monster.name}</h1>
                   {isCustom && (
-                    <span className="px-3 py-1 bg-green-600 text-white text-sm rounded-full">
+                    <span className="px-3 py-1 bg-accent-green text-white text-sm rounded-full">
                       Custom
                     </span>
                   )}
                 </div>
-                <p className="text-xl text-gray-300 italic">
+                <p className="text-xl text-theme-tertiary italic">
                   {monster.size} {monster.type}
                   {monster.subtype && ` (${monster.subtype})`}, {monster.alignment}
                 </p>
@@ -113,12 +113,12 @@ export const MonsterStatBlock: React.FC<MonsterStatBlockProps> = ({ monster, onC
               <div className="flex gap-2">
                 <button
                   onClick={handleFavoriteClick}
-                  className="p-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors"
+                  className="p-2 bg-theme-secondary hover:bg-theme-tertiary rounded-lg transition-colors"
                   title={isFav ? 'Remove from favorites' : 'Add to favorites'}
                 >
                   <Star
                     className={`w-6 h-6 ${
-                      isFav ? 'fill-yellow-400 text-yellow-400' : 'text-gray-400'
+                      isFav ? 'fill-yellow-400 text-accent-yellow-light' : 'text-theme-muted'
                     }`}
                   />
                 </button>
@@ -126,14 +126,14 @@ export const MonsterStatBlock: React.FC<MonsterStatBlockProps> = ({ monster, onC
                   <>
                     <button
                       onClick={onEdit}
-                      className="p-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+                      className="p-2 bg-accent-blue hover:bg-blue-700 rounded-lg transition-colors"
                       title="Edit monster"
                     >
                       <Edit2 className="w-6 h-6 text-white" />
                     </button>
                     <button
                       onClick={handleDelete}
-                      className="p-2 bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
+                      className="p-2 bg-accent-red hover:bg-accent-red-dark rounded-lg transition-colors"
                       title="Delete monster"
                     >
                       <Trash2 className="w-6 h-6 text-white" />
@@ -142,7 +142,7 @@ export const MonsterStatBlock: React.FC<MonsterStatBlockProps> = ({ monster, onC
                 )}
                 <button
                   onClick={onClose}
-                  className="p-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors"
+                  className="p-2 bg-theme-secondary hover:bg-theme-tertiary rounded-lg transition-colors"
                 >
                   <X className="w-6 h-6 text-white" />
                 </button>
@@ -153,25 +153,25 @@ export const MonsterStatBlock: React.FC<MonsterStatBlockProps> = ({ monster, onC
           {/* Stat Block Content */}
           <div className="p-6 space-y-4">
             {/* Basic Stats */}
-            <div className="space-y-2 pb-4 border-b-2 border-red-700">
+            <div className="space-y-2 pb-4 border-b-2 border-accent-red-dark">
               <div className="flex gap-2">
-                <span className="font-bold text-red-400">Armor Class</span>
-                <span className="text-gray-300">{getACText()}</span>
+                <span className="font-bold text-accent-red-light">Armor Class</span>
+                <span className="text-theme-tertiary">{getACText()}</span>
               </div>
               <div className="flex gap-2">
-                <span className="font-bold text-red-400">Hit Points</span>
-                <span className="text-gray-300">
+                <span className="font-bold text-accent-red-light">Hit Points</span>
+                <span className="text-theme-tertiary">
                   {monster.hit_points} ({monster.hit_points_roll})
                 </span>
               </div>
               <div className="flex gap-2">
-                <span className="font-bold text-red-400">Speed</span>
-                <span className="text-gray-300">{getSpeedText()}</span>
+                <span className="font-bold text-accent-red-light">Speed</span>
+                <span className="text-theme-tertiary">{getSpeedText()}</span>
               </div>
             </div>
 
             {/* Ability Scores */}
-            <div className="grid grid-cols-6 gap-3 pb-4 border-b-2 border-red-700">
+            <div className="grid grid-cols-6 gap-3 pb-4 border-b-2 border-accent-red-dark">
               {[
                 { name: 'STR', score: monster.strength },
                 { name: 'DEX', score: monster.dexterity },
@@ -181,74 +181,74 @@ export const MonsterStatBlock: React.FC<MonsterStatBlockProps> = ({ monster, onC
                 { name: 'CHA', score: monster.charisma },
               ].map((ability) => (
                 <div key={ability.name} className="text-center">
-                  <div className="font-bold text-red-400 text-sm">{ability.name}</div>
+                  <div className="font-bold text-accent-red-light text-sm">{ability.name}</div>
                   <div className="text-2xl font-bold text-white">{ability.score}</div>
-                  <div className="text-sm text-gray-400">({getModifier(ability.score)})</div>
+                  <div className="text-sm text-theme-muted">({getModifier(ability.score)})</div>
                 </div>
               ))}
             </div>
 
             {/* Additional Stats */}
-            <div className="space-y-2 pb-4 border-b-2 border-red-700 text-sm">
+            <div className="space-y-2 pb-4 border-b-2 border-accent-red-dark text-sm">
               {getSavingThrows() && (
                 <div className="flex gap-2">
-                  <span className="font-bold text-red-400">Saving Throws</span>
-                  <span className="text-gray-300">{getSavingThrows()}</span>
+                  <span className="font-bold text-accent-red-light">Saving Throws</span>
+                  <span className="text-theme-tertiary">{getSavingThrows()}</span>
                 </div>
               )}
               {getSkills() && (
                 <div className="flex gap-2">
-                  <span className="font-bold text-red-400">Skills</span>
-                  <span className="text-gray-300">{getSkills()}</span>
+                  <span className="font-bold text-accent-red-light">Skills</span>
+                  <span className="text-theme-tertiary">{getSkills()}</span>
                 </div>
               )}
               {monster.damage_vulnerabilities.length > 0 && (
                 <div className="flex gap-2">
-                  <span className="font-bold text-red-400">Damage Vulnerabilities</span>
-                  <span className="text-gray-300">{monster.damage_vulnerabilities.join(', ')}</span>
+                  <span className="font-bold text-accent-red-light">Damage Vulnerabilities</span>
+                  <span className="text-theme-tertiary">{monster.damage_vulnerabilities.join(', ')}</span>
                 </div>
               )}
               {monster.damage_resistances.length > 0 && (
                 <div className="flex gap-2">
-                  <span className="font-bold text-red-400">Damage Resistances</span>
-                  <span className="text-gray-300">{monster.damage_resistances.join(', ')}</span>
+                  <span className="font-bold text-accent-red-light">Damage Resistances</span>
+                  <span className="text-theme-tertiary">{monster.damage_resistances.join(', ')}</span>
                 </div>
               )}
               {monster.damage_immunities.length > 0 && (
                 <div className="flex gap-2">
-                  <span className="font-bold text-red-400">Damage Immunities</span>
-                  <span className="text-gray-300">{monster.damage_immunities.join(', ')}</span>
+                  <span className="font-bold text-accent-red-light">Damage Immunities</span>
+                  <span className="text-theme-tertiary">{monster.damage_immunities.join(', ')}</span>
                 </div>
               )}
               {monster.condition_immunities.length > 0 && (
                 <div className="flex gap-2">
-                  <span className="font-bold text-red-400">Condition Immunities</span>
-                  <span className="text-gray-300">
+                  <span className="font-bold text-accent-red-light">Condition Immunities</span>
+                  <span className="text-theme-tertiary">
                     {monster.condition_immunities.map((c) => c.name).join(', ')}
                   </span>
                 </div>
               )}
               <div className="flex gap-2">
-                <span className="font-bold text-red-400">Senses</span>
-                <span className="text-gray-300">
+                <span className="font-bold text-accent-red-light">Senses</span>
+                <span className="text-theme-tertiary">
                   {Object.entries(monster.senses)
                     .map(([key, value]) => `${key} ${value}`)
                     .join(', ')}
                 </span>
               </div>
               <div className="flex gap-2">
-                <span className="font-bold text-red-400">Languages</span>
-                <span className="text-gray-300">{monster.languages || '—'}</span>
+                <span className="font-bold text-accent-red-light">Languages</span>
+                <span className="text-theme-tertiary">{monster.languages || '—'}</span>
               </div>
               <div className="flex gap-2">
-                <span className="font-bold text-red-400">Challenge</span>
-                <span className="text-gray-300">
+                <span className="font-bold text-accent-red-light">Challenge</span>
+                <span className="text-theme-tertiary">
                   {monster.challenge_rating} ({monster.xp.toLocaleString()} XP)
                 </span>
               </div>
               <div className="flex gap-2">
-                <span className="font-bold text-red-400">Proficiency Bonus</span>
-                <span className="text-gray-300">+{monster.proficiency_bonus}</span>
+                <span className="font-bold text-accent-red-light">Proficiency Bonus</span>
+                <span className="text-theme-tertiary">+{monster.proficiency_bonus}</span>
               </div>
             </div>
 
@@ -258,8 +258,8 @@ export const MonsterStatBlock: React.FC<MonsterStatBlockProps> = ({ monster, onC
                 <div className="space-y-3">
                   {monster.special_abilities.map((ability, idx) => (
                     <div key={idx} className="text-sm">
-                      <p className="font-bold text-purple-400 italic">{ability.name}.</p>
-                      <p className="text-gray-300 mt-1">{ability.desc}</p>
+                      <p className="font-bold text-accent-purple-light italic">{ability.name}.</p>
+                      <p className="text-theme-tertiary mt-1">{ability.desc}</p>
                     </div>
                   ))}
                 </div>
@@ -272,8 +272,8 @@ export const MonsterStatBlock: React.FC<MonsterStatBlockProps> = ({ monster, onC
                 <div className="space-y-3">
                   {monster.actions.map((action, idx) => (
                     <div key={idx} className="text-sm">
-                      <p className="font-bold text-red-400 italic">{action.name}.</p>
-                      <p className="text-gray-300 mt-1">{action.desc}</p>
+                      <p className="font-bold text-accent-red-light italic">{action.name}.</p>
+                      <p className="text-theme-tertiary mt-1">{action.desc}</p>
                     </div>
                   ))}
                 </div>
@@ -284,7 +284,7 @@ export const MonsterStatBlock: React.FC<MonsterStatBlockProps> = ({ monster, onC
             {monster.legendary_actions && monster.legendary_actions.length > 0 && (
               <CollapsibleSection title="Legendary Actions">
                 <div className="space-y-3">
-                  <p className="text-sm text-gray-300 italic mb-3">
+                  <p className="text-sm text-theme-tertiary italic mb-3">
                     The {monster.name} can take 3 legendary actions, choosing from the options
                     below. Only one legendary action option can be used at a time and only at the
                     end of another creature's turn. The {monster.name} regains spent legendary
@@ -292,8 +292,8 @@ export const MonsterStatBlock: React.FC<MonsterStatBlockProps> = ({ monster, onC
                   </p>
                   {monster.legendary_actions.map((action, idx) => (
                     <div key={idx} className="text-sm">
-                      <p className="font-bold text-yellow-400 italic">{action.name}.</p>
-                      <p className="text-gray-300 mt-1">{action.desc}</p>
+                      <p className="font-bold text-accent-yellow-light italic">{action.name}.</p>
+                      <p className="text-theme-tertiary mt-1">{action.desc}</p>
                     </div>
                   ))}
                 </div>
@@ -306,8 +306,8 @@ export const MonsterStatBlock: React.FC<MonsterStatBlockProps> = ({ monster, onC
                 <div className="space-y-3">
                   {monster.reactions.map((reaction, idx) => (
                     <div key={idx} className="text-sm">
-                      <p className="font-bold text-blue-400 italic">{reaction.name}.</p>
-                      <p className="text-gray-300 mt-1">{reaction.desc}</p>
+                      <p className="font-bold text-accent-blue-light italic">{reaction.name}.</p>
+                      <p className="text-theme-tertiary mt-1">{reaction.desc}</p>
                     </div>
                   ))}
                 </div>
@@ -316,10 +316,10 @@ export const MonsterStatBlock: React.FC<MonsterStatBlockProps> = ({ monster, onC
           </div>
 
           {/* Footer */}
-          <div className="bg-gray-800 p-4 flex justify-center">
+          <div className="bg-theme-secondary p-4 flex justify-center">
             <button
               onClick={onClose}
-              className="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg transition-colors"
+              className="px-6 py-3 bg-accent-purple hover:bg-purple-700 text-white font-semibold rounded-lg transition-colors"
             >
               Close Stat Block
             </button>

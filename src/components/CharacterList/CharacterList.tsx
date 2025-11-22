@@ -4,10 +4,10 @@ import { CharacterListProps } from '../../types/components';
 import { CharacterCard } from './CharacterCard';
 
 const EmptyState: React.FC = () => (
-  <div className="text-center p-12 bg-gray-800 rounded-xl border-2 border-dashed border-gray-700">
+  <div className="text-center p-12 bg-theme-secondary rounded-xl border-2 border-dashed border-theme-secondary">
     <Shield className="w-12 h-12 text-red-500 mx-auto mb-3" />
-    <p className="text-xl font-semibold text-gray-400">Ready your destiny!</p>
-    <p className="text-gray-500">Use the "New Character Wizard" button to start forging your hero.</p>
+    <p className="text-xl font-semibold text-theme-muted">Ready your destiny!</p>
+    <p className="text-theme-disabled">Use the "New Character Wizard" button to start forging your hero.</p>
   </div>
 );
 
@@ -20,7 +20,7 @@ export const CharacterList: React.FC<CharacterListProps> = ({
 }) => {
   return (
     <section>
-      <h2 className="text-2xl font-bold text-gray-200 mb-4">Your Heroes ({characters.length})</h2>
+      <h2 className="text-2xl font-bold text-theme-secondary mb-4">Your Heroes ({characters.length})</h2>
 
       {characters.length === 0 ? (
         <EmptyState />

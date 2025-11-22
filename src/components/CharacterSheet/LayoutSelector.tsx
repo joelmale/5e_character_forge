@@ -14,8 +14,8 @@ export const LayoutSelector: React.FC = () => {
 
   return (
     <div className="flex flex-col gap-1">
-      <span className="text-xs text-gray-400">Layout:</span>
-      <div className="flex flex-col gap-0 bg-gray-800 rounded-lg p-1">
+      <span className="text-xs text-theme-muted">Layout:</span>
+      <div className="flex flex-col gap-0 bg-theme-secondary rounded-lg p-1">
         {layouts.map((l) => (
           <button
             key={l.value}
@@ -24,8 +24,8 @@ export const LayoutSelector: React.FC = () => {
               flex items-center gap-1 px-3 py-1 rounded text-xs font-medium transition-all
               ${
                 layoutMode === l.value
-                  ? 'bg-blue-600 text-white'
-                  : 'text-gray-400 hover:text-white hover:bg-gray-700'
+                  ? 'bg-accent-blue text-white'
+                  : 'text-theme-muted hover:text-white hover:bg-theme-tertiary'
               }
             `}
             title={`Switch to ${l.label} layout`}

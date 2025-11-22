@@ -15,7 +15,7 @@ const RandomizeButton: React.FC<{ onClick: () => void; title?: string; className
   return (
     <button
       onClick={onClick}
-      className={`px-3 py-2 bg-purple-600 hover:bg-purple-500 rounded-lg text-white text-sm font-medium transition-colors flex items-center gap-2 ${className}`}
+      className={`px-3 py-2 bg-accent-purple hover:bg-accent-purple-light rounded-lg text-white text-sm font-medium transition-colors flex items-center gap-2 ${className}`}
       title={title}
     >
       <Shuffle className="w-4 h-4" />
@@ -60,7 +60,7 @@ export const Step4Spells: React.FC<StepProps> = ({ data, updateData, nextStep, p
   // If not a spellcaster or has no spells available, skip this step
   if (!selectedClass || !selectedClass.spellcasting ||
       (selectedClass.spellcasting.cantripsKnown === 0 && selectedClass.spellcasting.spellsKnownOrPrepared === 0)) {
-    return <div className='text-center text-gray-400'>This class doesn't have spells available at level {data.level}. Advancing...</div>;
+    return <div className='text-center text-theme-muted'>This class doesn't have spells available at level {data.level}. Advancing...</div>;
   }
 
   const spellcasting = selectedClass.spellcasting!;
@@ -141,7 +141,7 @@ export const Step4Spells: React.FC<StepProps> = ({ data, updateData, nextStep, p
       <div className='flex justify-between items-start'>
         <div>
           <h3 className='text-xl font-bold text-red-300'>Select Your Spells</h3>
-          <p className='text-sm text-gray-400 mt-1'>
+          <p className='text-sm text-theme-muted mt-1'>
             {selectedClass.name} - {modeDescription}
           </p>
           <p className='text-xs text-purple-300 mt-1'>
@@ -158,11 +158,11 @@ export const Step4Spells: React.FC<StepProps> = ({ data, updateData, nextStep, p
       </div>
 
       {/* Cantrips Section */}
-      <div className="bg-gray-700/50 border border-gray-600 rounded-lg p-4 space-y-3">
-        <h4 className="text-lg font-bold text-yellow-300">
+      <div className="bg-theme-tertiary/50 border border-theme-primary rounded-lg p-4 space-y-3">
+        <h4 className="text-lg font-bold text-accent-yellow-light">
           Cantrips ({data.spellSelection.selectedCantrips.length} / {spellcasting.cantripsKnown} selected)
         </h4>
-        <p className="text-xs text-gray-400">
+        <p className="text-xs text-theme-muted">
           Cantrips are 0-level spells that can be cast at will, without expending spell slots.
         </p>
 
@@ -180,8 +180,8 @@ export const Step4Spells: React.FC<StepProps> = ({ data, updateData, nextStep, p
                   isSelected
                     ? 'bg-blue-900 border-blue-500'
                     : canSelect
-                    ? 'bg-gray-700 border-gray-600 hover:border-blue-400'
-                    : 'bg-gray-800 border-gray-700 opacity-50 cursor-not-allowed'
+                    ? 'bg-theme-tertiary border-theme-primary hover:border-blue-400'
+                    : 'bg-theme-secondary border-theme-secondary opacity-50 cursor-not-allowed'
                 }`}
               >
                 <div className="flex items-start justify-between">
@@ -189,12 +189,12 @@ export const Step4Spells: React.FC<StepProps> = ({ data, updateData, nextStep, p
                     <div className="font-semibold text-white">{spell.name}</div>
                     <div className="text-xs text-purple-300">{spell.school}</div>
                   </div>
-                  {isSelected && <Check className="w-5 h-5 text-green-400" />}
+                  {isSelected && <Check className="w-5 h-5 text-accent-green-light" />}
                 </div>
-                <div className="text-xs text-gray-400 mt-2 line-clamp-2">
+                <div className="text-xs text-theme-muted mt-2 line-clamp-2">
                   {spell.description}
                 </div>
-                <div className="text-xs text-gray-500 mt-1">
+                <div className="text-xs text-theme-disabled mt-1">
                   {spell.castingTime} • {spell.range}
                   {spell.concentration && ' • Concentration'}
                 </div>
@@ -208,11 +208,11 @@ export const Step4Spells: React.FC<StepProps> = ({ data, updateData, nextStep, p
       {spellcastingType === 'wizard' && (
         <>
           {/* Wizard Spellbook Section */}
-          <div className="bg-gray-700/50 border border-gray-600 rounded-lg p-4 space-y-3">
-            <h4 className="text-lg font-bold text-yellow-300">
+          <div className="bg-theme-tertiary/50 border border-theme-primary rounded-lg p-4 space-y-3">
+            <h4 className="text-lg font-bold text-accent-yellow-light">
               Spellbook ({data.spellSelection.spellbook?.length || 0} / 6 selected)
             </h4>
-            <p className="text-xs text-gray-400">
+            <p className="text-xs text-theme-muted">
               Choose 6 1st-level spells for your permanent spellbook. You can prepare a subset of these each day.
             </p>
 
@@ -230,8 +230,8 @@ export const Step4Spells: React.FC<StepProps> = ({ data, updateData, nextStep, p
                       isSelected
                         ? 'bg-blue-900 border-blue-500'
                         : canSelect
-                        ? 'bg-gray-700 border-gray-600 hover:border-blue-400'
-                        : 'bg-gray-800 border-gray-700 opacity-50 cursor-not-allowed'
+                        ? 'bg-theme-tertiary border-theme-primary hover:border-blue-400'
+                        : 'bg-theme-secondary border-theme-secondary opacity-50 cursor-not-allowed'
                     }`}
                   >
                     <div className="flex items-start justify-between">
@@ -239,12 +239,12 @@ export const Step4Spells: React.FC<StepProps> = ({ data, updateData, nextStep, p
                         <div className="font-semibold text-white">{spell.name}</div>
                         <div className="text-xs text-purple-300">{spell.school}</div>
                       </div>
-                      {isSelected && <Check className="w-5 h-5 text-green-400" />}
+                      {isSelected && <Check className="w-5 h-5 text-accent-green-light" />}
                     </div>
-                    <div className="text-xs text-gray-400 mt-2 line-clamp-2">
+                    <div className="text-xs text-theme-muted mt-2 line-clamp-2">
                       {spell.description}
                     </div>
-                    <div className="text-xs text-gray-500 mt-1">
+                    <div className="text-xs text-theme-disabled mt-1">
                       {spell.castingTime} • {spell.range}
                       {spell.concentration && ' • Concentration'}
                       {spell.ritual && ' • Ritual'}
@@ -256,11 +256,11 @@ export const Step4Spells: React.FC<StepProps> = ({ data, updateData, nextStep, p
           </div>
 
           {/* Wizard Daily Preparation Section */}
-          <div className="bg-gray-700/50 border border-gray-600 rounded-lg p-4 space-y-3">
-            <h4 className="text-lg font-bold text-yellow-300">
+          <div className="bg-theme-tertiary/50 border border-theme-primary rounded-lg p-4 space-y-3">
+            <h4 className="text-lg font-bold text-accent-yellow-light">
               Daily Preparation ({data.spellSelection.dailyPrepared?.length || 0} / {Math.max(1, Math.floor((data.abilities.INT - 10) / 2) + 1)} selected)
             </h4>
-            <p className="text-xs text-gray-400">
+            <p className="text-xs text-theme-muted">
               Choose spells to prepare for today from your spellbook. You can change this after a long rest.
             </p>
 
@@ -282,8 +282,8 @@ export const Step4Spells: React.FC<StepProps> = ({ data, updateData, nextStep, p
                       isSelected
                         ? 'bg-green-900 border-green-500'
                         : canSelect
-                        ? 'bg-gray-700 border-gray-600 hover:border-green-400'
-                        : 'bg-gray-800 border-gray-700 opacity-50 cursor-not-allowed'
+                        ? 'bg-theme-tertiary border-theme-primary hover:border-green-400'
+                        : 'bg-theme-secondary border-theme-secondary opacity-50 cursor-not-allowed'
                     }`}
                   >
                     <div className="flex items-start justify-between">
@@ -291,12 +291,12 @@ export const Step4Spells: React.FC<StepProps> = ({ data, updateData, nextStep, p
                         <div className="font-semibold text-white">{spell.name}</div>
                         <div className="text-xs text-purple-300">{spell.school}</div>
                       </div>
-                      {isSelected && <Check className="w-5 h-5 text-green-400" />}
+                      {isSelected && <Check className="w-5 h-5 text-accent-green-light" />}
                     </div>
-                    <div className="text-xs text-gray-400 mt-2 line-clamp-2">
+                    <div className="text-xs text-theme-muted mt-2 line-clamp-2">
                       {spell.description}
                     </div>
-                    <div className="text-xs text-gray-500 mt-1">
+                    <div className="text-xs text-theme-disabled mt-1">
                       {spell.castingTime} • {spell.range}
                       {spell.concentration && ' • Concentration'}
                       {spell.ritual && ' • Ritual'}
@@ -310,11 +310,11 @@ export const Step4Spells: React.FC<StepProps> = ({ data, updateData, nextStep, p
       )}
 
       {spellcastingType === 'known' && (
-        <div className="bg-gray-700/50 border border-gray-600 rounded-lg p-4 space-y-3">
-          <h4 className="text-lg font-bold text-yellow-300">
+        <div className="bg-theme-tertiary/50 border border-theme-primary rounded-lg p-4 space-y-3">
+          <h4 className="text-lg font-bold text-accent-yellow-light">
             Spells Known ({data.spellSelection.knownSpells?.length || 0} / {spellcasting.spellsKnownOrPrepared} selected)
           </h4>
-          <p className="text-xs text-gray-400">
+          <p className="text-xs text-theme-muted">
             These are the spells your character knows permanently. You can change them when you level up.
           </p>
 
@@ -332,8 +332,8 @@ export const Step4Spells: React.FC<StepProps> = ({ data, updateData, nextStep, p
                     isSelected
                       ? 'bg-blue-900 border-blue-500'
                       : canSelect
-                      ? 'bg-gray-700 border-gray-600 hover:border-blue-400'
-                      : 'bg-gray-800 border-gray-700 opacity-50 cursor-not-allowed'
+                      ? 'bg-theme-tertiary border-theme-primary hover:border-blue-400'
+                      : 'bg-theme-secondary border-theme-secondary opacity-50 cursor-not-allowed'
                   }`}
                 >
                   <div className="flex items-start justify-between">
@@ -341,12 +341,12 @@ export const Step4Spells: React.FC<StepProps> = ({ data, updateData, nextStep, p
                       <div className="font-semibold text-white">{spell.name}</div>
                       <div className="text-xs text-purple-300">{spell.school}</div>
                     </div>
-                    {isSelected && <Check className="w-5 h-5 text-green-400" />}
+                    {isSelected && <Check className="w-5 h-5 text-accent-green-light" />}
                   </div>
-                  <div className="text-xs text-gray-400 mt-2 line-clamp-2">
+                  <div className="text-xs text-theme-muted mt-2 line-clamp-2">
                     {spell.description}
                   </div>
-                  <div className="text-xs text-gray-500 mt-1">
+                  <div className="text-xs text-theme-disabled mt-1">
                     {spell.castingTime} • {spell.range}
                     {spell.concentration && ' • Concentration'}
                     {spell.ritual && ' • Ritual'}
@@ -359,11 +359,11 @@ export const Step4Spells: React.FC<StepProps> = ({ data, updateData, nextStep, p
       )}
 
       {spellcastingType === 'prepared' && (
-        <div className="bg-gray-700/50 border border-gray-600 rounded-lg p-4 space-y-3">
-          <h4 className="text-lg font-bold text-yellow-300">
+        <div className="bg-theme-tertiary/50 border border-theme-primary rounded-lg p-4 space-y-3">
+          <h4 className="text-lg font-bold text-accent-yellow-light">
             Prepared Spells ({data.spellSelection.preparedSpells?.length || 0} / {spellcasting.spellsKnownOrPrepared} selected)
           </h4>
-          <p className="text-xs text-gray-400">
+          <p className="text-xs text-theme-muted">
             Choose spells to prepare. You can change your prepared spells after a long rest.
           </p>
 
@@ -381,8 +381,8 @@ export const Step4Spells: React.FC<StepProps> = ({ data, updateData, nextStep, p
                     isSelected
                       ? 'bg-blue-900 border-blue-500'
                       : canSelect
-                      ? 'bg-gray-700 border-gray-600 hover:border-blue-400'
-                      : 'bg-gray-800 border-gray-700 opacity-50 cursor-not-allowed'
+                      ? 'bg-theme-tertiary border-theme-primary hover:border-blue-400'
+                      : 'bg-theme-secondary border-theme-secondary opacity-50 cursor-not-allowed'
                   }`}
                 >
                   <div className="flex items-start justify-between">
@@ -390,12 +390,12 @@ export const Step4Spells: React.FC<StepProps> = ({ data, updateData, nextStep, p
                       <div className="font-semibold text-white">{spell.name}</div>
                       <div className="text-xs text-purple-300">{spell.school}</div>
                     </div>
-                    {isSelected && <Check className="w-5 h-5 text-green-400" />}
+                    {isSelected && <Check className="w-5 h-5 text-accent-green-light" />}
                   </div>
-                  <div className="text-xs text-gray-400 mt-2 line-clamp-2">
+                  <div className="text-xs text-theme-muted mt-2 line-clamp-2">
                     {spell.description}
                   </div>
-                  <div className="text-xs text-gray-500 mt-1">
+                  <div className="text-xs text-theme-disabled mt-1">
                     {spell.castingTime} • {spell.range}
                     {spell.concentration && ' • Concentration'}
                     {spell.ritual && ' • Ritual'}
@@ -409,7 +409,7 @@ export const Step4Spells: React.FC<StepProps> = ({ data, updateData, nextStep, p
 
       {/* Navigation */}
       <div className='flex justify-between'>
-        <button onClick={prevStep} className='px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-500 flex items-center gap-2'>
+        <button onClick={prevStep} className='px-4 py-2 bg-theme-quaternary text-white rounded-lg hover:bg-theme-hover flex items-center gap-2'>
           <ArrowLeft className='w-4 h-4' />
           Back
         </button>
@@ -418,8 +418,8 @@ export const Step4Spells: React.FC<StepProps> = ({ data, updateData, nextStep, p
           disabled={!allSelectionsComplete}
           className={`px-4 py-2 rounded-lg flex items-center gap-2 ${
             allSelectionsComplete
-              ? 'bg-red-700 text-white hover:bg-red-600'
-              : 'bg-gray-700 text-gray-500 cursor-not-allowed'
+              ? 'bg-accent-red-dark text-white hover:bg-accent-red'
+              : 'bg-theme-tertiary text-theme-disabled cursor-not-allowed'
           }`}
         >
           Next: {getNextStepLabel?.() || 'Continue'}

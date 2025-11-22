@@ -12,7 +12,7 @@ const RandomizeButton: React.FC<RandomizeButtonProps> = ({ onClick, title }) => 
   <button
     onClick={onClick}
     title={title}
-    className="p-2 bg-yellow-600 hover:bg-yellow-500 rounded-lg text-white transition-colors"
+    className="p-2 bg-accent-yellow-dark hover:bg-accent-yellow rounded-lg text-white transition-colors"
   >
     <Shuffle className="w-4 h-4" />
   </button>
@@ -65,8 +65,8 @@ export const Step0Level: React.FC<StepProps> = ({ data, updateData, nextStep, ge
             title="Randomize character level"
           />
         </div>
-        <h3 className='text-2xl font-bold text-yellow-300 mb-2'>Choose Your Level</h3>
-        <p className='text-gray-300'>Select your character's starting level (1-20)</p>
+        <h3 className='text-2xl font-bold text-accent-yellow-light mb-2'>Choose Your Level</h3>
+        <p className='text-theme-tertiary'>Select your character's starting level (1-20)</p>
       </div>
 
       <div className='grid grid-cols-5 md:grid-cols-10 gap-3 max-w-4xl mx-auto'>
@@ -80,13 +80,13 @@ export const Step0Level: React.FC<StepProps> = ({ data, updateData, nextStep, ge
               onClick={() => updateData({ level })}
               className={`relative p-3 rounded-lg border-2 transition-all duration-200 ${
                 isSelected
-                  ? 'bg-red-600 border-red-400 shadow-lg shadow-red-500/25'
+                  ? 'bg-accent-red border-red-400 shadow-lg shadow-red-500/25'
                   : isMilestone
-                    ? 'bg-yellow-600/20 border-yellow-500 hover:bg-yellow-600/30'
-                    : 'bg-gray-700 border-gray-600 hover:bg-gray-600'
+                    ? 'bg-accent-yellow-dark/20 border-yellow-500 hover:bg-accent-yellow-dark/30'
+                    : 'bg-theme-tertiary border-theme-primary hover:bg-theme-quaternary'
               }`}
             >
-              <div className={`text-center ${isSelected ? 'text-white' : isMilestone ? 'text-yellow-300' : 'text-gray-300'}`}>
+              <div className={`text-center ${isSelected ? 'text-white' : isMilestone ? 'text-accent-yellow-light' : 'text-theme-tertiary'}`}>
                 <div className='font-bold text-lg'>{level}</div>
                 {isMilestone && (
                   <div className='text-xs mt-1 opacity-75'>{getMilestoneIcon(level)}</div>
@@ -98,13 +98,13 @@ export const Step0Level: React.FC<StepProps> = ({ data, updateData, nextStep, ge
       </div>
 
       {data.level && (
-        <div className='bg-gray-700/50 border border-gray-600 rounded-lg p-4 max-w-2xl mx-auto'>
+        <div className='bg-theme-tertiary/50 border border-theme-primary rounded-lg p-4 max-w-2xl mx-auto'>
           <div className='text-center'>
-            <h4 className='text-lg font-bold text-yellow-300 mb-2'>Level {data.level}</h4>
-            <p className='text-gray-300'>{getLevelDescription(data.level)}</p>
+            <h4 className='text-lg font-bold text-accent-yellow-light mb-2'>Level {data.level}</h4>
+            <p className='text-theme-tertiary'>{getLevelDescription(data.level)}</p>
             {milestoneLevels.includes(data.level) && (
-              <div className='mt-3 p-2 bg-yellow-600/20 border border-yellow-500 rounded'>
-                <p className='text-yellow-300 text-sm font-semibold'>🎯 Milestone Level</p>
+              <div className='mt-3 p-2 bg-accent-yellow-dark/20 border border-yellow-500 rounded'>
+                <p className='text-accent-yellow-light text-sm font-semibold'>🎯 Milestone Level</p>
                 <p className='text-yellow-200 text-xs mt-1'>
                   {data.level === 2 && "Gain your class's signature feature (Fighting Style, Spellcasting, etc.)"}
                   {data.level === 3 && "Choose your subclass to specialize your abilities"}
@@ -130,7 +130,7 @@ export const Step0Level: React.FC<StepProps> = ({ data, updateData, nextStep, ge
         <button
           onClick={nextStep}
           disabled={!data.level}
-          className="px-6 py-3 bg-red-600 hover:bg-red-500 rounded-lg text-white flex items-center disabled:bg-gray-600 disabled:cursor-not-allowed transition-colors"
+          className="px-6 py-3 bg-accent-red hover:bg-accent-red-light rounded-lg text-white flex items-center disabled:bg-theme-quaternary disabled:cursor-not-allowed transition-colors"
         >
           Next: {getNextStepLabel?.() || 'Continue'} <ArrowRight className="w-5 h-5 ml-2" />
         </button>

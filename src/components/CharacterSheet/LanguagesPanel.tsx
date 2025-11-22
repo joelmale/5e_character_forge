@@ -19,9 +19,9 @@ export const LanguagesPanel: React.FC<LanguagesPanelProps> = ({
   };
 
   return (
-    <div className="bg-gray-800 border border-gray-700 rounded-lg p-3 shadow-lg">
+    <div className="bg-theme-secondary border border-theme-secondary rounded-lg p-3 shadow-lg">
       <div className="flex items-center gap-2 mb-2">
-        <Languages className="w-4 h-4 text-blue-400" />
+        <Languages className="w-4 h-4 text-accent-blue-light" />
         <span className="text-sm font-semibold text-blue-300">Languages</span>
       </div>
       <div className="flex flex-wrap gap-1">
@@ -29,14 +29,14 @@ export const LanguagesPanel: React.FC<LanguagesPanelProps> = ({
           character.languages.map((language, index) => (
             <span
               key={index}
-              className="px-2 py-1 bg-green-700 text-white text-xs rounded cursor-help"
+              className="px-2 py-1 bg-accent-green-dark text-white text-xs rounded cursor-help"
               title={getLanguageDescription(language)}
             >
               {language}
             </span>
           ))
         ) : (
-          <span className="text-xs text-gray-400">None</span>
+          <span className="text-xs text-theme-muted">None</span>
         )}
       </div>
     </div>

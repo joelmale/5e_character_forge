@@ -202,7 +202,7 @@ export const MobileLayout: React.FC<CharacterSheetProps> = ({
       hitDice: {
         title: 'Hit Dice',
         icon: Dice6,
-        className: 'border-purple-500 bg-purple-900',
+        className: 'border-accent-purple bg-purple-900',
         badge: `${character.hitDice.current}/${character.hitDice.max}`,
         content: (
           <HitDice
@@ -229,7 +229,7 @@ export const MobileLayout: React.FC<CharacterSheetProps> = ({
         className: 'border-pink-500 bg-pink-900',
         badge: character.level >= 6 ? `${character.level >= 17 ? 3 : character.level >= 11 ? 2 : 1}/3` : 'Locked',
         content: (
-          <div className="text-sm text-gray-300">
+          <div className="text-sm text-theme-tertiary">
             <p>Attunement slots available based on character level.</p>
             <p>Level 6-10: 1 slot, Level 11-16: 2 slots, Level 17+: 3 slots</p>
           </div>
@@ -240,7 +240,7 @@ export const MobileLayout: React.FC<CharacterSheetProps> = ({
         icon: Star,
         className: 'border-indigo-500 bg-indigo-900',
         content: (
-          <div className="text-sm text-gray-300">
+          <div className="text-sm text-theme-tertiary">
             <p>Armor: {character.proficiencies?.armor?.join(', ') || 'None'}</p>
             <p>Weapons: {character.proficiencies?.weapons?.join(', ') || 'None'}</p>
             <p>Tools: {character.proficiencies?.tools?.join(', ') || 'None'}</p>
@@ -258,7 +258,7 @@ export const MobileLayout: React.FC<CharacterSheetProps> = ({
       conditions: {
         title: 'Conditions',
         icon: AlertTriangle,
-        className: 'border-red-600 bg-red-900',
+        className: 'border-accent-red bg-red-900',
         badge: character.conditions?.length || 0,
         content: (
           <Conditions
@@ -334,7 +334,7 @@ export const MobileLayout: React.FC<CharacterSheetProps> = ({
   };
 
   return (
-    <div className="p-4 md:p-8 bg-gray-900 text-gray-100 min-h-screen pb-24">
+    <div className="p-4 md:p-8 bg-theme-primary text-white min-h-screen pb-24">
       <div className="max-w-4xl mx-auto space-y-3">
         <CharacterHeader
           character={character}
@@ -348,17 +348,17 @@ export const MobileLayout: React.FC<CharacterSheetProps> = ({
         />
 
         {/* Global Section Controls */}
-        <div className="flex gap-2 mb-4 p-3 bg-gray-800/50 rounded-lg">
+        <div className="flex gap-2 mb-4 p-3 bg-theme-secondary/50 rounded-lg">
           <button
             onClick={expandAll}
-            className="px-3 py-1 bg-blue-600 hover:bg-blue-500 rounded text-sm font-medium transition-colors"
+            className="px-3 py-1 bg-accent-blue hover:bg-accent-blue-light rounded text-sm font-medium transition-colors"
             title="Expand all sections"
           >
             Expand All
           </button>
           <button
             onClick={collapseAll}
-            className="px-3 py-1 bg-gray-600 hover:bg-gray-500 rounded text-sm font-medium transition-colors"
+            className="px-3 py-1 bg-theme-quaternary hover:bg-theme-hover rounded text-sm font-medium transition-colors"
             title="Collapse all sections"
           >
             Collapse All
@@ -367,14 +367,14 @@ export const MobileLayout: React.FC<CharacterSheetProps> = ({
             onClick={toggleAdjustMode}
             className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
               adjustMode
-                ? 'bg-green-600 hover:bg-green-500 text-white'
-                : 'bg-purple-600 hover:bg-purple-500 text-white'
+                ? 'bg-accent-green hover:bg-accent-green text-white'
+                : 'bg-accent-purple hover:bg-accent-purple-light text-white'
             }`}
             title={adjustMode ? 'Exit layout adjustment mode' : 'Enter layout adjustment mode'}
           >
             {adjustMode ? 'Done' : 'Adjust Layout'}
           </button>
-          <span className="text-xs text-gray-400 self-center ml-4">
+          <span className="text-xs text-theme-muted self-center ml-4">
             {Object.values(collapsedSections).filter(Boolean).length} of {Object.keys(collapsedSections).length} sections collapsed
             {adjustMode && ' • Adjust Mode Active'}
           </span>

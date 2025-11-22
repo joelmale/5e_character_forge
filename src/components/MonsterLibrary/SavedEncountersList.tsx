@@ -38,10 +38,10 @@ export const SavedEncountersList: React.FC = () => {
 
   if (encounters.length === 0) {
     return (
-      <div className="text-center p-8 bg-gray-800 rounded-xl border-2 border-dashed border-gray-700">
+      <div className="text-center p-8 bg-theme-secondary rounded-xl border-2 border-dashed border-theme-secondary">
         <div className="text-4xl mb-3">📖</div>
-        <p className="text-gray-400">No saved encounters yet</p>
-        <p className="text-sm text-gray-500 mt-2">
+        <p className="text-theme-muted">No saved encounters yet</p>
+        <p className="text-sm text-theme-disabled mt-2">
           Create an encounter by selecting monsters and clicking "Save Encounter"
         </p>
       </div>
@@ -53,13 +53,13 @@ export const SavedEncountersList: React.FC = () => {
       {encounters.map((encounter) => (
         <div
           key={encounter.id}
-          className="bg-gray-800 rounded-lg p-4 hover:bg-gray-750 transition-colors"
+          className="bg-theme-secondary rounded-lg p-4 hover:bg-gray-750 transition-colors"
         >
           <div className="flex items-start justify-between">
             <div className="flex-grow">
-              <h3 className="text-lg font-bold text-purple-400 mb-1">{encounter.name}</h3>
-              <p className="text-sm text-gray-400 mb-2">{getEncounterSummary(encounter.monsterIds)}</p>
-              <div className="flex items-center gap-2 text-xs text-gray-500">
+              <h3 className="text-lg font-bold text-accent-purple-light mb-1">{encounter.name}</h3>
+              <p className="text-sm text-theme-muted mb-2">{getEncounterSummary(encounter.monsterIds)}</p>
+              <div className="flex items-center gap-2 text-xs text-theme-disabled">
                 <Calendar className="w-3 h-3" />
                 <span>Created {new Date(encounter.createdAt).toLocaleDateString()}</span>
                 <span className="mx-2">•</span>
@@ -70,14 +70,14 @@ export const SavedEncountersList: React.FC = () => {
             <div className="flex gap-2">
               <button
                 onClick={() => handleLoad(encounter.id)}
-                className="p-2 bg-purple-600 hover:bg-purple-700 rounded-lg transition-colors"
+                className="p-2 bg-accent-purple hover:bg-purple-700 rounded-lg transition-colors"
                 title="Load encounter"
               >
                 <Eye className="w-4 h-4" />
               </button>
               <button
                 onClick={() => handleDelete(encounter.id, encounter.name)}
-                className="p-2 bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
+                className="p-2 bg-accent-red hover:bg-accent-red-dark rounded-lg transition-colors"
                 title="Delete encounter"
               >
                 <Trash2 className="w-4 h-4" />

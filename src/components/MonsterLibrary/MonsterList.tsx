@@ -14,10 +14,10 @@ interface MonsterListProps {
 }
 
 const EmptyState: React.FC = () => (
-  <div className="text-center p-12 bg-gray-800 rounded-xl border-2 border-dashed border-gray-700">
+  <div className="text-center p-12 bg-theme-secondary rounded-xl border-2 border-dashed border-theme-secondary">
     <div className="text-6xl mb-4">🐉</div>
-    <p className="text-xl font-semibold text-gray-400">No monsters found</p>
-    <p className="text-gray-500">Try adjusting your filters or create a custom monster</p>
+    <p className="text-xl font-semibold text-theme-muted">No monsters found</p>
+    <p className="text-theme-disabled">Try adjusting your filters or create a custom monster</p>
   </div>
 );
 

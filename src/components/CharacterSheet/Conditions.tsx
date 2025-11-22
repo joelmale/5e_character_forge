@@ -87,7 +87,7 @@ export const Conditions: React.FC<ConditionsProps> = ({
 
   return (
     <div className="bg-red-900 rounded-xl shadow-lg border-l-4 border-yellow-500 p-3">
-      <h3 className="text-sm font-bold text-yellow-400 mb-2 flex items-center gap-2 uppercase tracking-wider font-cinzel">
+      <h3 className="text-sm font-bold text-accent-yellow-light mb-2 flex items-center gap-2 uppercase tracking-wider font-cinzel">
         <AlertTriangle className="w-4 h-4" />
         Conditions
       </h3>
@@ -99,12 +99,12 @@ export const Conditions: React.FC<ConditionsProps> = ({
             {activeConditions.map((condition, index) => (
               <div
                 key={index}
-                className="flex items-center gap-1 px-2 py-0.5 bg-red-800/70 rounded-full text-xs text-white"
+                className="flex items-center gap-1 px-2 py-0.5 bg-accent-red-darker/70 rounded-full text-xs text-white"
               >
                 <span>{condition}</span>
                 <button
                   onClick={() => removeCondition(condition)}
-                  className="ml-0.5 hover:bg-red-700 rounded-full p-0.5"
+                  className="ml-0.5 hover:bg-accent-red-dark rounded-full p-0.5"
                   title={`Remove ${condition}`}
                 >
                   <X className="w-2.5 h-2.5" />
@@ -124,11 +124,11 @@ export const Conditions: React.FC<ConditionsProps> = ({
             onChange={(e) => setNewCondition(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && addCustomCondition()}
             placeholder="Add custom condition"
-            className="flex-1 px-3 py-2 bg-gray-800 text-white rounded border border-gray-600 focus:border-yellow-500 focus:outline-none"
+            className="flex-1 px-3 py-2 bg-theme-secondary text-white rounded border border-theme-primary focus:border-yellow-500 focus:outline-none"
           />
           <button
             onClick={addCustomCondition}
-            className="px-2 py-2 bg-yellow-600 hover:bg-yellow-500 rounded transition-colors flex items-center justify-center"
+            className="px-2 py-2 bg-accent-yellow-dark hover:bg-accent-yellow rounded transition-colors flex items-center justify-center"
             title="Add condition"
           >
             <Plus className="w-4 h-4" />
@@ -147,7 +147,7 @@ export const Conditions: React.FC<ConditionsProps> = ({
                   <button
                     key={index}
                     onClick={() => addCondition(condition)}
-                    className="flex items-center gap-1 px-2 py-1 bg-gray-800/50 hover:bg-red-800/70 rounded text-xs text-gray-300 hover:text-white transition-colors text-left"
+                    className="flex items-center gap-1 px-2 py-1 bg-theme-secondary/50 hover:bg-accent-red-darker/70 rounded text-xs text-theme-tertiary hover:text-white transition-colors text-left"
                     title={`Add ${condition}`}
                   >
                     {IconComponent && <IconComponent className="w-3 h-3 flex-shrink-0" />}
@@ -160,20 +160,20 @@ export const Conditions: React.FC<ConditionsProps> = ({
       </div>
 
       {/* Condition Effects Summary */}
-      <div className="mt-4 pt-4 border-t border-gray-600">
+      <div className="mt-4 pt-4 border-t border-theme-primary">
         {activeConditions.length > 0 ? (
           <div className="space-y-2">
             {activeConditions.map((condition, index) => (
-              <div key={index} className="text-xs text-gray-300">
+              <div key={index} className="text-xs text-theme-tertiary">
                 <div className="font-semibold text-red-300 mb-1">{condition}:</div>
-                <div className="text-gray-400 leading-relaxed">
+                <div className="text-theme-muted leading-relaxed">
                   {conditionEffects[condition] || 'Effect details not available'}
                 </div>
               </div>
             ))}
           </div>
         ) : (
-          <div className="text-xs text-gray-400 text-center">
+          <div className="text-xs text-theme-muted text-center">
             Active conditions may affect ability checks, attacks, and movement
           </div>
         )}
