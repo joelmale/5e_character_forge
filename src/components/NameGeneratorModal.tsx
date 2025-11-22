@@ -53,10 +53,26 @@ const NameGeneratorModal: React.FC<NameGeneratorModalProps> = ({
     }
   };
 
+  /**
+   * Save name generation history to localStorage
+   * NOTE: CodeQL flags this as "clear text storage of sensitive information"
+   * This is safe because:
+   * - Stores user-generated fantasy character names only
+   * - No passwords, tokens, personal data, or sensitive information
+   * - localStorage is appropriate for user preferences/game data
+   */
   const saveHistory = (history: NameHistoryItem[]) => {
     localStorage.setItem('nameGenerator_history', JSON.stringify(history.slice(-50))); // Keep last 50
   };
 
+  /**
+   * Save name generator favorites to localStorage
+   * NOTE: CodeQL flags this as "clear text storage of sensitive information"
+   * This is safe because:
+   * - Stores user-generated fantasy character names only
+   * - No passwords, tokens, personal data, or sensitive information
+   * - localStorage is appropriate for user preferences/game data
+   */
   const saveFavorites = (favorites: NameHistoryItem[]) => {
     localStorage.setItem('nameGenerator_favorites', JSON.stringify(favorites));
   };

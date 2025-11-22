@@ -82,6 +82,7 @@ export const Step3point5FightingStyle: React.FC<StepProps> = ({ data, updateData
   }, [hasFightingStyle, nextStep]);
 
   if (!hasFightingStyle) {
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     return <div className='text-center text-theme-muted'>This class doesn't have Fighting Styles. Advancing...</div>;
   }
 

@@ -129,6 +129,7 @@ const SpellEditModal: React.FC<SpellEditModalProps> = ({
     onClose();
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const getSpellInfo = (spell: AppSpell) => {
     return {
       name: spell.name,

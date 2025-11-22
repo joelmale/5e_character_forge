@@ -98,6 +98,14 @@ export const Step1Details: React.FC<StepProps> = ({ data, updateData, nextStep, 
     setShowNameGenerator(false);
   };
 
+  /**
+   * Toggle favorite status for a name
+   * NOTE: Uses localStorage which CodeQL flags as "clear text storage of sensitive information"
+   * This is safe because:
+   * - Stores user-generated fantasy character names only
+   * - No passwords, tokens, personal data, or sensitive information
+   * - localStorage is standard for user preferences in web apps
+   */
   const toggleFavorite = (nameItem: NameHistoryItem) => {
     const isFavorite = favorites.some(fav => fav.name === nameItem.name);
 
