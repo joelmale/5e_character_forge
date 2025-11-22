@@ -72,20 +72,27 @@ const PersonalitySummary: React.FC<PersonalitySummaryProps> = ({
     currentBackground
   });
 
-  // Calculate character preview
-  const characterPreview = useMemo(() => {
-    // Extract base class name (remove subclass in parentheses)
-    const extractBaseName = (fullName: string): string => {
-      const parenIndex = fullName.indexOf(' (');
-      return parenIndex > 0 ? fullName.substring(0, parenIndex) : fullName;
-    };
+  // Extract base class name (remove subclass in parentheses)
+  const extractBaseName = (fullName: string): string => {
+    const parenIndex = fullName.indexOf(' (');
+    return parenIndex > 0 ? fullName.substring(0, parenIndex) : fullName;
+  };
 
+  // Calculate base abilities (separate from characterPreview so it can be used in modals)
+  const baseAbilities = useMemo(() => {
     const allClasses = loadClasses();
     const baseClassName = extractBaseName(currentClass);
     const selectedClassData = allClasses.find(c => c.name === baseClassName);
 
     // Use custom abilities if user edited them, otherwise assign based on class priorities
-    const baseAbilities = customAbilities || (selectedClassData ? assignAbilityScoresByClass(selectedClassData.slug) : { STR: 15, DEX: 14, CON: 13, INT: 12, WIS: 10, CHA: 8 });
+    return customAbilities || (selectedClassData ? assignAbilityScoresByClass(selectedClassData.slug) : { STR: 15, DEX: 14, CON: 13, INT: 12, WIS: 10, CHA: 8 });
+  }, [currentClass, customAbilities]);
+
+  // Calculate character preview
+  const characterPreview = useMemo(() => {
+    const allClasses = loadClasses();
+    const baseClassName = extractBaseName(currentClass);
+    const selectedClassData = allClasses.find(c => c.name === baseClassName);
 
     // Calculate modifiers
     const abilities = {
@@ -120,7 +127,7 @@ const PersonalitySummary: React.FC<PersonalitySummaryProps> = ({
       hitDie: selectedClassData?.hit_die || 8,
       armorClass: 10 + abilities.DEX.modifier // Base AC + Dex modifier
     };
-  }, [currentClass, currentBackground, customSkills, customAbilities]);
+  }, [currentClass, currentBackground, customSkills, baseAbilities]);
 
   // Compute spell information for display
   const spellInfo = useMemo(() => {
