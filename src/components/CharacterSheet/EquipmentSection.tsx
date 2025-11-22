@@ -65,7 +65,7 @@ export const EquipmentSection: React.FC<EquipmentSectionProps> = ({
                           const equipment = loadEquipment().find(eq => eq.slug === item.equipmentSlug);
                           setEquipmentModal(equipment || null);
                         }}
-                        className="font-semibold text-white hover:text-orange-300 transition-colors text-left"
+                        className="font-semibold text-theme-primary hover:text-orange-300 transition-colors text-left"
                       >
                         {item.equipmentSlug}
                       </button>

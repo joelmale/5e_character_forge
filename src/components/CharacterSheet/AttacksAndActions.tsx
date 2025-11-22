@@ -217,7 +217,7 @@ export const AttacksAndActions: React.FC<AttacksAndActionsProps> = ({
             {equippedWeapons.map((weapon, index) => (
               <div key={weapon.slug} className="flex items-center justify-between p-3 bg-theme-tertiary/50 rounded-lg">
                 <div className="flex-1">
-                  <div className="font-semibold text-white">{weapon.name}</div>
+                  <div className="font-semibold text-theme-primary">{weapon.name}</div>
                   <div className="text-sm text-theme-muted">
                     +{calculateAttackBonus(character, weapon)} to hit • {getWeaponDamage(weapon, character)} {weapon.damage?.damage_type}
                     {weapon.properties && weapon.properties.length > 0 && (
@@ -262,7 +262,7 @@ export const AttacksAndActions: React.FC<AttacksAndActionsProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div className="p-3 bg-theme-tertiary/50 rounded-lg">
               <div className="text-sm text-theme-muted">Spell Attack</div>
-              <div className="font-bold text-white">+{character.spellcasting.spellAttackBonus}</div>
+              <div className="font-bold text-theme-primary">+{character.spellcasting.spellAttackBonus}</div>
               <button
                 onClick={handleSpellAttack}
                 className="mt-2 px-3 py-2 bg-accent-purple hover:bg-accent-purple-light rounded text-sm font-medium transition-colors w-full"
@@ -272,7 +272,7 @@ export const AttacksAndActions: React.FC<AttacksAndActionsProps> = ({
             </div>
             <div className="p-3 bg-theme-tertiary/50 rounded-lg">
               <div className="text-sm text-theme-muted">Spell Save DC</div>
-              <div className="font-bold text-white">{character.spellcasting.spellSaveDC}</div>
+              <div className="font-bold text-theme-primary">{character.spellcasting.spellSaveDC}</div>
               <div className="text-xs text-theme-disabled mt-1">Enemies roll against this DC</div>
             </div>
           </div>
@@ -290,7 +290,7 @@ export const AttacksAndActions: React.FC<AttacksAndActionsProps> = ({
                       onClick={() => handleCantripAttack(cantripSlug)}
                       className="p-2 bg-purple-700 hover:bg-accent-purple rounded text-sm transition-colors text-left"
                     >
-                      <div className="font-medium text-white">{cantripSlug.replace('-', ' ')}</div>
+                      <div className="font-medium text-theme-primary">{cantripSlug.replace('-', ' ')}</div>
                       <div className="text-xs text-theme-muted">+{character.spellcasting?.spellAttackBonus || 0} to hit</div>
                     </button>
                   ))}
@@ -308,7 +308,7 @@ export const AttacksAndActions: React.FC<AttacksAndActionsProps> = ({
         <div className="mb-4">
           <div className="flex items-center justify-between mb-2">
             <span className="text-theme-tertiary">Initiative</span>
-            <span className="text-white font-medium">+{character.initiative}</span>
+            <span className="text-theme-primary font-medium">+{character.initiative}</span>
           </div>
           <button
             onClick={handleInitiative}
@@ -334,7 +334,7 @@ export const AttacksAndActions: React.FC<AttacksAndActionsProps> = ({
                   onClick={() => handleSavingThrow(ability)}
                   className="p-2 bg-theme-tertiary hover:bg-theme-quaternary rounded text-sm transition-colors text-left"
                 >
-                  <div className="font-medium text-white">{ability}</div>
+                  <div className="font-medium text-theme-primary">{ability}</div>
                   <div className="text-xs text-theme-muted">
                     {saveBonus >= 0 ? '+' : ''}{saveBonus}
                     {isProficient && <span className="text-accent-yellow-light ml-1">●</span>}
@@ -362,7 +362,7 @@ export const AttacksAndActions: React.FC<AttacksAndActionsProps> = ({
                   onClick={() => handleSkillCheck(name, ability)}
                   className="p-2 bg-theme-tertiary hover:bg-theme-quaternary rounded text-sm transition-colors text-left"
                 >
-                  <div className="font-medium text-white">{name.replace(/([A-Z])/g, ' $1').trim()}</div>
+                  <div className="font-medium text-theme-primary">{name.replace(/([A-Z])/g, ' $1').trim()}</div>
                   <div className="text-xs text-theme-muted">
                     {skill.value >= 0 ? '+' : ''}{skill.value}
                     {skill.proficient && <span className="text-accent-yellow-light ml-1">●</span>}

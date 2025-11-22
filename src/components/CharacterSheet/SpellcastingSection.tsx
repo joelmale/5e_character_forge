@@ -34,7 +34,7 @@ export const SpellcastingSection: React.FC<SpellcastingSectionProps> = ({
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
               <span className="text-theme-muted">Spellcasting Ability:</span>
-              <span className="font-bold text-white">{character.spellcasting.ability}</span>
+              <span className="font-bold text-theme-primary">{character.spellcasting.ability}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-theme-muted">Spell Save DC:</span>
@@ -70,7 +70,7 @@ export const SpellcastingSection: React.FC<SpellcastingSectionProps> = ({
               <div className="font-semibold text-theme-tertiary mb-1">Cantrips ({character.spellcasting.cantripsKnown.length})</div>
               <div className="flex flex-wrap gap-2">
                 {character.spellcasting.cantripsKnown.map((spellSlug) => (
-                  <span key={spellSlug} className="px-2 py-1 bg-purple-700 text-white text-xs rounded">
+                  <span key={spellSlug} className="px-2 py-1 bg-purple-700 text-theme-primary text-xs rounded">
                     {spellSlug}
                   </span>
                 ))}
@@ -94,7 +94,7 @@ export const SpellcastingSection: React.FC<SpellcastingSectionProps> = ({
               <div key={spellLevel} className="flex flex-col items-center space-y-2 p-2 bg-theme-tertiary/50 rounded-lg">
                 <div className="flex items-center justify-between w-full">
                   <span className="text-theme-muted text-xs">Level {spellLevel}</span>
-                  <span className="font-bold text-white text-xs">{availableSlots}/{maxSlots}</span>
+                  <span className="font-bold text-theme-primary text-xs">{availableSlots}/{maxSlots}</span>
                 </div>
                 <div className="flex items-center gap-1 justify-center flex-wrap">
                   {Array.from({ length: maxSlots }, (_, slotIndex) => (

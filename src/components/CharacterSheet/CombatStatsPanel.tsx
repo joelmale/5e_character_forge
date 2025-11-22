@@ -134,7 +134,7 @@ export const CombatStatsPanel: React.FC<CombatStatsPanelProps> = ({
         >
           <Shield className="w-5 h-5 text-red-500 mb-1" />
           <span className="text-xs font-semibold text-theme-muted uppercase">AC</span>
-          <div className="text-3xl font-extrabold text-white">{character.armorClass}</div>
+          <div className="text-3xl font-extrabold text-theme-primary">{character.armorClass}</div>
         </div>
 
         {/* Initiative */}
@@ -176,7 +176,7 @@ export const CombatStatsPanel: React.FC<CombatStatsPanelProps> = ({
         {/* HP Maximum */}
         <div className="flex items-center justify-between">
           <span className="text-xs font-semibold text-theme-muted uppercase">Hit Point Maximum</span>
-          <span className="text-lg font-bold text-white">{character.maxHitPoints}</span>
+          <span className="text-lg font-bold text-theme-primary">{character.maxHitPoints}</span>
         </div>
 
         {/* Current HP */}
@@ -210,12 +210,12 @@ export const CombatStatsPanel: React.FC<CombatStatsPanelProps> = ({
                   onChange={(e) => setTempHpInput(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && handleAddTempHp()}
                   placeholder="0"
-                  className="w-12 h-6 text-xs bg-theme-tertiary text-white rounded border border-theme-primary focus:border-blue-500 focus:outline-none text-center"
+                  className="w-12 h-6 text-xs bg-theme-tertiary text-theme-primary rounded border border-theme-primary focus:border-blue-500 focus:outline-none text-center"
                   min="1"
                 />
                 <button
                   onClick={handleAddTempHp}
-                  className="w-6 h-6 flex items-center justify-center bg-accent-blue hover:bg-accent-blue-light rounded text-white"
+                  className="w-6 h-6 flex items-center justify-center bg-accent-blue hover:bg-accent-blue-light rounded text-theme-primary"
                   title="Add temporary HP"
                 >
                   <Plus className="w-4 h-4" />

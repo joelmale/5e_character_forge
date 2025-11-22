@@ -29,7 +29,7 @@ export const LanguagesPanel: React.FC<LanguagesPanelProps> = ({
           character.languages.map((language, index) => (
             <span
               key={index}
-              className="px-2 py-1 bg-accent-green-dark text-white text-xs rounded cursor-help"
+              className="px-2 py-1 bg-accent-green-dark text-theme-primary text-xs rounded cursor-help"
               title={getLanguageDescription(language)}
             >
               {language}

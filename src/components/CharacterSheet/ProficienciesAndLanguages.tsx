@@ -28,7 +28,7 @@ export const ProficienciesAndLanguages: React.FC<ProficienciesAndLanguagesProps>
           </div>
           <div className="flex flex-wrap gap-2">
             {armorProficiencies.map((proficiency, index) => (
-              <span key={index} className="px-2 py-1 bg-blue-700 text-white text-xs rounded">
+              <span key={index} className="px-2 py-1 bg-blue-700 text-theme-primary text-xs rounded">
                 {proficiency}
               </span>
             ))}
@@ -43,7 +43,7 @@ export const ProficienciesAndLanguages: React.FC<ProficienciesAndLanguagesProps>
           </div>
           <div className="flex flex-wrap gap-2">
             {weaponProficiencies.map((proficiency, index) => (
-              <span key={index} className="px-2 py-1 bg-blue-700 text-white text-xs rounded">
+              <span key={index} className="px-2 py-1 bg-blue-700 text-theme-primary text-xs rounded">
                 {proficiency}
               </span>
             ))}
@@ -58,7 +58,7 @@ export const ProficienciesAndLanguages: React.FC<ProficienciesAndLanguagesProps>
           </div>
           <div className="flex flex-wrap gap-2">
             {toolProficiencies.map((proficiency, index) => (
-              <span key={index} className="px-2 py-1 bg-blue-700 text-white text-xs rounded">
+              <span key={index} className="px-2 py-1 bg-blue-700 text-theme-primary text-xs rounded">
                 {proficiency}
               </span>
             ))}
@@ -73,7 +73,7 @@ export const ProficienciesAndLanguages: React.FC<ProficienciesAndLanguagesProps>
           </div>
           <div className="flex flex-wrap gap-2">
             {languages.map((language, index) => (
-              <span key={index} className="px-2 py-1 bg-accent-green-dark text-white text-xs rounded">
+              <span key={index} className="px-2 py-1 bg-accent-green-dark text-theme-primary text-xs rounded">
                 {language}
               </span>
             ))}
@@ -85,19 +85,19 @@ export const ProficienciesAndLanguages: React.FC<ProficienciesAndLanguagesProps>
       <div className="mt-4 pt-4 border-t border-theme-primary">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
           <div>
-            <div className="text-lg font-bold text-white">{armorProficiencies.length}</div>
+            <div className="text-lg font-bold text-theme-primary">{armorProficiencies.length}</div>
             <div className="text-xs text-theme-muted">Armor Proficiencies</div>
           </div>
           <div>
-            <div className="text-lg font-bold text-white">{weaponProficiencies.length}</div>
+            <div className="text-lg font-bold text-theme-primary">{weaponProficiencies.length}</div>
             <div className="text-xs text-theme-muted">Weapon Proficiencies</div>
           </div>
           <div>
-            <div className="text-lg font-bold text-white">{toolProficiencies.length}</div>
+            <div className="text-lg font-bold text-theme-primary">{toolProficiencies.length}</div>
             <div className="text-xs text-theme-muted">Tool Proficiencies</div>
           </div>
           <div>
-            <div className="text-lg font-bold text-white">{languages.length}</div>
+            <div className="text-lg font-bold text-theme-primary">{languages.length}</div>
             <div className="text-xs text-theme-muted">Languages</div>
           </div>
         </div>

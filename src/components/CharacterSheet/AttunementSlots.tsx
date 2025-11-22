@@ -42,7 +42,7 @@ export const AttunementSlots: React.FC<AttunementSlotsProps> = ({
       <div className="space-y-4">
         {/* Slot Counter */}
         <div className="text-center">
-          <div className="text-3xl font-bold text-white mb-1">
+          <div className="text-3xl font-bold text-theme-primary mb-1">
             {availableSlots} / {maxSlots}
           </div>
           <div className="text-sm text-theme-muted">Available Slots</div>

@@ -101,7 +101,7 @@ export const CharacterStats: React.FC<CharacterStatsProps> = ({
         <div className="flex flex-col items-center bg-theme-tertiary/50 p-3 rounded border border-theme-primary">
           <Shield className="w-5 h-5 text-red-500 mb-1" />
           <span className="text-xs font-semibold text-theme-muted uppercase">AC</span>
-          <div className="text-3xl font-extrabold text-white">{character.armorClass}</div>
+          <div className="text-3xl font-extrabold text-theme-primary">{character.armorClass}</div>
         </div>
         <div className="flex flex-col items-center bg-theme-tertiary/50 p-3 rounded border border-theme-primary">
           <Zap className="w-5 h-5 text-red-500 mb-1" />
@@ -133,7 +133,7 @@ export const CharacterStats: React.FC<CharacterStatsProps> = ({
                   onChange={(e) => setTempHpInput(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && handleAddTempHp()}
                   placeholder="+"
-                  className="w-8 h-5 text-xs bg-theme-tertiary text-white rounded border border-theme-primary focus:border-blue-500 focus:outline-none text-center"
+                  className="w-8 h-5 text-xs bg-theme-tertiary text-theme-primary rounded border border-theme-primary focus:border-blue-500 focus:outline-none text-center"
                   min="1"
                 />
                 <button
@@ -182,7 +182,7 @@ export const CharacterStats: React.FC<CharacterStatsProps> = ({
         <div className="flex flex-col items-center bg-theme-tertiary/50 p-3 rounded border border-theme-primary">
           <UserIcon className="w-5 h-5 text-red-500 mb-1" />
           <span className="text-xs font-semibold text-theme-muted uppercase">Pass Perc</span>
-          <div className="text-xl font-extrabold text-white">{passivePerception}</div>
+          <div className="text-xl font-extrabold text-theme-primary">{passivePerception}</div>
         </div>
       </div>
     );
@@ -191,7 +191,7 @@ export const CharacterStats: React.FC<CharacterStatsProps> = ({
   // Modern layout: Horizontal 6-column grid
   return (
     <div className="grid grid-cols-2 md:grid-cols-6 gap-4 bg-theme-secondary/70 p-4 rounded-xl shadow-lg border border-red-900">
-      <div className="col-span-1 flex flex-col items-center"><Shield className="w-6 h-6 text-red-500 mb-1" /><span className="text-sm font-semibold text-theme-muted">AC</span><div className="text-4xl font-extrabold text-white">{character.armorClass}</div></div>
+      <div className="col-span-1 flex flex-col items-center"><Shield className="w-6 h-6 text-red-500 mb-1" /><span className="text-sm font-semibold text-theme-muted">AC</span><div className="text-4xl font-extrabold text-theme-primary">{character.armorClass}</div></div>
       <div className="col-span-1 flex flex-col items-center">
         <Zap className="w-6 h-6 text-red-500 mb-1" />
         <span className="text-sm font-semibold text-theme-muted">HP</span>
@@ -222,7 +222,7 @@ export const CharacterStats: React.FC<CharacterStatsProps> = ({
                 onChange={(e) => setTempHpInput(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && handleAddTempHp()}
                 placeholder="+"
-                className="w-8 h-5 text-xs bg-theme-tertiary text-white rounded border border-theme-primary focus:border-blue-500 focus:outline-none text-center"
+                className="w-8 h-5 text-xs bg-theme-tertiary text-theme-primary rounded border border-theme-primary focus:border-blue-500 focus:outline-none text-center"
                 min="1"
               />
               <button
@@ -261,7 +261,7 @@ export const CharacterStats: React.FC<CharacterStatsProps> = ({
       </div>
       <div className="col-span-1 flex flex-col items-center"><Footprints className="w-6 h-6 text-red-500 mb-1" /><span className="text-sm font-semibold text-theme-muted">Speed</span><div className="text-2xl font-extrabold text-accent-blue-light">{getSpeed()} ft</div></div>
       <div className="col-span-1 flex flex-col items-center"><BookOpen className="w-6 h-6 text-red-500 mb-1" /><span className="text-sm font-semibold text-theme-muted">Prof</span><div className="text-2xl font-extrabold text-accent-yellow-light">+{character.proficiencyBonus}</div></div>
-      <div className="col-span-1 flex flex-col items-center"><UserIcon className="w-6 h-6 text-red-500 mb-1" /><span className="text-sm font-semibold text-theme-muted">Pass Perc</span><div className="text-2xl font-extrabold text-white">{passivePerception}</div></div>
+      <div className="col-span-1 flex flex-col items-center"><UserIcon className="w-6 h-6 text-red-500 mb-1" /><span className="text-sm font-semibold text-theme-muted">Pass Perc</span><div className="text-2xl font-extrabold text-theme-primary">{passivePerception}</div></div>
     </div>
   );
 };
