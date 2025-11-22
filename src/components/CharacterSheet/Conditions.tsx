@@ -99,7 +99,7 @@ export const Conditions: React.FC<ConditionsProps> = ({
             {activeConditions.map((condition, index) => (
               <div
                 key={index}
-                className="flex items-center gap-1 px-2 py-0.5 bg-accent-red-darker/70 rounded-full text-xs text-theme-primary"
+                className="flex items-center gap-1 px-2 py-0.5 bg-accent-red-darker/70 rounded-full text-xs text-white"
               >
                 <span>{condition}</span>
                 <button
@@ -124,7 +124,7 @@ export const Conditions: React.FC<ConditionsProps> = ({
             onChange={(e) => setNewCondition(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && addCustomCondition()}
             placeholder="Add custom condition"
-            className="flex-1 px-3 py-2 bg-theme-secondary text-theme-primary rounded border border-theme-primary focus:border-yellow-500 focus:outline-none"
+            className="flex-1 px-3 py-2 bg-theme-secondary text-white rounded border border-theme-primary focus:border-yellow-500 focus:outline-none"
           />
           <button
             onClick={addCustomCondition}
@@ -147,7 +147,7 @@ export const Conditions: React.FC<ConditionsProps> = ({
                   <button
                     key={index}
                     onClick={() => addCondition(condition)}
-                    className="flex items-center gap-1 px-2 py-1 bg-theme-secondary/50 hover:bg-accent-red-darker/70 rounded text-xs text-theme-tertiary hover:text-theme-primary transition-colors text-left"
+                    className="flex items-center gap-1 px-2 py-1 bg-theme-secondary/50 hover:bg-accent-red-darker/70 rounded text-xs text-theme-tertiary hover:text-white transition-colors text-left"
                     title={`Add ${condition}`}
                   >
                     {IconComponent && <IconComponent className="w-3 h-3 flex-shrink-0" />}

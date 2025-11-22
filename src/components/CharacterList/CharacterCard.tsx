@@ -47,7 +47,7 @@ export const CharacterCard: React.FC<CharacterCardProps> = ({
       <div className="flex justify-between items-center mt-4 space-x-3">
         <button
           onClick={onView}
-          className="flex-grow py-2 bg-accent-red hover:bg-accent-red-light rounded-lg text-theme-primary font-semibold transition-colors flex items-center justify-center text-sm"
+          className="flex-grow py-2 bg-accent-red hover:bg-accent-red-light rounded-lg text-white font-semibold transition-colors flex items-center justify-center text-sm"
         >
           <BookOpen className="w-4 h-4 mr-2" /> View Sheet
         </button>

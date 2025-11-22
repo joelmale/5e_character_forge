@@ -42,7 +42,7 @@ export const ChooseCantripModal: React.FC<ChooseCantripModalProps> = ({
         <div className="flex-shrink-0 p-6 border-b border-accent-red-dark">
           <div className="flex justify-between items-center">
             <h2 className="text-2xl font-bold text-red-500">Choose a New Cantrip</h2>
-            <button onClick={onClose} className="text-theme-muted hover:text-theme-primary">
+            <button onClick={onClose} className="text-theme-muted hover:text-white">
               <XCircle className="w-6 h-6" />
             </button>
           </div>
@@ -69,7 +69,7 @@ export const ChooseCantripModal: React.FC<ChooseCantripModalProps> = ({
           <button
             onClick={handleConfirm}
             disabled={!selectedCantrip}
-            className="w-full py-3 bg-accent-green hover:bg-accent-green rounded-xl text-theme-primary font-bold transition-colors disabled:bg-theme-quaternary"
+            className="w-full py-3 bg-accent-green hover:bg-accent-green rounded-xl text-white font-bold transition-colors disabled:bg-theme-quaternary"
           >
             Confirm Selection
           </button>

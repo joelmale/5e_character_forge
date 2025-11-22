@@ -85,7 +85,7 @@ export const MonsterCard: React.FC<MonsterCardProps> = ({
             <div className="flex items-center gap-2">
               <h3 className="text-2xl font-bold text-accent-purple-light">{monster.name}</h3>
               {isCustom && (
-                <span className="px-2 py-0.5 bg-accent-green text-theme-primary text-xs rounded-full">
+                <span className="px-2 py-0.5 bg-accent-green text-white text-xs rounded-full">
                   Custom
                 </span>
               )}
@@ -158,7 +158,7 @@ export const MonsterCard: React.FC<MonsterCardProps> = ({
           <span
             className={`inline-block px-3 py-1 ${getCRColor(
               monster.challenge_rating
-            )} text-theme-primary text-sm font-bold rounded-full`}
+            )} text-white text-sm font-bold rounded-full`}
           >
             CR {monster.challenge_rating} ({monster.xp.toLocaleString()} XP)
           </span>
@@ -208,7 +208,7 @@ export const MonsterCard: React.FC<MonsterCardProps> = ({
                 e.stopPropagation();
                 onView();
               }}
-              className="w-full py-2 bg-accent-purple hover:bg-accent-purple-light rounded-lg text-theme-primary font-semibold transition-colors flex items-center justify-center text-sm"
+              className="w-full py-2 bg-accent-purple hover:bg-accent-purple-light rounded-lg text-white font-semibold transition-colors flex items-center justify-center text-sm"
             >
               <Eye className="w-4 h-4 mr-2" /> View Stat Block
             </button>
@@ -221,13 +221,13 @@ export const MonsterCard: React.FC<MonsterCardProps> = ({
                     e.stopPropagation();
                     onEdit();
                   }}
-                  className="flex-1 py-2 bg-accent-blue hover:bg-accent-blue-light rounded-lg text-theme-primary font-semibold transition-colors flex items-center justify-center text-sm"
+                  className="flex-1 py-2 bg-accent-blue hover:bg-accent-blue-light rounded-lg text-white font-semibold transition-colors flex items-center justify-center text-sm"
                 >
                   <Edit2 className="w-4 h-4 mr-1" /> Edit
                 </button>
                 <button
                   onClick={handleDelete}
-                  className="flex-1 py-2 bg-accent-red hover:bg-accent-red-light rounded-lg text-theme-primary font-semibold transition-colors flex items-center justify-center text-sm"
+                  className="flex-1 py-2 bg-accent-red hover:bg-accent-red-light rounded-lg text-white font-semibold transition-colors flex items-center justify-center text-sm"
                 >
                   <Trash2 className="w-4 h-4 mr-1" /> Delete
                 </button>

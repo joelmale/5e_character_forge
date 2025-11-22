@@ -23,7 +23,7 @@ const RandomizeButton: React.FC<{ onClick: () => void; title?: string; className
   return (
     <button
       onClick={onClick}
-      className={`px-3 py-2 bg-accent-purple hover:bg-accent-purple-light rounded-lg text-theme-primary text-sm font-medium transition-colors flex items-center gap-2 ${className}`}
+      className={`px-3 py-2 bg-accent-purple hover:bg-accent-purple-light rounded-lg text-white text-sm font-medium transition-colors flex items-center gap-2 ${className}`}
       title={title}
     >
       <Shuffle className="w-4 h-4" />
@@ -176,7 +176,7 @@ export const Step4Abilities: React.FC<StepProps> = ({ data, updateData, nextStep
         <select
           value={data.abilityScoreMethod}
           onChange={(e) => handleMethodChange(e.target.value as CharacterCreationData['abilityScoreMethod'])}
-          className="w-full p-3 bg-theme-tertiary text-theme-primary rounded-lg font-semibold text-lg"
+          className="w-full p-3 bg-theme-tertiary text-white rounded-lg font-semibold text-lg"
         >
           {Object.entries(ABILITY_METHOD_TITLES).map(([key, title]) => (
             <option key={key} value={key}>{title}</option>
@@ -223,7 +223,7 @@ export const Step4Abilities: React.FC<StepProps> = ({ data, updateData, nextStep
                     <select
                       value={baseScore}
                       onChange={(e) => handleAssignScore(ability, parseInt(e.target.value))}
-                      className="p-2 bg-theme-tertiary rounded-lg text-theme-primary font-mono"
+                      className="p-2 bg-theme-tertiary rounded-lg text-white font-mono"
                     >
                       <option value={0}>Select...</option>
                       {standardArrayScores.map(s => (
@@ -254,7 +254,7 @@ export const Step4Abilities: React.FC<StepProps> = ({ data, updateData, nextStep
         <>
           <button
             onClick={() => rollAbilityScores(data.abilityScoreMethod as 'standard-roll' | 'classic-roll' | '5d6-drop-2')}
-            className="w-full p-3 bg-accent-purple hover:bg-accent-purple-light rounded-lg text-theme-primary font-bold flex items-center justify-center gap-2"
+            className="w-full p-3 bg-accent-purple hover:bg-accent-purple-light rounded-lg text-white font-bold flex items-center justify-center gap-2"
           >
             <Dice6 className="w-5 h-5" />
             {rolledSets.length === 0 ? 'Roll Ability Scores' : 'Re-roll All Scores'}
@@ -299,7 +299,7 @@ export const Step4Abilities: React.FC<StepProps> = ({ data, updateData, nextStep
                           <select
                             value={baseScore}
                             onChange={(e) => handleAssignRolledScore(ability, parseInt(e.target.value))}
-                            className="p-2 bg-theme-tertiary rounded-lg text-theme-primary font-mono"
+                            className="p-2 bg-theme-tertiary rounded-lg text-white font-mono"
                           >
                             <option value={0}>Select...</option>
                             {rolledSets.map((set, setIdx) => {
@@ -352,7 +352,7 @@ export const Step4Abilities: React.FC<StepProps> = ({ data, updateData, nextStep
                     <select
                       value={baseScore}
                       onChange={(e) => handlePointBuyChange(ability, parseInt(e.target.value))}
-                      className="p-2 bg-theme-tertiary rounded-lg text-theme-primary font-mono"
+                      className="p-2 bg-theme-tertiary rounded-lg text-white font-mono"
                     >
                       {Object.keys(POINT_BUY_COSTS).map(score => {
                         const s = parseInt(score);
@@ -406,7 +406,7 @@ export const Step4Abilities: React.FC<StepProps> = ({ data, updateData, nextStep
                       max="20"
                       value={baseScore || ''}
                       onChange={(e) => handleCustomInput(ability, e.target.value)}
-                      className="p-2 bg-theme-tertiary rounded-lg text-theme-primary font-mono w-20"
+                      className="p-2 bg-theme-tertiary rounded-lg text-white font-mono w-20"
                       placeholder="0"
                     />
 
@@ -423,13 +423,13 @@ export const Step4Abilities: React.FC<StepProps> = ({ data, updateData, nextStep
       )}
 
       <div className='flex justify-between'>
-        <button onClick={prevStep} className="px-4 py-2 bg-theme-quaternary hover:bg-theme-hover rounded-lg text-theme-primary flex items-center">
+        <button onClick={prevStep} className="px-4 py-2 bg-theme-quaternary hover:bg-theme-hover rounded-lg text-white flex items-center">
           <ArrowLeft className="w-4 h-4 mr-2" /> Back
         </button>
         <button
           onClick={nextStep}
           disabled={!isComplete}
-          className="px-4 py-2 bg-accent-red hover:bg-accent-red-light rounded-lg text-theme-primary flex items-center disabled:bg-theme-quaternary disabled:cursor-not-allowed"
+          className="px-4 py-2 bg-accent-red hover:bg-accent-red-light rounded-lg text-white flex items-center disabled:bg-theme-quaternary disabled:cursor-not-allowed"
         >
           Next: {getNextStepLabel?.() || 'Continue'} <ArrowRight className="w-4 h-4 ml-2" />
         </button>

@@ -37,7 +37,7 @@ const EquipmentPackDisplay: React.FC<EquipmentPackDisplayProps> = ({
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <span className="text-theme-primary font-medium">{pack.name}</span>
+            <span className="text-white font-medium">{pack.name}</span>
             {pack.startingGold && pack.startingGold > 0 && (
               <span className="text-accent-yellow-light text-sm">({pack.startingGold} gp)</span>
             )}
@@ -92,7 +92,7 @@ const RandomizeButton: React.FC<{ onClick: () => void; title?: string; className
   return (
     <button
       onClick={onClick}
-      className={`px-3 py-2 bg-accent-purple hover:bg-accent-purple-light rounded-lg text-theme-primary text-sm font-medium transition-colors flex items-center gap-2 ${className}`}
+      className={`px-3 py-2 bg-accent-purple hover:bg-accent-purple-light rounded-lg text-white text-sm font-medium transition-colors flex items-center gap-2 ${className}`}
       title={title}
     >
       <Shuffle className="w-4 h-4" />
@@ -208,7 +208,7 @@ export const Step6Equipment: React.FC<StepProps & { skipToStep?: (step: number) 
                     <div className="space-y-1">
                       {option.map((item, itemIdx) => (
                         <div key={itemIdx} className="text-sm">
-                          <span className="text-theme-primary font-medium">{item.name}</span>
+                          <span className="text-white font-medium">{item.name}</span>
                           {item.quantity > 1 && (
                             <span className="text-theme-muted ml-1">x{item.quantity}</span>
                           )}
@@ -340,7 +340,7 @@ export const Step6Equipment: React.FC<StepProps & { skipToStep?: (step: number) 
          {/* Roll Button */}
          <button
            onClick={rollForTrinket}
-           className="flex items-center space-x-2 px-4 py-2 bg-accent-purple hover:bg-accent-purple-light rounded-lg text-theme-primary transition-colors"
+           className="flex items-center space-x-2 px-4 py-2 bg-accent-purple hover:bg-accent-purple-light rounded-lg text-white transition-colors"
          >
            <Dice6 className="w-4 h-4" />
            <span>Roll d{useExtendedTrinkets ? '200' : '100'}</span>
@@ -368,13 +368,13 @@ export const Step6Equipment: React.FC<StepProps & { skipToStep?: (step: number) 
        </div>
 
        <div className='flex justify-between items-center gap-3'>
-        <button onClick={prevStep} className="px-4 py-2 bg-theme-quaternary hover:bg-theme-hover rounded-lg text-theme-primary flex items-center">
+        <button onClick={prevStep} className="px-4 py-2 bg-theme-quaternary hover:bg-theme-hover rounded-lg text-white flex items-center">
           <ArrowLeft className="w-4 h-4 mr-2" /> Back
         </button>
         <button
           onClick={nextStep}
           disabled={!allChoicesMade}
-          className="px-4 py-2 bg-accent-yellow-dark hover:bg-accent-yellow rounded-lg text-theme-primary flex items-center disabled:bg-theme-quaternary disabled:cursor-not-allowed"
+          className="px-4 py-2 bg-accent-yellow-dark hover:bg-accent-yellow rounded-lg text-white flex items-center disabled:bg-theme-quaternary disabled:cursor-not-allowed"
         >
           {getNextStepLabel?.() || 'Continue'} <ArrowRight className="w-4 h-4 ml-2" />
         </button>
@@ -386,7 +386,7 @@ export const Step6Equipment: React.FC<StepProps & { skipToStep?: (step: number) 
             }
           }}
           disabled={!allChoicesMade}
-          className="px-4 py-2 bg-accent-red hover:bg-accent-red-light rounded-lg text-theme-primary flex items-center disabled:bg-theme-quaternary disabled:cursor-not-allowed"
+          className="px-4 py-2 bg-accent-red hover:bg-accent-red-light rounded-lg text-white flex items-center disabled:bg-theme-quaternary disabled:cursor-not-allowed"
         >
           Skip to Traits <ArrowRight className="w-4 h-4 ml-2" />
         </button>

@@ -12,7 +12,7 @@ const RandomizeButton: React.FC<RandomizeButtonProps> = ({ onClick, title }) => 
   <button
     onClick={onClick}
     title={title}
-    className="p-2 bg-accent-yellow-dark hover:bg-accent-yellow rounded-lg text-theme-primary transition-colors"
+    className="p-2 bg-accent-yellow-dark hover:bg-accent-yellow rounded-lg text-white transition-colors"
   >
     <Shuffle className="w-4 h-4" />
   </button>
@@ -86,7 +86,7 @@ export const Step0Level: React.FC<StepProps> = ({ data, updateData, nextStep, ge
                     : 'bg-theme-tertiary border-theme-primary hover:bg-theme-quaternary'
               }`}
             >
-              <div className={`text-center ${isSelected ? 'text-theme-primary' : isMilestone ? 'text-accent-yellow-light' : 'text-theme-tertiary'}`}>
+              <div className={`text-center ${isSelected ? 'text-white' : isMilestone ? 'text-accent-yellow-light' : 'text-theme-tertiary'}`}>
                 <div className='font-bold text-lg'>{level}</div>
                 {isMilestone && (
                   <div className='text-xs mt-1 opacity-75'>{getMilestoneIcon(level)}</div>
@@ -130,7 +130,7 @@ export const Step0Level: React.FC<StepProps> = ({ data, updateData, nextStep, ge
         <button
           onClick={nextStep}
           disabled={!data.level}
-          className="px-6 py-3 bg-accent-red hover:bg-accent-red-light rounded-lg text-theme-primary flex items-center disabled:bg-theme-quaternary disabled:cursor-not-allowed transition-colors"
+          className="px-6 py-3 bg-accent-red hover:bg-accent-red-light rounded-lg text-white flex items-center disabled:bg-theme-quaternary disabled:cursor-not-allowed transition-colors"
         >
           Next: {getNextStepLabel?.() || 'Continue'} <ArrowRight className="w-5 h-5 ml-2" />
         </button>

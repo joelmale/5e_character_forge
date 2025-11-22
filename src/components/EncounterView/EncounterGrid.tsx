@@ -44,7 +44,7 @@ const CondensedStatBlock: React.FC<{
       <div className="bg-gradient-to-r from-purple-900 to-red-900 p-4">
         <div className="flex items-start justify-between">
           <div>
-            <h3 className="text-xl font-bold text-theme-primary">
+            <h3 className="text-xl font-bold text-white">
               {monster.name}
               {instanceNumber > 1 && (
                 <span className="ml-2 text-sm text-theme-tertiary">#{instanceNumber}</span>
@@ -57,7 +57,7 @@ const CondensedStatBlock: React.FC<{
           <span
             className={`px-2 py-1 ${getCRColor(
               monster.challenge_rating
-            )} text-theme-primary text-xs font-bold rounded`}
+            )} text-white text-xs font-bold rounded`}
           >
             CR {monster.challenge_rating}
           </span>
@@ -94,7 +94,7 @@ const CondensedStatBlock: React.FC<{
           ].map((ability) => (
             <div key={ability.name} className="bg-theme-tertiary/50 p-1 rounded">
               <div className="text-theme-muted">{ability.name}</div>
-              <div className="font-bold text-theme-primary">{ability.score}</div>
+              <div className="font-bold text-white">{ability.score}</div>
               <div className="text-xs text-theme-muted">({getModifier(ability.score)})</div>
             </div>
           ))}
@@ -123,7 +123,7 @@ const CondensedStatBlock: React.FC<{
         {/* View Full Button */}
         <button
           onClick={onViewFull}
-          className="w-full py-2 bg-accent-purple hover:bg-accent-purple-light rounded-lg text-theme-primary font-semibold transition-colors flex items-center justify-center text-sm"
+          className="w-full py-2 bg-accent-purple hover:bg-accent-purple-light rounded-lg text-white font-semibold transition-colors flex items-center justify-center text-sm"
         >
           <Eye className="w-4 h-4 mr-2" />
           View Full Stat Block

@@ -81,7 +81,7 @@ export const MonsterLibrary: React.FC<MonsterLibraryProps> = ({ onSelectMonster,
             {!selectionMode && (
               <button
                 onClick={() => setShowCreateMonster(true)}
-                className="px-4 py-2 bg-accent-green text-theme-primary rounded-lg hover:bg-accent-green-dark transition-colors"
+                className="px-4 py-2 bg-accent-green text-white rounded-lg hover:bg-accent-green-dark transition-colors"
               >
                 + Create Custom Monster
               </button>
@@ -91,8 +91,8 @@ export const MonsterLibrary: React.FC<MonsterLibraryProps> = ({ onSelectMonster,
               onClick={handleToggleSelectionMode}
               className={`px-4 py-2 rounded-lg transition-colors ${
                 selectionMode
-                  ? 'bg-accent-red text-theme-primary hover:bg-accent-red-dark'
-                  : 'bg-accent-blue text-theme-primary hover:bg-blue-700'
+                  ? 'bg-accent-red text-white hover:bg-accent-red-dark'
+                  : 'bg-accent-blue text-white hover:bg-blue-700'
               }`}
             >
               {selectionMode ? 'Exit Selection Mode' : 'Select for Encounter'}
@@ -122,7 +122,7 @@ export const MonsterLibrary: React.FC<MonsterLibraryProps> = ({ onSelectMonster,
             </div>
             {uniqueMonstersSelected > 0 && onViewEncounter && (
               <button
-                className="px-4 py-2 bg-accent-blue text-theme-primary rounded-lg hover:bg-blue-700 transition-colors"
+                className="px-4 py-2 bg-accent-blue text-white rounded-lg hover:bg-blue-700 transition-colors"
                 onClick={onViewEncounter}
               >
                 View Encounter →
@@ -140,7 +140,7 @@ export const MonsterLibrary: React.FC<MonsterLibraryProps> = ({ onSelectMonster,
         >
           <div className="flex items-center gap-2">
             <span className="text-lg font-bold">Saved Encounters</span>
-            <span className="px-2 py-0.5 bg-accent-purple text-theme-primary text-xs rounded-full">
+            <span className="px-2 py-0.5 bg-accent-purple text-white text-xs rounded-full">
               {encounters.length}
             </span>
           </div>

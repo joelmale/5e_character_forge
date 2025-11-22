@@ -60,7 +60,7 @@ export const EquipmentDetailModal: React.FC<EquipmentDetailModalProps> = ({ equi
           </div>
           <button
             onClick={onClose}
-            className="text-theme-muted hover:text-theme-primary transition-colors ml-4"
+            className="text-theme-muted hover:text-white transition-colors ml-4"
           >
             <X className="w-6 h-6" />
           </button>
@@ -86,7 +86,7 @@ export const EquipmentDetailModal: React.FC<EquipmentDetailModalProps> = ({ equi
             </div>
             <div className="bg-theme-tertiary/50 p-3 rounded">
               <div className="text-xs text-theme-muted mb-1">Weight</div>
-              <div className="text-lg font-bold text-theme-primary">{equipmentData.weight} lb</div>
+              <div className="text-lg font-bold text-white">{equipmentData.weight} lb</div>
             </div>
           </div>
 
@@ -98,7 +98,7 @@ export const EquipmentDetailModal: React.FC<EquipmentDetailModalProps> = ({ equi
                 <div className="grid grid-cols-2 gap-4">
                   <div className="bg-theme-tertiary/50 p-3 rounded">
                     <div className="text-xs text-theme-muted mb-1">Category</div>
-                    <div className="text-sm font-bold text-theme-primary">
+                    <div className="text-sm font-bold text-white">
                       {equipmentData.weapon_category} {equipmentData.weapon_range}
                     </div>
                   </div>
@@ -135,7 +135,7 @@ export const EquipmentDetailModal: React.FC<EquipmentDetailModalProps> = ({ equi
                     <div className="text-xs text-theme-muted mb-1">Properties</div>
                     <div className="flex flex-wrap gap-1">
                       {equipmentData.properties.map((prop: string, idx: number) => (
-                        <span key={idx} className="text-xs bg-accent-blue/70 text-theme-primary px-2 py-1 rounded">
+                        <span key={idx} className="text-xs bg-accent-blue/70 text-white px-2 py-1 rounded">
                           {prop}
                         </span>
                       ))}
@@ -161,7 +161,7 @@ export const EquipmentDetailModal: React.FC<EquipmentDetailModalProps> = ({ equi
                 <div className="grid grid-cols-2 gap-4">
                   <div className="bg-theme-tertiary/50 p-3 rounded">
                     <div className="text-xs text-theme-muted mb-1">Category</div>
-                    <div className="text-sm font-bold text-theme-primary">{equipmentData.armor_category} Armor</div>
+                    <div className="text-sm font-bold text-white">{equipmentData.armor_category} Armor</div>
                   </div>
                   {equipmentData.armor_class && (
                     <div className="bg-theme-tertiary/50 p-3 rounded">

@@ -98,9 +98,9 @@ export const MonsterStatBlock: React.FC<MonsterStatBlockProps> = ({ monster, onC
             <div className="flex justify-between items-start">
               <div className="flex-grow">
                 <div className="flex items-center gap-3 mb-2">
-                  <h1 className="text-4xl font-bold text-theme-primary">{monster.name}</h1>
+                  <h1 className="text-4xl font-bold text-white">{monster.name}</h1>
                   {isCustom && (
-                    <span className="px-3 py-1 bg-accent-green text-theme-primary text-sm rounded-full">
+                    <span className="px-3 py-1 bg-accent-green text-white text-sm rounded-full">
                       Custom
                     </span>
                   )}
@@ -129,14 +129,14 @@ export const MonsterStatBlock: React.FC<MonsterStatBlockProps> = ({ monster, onC
                       className="p-2 bg-accent-blue hover:bg-blue-700 rounded-lg transition-colors"
                       title="Edit monster"
                     >
-                      <Edit2 className="w-6 h-6 text-theme-primary" />
+                      <Edit2 className="w-6 h-6 text-white" />
                     </button>
                     <button
                       onClick={handleDelete}
                       className="p-2 bg-accent-red hover:bg-accent-red-dark rounded-lg transition-colors"
                       title="Delete monster"
                     >
-                      <Trash2 className="w-6 h-6 text-theme-primary" />
+                      <Trash2 className="w-6 h-6 text-white" />
                     </button>
                   </>
                 )}
@@ -144,7 +144,7 @@ export const MonsterStatBlock: React.FC<MonsterStatBlockProps> = ({ monster, onC
                   onClick={onClose}
                   className="p-2 bg-theme-secondary hover:bg-theme-tertiary rounded-lg transition-colors"
                 >
-                  <X className="w-6 h-6 text-theme-primary" />
+                  <X className="w-6 h-6 text-white" />
                 </button>
               </div>
             </div>
@@ -182,7 +182,7 @@ export const MonsterStatBlock: React.FC<MonsterStatBlockProps> = ({ monster, onC
               ].map((ability) => (
                 <div key={ability.name} className="text-center">
                   <div className="font-bold text-accent-red-light text-sm">{ability.name}</div>
-                  <div className="text-2xl font-bold text-theme-primary">{ability.score}</div>
+                  <div className="text-2xl font-bold text-white">{ability.score}</div>
                   <div className="text-sm text-theme-muted">({getModifier(ability.score)})</div>
                 </div>
               ))}
@@ -319,7 +319,7 @@ export const MonsterStatBlock: React.FC<MonsterStatBlockProps> = ({ monster, onC
           <div className="bg-theme-secondary p-4 flex justify-center">
             <button
               onClick={onClose}
-              className="px-6 py-3 bg-accent-purple hover:bg-purple-700 text-theme-primary font-semibold rounded-lg transition-colors"
+              className="px-6 py-3 bg-accent-purple hover:bg-purple-700 text-white font-semibold rounded-lg transition-colors"
             >
               Close Stat Block
             </button>

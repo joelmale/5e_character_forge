@@ -7,13 +7,13 @@ interface ManualEntryScreenProps {
 
 const ManualEntryScreen: React.FC<ManualEntryScreenProps> = ({ onBack }) => {
   return (
-    <div className="min-h-screen bg-theme-primary text-theme-primary font-sans">
+    <div className="min-h-screen bg-theme-primary text-white font-sans">
       <div className="max-w-4xl mx-auto p-4 md:p-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <button
             onClick={onBack}
-            className="flex items-center space-x-2 px-4 py-2 bg-theme-tertiary hover:bg-theme-quaternary rounded-lg text-theme-primary transition-colors"
+            className="flex items-center space-x-2 px-4 py-2 bg-theme-tertiary hover:bg-theme-quaternary rounded-lg text-white transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             <span>Back to Options</span>
@@ -76,7 +76,7 @@ const ManualEntryScreen: React.FC<ManualEntryScreenProps> = ({ onBack }) => {
               </p>
               <button
                 onClick={onBack}
-                className="px-6 py-3 bg-accent-red hover:bg-accent-red-light rounded-lg text-theme-primary font-semibold transition-colors"
+                className="px-6 py-3 bg-accent-red hover:bg-accent-red-light rounded-lg text-white font-semibold transition-colors"
               >
                 Try Character Wizards
               </button>

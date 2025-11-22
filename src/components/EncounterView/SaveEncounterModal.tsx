@@ -58,12 +58,12 @@ export const SaveEncounterModal: React.FC<SaveEncounterModalProps> = ({ isOpen, 
       <div className="bg-theme-primary rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="bg-gradient-to-r from-purple-900 to-red-900 p-6 flex justify-between items-center">
-          <h2 className="text-2xl font-bold text-theme-primary">Save Encounter</h2>
+          <h2 className="text-2xl font-bold text-white">Save Encounter</h2>
           <button
             onClick={handleClose}
             className="p-2 bg-theme-secondary hover:bg-theme-tertiary rounded-lg transition-colors"
           >
-            <X className="w-6 h-6 text-theme-primary" />
+            <X className="w-6 h-6 text-white" />
           </button>
         </div>
 
@@ -79,7 +79,7 @@ export const SaveEncounterModal: React.FC<SaveEncounterModalProps> = ({ isOpen, 
               value={encounterName}
               onChange={(e) => setEncounterName(e.target.value)}
               placeholder="e.g., Goblin Ambush, Dragon's Lair"
-              className="w-full px-4 py-2 bg-theme-secondary border border-theme-secondary rounded-lg text-theme-primary placeholder-gray-500 focus:outline-none focus:border-accent-purple"
+              className="w-full px-4 py-2 bg-theme-secondary border border-theme-secondary rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-accent-purple"
               autoFocus
               onKeyPress={(e) => {
                 if (e.key === 'Enter') {
@@ -95,11 +95,11 @@ export const SaveEncounterModal: React.FC<SaveEncounterModalProps> = ({ isOpen, 
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
                 <span className="text-theme-muted">Total Monsters:</span>
-                <span className="text-theme-primary font-bold">{totalMonsters}</span>
+                <span className="text-white font-bold">{totalMonsters}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-theme-muted">Unique Types:</span>
-                <span className="text-theme-primary font-bold">{uniqueMonsters}</span>
+                <span className="text-white font-bold">{uniqueMonsters}</span>
               </div>
             </div>
           </div>
@@ -120,14 +120,14 @@ export const SaveEncounterModal: React.FC<SaveEncounterModalProps> = ({ isOpen, 
           <div className="flex gap-3">
             <button
               onClick={handleClose}
-              className="flex-1 px-6 py-3 bg-theme-tertiary hover:bg-theme-quaternary text-theme-primary font-semibold rounded-lg transition-colors"
+              className="flex-1 px-6 py-3 bg-theme-tertiary hover:bg-theme-quaternary text-white font-semibold rounded-lg transition-colors"
               disabled={saving}
             >
               Cancel
             </button>
             <button
               onClick={handleSave}
-              className="flex-1 px-6 py-3 bg-accent-green hover:bg-accent-green-dark text-theme-primary font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 px-6 py-3 bg-accent-green hover:bg-accent-green-dark text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={saving || !encounterName.trim()}
             >
               {saving ? 'Saving...' : 'Save Encounter'}

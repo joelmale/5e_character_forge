@@ -166,11 +166,11 @@ export const CreateMonsterModal: React.FC<CreateMonsterModalProps> = ({
       <div className="bg-theme-primary rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="sticky top-0 bg-gradient-to-r from-purple-900 to-green-900 p-4 flex justify-between items-center rounded-t-lg z-10">
-          <h2 className="text-2xl font-bold text-theme-primary">
+          <h2 className="text-2xl font-bold text-white">
             {editingMonster ? 'Edit Custom Monster' : 'Create Custom Monster'}
           </h2>
           <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-lg transition-colors">
-            <X className="w-6 h-6 text-theme-primary" />
+            <X className="w-6 h-6 text-white" />
           </button>
         </div>
 
@@ -187,7 +187,7 @@ export const CreateMonsterModal: React.FC<CreateMonsterModalProps> = ({
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full px-3 py-2 bg-theme-secondary text-theme-primary rounded-lg border border-theme-secondary focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="w-full px-3 py-2 bg-theme-secondary text-white rounded-lg border border-theme-secondary focus:outline-none focus:ring-2 focus:ring-purple-500"
                   placeholder="Ancient Red Dragon"
                 />
               </div>
@@ -197,7 +197,7 @@ export const CreateMonsterModal: React.FC<CreateMonsterModalProps> = ({
                 <select
                   value={size}
                   onChange={(e) => setSize(e.target.value as MonsterSize)}
-                  className="w-full px-3 py-2 bg-theme-secondary text-theme-primary rounded-lg border border-theme-secondary focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="w-full px-3 py-2 bg-theme-secondary text-white rounded-lg border border-theme-secondary focus:outline-none focus:ring-2 focus:ring-purple-500"
                 >
                   {MONSTER_SIZES.map(s => (
                     <option key={s} value={s}>{s}</option>
@@ -210,7 +210,7 @@ export const CreateMonsterModal: React.FC<CreateMonsterModalProps> = ({
                 <select
                   value={type}
                   onChange={(e) => setType(e.target.value as MonsterType)}
-                  className="w-full px-3 py-2 bg-theme-secondary text-theme-primary rounded-lg border border-theme-secondary focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="w-full px-3 py-2 bg-theme-secondary text-white rounded-lg border border-theme-secondary focus:outline-none focus:ring-2 focus:ring-purple-500"
                 >
                   {MONSTER_TYPE_CATEGORIES.map(cat => (
                     <option key={cat.type} value={cat.type}>
@@ -226,7 +226,7 @@ export const CreateMonsterModal: React.FC<CreateMonsterModalProps> = ({
                   type="text"
                   value={alignment}
                   onChange={(e) => setAlignment(e.target.value)}
-                  className="w-full px-3 py-2 bg-theme-secondary text-theme-primary rounded-lg border border-theme-secondary focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="w-full px-3 py-2 bg-theme-secondary text-white rounded-lg border border-theme-secondary focus:outline-none focus:ring-2 focus:ring-purple-500"
                   placeholder="lawful evil"
                 />
               </div>
@@ -244,7 +244,7 @@ export const CreateMonsterModal: React.FC<CreateMonsterModalProps> = ({
                   type="number"
                   value={ac}
                   onChange={(e) => setAc(parseInt(e.target.value) || 10)}
-                  className="w-full px-3 py-2 bg-theme-secondary text-theme-primary rounded-lg border border-theme-secondary focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="w-full px-3 py-2 bg-theme-secondary text-white rounded-lg border border-theme-secondary focus:outline-none focus:ring-2 focus:ring-purple-500"
                 />
               </div>
 
@@ -254,7 +254,7 @@ export const CreateMonsterModal: React.FC<CreateMonsterModalProps> = ({
                   type="number"
                   value={hp}
                   onChange={(e) => setHp(parseInt(e.target.value) || 10)}
-                  className="w-full px-3 py-2 bg-theme-secondary text-theme-primary rounded-lg border border-theme-secondary focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="w-full px-3 py-2 bg-theme-secondary text-white rounded-lg border border-theme-secondary focus:outline-none focus:ring-2 focus:ring-purple-500"
                 />
               </div>
 
@@ -264,7 +264,7 @@ export const CreateMonsterModal: React.FC<CreateMonsterModalProps> = ({
                   type="text"
                   value={hitDice}
                   onChange={(e) => setHitDice(e.target.value)}
-                  className="w-full px-3 py-2 bg-theme-secondary text-theme-primary rounded-lg border border-theme-secondary focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="w-full px-3 py-2 bg-theme-secondary text-white rounded-lg border border-theme-secondary focus:outline-none focus:ring-2 focus:ring-purple-500"
                   placeholder="18d10+36"
                 />
               </div>
@@ -290,7 +290,7 @@ export const CreateMonsterModal: React.FC<CreateMonsterModalProps> = ({
                     type="number"
                     value={value}
                     onChange={(e) => setter(parseInt(e.target.value) || 10)}
-                    className="w-full px-3 py-2 bg-theme-secondary text-theme-primary rounded-lg border border-theme-secondary focus:outline-none focus:ring-2 focus:ring-purple-500 text-center"
+                    className="w-full px-3 py-2 bg-theme-secondary text-white rounded-lg border border-theme-secondary focus:outline-none focus:ring-2 focus:ring-purple-500 text-center"
                   />
                 </div>
               ))}
@@ -308,7 +308,7 @@ export const CreateMonsterModal: React.FC<CreateMonsterModalProps> = ({
                   type="text"
                   value={walkSpeed}
                   onChange={(e) => setWalkSpeed(e.target.value)}
-                  className="w-full px-3 py-2 bg-theme-secondary text-theme-primary rounded-lg border border-theme-secondary focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="w-full px-3 py-2 bg-theme-secondary text-white rounded-lg border border-theme-secondary focus:outline-none focus:ring-2 focus:ring-purple-500"
                   placeholder="30 ft."
                 />
               </div>
@@ -319,7 +319,7 @@ export const CreateMonsterModal: React.FC<CreateMonsterModalProps> = ({
                   type="text"
                   value={flySpeed}
                   onChange={(e) => setFlySpeed(e.target.value)}
-                  className="w-full px-3 py-2 bg-theme-secondary text-theme-primary rounded-lg border border-theme-secondary focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="w-full px-3 py-2 bg-theme-secondary text-white rounded-lg border border-theme-secondary focus:outline-none focus:ring-2 focus:ring-purple-500"
                   placeholder="60 ft."
                 />
               </div>
@@ -330,7 +330,7 @@ export const CreateMonsterModal: React.FC<CreateMonsterModalProps> = ({
                   type="text"
                   value={swimSpeed}
                   onChange={(e) => setSwimSpeed(e.target.value)}
-                  className="w-full px-3 py-2 bg-theme-secondary text-theme-primary rounded-lg border border-theme-secondary focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="w-full px-3 py-2 bg-theme-secondary text-white rounded-lg border border-theme-secondary focus:outline-none focus:ring-2 focus:ring-purple-500"
                   placeholder="40 ft."
                 />
               </div>
@@ -341,7 +341,7 @@ export const CreateMonsterModal: React.FC<CreateMonsterModalProps> = ({
                   type="text"
                   value={burrowSpeed}
                   onChange={(e) => setBurrowSpeed(e.target.value)}
-                  className="w-full px-3 py-2 bg-theme-secondary text-theme-primary rounded-lg border border-theme-secondary focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="w-full px-3 py-2 bg-theme-secondary text-white rounded-lg border border-theme-secondary focus:outline-none focus:ring-2 focus:ring-purple-500"
                   placeholder="20 ft."
                 />
               </div>
@@ -352,7 +352,7 @@ export const CreateMonsterModal: React.FC<CreateMonsterModalProps> = ({
                   type="text"
                   value={climbSpeed}
                   onChange={(e) => setClimbSpeed(e.target.value)}
-                  className="w-full px-3 py-2 bg-theme-secondary text-theme-primary rounded-lg border border-theme-secondary focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="w-full px-3 py-2 bg-theme-secondary text-white rounded-lg border border-theme-secondary focus:outline-none focus:ring-2 focus:ring-purple-500"
                   placeholder="30 ft."
                 />
               </div>
@@ -383,7 +383,7 @@ export const CreateMonsterModal: React.FC<CreateMonsterModalProps> = ({
                   value={cr}
                   onChange={(e) => setCr(parseFloat(e.target.value) || 0)}
                   step="0.125"
-                  className="w-full px-3 py-2 bg-theme-secondary text-theme-primary rounded-lg border border-theme-secondary focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="w-full px-3 py-2 bg-theme-secondary text-white rounded-lg border border-theme-secondary focus:outline-none focus:ring-2 focus:ring-purple-500"
                 />
               </div>
 
@@ -393,7 +393,7 @@ export const CreateMonsterModal: React.FC<CreateMonsterModalProps> = ({
                   type="number"
                   value={xp}
                   onChange={(e) => setXp(parseInt(e.target.value) || 10)}
-                  className="w-full px-3 py-2 bg-theme-secondary text-theme-primary rounded-lg border border-theme-secondary focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="w-full px-3 py-2 bg-theme-secondary text-white rounded-lg border border-theme-secondary focus:outline-none focus:ring-2 focus:ring-purple-500"
                 />
               </div>
             </div>
@@ -410,7 +410,7 @@ export const CreateMonsterModal: React.FC<CreateMonsterModalProps> = ({
                   type="text"
                   value={senses}
                   onChange={(e) => setSenses(e.target.value)}
-                  className="w-full px-3 py-2 bg-theme-secondary text-theme-primary rounded-lg border border-theme-secondary focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="w-full px-3 py-2 bg-theme-secondary text-white rounded-lg border border-theme-secondary focus:outline-none focus:ring-2 focus:ring-purple-500"
                   placeholder="darkvision 60 ft., passive Perception 12"
                 />
               </div>
@@ -421,7 +421,7 @@ export const CreateMonsterModal: React.FC<CreateMonsterModalProps> = ({
                   type="text"
                   value={languages}
                   onChange={(e) => setLanguages(e.target.value)}
-                  className="w-full px-3 py-2 bg-theme-secondary text-theme-primary rounded-lg border border-theme-secondary focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="w-full px-3 py-2 bg-theme-secondary text-white rounded-lg border border-theme-secondary focus:outline-none focus:ring-2 focus:ring-purple-500"
                   placeholder="Common, Draconic"
                 />
               </div>
@@ -434,7 +434,7 @@ export const CreateMonsterModal: React.FC<CreateMonsterModalProps> = ({
               <h3 className="text-xl font-bold text-accent-purple-light">Special Abilities</h3>
               <button
                 onClick={() => setSpecialAbilities([...specialAbilities, { name: '', desc: '' }])}
-                className="px-3 py-1 bg-accent-purple hover:bg-purple-700 text-theme-primary rounded-lg text-sm flex items-center gap-1"
+                className="px-3 py-1 bg-accent-purple hover:bg-purple-700 text-white rounded-lg text-sm flex items-center gap-1"
               >
                 <Plus className="w-4 h-4" /> Add
               </button>
@@ -451,7 +451,7 @@ export const CreateMonsterModal: React.FC<CreateMonsterModalProps> = ({
                       updated[idx].name = e.target.value;
                       setSpecialAbilities(updated);
                     }}
-                    className="flex-grow px-3 py-2 bg-theme-tertiary text-theme-primary rounded-lg border border-theme-primary focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="flex-grow px-3 py-2 bg-theme-tertiary text-white rounded-lg border border-theme-primary focus:outline-none focus:ring-2 focus:ring-purple-500"
                     placeholder="Ability Name"
                   />
                   <button
@@ -468,7 +468,7 @@ export const CreateMonsterModal: React.FC<CreateMonsterModalProps> = ({
                     updated[idx].desc = e.target.value;
                     setSpecialAbilities(updated);
                   }}
-                  className="w-full px-3 py-2 bg-theme-tertiary text-theme-primary rounded-lg border border-theme-primary focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="w-full px-3 py-2 bg-theme-tertiary text-white rounded-lg border border-theme-primary focus:outline-none focus:ring-2 focus:ring-purple-500"
                   placeholder="Ability description..."
                   rows={3}
                 />
@@ -482,7 +482,7 @@ export const CreateMonsterModal: React.FC<CreateMonsterModalProps> = ({
               <h3 className="text-xl font-bold text-accent-red-light">Actions</h3>
               <button
                 onClick={() => setActions([...actions, { name: '', desc: '' }])}
-                className="px-3 py-1 bg-accent-red hover:bg-accent-red-dark text-theme-primary rounded-lg text-sm flex items-center gap-1"
+                className="px-3 py-1 bg-accent-red hover:bg-accent-red-dark text-white rounded-lg text-sm flex items-center gap-1"
               >
                 <Plus className="w-4 h-4" /> Add
               </button>
@@ -499,7 +499,7 @@ export const CreateMonsterModal: React.FC<CreateMonsterModalProps> = ({
                       updated[idx].name = e.target.value;
                       setActions(updated);
                     }}
-                    className="flex-grow px-3 py-2 bg-theme-tertiary text-theme-primary rounded-lg border border-theme-primary focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="flex-grow px-3 py-2 bg-theme-tertiary text-white rounded-lg border border-theme-primary focus:outline-none focus:ring-2 focus:ring-purple-500"
                     placeholder="Action Name"
                   />
                   <button
@@ -516,7 +516,7 @@ export const CreateMonsterModal: React.FC<CreateMonsterModalProps> = ({
                     updated[idx].desc = e.target.value;
                     setActions(updated);
                   }}
-                  className="w-full px-3 py-2 bg-theme-tertiary text-theme-primary rounded-lg border border-theme-primary focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="w-full px-3 py-2 bg-theme-tertiary text-white rounded-lg border border-theme-primary focus:outline-none focus:ring-2 focus:ring-purple-500"
                   placeholder="Action description..."
                   rows={3}
                 />
@@ -530,7 +530,7 @@ export const CreateMonsterModal: React.FC<CreateMonsterModalProps> = ({
               <h3 className="text-xl font-bold text-accent-yellow-light">Legendary Actions (Optional)</h3>
               <button
                 onClick={() => setLegendaryActions([...legendaryActions, { name: '', desc: '' }])}
-                className="px-3 py-1 bg-accent-yellow-dark hover:bg-yellow-700 text-theme-primary rounded-lg text-sm flex items-center gap-1"
+                className="px-3 py-1 bg-accent-yellow-dark hover:bg-yellow-700 text-white rounded-lg text-sm flex items-center gap-1"
               >
                 <Plus className="w-4 h-4" /> Add
               </button>
@@ -547,7 +547,7 @@ export const CreateMonsterModal: React.FC<CreateMonsterModalProps> = ({
                       updated[idx].name = e.target.value;
                       setLegendaryActions(updated);
                     }}
-                    className="flex-grow px-3 py-2 bg-theme-tertiary text-theme-primary rounded-lg border border-theme-primary focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="flex-grow px-3 py-2 bg-theme-tertiary text-white rounded-lg border border-theme-primary focus:outline-none focus:ring-2 focus:ring-purple-500"
                     placeholder="Legendary Action Name"
                   />
                   <button
@@ -564,7 +564,7 @@ export const CreateMonsterModal: React.FC<CreateMonsterModalProps> = ({
                     updated[idx].desc = e.target.value;
                     setLegendaryActions(updated);
                   }}
-                  className="w-full px-3 py-2 bg-theme-tertiary text-theme-primary rounded-lg border border-theme-primary focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="w-full px-3 py-2 bg-theme-tertiary text-white rounded-lg border border-theme-primary focus:outline-none focus:ring-2 focus:ring-purple-500"
                   placeholder="Legendary action description..."
                   rows={3}
                 />
@@ -577,13 +577,13 @@ export const CreateMonsterModal: React.FC<CreateMonsterModalProps> = ({
         <div className="sticky bottom-0 bg-theme-secondary p-4 flex justify-end gap-3 rounded-b-lg border-t border-theme-secondary">
           <button
             onClick={onClose}
-            className="px-6 py-2 bg-theme-tertiary hover:bg-theme-quaternary text-theme-primary rounded-lg transition-colors"
+            className="px-6 py-2 bg-theme-tertiary hover:bg-theme-quaternary text-white rounded-lg transition-colors"
           >
             Cancel
           </button>
           <button
             onClick={handleSave}
-            className="px-6 py-2 bg-accent-green hover:bg-accent-green-dark text-theme-primary rounded-lg transition-colors font-semibold"
+            className="px-6 py-2 bg-accent-green hover:bg-accent-green-dark text-white rounded-lg transition-colors font-semibold"
           >
             {editingMonster ? 'Update Monster' : 'Create Monster'}
           </button>

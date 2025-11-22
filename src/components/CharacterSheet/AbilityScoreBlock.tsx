@@ -93,7 +93,7 @@ export const AbilityScoreBlock: React.FC<AbilityScoreBlockProps> = ({
              <div className="absolute inset-0 rounded-full border-4 border-theme-primary bg-theme-secondary group-hover:border-red-500 group-hover:bg-red-900/30 transition-all" />
            {/* Score */}
            <div className="absolute inset-0 flex items-center justify-center">
-             <span className="text-2xl font-bold text-theme-primary">{ability.score}</span>
+             <span className="text-2xl font-bold text-white">{ability.score}</span>
            </div>
             {/* Roll indicator */}
             {getRollIcon() && (
@@ -173,7 +173,7 @@ export const AbilityScoreBlock: React.FC<AbilityScoreBlockProps> = ({
 
           {/* Score */}
           <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-2xl font-bold text-theme-primary">{ability.score}</span>
+            <span className="text-2xl font-bold text-white">{ability.score}</span>
           </div>
 
           {/* Roll indicator */}
@@ -184,7 +184,7 @@ export const AbilityScoreBlock: React.FC<AbilityScoreBlockProps> = ({
           )}
 
           {/* Modifier badge overlapping bottom */}
-          <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 px-2 py-1 bg-accent-yellow-dark rounded-full border-2 border-theme-tertiary text-xs font-bold text-theme-primary min-w-8 text-center">
+          <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 px-2 py-1 bg-accent-yellow-dark rounded-full border-2 border-theme-tertiary text-xs font-bold text-white min-w-8 text-center">
             {formatModifier(ability.modifier)}
           </div>
         </div>

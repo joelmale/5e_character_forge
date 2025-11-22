@@ -22,10 +22,10 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({
           <div className="p-4 bg-theme-secondary rounded-xl shadow-lg border-l-4 border-blue-500">
             <h3 className="text-lg font-bold text-accent-blue-light mb-2">Personality, Ideals, Bonds & Flaws</h3>
             <ul className="list-disc list-inside space-y-1 text-sm text-theme-tertiary">
-              <li><span className="font-semibold text-theme-primary">Personality:</span> {character.featuresAndTraits.personality}</li>
-              <li><span className="font-semibold text-theme-primary">Ideals:</span> {character.featuresAndTraits.ideals}</li>
-              <li><span className="font-semibold text-theme-primary">Bonds:</span> {character.featuresAndTraits.bonds}</li>
-              <li><span className="font-semibold text-theme-primary">Flaws:</span> {character.featuresAndTraits.flaws}</li>
+              <li><span className="font-semibold text-white">Personality:</span> {character.featuresAndTraits.personality}</li>
+              <li><span className="font-semibold text-white">Ideals:</span> {character.featuresAndTraits.ideals}</li>
+              <li><span className="font-semibold text-white">Bonds:</span> {character.featuresAndTraits.bonds}</li>
+              <li><span className="font-semibold text-white">Flaws:</span> {character.featuresAndTraits.flaws}</li>
             </ul>
           </div>
 
@@ -37,7 +37,7 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({
                 <button
                   key={`r-${index}`}
                   onClick={() => onFeatureClick(trait)}
-                  className="px-2 py-1 bg-accent-green-dark text-theme-primary text-xs rounded hover:bg-accent-green transition-colors cursor-pointer"
+                  className="px-2 py-1 bg-accent-green-dark text-white text-xs rounded hover:bg-accent-green transition-colors cursor-pointer"
                 >
                   {trait}
                 </button>
@@ -62,7 +62,7 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({
                   }, [] as typeof character.srdFeatures.classFeatures)
                   .map((feature, index) => (
                     <div key={`cf-${index}`} className="flex items-start gap-2">
-                      <span className="text-xs bg-orange-700 text-theme-primary px-1.5 py-0.5 rounded font-mono">
+                      <span className="text-xs bg-orange-700 text-white px-1.5 py-0.5 rounded font-mono">
                         L{feature.level}
                       </span>
                       <button
@@ -84,7 +84,7 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({
               <div className="space-y-2 text-sm text-theme-tertiary max-h-60 overflow-y-auto">
                 {character.srdFeatures.subclassFeatures.map((feature, index) => (
                   <div key={`scf-${index}`} className="flex items-start gap-2">
-                    <span className="text-xs bg-purple-700 text-theme-primary px-1.5 py-0.5 rounded font-mono">
+                    <span className="text-xs bg-purple-700 text-white px-1.5 py-0.5 rounded font-mono">
                       L{feature.level}
                     </span>
                     <button
@@ -144,10 +144,10 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({
         <div className="p-4 bg-theme-secondary rounded-xl shadow-lg border-l-4 border-blue-500">
           <h3 className="text-lg font-bold text-accent-blue-light mb-2">Personality, Ideals, Bonds & Flaws</h3>
           <ul className="list-disc list-inside space-y-1 text-sm text-theme-tertiary">
-            <li><span className="font-semibold text-theme-primary">Personality:</span> {character.featuresAndTraits.personality}</li>
-            <li><span className="font-semibold text-theme-primary">Ideals:</span> {character.featuresAndTraits.ideals}</li>
-            <li><span className="font-semibold text-theme-primary">Bonds:</span> {character.featuresAndTraits.bonds}</li>
-            <li><span className="font-semibold text-theme-primary">Flaws:</span> {character.featuresAndTraits.flaws}</li>
+            <li><span className="font-semibold text-white">Personality:</span> {character.featuresAndTraits.personality}</li>
+            <li><span className="font-semibold text-white">Ideals:</span> {character.featuresAndTraits.ideals}</li>
+            <li><span className="font-semibold text-white">Bonds:</span> {character.featuresAndTraits.bonds}</li>
+            <li><span className="font-semibold text-white">Flaws:</span> {character.featuresAndTraits.flaws}</li>
           </ul>
         </div>
       </div>
@@ -161,7 +161,7 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({
               <button
                 key={`r-${index}`}
                 onClick={() => onFeatureClick(trait)}
-                className="px-2 py-1 bg-accent-green-dark text-theme-primary text-xs rounded hover:bg-accent-green transition-colors cursor-pointer"
+                className="px-2 py-1 bg-accent-green-dark text-white text-xs rounded hover:bg-accent-green transition-colors cursor-pointer"
               >
                 {trait}
               </button>
@@ -186,7 +186,7 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({
                 }, [] as typeof character.srdFeatures.classFeatures)
                 .map((feature, index) => (
                   <div key={`cf-${index}`} className="flex items-start gap-2">
-                    <span className="text-xs bg-orange-700 text-theme-primary px-1.5 py-0.5 rounded font-mono">
+                    <span className="text-xs bg-orange-700 text-white px-1.5 py-0.5 rounded font-mono">
                       L{feature.level}
                     </span>
                     <button
@@ -213,7 +213,7 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({
             <div className="space-y-2 text-sm text-theme-tertiary max-h-60 overflow-y-auto">
               {character.srdFeatures.subclassFeatures.map((feature, index) => (
                 <div key={`scf-${index}`} className="flex items-start gap-2">
-                  <span className="text-xs bg-purple-700 text-theme-primary px-1.5 py-0.5 rounded font-mono">
+                  <span className="text-xs bg-purple-700 text-white px-1.5 py-0.5 rounded font-mono">
                     L{feature.level}
                   </span>
                   <button

@@ -40,7 +40,7 @@ export const RollHistoryTicker: React.FC<RollHistoryTickerProps> = ({ rolls }) =
                     ? 'text-accent-green-light'
                     : roll.critical === 'failure'
                     ? 'text-accent-red-light'
-                    : 'text-theme-primary'
+                    : 'text-white'
                 }`}
               >
                 {roll.total}
@@ -71,7 +71,7 @@ export const RollHistoryModal: React.FC<RollHistoryModalProps> = ({
         className="fixed bottom-4 right-4 p-3 bg-accent-red hover:bg-accent-red-light rounded-full shadow-lg transition-colors z-30"
         title="View Roll History"
       >
-        <History className="w-6 h-6 text-theme-primary" />
+        <History className="w-6 h-6 text-white" />
       </button>
     );
   }
@@ -112,7 +112,7 @@ export const RollHistoryModal: React.FC<RollHistoryModalProps> = ({
             )}
             <button
               onClick={() => setIsOpen(false)}
-              className="p-2 text-theme-muted hover:text-theme-primary transition-colors"
+              className="p-2 text-theme-muted hover:text-white transition-colors"
               title="Close"
             >
               <X className="w-5 h-5" />
@@ -148,15 +148,15 @@ export const RollHistoryModal: React.FC<RollHistoryModalProps> = ({
                   >
                     <div className="flex justify-between items-start mb-2">
                       <div className="flex items-center gap-2">
-                        <span className="font-bold text-theme-primary">
+                        <span className="font-bold text-white">
                           {roll.label}
                         </span>
                         {roll.critical && (
                           <span
                             className={`text-xs px-2 py-1 rounded font-bold ${
                               roll.critical === 'success'
-                                ? 'bg-accent-green text-theme-primary'
-                                : 'bg-accent-red-light text-theme-primary'
+                                ? 'bg-accent-green text-white'
+                                : 'bg-accent-red-light text-white'
                             }`}
                           >
                             {roll.critical === 'success'
@@ -222,7 +222,7 @@ export const RollHistoryModal: React.FC<RollHistoryModalProps> = ({
                                ? 'text-accent-green-light'
                                : roll.critical === 'failure'
                                ? 'text-accent-red-light'
-                               : 'text-theme-primary'
+                               : 'text-white'
                            }`}
                          >
                            {roll.total}

@@ -20,7 +20,7 @@ export const ImportExportControls: React.FC<ImportExportControlsProps> = ({
     <div className="flex flex-col space-y-3 md:space-y-0 md:flex-row md:space-x-3 w-full md:w-auto">
       <button
         onClick={onNewCharacter}
-        className="w-full md:w-auto px-6 py-3 bg-accent-red hover:bg-accent-red-light rounded-xl text-theme-primary font-bold shadow-red-theme/50 shadow-lg transition-all flex items-center justify-center"
+        className="w-full md:w-auto px-6 py-3 bg-accent-red hover:bg-accent-red-light rounded-xl text-white font-bold shadow-red-theme/50 shadow-lg transition-all flex items-center justify-center"
       >
         <Plus className="w-5 h-5 mr-2" />
         New Character Wizard
@@ -28,12 +28,12 @@ export const ImportExportControls: React.FC<ImportExportControlsProps> = ({
       <button
         onClick={onExport}
         disabled={characters.length === 0}
-        className="w-full md:w-auto px-6 py-3 bg-accent-blue hover:bg-accent-blue-light rounded-xl text-theme-primary font-bold shadow-blue-800/50 shadow-lg transition-all flex items-center justify-center disabled:bg-theme-quaternary disabled:cursor-not-allowed"
+        className="w-full md:w-auto px-6 py-3 bg-accent-blue hover:bg-accent-blue-light rounded-xl text-white font-bold shadow-blue-800/50 shadow-lg transition-all flex items-center justify-center disabled:bg-theme-quaternary disabled:cursor-not-allowed"
       >
         <Download className="w-5 h-5 mr-2" />
         Export Data
       </button>
-      <label className="w-full md:w-auto px-6 py-3 bg-accent-green hover:bg-accent-green rounded-xl text-theme-primary font-bold shadow-green-800/50 shadow-lg transition-all flex items-center justify-center cursor-pointer">
+      <label className="w-full md:w-auto px-6 py-3 bg-accent-green hover:bg-accent-green rounded-xl text-white font-bold shadow-green-800/50 shadow-lg transition-all flex items-center justify-center cursor-pointer">
         <Upload className="w-5 h-5 mr-2" />
         Import Data
         <input

@@ -115,9 +115,9 @@ export const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({
         </div>
         <div className="flex items-center gap-2">
           {isCollapsed ? (
-            <ChevronRight className="w-6 h-6 text-theme-primary group-hover:text-accent-yellow-light transition-colors" />
+            <ChevronRight className="w-6 h-6 text-white group-hover:text-accent-yellow-light transition-colors" />
           ) : (
-            <ChevronDown className="w-6 h-6 text-theme-primary group-hover:text-accent-yellow-light transition-colors" />
+            <ChevronDown className="w-6 h-6 text-white group-hover:text-accent-yellow-light transition-colors" />
           )}
         </div>
       </button>

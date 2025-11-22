@@ -57,7 +57,7 @@ export const ExperiencePoints: React.FC<ExperiencePointsProps> = ({
       <div className="space-y-4">
         {/* Current XP Display */}
         <div className="text-center">
-          <div className="text-3xl font-bold text-theme-primary mb-1">
+          <div className="text-3xl font-bold text-white mb-1">
             {currentXP.toLocaleString()}
           </div>
           <div className="text-sm text-theme-muted">Total XP</div>
@@ -87,7 +87,7 @@ export const ExperiencePoints: React.FC<ExperiencePointsProps> = ({
             value={xpInput}
             onChange={(e) => setXpInput(e.target.value)}
             placeholder="Enter XP to add"
-            className="flex-1 px-3 py-2 bg-theme-secondary text-theme-primary rounded border border-theme-primary focus:border-yellow-500 focus:outline-none"
+            className="flex-1 px-3 py-2 bg-theme-secondary text-white rounded border border-theme-primary focus:border-yellow-500 focus:outline-none"
           />
           <button
             onClick={addXP}
@@ -102,7 +102,7 @@ export const ExperiencePoints: React.FC<ExperiencePointsProps> = ({
         {currentXP >= nextLevelXP && (
           <button
             onClick={levelUp}
-            className="w-full py-3 bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-500 hover:to-purple-400 rounded-lg text-theme-primary font-bold transition-all duration-200 transform hover:scale-105 shadow-lg"
+            className="w-full py-3 bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-500 hover:to-purple-400 rounded-lg text-white font-bold transition-all duration-200 transform hover:scale-105 shadow-lg"
           >
             🎉 LEVEL UP AVAILABLE! 🎉
           </button>

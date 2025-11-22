@@ -28,7 +28,7 @@ export const FeatureModal: React.FC<FeatureModalProps> = ({ feature, onClose }) 
           <h3 className="text-2xl font-bold text-accent-red-light">{feature.name}</h3>
           <button
             onClick={onClose}
-            className="text-theme-muted hover:text-theme-primary transition-colors"
+            className="text-theme-muted hover:text-white transition-colors"
           >
             <X className="w-6 h-6" />
           </button>

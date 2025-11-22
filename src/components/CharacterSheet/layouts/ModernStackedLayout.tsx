@@ -334,7 +334,7 @@ export const ModernStackedLayout: React.FC<CharacterSheetProps> = ({
   };
 
   return (
-    <div className="p-4 md:p-8 bg-theme-primary text-theme-primary min-h-screen pb-24">
+    <div className="p-4 md:p-8 bg-theme-primary text-white min-h-screen pb-24">
       <div className="max-w-4xl mx-auto space-y-3">
         <CharacterHeader
           character={character}
@@ -367,8 +367,8 @@ export const ModernStackedLayout: React.FC<CharacterSheetProps> = ({
             onClick={toggleAdjustMode}
             className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
               adjustMode
-                ? 'bg-accent-green hover:bg-accent-green text-theme-primary'
-                : 'bg-accent-purple hover:bg-accent-purple-light text-theme-primary'
+                ? 'bg-accent-green hover:bg-accent-green text-white'
+                : 'bg-accent-purple hover:bg-accent-purple-light text-white'
             }`}
             title={adjustMode ? 'Exit layout adjustment mode' : 'Enter layout adjustment mode'}
           >

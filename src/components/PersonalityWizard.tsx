@@ -340,7 +340,7 @@ const PersonalityWizard: React.FC<PersonalityWizardProps> = ({ isOpen, onClose: 
         <div className="flex items-center justify-between mb-8">
           <button
             onClick={onBack}
-            className="flex items-center space-x-2 px-4 py-2 bg-theme-tertiary hover:bg-theme-quaternary rounded-lg text-theme-primary transition-colors"
+            className="flex items-center space-x-2 px-4 py-2 bg-theme-tertiary hover:bg-theme-quaternary rounded-lg text-white transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             <span>Back to Options</span>
@@ -785,14 +785,14 @@ const ProfileDisplay: React.FC<{
     <div className="flex justify-center space-x-4">
       <button
         onClick={onBack}
-        className="px-6 py-3 bg-theme-quaternary hover:bg-theme-hover rounded-lg text-theme-primary transition-colors flex items-center"
+        className="px-6 py-3 bg-theme-quaternary hover:bg-theme-hover rounded-lg text-white transition-colors flex items-center"
       >
         <ArrowLeft className="w-4 h-4 mr-2" />
         Back to Choices
       </button>
           <button
             onClick={onContinue}
-            className="px-6 py-3 bg-accent-purple hover:bg-accent-purple-light rounded-lg text-theme-primary font-semibold transition-colors flex items-center"
+            className="px-6 py-3 bg-accent-purple hover:bg-accent-purple-light rounded-lg text-white font-semibold transition-colors flex items-center"
           >
         Create Character
         <ArrowRight className="w-4 h-4 ml-2" />

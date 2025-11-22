@@ -171,14 +171,14 @@ const NameGeneratorModal: React.FC<NameGeneratorModalProps> = ({
           <div className="flex items-end gap-2">
             <button
               onClick={generateNewName}
-              className="flex-1 bg-accent-blue hover:bg-accent-blue-light text-theme-primary px-4 py-2 rounded flex items-center justify-center gap-2 transition-colors"
+              className="flex-1 bg-accent-blue hover:bg-accent-blue-light text-white px-4 py-2 rounded flex items-center justify-center gap-2 transition-colors"
             >
               <Shuffle className="w-4 h-4" />
               Generate
             </button>
             <button
               onClick={generateNameOptions}
-              className="bg-accent-purple hover:bg-accent-purple-light text-theme-primary px-4 py-2 rounded flex items-center justify-center gap-2 transition-colors"
+              className="bg-accent-purple hover:bg-accent-purple-light text-white px-4 py-2 rounded flex items-center justify-center gap-2 transition-colors"
               title="Generate multiple options"
             >
               <BookOpen className="w-4 h-4" />
@@ -220,7 +220,7 @@ const NameGeneratorModal: React.FC<NameGeneratorModalProps> = ({
                 </button>
                 <button
                   onClick={() => selectName(currentName.name)}
-                  className="bg-accent-green hover:bg-accent-green text-theme-primary px-4 py-1 rounded text-sm transition-colors"
+                  className="bg-accent-green hover:bg-accent-green text-white px-4 py-1 rounded text-sm transition-colors"
                 >
                   Select
                 </button>
@@ -267,7 +267,7 @@ const NameGeneratorModal: React.FC<NameGeneratorModalProps> = ({
                       </button>
                       <button
                         onClick={() => selectName(name.name)}
-                        className="bg-accent-green hover:bg-accent-green text-theme-primary px-3 py-1 rounded text-xs transition-colors"
+                        className="bg-accent-green hover:bg-accent-green text-white px-3 py-1 rounded text-xs transition-colors"
                       >
                         Select
                       </button>
@@ -336,7 +336,7 @@ const NameGeneratorModal: React.FC<NameGeneratorModalProps> = ({
                   )}
                   <button
                     onClick={() => selectName(item.name)}
-                    className="bg-accent-green hover:bg-accent-green text-theme-primary px-3 py-1 rounded text-xs transition-colors"
+                    className="bg-accent-green hover:bg-accent-green text-white px-3 py-1 rounded text-xs transition-colors"
                   >
                     Select
                   </button>

@@ -67,12 +67,12 @@ export const MonsterFilters: React.FC = () => {
             placeholder="Search monsters..."
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-theme-tertiary text-theme-primary rounded-lg border border-theme-primary focus:outline-none focus:ring-2 focus:ring-purple-500"
+            className="w-full pl-10 pr-4 py-2 bg-theme-tertiary text-white rounded-lg border border-theme-primary focus:outline-none focus:ring-2 focus:ring-purple-500"
           />
           {searchInput && (
             <button
               onClick={() => setSearchInput('')}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-theme-muted hover:text-theme-primary"
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-theme-muted hover:text-white"
             >
               <X className="w-4 h-4" />
             </button>
@@ -81,7 +81,7 @@ export const MonsterFilters: React.FC = () => {
 
         <button
           onClick={() => setIsExpanded(!isExpanded)}
-          className="px-4 py-2 bg-theme-tertiary text-theme-primary rounded-lg hover:bg-theme-quaternary transition-colors whitespace-nowrap"
+          className="px-4 py-2 bg-theme-tertiary text-white rounded-lg hover:bg-theme-quaternary transition-colors whitespace-nowrap"
         >
           {isExpanded ? 'Hide' : 'Show'} Filters
         </button>
@@ -92,7 +92,7 @@ export const MonsterFilters: React.FC = () => {
               clearFilters();
               setSearchInput('');
             }}
-            className="px-4 py-2 bg-accent-red text-theme-primary rounded-lg hover:bg-accent-red-dark transition-colors whitespace-nowrap"
+            className="px-4 py-2 bg-accent-red text-white rounded-lg hover:bg-accent-red-dark transition-colors whitespace-nowrap"
           >
             Clear All
           </button>
@@ -114,7 +114,7 @@ export const MonsterFilters: React.FC = () => {
                   onClick={() => handleQuickCRRange(range.min, range.max)}
                   className={`px-3 py-1 rounded-lg text-sm transition-colors ${
                     filters.crMin === range.min && filters.crMax === range.max
-                      ? 'bg-accent-purple text-theme-primary'
+                      ? 'bg-accent-purple text-white'
                       : 'bg-theme-tertiary text-theme-tertiary hover:bg-theme-quaternary'
                   }`}
                 >
@@ -166,7 +166,7 @@ export const MonsterFilters: React.FC = () => {
                   onClick={() => handleTypeToggle(category.type)}
                   className={`px-3 py-1.5 rounded-lg text-sm transition-colors flex items-center gap-1 ${
                     filters.types.includes(category.type)
-                      ? 'bg-accent-purple text-theme-primary'
+                      ? 'bg-accent-purple text-white'
                       : 'bg-theme-tertiary text-theme-tertiary hover:bg-theme-quaternary'
                   }`}
                   title={category.description}
@@ -190,7 +190,7 @@ export const MonsterFilters: React.FC = () => {
                   onClick={() => handleSizeToggle(size)}
                   className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${
                     filters.sizes.includes(size)
-                      ? 'bg-accent-purple text-theme-primary'
+                      ? 'bg-accent-purple text-white'
                       : 'bg-theme-tertiary text-theme-tertiary hover:bg-theme-quaternary'
                   }`}
                 >

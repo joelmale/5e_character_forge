@@ -91,7 +91,7 @@ export const CoinManagement: React.FC<CoinManagementProps> = ({
 
         {/* Total Value */}
         <div className="text-center p-1 bg-theme-secondary/30 rounded">
-          <div className="text-sm font-bold text-theme-primary">{totalValue.toFixed(2)} gp</div>
+          <div className="text-sm font-bold text-white">{totalValue.toFixed(2)} gp</div>
         </div>
       </div>
     );
@@ -146,7 +146,7 @@ export const CoinManagement: React.FC<CoinManagementProps> = ({
 
       {/* Total Value */}
       <div className="text-center mb-4 p-3 bg-theme-secondary/30 rounded-lg">
-        <div className="text-lg font-bold text-theme-primary">{totalValue.toFixed(2)} gp</div>
+        <div className="text-lg font-bold text-white">{totalValue.toFixed(2)} gp</div>
         <div className="text-xs text-theme-muted">Total Value</div>
       </div>
 
@@ -163,7 +163,7 @@ export const CoinManagement: React.FC<CoinManagementProps> = ({
                 value={value}
                 onChange={(e) => setCoinInputs(prev => ({ ...prev, [type]: e.target.value }))}
                 placeholder="0"
-                className="w-full px-2 py-1 bg-theme-secondary text-theme-primary rounded border border-theme-primary focus:border-yellow-500 focus:outline-none text-sm"
+                className="w-full px-2 py-1 bg-theme-secondary text-white rounded border border-theme-primary focus:border-yellow-500 focus:outline-none text-sm"
               />
             </div>
           ))}

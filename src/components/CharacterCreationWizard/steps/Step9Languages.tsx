@@ -18,7 +18,7 @@ const RandomizeButton: React.FC<{ onClick: () => void; title?: string; className
   return (
     <button
       onClick={onClick}
-      className={`px-3 py-2 bg-accent-purple hover:bg-accent-purple-light rounded-lg text-theme-primary text-sm font-medium transition-colors flex items-center gap-2 ${className}`}
+      className={`px-3 py-2 bg-accent-purple hover:bg-accent-purple-light rounded-lg text-white text-sm font-medium transition-colors flex items-center gap-2 ${className}`}
       title={title}
     >
       <Shuffle className="w-4 h-4" />
@@ -104,15 +104,15 @@ export const Step9Languages: React.FC<StepProps> = ({ data, updateData, nextStep
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
           <div>
             <span className="text-theme-tertiary">Intelligence Score:</span>
-            <span className="text-theme-primary font-bold ml-2">{intelligenceScore}</span>
+            <span className="text-white font-bold ml-2">{intelligenceScore}</span>
           </div>
           <div>
             <span className="text-theme-tertiary">Maximum Languages:</span>
-            <span className="text-theme-primary font-bold ml-2">{maxLanguages}</span>
+            <span className="text-white font-bold ml-2">{maxLanguages}</span>
           </div>
           <div>
             <span className="text-theme-tertiary">Languages Known:</span>
-            <span className="text-theme-primary font-bold ml-2">{autoLanguages.size + selectedLanguages.length}</span>
+            <span className="text-white font-bold ml-2">{autoLanguages.size + selectedLanguages.length}</span>
           </div>
           <div>
             <span className="text-theme-tertiary">Remaining Slots:</span>
@@ -209,7 +209,7 @@ export const Step9Languages: React.FC<StepProps> = ({ data, updateData, nextStep
                                 : 'bg-theme-secondary border-theme-secondary opacity-50 cursor-not-allowed'
                             }`}
                           >
-                            <div className="font-semibold text-theme-primary">{language.name}</div>
+                            <div className="font-semibold text-white">{language.name}</div>
                             <div className="text-xs text-theme-muted mt-1">
                               {language.typicalSpeakers}
                             </div>
@@ -238,7 +238,7 @@ export const Step9Languages: React.FC<StepProps> = ({ data, updateData, nextStep
                 <span>{language}</span>
                 <button
                   onClick={() => handleLanguageToggle(language)}
-                  className="text-green-300 hover:text-theme-primary ml-1"
+                  className="text-green-300 hover:text-white ml-1"
                 >
                   ×
                 </button>
@@ -250,13 +250,13 @@ export const Step9Languages: React.FC<StepProps> = ({ data, updateData, nextStep
 
       {/* Navigation */}
       <div className='flex justify-between'>
-        <button onClick={prevStep} className="px-4 py-2 bg-theme-quaternary hover:bg-theme-hover rounded-lg text-theme-primary flex items-center">
+        <button onClick={prevStep} className="px-4 py-2 bg-theme-quaternary hover:bg-theme-hover rounded-lg text-white flex items-center">
           <ArrowLeft className="w-4 h-4 mr-2" /> Back
         </button>
         <button
           onClick={nextStep}
           disabled={!hasRequiredBackgroundSelections}
-          className={`px-4 py-2 rounded-lg text-theme-primary flex items-center ${
+          className={`px-4 py-2 rounded-lg text-white flex items-center ${
             hasRequiredBackgroundSelections
               ? 'bg-accent-red hover:bg-accent-red-light'
               : 'bg-theme-hover cursor-not-allowed'

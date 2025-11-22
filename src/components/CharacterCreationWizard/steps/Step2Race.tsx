@@ -12,7 +12,7 @@ const RandomizeButton: React.FC<RandomizeButtonProps> = ({ onClick, title }) => 
   <button
     onClick={onClick}
     title={title}
-    className="p-2 bg-accent-yellow-dark hover:bg-accent-yellow rounded-lg text-theme-primary transition-colors"
+    className="p-2 bg-accent-yellow-dark hover:bg-accent-yellow rounded-lg text-white transition-colors"
   >
     <Shuffle className="w-4 h-4" />
   </button>
@@ -97,7 +97,7 @@ export const Step2Race: React.FC<StepProps> = ({ data, updateData, nextStep, pre
         <div className="bg-theme-tertiary/50 border border-theme-primary rounded-lg p-4 space-y-3 relative">
           <button
             onClick={() => setShowRaceInfo(false)}
-            className="absolute top-2 right-2 text-theme-muted hover:text-theme-primary transition-colors"
+            className="absolute top-2 right-2 text-theme-muted hover:text-white transition-colors"
             title="Close"
           >
             <XCircle className="w-5 h-5" />
@@ -117,7 +117,7 @@ export const Step2Race: React.FC<StepProps> = ({ data, updateData, nextStep, pre
               <span className="font-semibold text-accent-red-light">Ability Bonuses: </span>
               <div className="flex flex-wrap gap-2 mt-1">
                 {Object.entries(selectedRace.ability_bonuses).map(([ability, bonus]) => (
-                  <span key={ability} className="px-2 py-1 bg-blue-700 text-theme-primary text-xs rounded">
+                  <span key={ability} className="px-2 py-1 bg-blue-700 text-white text-xs rounded">
                     {ability} +{bonus}
                   </span>
                 ))}
@@ -138,7 +138,7 @@ export const Step2Race: React.FC<StepProps> = ({ data, updateData, nextStep, pre
                         };
                         openTraitModal?.(trait, position);
                       }}
-                      className="px-2 py-1 bg-accent-green-dark hover:bg-accent-green text-theme-primary text-xs rounded transition-colors cursor-pointer"
+                      className="px-2 py-1 bg-accent-green-dark hover:bg-accent-green text-white text-xs rounded transition-colors cursor-pointer"
                       title={`Click to learn more about ${trait}`}
                     >
                       {trait}
@@ -156,13 +156,13 @@ export const Step2Race: React.FC<StepProps> = ({ data, updateData, nextStep, pre
       )}
 
       <div className='flex justify-between'>
-        <button onClick={prevStep} className="px-4 py-2 bg-theme-quaternary hover:bg-theme-hover rounded-lg text-theme-primary flex items-center">
+        <button onClick={prevStep} className="px-4 py-2 bg-theme-quaternary hover:bg-theme-hover rounded-lg text-white flex items-center">
           <ArrowLeft className="w-4 h-4 mr-2" /> Back
         </button>
         <button
           onClick={nextStep}
           disabled={!data.raceSlug}
-          className="px-4 py-2 bg-accent-red hover:bg-accent-red-light rounded-lg text-theme-primary flex items-center disabled:bg-theme-quaternary"
+          className="px-4 py-2 bg-accent-red hover:bg-accent-red-light rounded-lg text-white flex items-center disabled:bg-theme-quaternary"
         >
           Next: {getNextStepLabel?.() || 'Continue'} <ArrowRight className="w-4 h-4 ml-2" />
         </button>

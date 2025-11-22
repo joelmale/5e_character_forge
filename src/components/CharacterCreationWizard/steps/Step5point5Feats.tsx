@@ -18,7 +18,7 @@ const RandomizeButton: React.FC<{ onClick: () => void; title?: string; className
   return (
     <button
       onClick={onClick}
-      className={`px-3 py-2 bg-accent-purple hover:bg-accent-purple-light rounded-lg text-theme-primary text-sm font-medium transition-colors flex items-center gap-2 ${className}`}
+      className={`px-3 py-2 bg-accent-purple hover:bg-accent-purple-light rounded-lg text-white text-sm font-medium transition-colors flex items-center gap-2 ${className}`}
       title={title}
     >
       <Shuffle className="w-4 h-4" />
@@ -88,7 +88,7 @@ export const Step5point5Feats: React.FC<StepProps> = ({ data, updateData, nextSt
             {selectedFeats.map(slug => {
               const feat = FEAT_DATABASE.find(f => f.slug === slug);
               return (
-                <span key={slug} className="px-2 py-1 bg-accent-green-dark text-theme-primary text-xs rounded">
+                <span key={slug} className="px-2 py-1 bg-accent-green-dark text-white text-xs rounded">
                   {feat?.name}
                 </span>
               );
@@ -119,7 +119,7 @@ export const Step5point5Feats: React.FC<StepProps> = ({ data, updateData, nextSt
                   <div className="flex items-start justify-between">
                     <p className="text-sm font-bold text-accent-yellow-light">{feat.name}</p>
                     {featProvidesAbilityIncrease(feat) && (
-                      <span className="text-xs bg-accent-blue text-theme-primary px-1 py-0.5 rounded ml-2">
+                      <span className="text-xs bg-accent-blue text-white px-1 py-0.5 rounded ml-2">
                         +ASI
                       </span>
                     )}
@@ -172,12 +172,12 @@ export const Step5point5Feats: React.FC<StepProps> = ({ data, updateData, nextSt
       )}
 
       <div className='flex justify-between'>
-        <button onClick={prevStep} className="px-4 py-2 bg-theme-quaternary hover:bg-theme-hover rounded-lg text-theme-primary flex items-center">
+        <button onClick={prevStep} className="px-4 py-2 bg-theme-quaternary hover:bg-theme-hover rounded-lg text-white flex items-center">
           <ArrowLeft className="w-4 h-4 mr-2" /> Back
         </button>
         <button
           onClick={nextStep}
-          className="px-4 py-2 bg-accent-red hover:bg-accent-red-light rounded-lg text-theme-primary flex items-center"
+          className="px-4 py-2 bg-accent-red hover:bg-accent-red-light rounded-lg text-white flex items-center"
         >
           Next: {getNextStepLabel?.() || 'Continue'} <ArrowRight className="w-4 h-4 ml-2" />
         </button>

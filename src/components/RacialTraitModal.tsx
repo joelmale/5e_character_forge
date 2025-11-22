@@ -189,7 +189,7 @@ const RacialTraitModal: React.FC<RacialTraitModalProps> = ({
                e.stopPropagation();
                onClose();
              }}
-             className="text-theme-muted hover:text-theme-primary transition-colors"
+             className="text-theme-muted hover:text-white transition-colors"
            >
             <X className="w-6 h-6" />
           </button>

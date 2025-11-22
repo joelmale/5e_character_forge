@@ -13,7 +13,7 @@ const RandomizeButton: React.FC<RandomizeButtonProps> = ({ onClick, title }) => 
   <button
     onClick={onClick}
     title={title}
-    className="p-2 bg-accent-yellow-dark hover:bg-accent-yellow rounded-lg text-theme-primary transition-colors"
+    className="p-2 bg-accent-yellow-dark hover:bg-accent-yellow rounded-lg text-white transition-colors"
   >
     <Shuffle className="w-4 h-4" />
   </button>
@@ -109,7 +109,7 @@ export const Step3Class: React.FC<StepProps> = ({ data, updateData, nextStep, pr
         <div className="bg-theme-tertiary/50 border border-theme-primary rounded-lg p-4 space-y-3 relative">
           <button
             onClick={() => setShowClassInfo(false)}
-            className="absolute top-2 right-2 text-theme-muted hover:text-theme-primary transition-colors"
+            className="absolute top-2 right-2 text-theme-muted hover:text-white transition-colors"
             title="Close"
           >
             <XCircle className="w-5 h-5" />
@@ -181,7 +181,7 @@ export const Step3Class: React.FC<StepProps> = ({ data, updateData, nextStep, pr
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {backgroundSkills.map(skill => (
-                      <span key={skill} className="px-2 py-1 bg-accent-green-dark text-theme-primary text-xs rounded">
+                      <span key={skill} className="px-2 py-1 bg-accent-green-dark text-white text-xs rounded">
                         {skill}
                       </span>
                     ))}
@@ -224,7 +224,7 @@ export const Step3Class: React.FC<StepProps> = ({ data, updateData, nextStep, pr
                     isBackgroundSkill
                       ? 'bg-accent-green-darker/20 border-accent-green-dark text-accent-green-light cursor-not-allowed opacity-60'
                       : isSelected
-                        ? 'bg-accent-blue-darker border-blue-500 text-theme-primary'
+                        ? 'bg-accent-blue-darker border-blue-500 text-white'
                         : canSelect
                           ? 'bg-theme-tertiary border-theme-primary hover:bg-theme-quaternary text-theme-tertiary'
                           : 'bg-theme-secondary border-theme-secondary text-theme-disabled cursor-not-allowed'
@@ -318,7 +318,7 @@ export const Step3Class: React.FC<StepProps> = ({ data, updateData, nextStep, pr
         })()}
 
        <div className='flex justify-between'>
-        <button onClick={prevStep} className="px-4 py-2 bg-theme-quaternary hover:bg-theme-hover rounded-lg text-theme-primary flex items-center">
+        <button onClick={prevStep} className="px-4 py-2 bg-theme-quaternary hover:bg-theme-hover rounded-lg text-white flex items-center">
           <ArrowLeft className="w-4 h-4 mr-2" /> Back
         </button>
         <button
@@ -329,7 +329,7 @@ export const Step3Class: React.FC<StepProps> = ({ data, updateData, nextStep, pr
              data.selectedSkills.length < (selectedClass.num_skill_choices || 0) ||
              (getSubclassesByClass(data.classSlug).length > 0 && data.level >= 3 && !data.subclassSlug)
            }
-          className="px-4 py-2 bg-accent-red hover:bg-accent-red-light rounded-lg text-theme-primary flex items-center disabled:bg-theme-quaternary disabled:cursor-not-allowed"
+          className="px-4 py-2 bg-accent-red hover:bg-accent-red-light rounded-lg text-white flex items-center disabled:bg-theme-quaternary disabled:cursor-not-allowed"
         >
           Next: {getNextStepLabel?.() || 'Continue'} <ArrowRight className="w-4 h-4 ml-2" />
         </button>

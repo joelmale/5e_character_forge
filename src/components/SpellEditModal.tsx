@@ -150,7 +150,7 @@ const SpellEditModal: React.FC<SpellEditModalProps> = ({
           <div className="flex items-center gap-3">
             <Sparkles className="w-6 h-6 text-accent-purple-light" />
             <div>
-              <h2 className="text-xl font-bold text-theme-primary">Edit Spells</h2>
+              <h2 className="text-xl font-bold text-white">Edit Spells</h2>
               <p className="text-sm text-theme-muted">
                 Choose your starting spells for your {classSlug} character
               </p>
@@ -193,7 +193,7 @@ const SpellEditModal: React.FC<SpellEditModalProps> = ({
                       disabled={!isSelected && selectedCantrips.length >= numCantrips}
                     >
                       <div className="flex items-start justify-between mb-2">
-                        <h4 className="font-semibold text-theme-primary">{spell.name}</h4>
+                        <h4 className="font-semibold text-white">{spell.name}</h4>
                         {isSelected && <Check className="w-5 h-5 text-accent-blue-light flex-shrink-0" />}
                       </div>
                       <p className="text-xs text-theme-muted">{spell.school?.name || 'Cantrip'}</p>
@@ -231,7 +231,7 @@ const SpellEditModal: React.FC<SpellEditModalProps> = ({
                       disabled={!isSelected && selectedKnownSpells.length >= numSpells}
                     >
                       <div className="flex items-start justify-between mb-2">
-                        <h4 className="font-semibold text-theme-primary">{spell.name}</h4>
+                        <h4 className="font-semibold text-white">{spell.name}</h4>
                         {isSelected && <Check className="w-5 h-5 text-accent-purple-light flex-shrink-0" />}
                       </div>
                       <p className="text-xs text-theme-muted">Level {spell.level} • {spell.school?.name || 'Unknown'}</p>
@@ -269,7 +269,7 @@ const SpellEditModal: React.FC<SpellEditModalProps> = ({
                       disabled={!isSelected && selectedPreparedSpells.length >= numSpells}
                     >
                       <div className="flex items-start justify-between mb-2">
-                        <h4 className="font-semibold text-theme-primary">{spell.name}</h4>
+                        <h4 className="font-semibold text-white">{spell.name}</h4>
                         {isSelected && <Check className="w-5 h-5 text-accent-green-light flex-shrink-0" />}
                       </div>
                       <p className="text-xs text-theme-muted">Level {spell.level} • {spell.school?.name || 'Unknown'}</p>
@@ -312,7 +312,7 @@ const SpellEditModal: React.FC<SpellEditModalProps> = ({
                         disabled={!isSelected && selectedSpellbook.length >= numSpells}
                       >
                         <div className="flex items-start justify-between mb-2">
-                          <h4 className="font-semibold text-theme-primary">{spell.name}</h4>
+                          <h4 className="font-semibold text-white">{spell.name}</h4>
                           {isSelected && <Check className="w-5 h-5 text-accent-purple-light flex-shrink-0" />}
                         </div>
                         <p className="text-xs text-theme-muted">Level {spell.level} • {spell.school?.name || 'Unknown'}</p>
@@ -351,7 +351,7 @@ const SpellEditModal: React.FC<SpellEditModalProps> = ({
                           disabled={!isSelected && selectedPreparedSpells.length >= numWizardPrepared}
                         >
                           <div className="flex items-start justify-between mb-2">
-                            <h4 className="font-semibold text-theme-primary">{spell.name}</h4>
+                            <h4 className="font-semibold text-white">{spell.name}</h4>
                             {isSelected && <Check className="w-5 h-5 text-accent-blue-light flex-shrink-0" />}
                           </div>
                           <p className="text-xs text-theme-muted">Level {spell.level} • {spell.school?.name || 'Unknown'}</p>
@@ -369,13 +369,13 @@ const SpellEditModal: React.FC<SpellEditModalProps> = ({
         <div className="flex items-center justify-between p-6 border-t border-theme-secondary bg-theme-primary">
           <button
             onClick={onClose}
-            className="px-6 py-2 bg-theme-tertiary hover:bg-theme-quaternary rounded-lg text-theme-primary transition-colors"
+            className="px-6 py-2 bg-theme-tertiary hover:bg-theme-quaternary rounded-lg text-white transition-colors"
           >
             Cancel
           </button>
           <button
             onClick={handleSave}
-            className="px-6 py-2 bg-accent-purple hover:bg-accent-purple-light rounded-lg text-theme-primary font-semibold transition-colors flex items-center gap-2"
+            className="px-6 py-2 bg-accent-purple hover:bg-accent-purple-light rounded-lg text-white font-semibold transition-colors flex items-center gap-2"
           >
             <Check className="w-5 h-5" />
             Save Spells

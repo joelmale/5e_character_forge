@@ -14,7 +14,7 @@ const RandomizeButton: React.FC<{ onClick: () => void; title?: string; className
   return (
     <button
       onClick={onClick}
-      className={`px-3 py-2 bg-accent-purple hover:bg-accent-purple-light rounded-lg text-theme-primary text-sm font-medium transition-colors flex items-center gap-2 ${className}`}
+      className={`px-3 py-2 bg-accent-purple hover:bg-accent-purple-light rounded-lg text-white text-sm font-medium transition-colors flex items-center gap-2 ${className}`}
       title={title}
     >
       <Shuffle className="w-4 h-4" />
@@ -67,7 +67,7 @@ export const Step8Traits: React.FC<StepProps & { onSubmit: (data: CharacterCreat
           placeholder="Describe your character's personality traits and quirks..."
           value={data.personality || ''}
           onChange={(e) => updateData({ personality: e.target.value })}
-          className="w-full h-20 p-3 bg-theme-tertiary text-theme-primary rounded-lg focus:ring-red-500 focus:border-red-500 resize-none"
+          className="w-full h-20 p-3 bg-theme-tertiary text-white rounded-lg focus:ring-red-500 focus:border-red-500 resize-none"
         />
       </div>
 
@@ -79,7 +79,7 @@ export const Step8Traits: React.FC<StepProps & { onSubmit: (data: CharacterCreat
           placeholder="What principles and beliefs guide your character?"
           value={data.ideals || ''}
           onChange={(e) => updateData({ ideals: e.target.value })}
-          className="w-full h-16 p-3 bg-theme-tertiary text-theme-primary rounded-lg focus:ring-red-500 focus:border-red-500 resize-none"
+          className="w-full h-16 p-3 bg-theme-tertiary text-white rounded-lg focus:ring-red-500 focus:border-red-500 resize-none"
         />
       </div>
 
@@ -92,7 +92,7 @@ export const Step8Traits: React.FC<StepProps & { onSubmit: (data: CharacterCreat
             placeholder="Who or what is your character connected to?"
             value={data.bonds || ''}
             onChange={(e) => updateData({ bonds: e.target.value })}
-            className="w-full h-16 p-3 bg-theme-tertiary text-theme-primary rounded-lg focus:ring-red-500 focus:border-red-500 resize-none"
+            className="w-full h-16 p-3 bg-theme-tertiary text-white rounded-lg focus:ring-red-500 focus:border-red-500 resize-none"
           />
         </div>
         <div>
@@ -103,7 +103,7 @@ export const Step8Traits: React.FC<StepProps & { onSubmit: (data: CharacterCreat
             placeholder="What weaknesses does your character have?"
             value={data.flaws || ''}
             onChange={(e) => updateData({ flaws: e.target.value })}
-            className="w-full h-16 p-3 bg-theme-tertiary text-theme-primary rounded-lg focus:ring-red-500 focus:border-red-500 resize-none"
+            className="w-full h-16 p-3 bg-theme-tertiary text-white rounded-lg focus:ring-red-500 focus:border-red-500 resize-none"
           />
         </div>
       </div>
@@ -132,7 +132,7 @@ export const Step8Traits: React.FC<StepProps & { onSubmit: (data: CharacterCreat
                     : 'bg-theme-tertiary border-theme-primary hover:bg-theme-quaternary'
                 }`}
               >
-                <div className="font-semibold text-theme-primary">Take Maximum (Recommended)</div>
+                <div className="font-semibold text-white">Take Maximum (Recommended)</div>
                 <div className="text-sm text-theme-tertiary mt-1">
                   {selectedClass.hit_die} + {conModifier} = {selectedClass.hit_die + conModifier} HP
                 </div>
@@ -151,7 +151,7 @@ export const Step8Traits: React.FC<StepProps & { onSubmit: (data: CharacterCreat
                     : 'bg-theme-tertiary border-theme-primary hover:bg-theme-quaternary'
                 }`}
               >
-                <div className="font-semibold text-theme-primary">Roll Hit Die</div>
+                <div className="font-semibold text-white">Roll Hit Die</div>
                 <div className="text-sm text-theme-tertiary mt-1">
                   {data.hpCalculationMethod === 'rolled' && data.rolledHP ? (
                     <>
@@ -170,7 +170,7 @@ export const Step8Traits: React.FC<StepProps & { onSubmit: (data: CharacterCreat
             </div>
 
             <div className="text-xs text-theme-disabled mt-2">
-              Final HP: <span className="text-theme-primary font-bold">
+              Final HP: <span className="text-white font-bold">
                 {data.hpCalculationMethod === 'max'
                   ? selectedClass.hit_die + conModifier
                   : data.rolledHP ? data.rolledHP + conModifier : 0
@@ -182,13 +182,13 @@ export const Step8Traits: React.FC<StepProps & { onSubmit: (data: CharacterCreat
       })()}
 
       <div className='flex justify-between'>
-        <button onClick={prevStep} className="px-4 py-2 bg-theme-quaternary hover:bg-theme-hover rounded-lg text-theme-primary flex items-center">
+        <button onClick={prevStep} className="px-4 py-2 bg-theme-quaternary hover:bg-theme-hover rounded-lg text-white flex items-center">
           <ArrowLeft className="w-4 h-4 mr-2" /> Back
         </button>
         <button
           onClick={() => onSubmit(data)}
           disabled={!validateTraits(data)}
-          className={`px-4 py-2 rounded-lg text-theme-primary flex items-center font-bold ${
+          className={`px-4 py-2 rounded-lg text-white flex items-center font-bold ${
             validateTraits(data)
               ? 'bg-accent-green hover:bg-accent-green'
               : 'bg-theme-hover cursor-not-allowed'

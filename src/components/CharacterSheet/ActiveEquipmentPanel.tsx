@@ -63,7 +63,7 @@ export const ActiveEquipmentPanel: React.FC<ActiveEquipmentPanelProps> = ({
         </div>
         {equippedArmor ? (
           <div className="bg-theme-tertiary/50 p-3 rounded-lg">
-            <div className="font-semibold text-theme-primary">{equippedArmor.name}</div>
+            <div className="font-semibold text-white">{equippedArmor.name}</div>
             <div className="text-sm text-theme-tertiary">
               AC Contribution: {getACBreakdown().slice(1).join(' + ')}
             </div>
@@ -87,7 +87,7 @@ export const ActiveEquipmentPanel: React.FC<ActiveEquipmentPanelProps> = ({
 
               return (
                 <div key={index} className="bg-theme-tertiary/50 p-3 rounded-lg">
-                  <div className="font-semibold text-theme-primary">{weapon.name}</div>
+                  <div className="font-semibold text-white">{weapon.name}</div>
                   <div className="text-sm text-theme-tertiary">
                     {weapon.weapon_range || 'Melee'} • {weapon.damage?.damage_dice || 'Special'}
                   </div>
@@ -114,7 +114,7 @@ export const ActiveEquipmentPanel: React.FC<ActiveEquipmentPanelProps> = ({
                 const itemData = loadEquipment().find(eq => eq.slug === item.equipmentSlug);
                 return (
                   <div key={index} className="bg-theme-tertiary/50 p-2 rounded-lg">
-                    <div className="font-semibold text-theme-primary text-sm">{itemData?.name || item.equipmentSlug}</div>
+                    <div className="font-semibold text-white text-sm">{itemData?.name || item.equipmentSlug}</div>
                     <div className="text-xs text-theme-muted">Equipped</div>
                   </div>
                 );

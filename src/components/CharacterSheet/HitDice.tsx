@@ -75,7 +75,7 @@ export const HitDice: React.FC<HitDiceProps> = ({
         <div className="flex items-center justify-between">
           <div>
             <div className="text-xs text-theme-muted">Available</div>
-            <div className="text-lg font-bold text-theme-primary">
+            <div className="text-lg font-bold text-white">
               {hitDiceInfo.current} / {hitDiceInfo.max}
             </div>
             <div className="text-xs text-theme-muted">d{hitDiceInfo.dieType}</div>
@@ -104,7 +104,7 @@ export const HitDice: React.FC<HitDiceProps> = ({
         {hitDiceInfo.available > 0 && (
           <div className="pt-2 border-t border-theme-primary">
             <div className="text-xs text-theme-muted">Next healing:</div>
-            <div className="text-sm text-theme-primary">
+            <div className="text-sm text-white">
               {Math.max(1, Math.floor(hitDiceInfo.dieType / 2) + getModifier(character.abilities.CON.score))} HP
               <span className="text-theme-muted text-xs ml-1">
                 (avg + CON)

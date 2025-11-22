@@ -24,8 +24,8 @@ export const LayoutSelector: React.FC = () => {
               flex items-center gap-1 px-3 py-1 rounded text-xs font-medium transition-all
               ${
                 layoutMode === l.value
-                  ? 'bg-accent-blue text-theme-primary'
-                  : 'text-theme-muted hover:text-theme-primary hover:bg-theme-tertiary'
+                  ? 'bg-accent-blue text-white'
+                  : 'text-theme-muted hover:text-white hover:bg-theme-tertiary'
               }
             `}
             title={`Switch to ${l.label} layout`}

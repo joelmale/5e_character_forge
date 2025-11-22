@@ -114,7 +114,7 @@ export const SkillEntry: React.FC<SkillEntryProps> = ({
              {getRollIcon() && (
                <span className="text-xs font-bold text-accent-green-light">{getRollIcon()}</span>
              )}
-             <span className="text-xs font-medium text-theme-tertiary group-hover:text-theme-primary">{skillLabel}</span>
+             <span className="text-xs font-medium text-theme-tertiary group-hover:text-white">{skillLabel}</span>
            </div>
           <span className="font-mono text-sm font-bold text-accent-yellow-light">{formatModifier(skill.value)}</span>
         </button>
@@ -174,7 +174,7 @@ export const SkillEntry: React.FC<SkillEntryProps> = ({
         className={`flex items-center justify-between px-3 py-2 rounded-lg border transition-all cursor-pointer w-full text-sm font-medium ${
           skill.proficient
             ? 'bg-yellow-900/30 border-yellow-500/50 text-accent-yellow-light hover:bg-yellow-900/50 hover:border-yellow-400'
-            : 'bg-theme-secondary/50 border-theme-primary text-theme-tertiary hover:bg-theme-tertiary hover:border-gray-500 hover:text-theme-primary'
+            : 'bg-theme-secondary/50 border-theme-primary text-theme-tertiary hover:bg-theme-tertiary hover:border-gray-500 hover:text-white'
         }`}
         title={`${SKILL_DESCRIPTIONS[name]}\n\nRoll ${skillLabel} check (${rollType}) - Right-click for options`}
       >

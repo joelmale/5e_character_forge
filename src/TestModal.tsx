@@ -11,7 +11,7 @@ const TestModal: React.FC = () => {
       <h1 className="text-2xl font-bold mb-4">Racial Trait Modal Test</h1>
       <button
         onClick={() => setIsOpen(true)}
-        className="px-4 py-2 bg-accent-blue text-theme-primary rounded hover:bg-accent-blue-light"
+        className="px-4 py-2 bg-accent-blue text-white rounded hover:bg-accent-blue-light"
       >
         Open Modal
       </button>

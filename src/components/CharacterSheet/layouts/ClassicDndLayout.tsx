@@ -47,7 +47,7 @@ export const ClassicDndLayout: React.FC<CharacterSheetProps> = ({
   };
 
   return (
-    <div className="p-4 md:p-8 bg-theme-primary text-theme-primary min-h-screen pb-24">
+    <div className="p-4 md:p-8 bg-theme-primary text-white min-h-screen pb-24">
       <div className="max-w-[1400px] mx-auto space-y-4">
         <CharacterHeader
           character={character}

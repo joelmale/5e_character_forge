@@ -121,7 +121,7 @@ export const SavingThrows: React.FC<SavingThrowsProps> = ({
                     {getRollIcon(abilityName) && (
                       <span className="text-xs font-bold text-accent-green-light">{getRollIcon(abilityName)}</span>
                     )}
-                    <span className="text-xs font-medium text-theme-tertiary group-hover:text-theme-primary">{abilityName}</span>
+                    <span className="text-xs font-medium text-theme-tertiary group-hover:text-white">{abilityName}</span>
                   </div>
                   <span className="font-mono text-sm font-bold text-accent-yellow-light">{formatModifier(saveModifier)}</span>
                 </button>
@@ -201,7 +201,7 @@ export const SavingThrows: React.FC<SavingThrowsProps> = ({
                   {getRollIcon(abilityName) && (
                     <span className="text-xs font-bold text-accent-green-light">{getRollIcon(abilityName)}</span>
                   )}
-                  <span className="text-sm font-semibold text-theme-primary">{abilityName}</span>
+                  <span className="text-sm font-semibold text-white">{abilityName}</span>
                 </div>
                 <span className="font-mono text-lg font-bold text-accent-yellow-light">{formatModifier(saveModifier)}</span>
               </button>

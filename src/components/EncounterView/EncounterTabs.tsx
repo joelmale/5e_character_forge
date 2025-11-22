@@ -107,7 +107,7 @@ export const EncounterTabs: React.FC<EncounterTabsProps> = ({ monsters }) => {
                     onClick={() => setActiveIndex(index)}
                     className={`px-4 py-2 rounded-lg whitespace-nowrap transition-colors ${
                       isActive
-                        ? 'bg-accent-purple text-theme-primary font-bold'
+                        ? 'bg-accent-purple text-white font-bold'
                         : 'bg-theme-tertiary text-theme-tertiary hover:bg-theme-quaternary'
                     }`}
                   >
@@ -137,11 +137,11 @@ export const EncounterTabs: React.FC<EncounterTabsProps> = ({ monsters }) => {
         {/* Header */}
         <div className="bg-gradient-to-r from-purple-900 to-red-900 p-6">
           <div className="flex items-center gap-3 mb-2">
-            <h1 className="text-4xl font-bold text-theme-primary">
+            <h1 className="text-4xl font-bold text-white">
               {monster.name}
               {instanceNumber > 1 && <span className="ml-2 text-2xl text-theme-tertiary">#{instanceNumber}</span>}
             </h1>
-            <span className={`px-3 py-1 ${getCRColor(monster.challenge_rating)} text-theme-primary text-sm rounded-full`}>
+            <span className={`px-3 py-1 ${getCRColor(monster.challenge_rating)} text-white text-sm rounded-full`}>
               CR {monster.challenge_rating}
             </span>
           </div>
@@ -183,7 +183,7 @@ export const EncounterTabs: React.FC<EncounterTabsProps> = ({ monsters }) => {
             ].map((ability) => (
               <div key={ability.name} className="text-center">
                 <div className="font-bold text-accent-red-light text-sm">{ability.name}</div>
-                <div className="text-2xl font-bold text-theme-primary">{ability.score}</div>
+                <div className="text-2xl font-bold text-white">{ability.score}</div>
                 <div className="text-sm text-theme-muted">({getModifier(ability.score)})</div>
               </div>
             ))}

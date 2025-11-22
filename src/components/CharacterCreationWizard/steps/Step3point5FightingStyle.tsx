@@ -12,7 +12,7 @@ const RandomizeButton: React.FC<RandomizeButtonProps> = ({ onClick, title }) => 
   <button
     onClick={onClick}
     title={title}
-    className="p-2 bg-accent-yellow-dark hover:bg-accent-yellow rounded-lg text-theme-primary transition-colors"
+    className="p-2 bg-accent-yellow-dark hover:bg-accent-yellow rounded-lg text-white transition-colors"
   >
     <Shuffle className="w-4 h-4" />
   </button>
@@ -133,7 +133,7 @@ export const Step3point5FightingStyle: React.FC<StepProps> = ({ data, updateData
               <div className="flex items-start justify-between">
                 <p className="text-base font-bold text-accent-yellow-light">{style.name}</p>
                 {isRecommended && (
-                  <span className="text-xs bg-accent-blue text-theme-primary px-2 py-1 rounded ml-2">
+                  <span className="text-xs bg-accent-blue text-white px-2 py-1 rounded ml-2">
                     Recommended
                   </span>
                 )}
@@ -145,13 +145,13 @@ export const Step3point5FightingStyle: React.FC<StepProps> = ({ data, updateData
       </div>
 
       <div className='flex justify-between'>
-        <button onClick={prevStep} className="px-4 py-2 bg-theme-quaternary hover:bg-theme-hover rounded-lg text-theme-primary flex items-center">
+        <button onClick={prevStep} className="px-4 py-2 bg-theme-quaternary hover:bg-theme-hover rounded-lg text-white flex items-center">
           <ArrowLeft className="w-4 h-4 mr-2" /> Back
         </button>
         <button
           onClick={nextStep}
           disabled={!data.selectedFightingStyle}
-          className="px-4 py-2 bg-accent-red hover:bg-accent-red-light rounded-lg text-theme-primary flex items-center disabled:bg-theme-quaternary disabled:cursor-not-allowed"
+          className="px-4 py-2 bg-accent-red hover:bg-accent-red-light rounded-lg text-white flex items-center disabled:bg-theme-quaternary disabled:cursor-not-allowed"
         >
           Next: {selectedClass.spellcasting ? 'Spells' : 'Abilities'} <ArrowRight className="w-4 h-4 ml-2" />
         </button>

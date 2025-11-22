@@ -1031,7 +1031,7 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-theme-primary text-theme-primary font-sans">
+    <div className="min-h-screen bg-theme-primary text-white font-sans">
       <div className="max-w-7xl mx-auto p-4 md:p-8">
         {/* Header and Controls */}
         <header className="mb-8">
@@ -1075,7 +1075,7 @@ const App: React.FC = () => {
             <div className="flex flex-col space-y-3 md:space-y-0 md:flex-row md:space-x-3 w-full md:w-auto">
                <button
                 onClick={() => setIsNewCharacterModalOpen(true)}
-                className="w-full md:w-auto px-6 py-3 bg-accent-red hover:bg-accent-red-light rounded-xl text-theme-primary font-bold shadow-red-theme/50 shadow-lg transition-all flex items-center justify-center"
+                className="w-full md:w-auto px-6 py-3 bg-accent-red hover:bg-accent-red-light rounded-xl text-white font-bold shadow-red-theme/50 shadow-lg transition-all flex items-center justify-center"
               >
                 <Plus className="w-5 h-5 mr-2" />
                 New Character
@@ -1083,7 +1083,7 @@ const App: React.FC = () => {
              <button
                onClick={handleExportData}
                disabled={characters.length === 0}
-               className="w-full md:w-auto px-6 py-3 bg-accent-blue hover:bg-accent-blue-light rounded-xl text-theme-primary font-bold shadow-blue-800/50 shadow-lg transition-all flex items-center justify-center disabled:bg-theme-quaternary disabled:cursor-not-allowed"
+               className="w-full md:w-auto px-6 py-3 bg-accent-blue hover:bg-accent-blue-light rounded-xl text-white font-bold shadow-blue-800/50 shadow-lg transition-all flex items-center justify-center disabled:bg-theme-quaternary disabled:cursor-not-allowed"
              >
                <Download className="w-5 h-5 mr-2" />
                Export Data
@@ -1091,13 +1091,13 @@ const App: React.FC = () => {
              <button
                onClick={handleDeleteSelectedCharacters}
                disabled={selectedCharacterIds.size === 0}
-               className="w-full md:w-auto px-6 py-3 bg-accent-red-dark hover:bg-accent-red rounded-xl text-theme-primary font-bold shadow-red-900/50 shadow-lg transition-all flex items-center justify-center disabled:bg-theme-quaternary disabled:cursor-not-allowed"
+               className="w-full md:w-auto px-6 py-3 bg-accent-red-dark hover:bg-accent-red rounded-xl text-white font-bold shadow-red-900/50 shadow-lg transition-all flex items-center justify-center disabled:bg-theme-quaternary disabled:cursor-not-allowed"
                title={selectedCharacterIds.size > 0 ? `Delete ${selectedCharacterIds.size} selected character${selectedCharacterIds.size !== 1 ? 's' : ''}` : 'Select characters to delete'}
              >
                <Trash2 className="w-5 h-5 mr-2" />
                Delete Selected ({selectedCharacterIds.size})
              </button>
-              <label className="w-full md:w-auto px-6 py-3 bg-accent-green hover:bg-accent-green rounded-xl text-theme-primary font-bold shadow-green-800/50 shadow-lg transition-all flex items-center justify-center cursor-pointer">
+              <label className="w-full md:w-auto px-6 py-3 bg-accent-green hover:bg-accent-green rounded-xl text-white font-bold shadow-green-800/50 shadow-lg transition-all flex items-center justify-center cursor-pointer">
                 <Upload className="w-5 h-5 mr-2" />
                 Import Data
                 <input
@@ -1109,7 +1109,7 @@ const App: React.FC = () => {
               </label>
               <button
                 onClick={() => setIsSettingsModalOpen(true)}
-                className="w-full md:w-auto px-4 py-3 bg-theme-quaternary hover:bg-theme-hover rounded-xl text-theme-primary font-bold shadow-theme-lg shadow-lg transition-all flex items-center justify-center"
+                className="w-full md:w-auto px-4 py-3 bg-theme-quaternary hover:bg-theme-hover rounded-xl text-white font-bold shadow-theme-lg shadow-lg transition-all flex items-center justify-center"
                 title="Settings"
               >
                 <Settings className="w-5 h-5" />
@@ -1193,7 +1193,7 @@ const App: React.FC = () => {
                           console.log('📖 [CHARACTER] Opening character sheet for:', char.name, char.id);
                           setSelectedCharacterId(char.id);
                         }}
-                        className="flex-grow py-2 bg-accent-red hover:bg-accent-red-light rounded-lg text-theme-primary font-semibold transition-colors flex items-center justify-center text-sm"
+                        className="flex-grow py-2 bg-accent-red hover:bg-accent-red-light rounded-lg text-white font-semibold transition-colors flex items-center justify-center text-sm"
                       >
                         <BookOpen className="w-4 h-4 mr-2" /> View Sheet
                       </button>
@@ -1202,7 +1202,7 @@ const App: React.FC = () => {
                         className="p-2 bg-theme-quaternary hover:bg-accent-red-dark rounded-lg transition-colors"
                         title="Delete Character"
                       >
-                        <Trash2 className="w-5 h-5 text-theme-primary" />
+                        <Trash2 className="w-5 h-5 text-white" />
                       </button>
                     </div>
                   </div>
