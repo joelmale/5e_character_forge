@@ -163,7 +163,7 @@ export const CoinManagement: React.FC<CoinManagementProps> = ({
                 value={value}
                 onChange={(e) => setCoinInputs(prev => ({ ...prev, [type]: e.target.value }))}
                 placeholder="0"
-                className="w-full px-2 py-1 bg-theme-secondary text-theme-primary rounded border border-theme-primary focus:border-yellow-500 focus:outline-none text-sm"
+                className="w-full px-2 py-1 input-handwritten focus:border-yellow-500 text-sm"
               />
             </div>
           ))}

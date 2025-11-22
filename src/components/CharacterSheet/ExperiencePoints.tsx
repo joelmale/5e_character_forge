@@ -87,7 +87,7 @@ export const ExperiencePoints: React.FC<ExperiencePointsProps> = ({
             value={xpInput}
             onChange={(e) => setXpInput(e.target.value)}
             placeholder="Enter XP to add"
-            className="flex-1 px-3 py-2 bg-theme-secondary text-theme-primary rounded border border-theme-primary focus:border-yellow-500 focus:outline-none"
+            className="flex-1 px-3 py-2 input-handwritten focus:border-yellow-500"
           />
           <button
             onClick={addXP}

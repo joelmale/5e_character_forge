@@ -31,7 +31,7 @@ export const CharacterHeader: React.FC<CharacterHeaderProps> = ({
       <div className="flex justify-between items-center border-b border-accent-red-dark pb-3 gap-4">
         {/* Player Name and Details */}
         <div className="flex flex-col">
-          <h1 className="text-2xl font-serif font-bold text-accent-red-light">
+          <h1 className="text-2xl font-serif font-bold text-accent-red-light font-handwriting">
             {character.name}
           </h1>
           <div className="text-sm text-theme-tertiary">
@@ -115,11 +115,11 @@ export const CharacterHeader: React.FC<CharacterHeaderProps> = ({
 
       {/* Core Info Row */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3 text-center text-xs font-semibold">
-        <div className="p-2 bg-theme-secondary rounded-lg">Race: <span className="text-accent-yellow-light block text-sm">{character.race}</span></div>
-        <div className="p-2 bg-theme-secondary rounded-lg">Class: <span className="text-accent-yellow-light block text-sm">{character.class}</span></div>
-        <div className="p-2 bg-theme-secondary rounded-lg">Level: <span className="text-accent-yellow-light block text-sm">{character.level}</span></div>
-        <div className="p-2 bg-theme-secondary rounded-lg col-span-2 md:col-span-1">Alignment: <span className="text-accent-yellow-light block text-sm">{character.alignment}</span></div>
-        <div className="p-2 bg-theme-secondary rounded-lg col-span-2 md:col-span-1">Background: <span className="text-accent-yellow-light block text-sm">{character.background}</span></div>
+        <div className="p-2 bg-theme-secondary rounded-lg">Race: <span className="text-theme-primary block text-sm font-handwriting">{character.race}</span></div>
+        <div className="p-2 bg-theme-secondary rounded-lg">Class: <span className="text-theme-primary block text-sm font-handwriting">{character.class}</span></div>
+        <div className="p-2 bg-theme-secondary rounded-lg">Level: <span className="text-theme-primary block text-sm font-handwriting">{character.level}</span></div>
+        <div className="p-2 bg-theme-secondary rounded-lg col-span-2 md:col-span-1">Alignment: <span className="text-theme-primary block text-sm font-handwriting">{character.alignment}</span></div>
+        <div className="p-2 bg-theme-secondary rounded-lg col-span-2 md:col-span-1">Background: <span className="text-theme-primary block text-sm font-handwriting">{character.background}</span></div>
       </div>
     </>
   );

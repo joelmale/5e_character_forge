@@ -106,7 +106,7 @@ export const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({
       >
         <div className="flex items-center gap-3">
           {Icon && <Icon className="w-5 h-5 text-current" />}
-          <h3 className="text-lg font-bold">{title}</h3>
+          <h3 className="text-lg heading-parchment">{title}</h3>
           {badge && (
             <span className="px-2 py-1 bg-theme-tertiary text-theme-tertiary rounded-full text-xs font-medium">
               {badge}
