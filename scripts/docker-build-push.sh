@@ -1,4 +1,9 @@
 #!/bin/bash
+# Multi-stage Docker build optimized for speed
+# - Uses BuildKit cache mounts for npm and Vite
+# - Copies files in layers for better caching
+# - Excludes unnecessary files via .dockerignore
+# - Uses --no-cache to ensure fresh builds and prevent version discrepancies
 set -e
 
 DOCKER_IMAGE="joelmale/5e-character-forge:latest"
@@ -28,6 +33,7 @@ mkdir -p /tmp/.buildx-cache
 
 # Build builder stage first for better caching
 docker buildx build \
+    --no-cache \
     --progress=plain \
     --target builder \
     --platform linux/amd64,linux/arm64 \
@@ -51,6 +57,7 @@ mkdir -p /tmp/.buildx-cache
 
 # Build and push final production image with cache
 docker buildx build \
+    --no-cache \
     --progress=plain \
     --platform linux/amd64,linux/arm64 \
     --cache-from type=local,src=/tmp/.buildx-cache \

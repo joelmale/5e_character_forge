@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # Fast Docker Build Script with BuildKit optimizations
+# Uses --no-cache to ensure fresh builds and prevent version discrepancies
 
 set -e
 
@@ -19,6 +20,7 @@ BUILDER_START=$(date +%s)
 
 # Build with cache mounts and optimizations
 docker build \
+  --no-cache \
   --progress=plain \
   --target builder \
   --build-arg BUILDKIT_INLINE_CACHE=1 \
@@ -37,6 +39,7 @@ PRODUCTION_START=$(date +%s)
 
 # Build final production image
 docker build \
+  --no-cache \
   --progress=plain \
   --build-arg BUILDKIT_INLINE_CACHE=1 \
   --cache-from joelmale/5e-character-forge:latest \
