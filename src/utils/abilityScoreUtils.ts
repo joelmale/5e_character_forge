@@ -1,5 +1,6 @@
 import { AbilityName } from '../types/dnd';
 import { rollDice } from '../services/diceService';
+import { getEnhancedClassData } from '../services/dataService';
 
 import abilityScoreConfig from '../data/abilityScoreConfig.json';
 
@@ -9,33 +10,16 @@ export const POINT_BUY_COSTS: Record<number, number> = abilityScoreConfig.POINT_
 export const ABILITY_METHOD_TITLES: Record<string, string> = abilityScoreConfig.ABILITY_METHOD_TITLES;
 
 /**
- * Class ability score priorities for optimal standard array distribution
- * Each class is mapped to an array of abilities in order of importance (best to worst)
- * Based on D&D 5e class design and combat/spellcasting needs
- */
-export const CLASS_ABILITY_PRIORITIES: Record<string, AbilityName[]> = {
-  'barbarian': ['STR', 'CON', 'DEX', 'WIS', 'CHA', 'INT'],
-  'bard': ['CHA', 'DEX', 'CON', 'INT', 'WIS', 'STR'],
-  'cleric': ['WIS', 'CON', 'STR', 'CHA', 'DEX', 'INT'],
-  'druid': ['WIS', 'CON', 'DEX', 'INT', 'STR', 'CHA'],
-  'fighter': ['STR', 'CON', 'DEX', 'WIS', 'INT', 'CHA'],
-  'monk': ['DEX', 'WIS', 'CON', 'STR', 'INT', 'CHA'],
-  'paladin': ['STR', 'CHA', 'CON', 'WIS', 'DEX', 'INT'],
-  'ranger': ['DEX', 'WIS', 'CON', 'STR', 'INT', 'CHA'],
-  'rogue': ['DEX', 'CON', 'INT', 'WIS', 'CHA', 'STR'],
-  'sorcerer': ['CHA', 'CON', 'DEX', 'INT', 'WIS', 'STR'],
-  'warlock': ['CHA', 'CON', 'DEX', 'WIS', 'INT', 'STR'],
-  'wizard': ['INT', 'CON', 'DEX', 'WIS', 'STR', 'CHA']
-};
-
-/**
  * Assign ability scores using standard array based on class priorities
  * @param classSlug - The class identifier (e.g., 'warlock', 'wizard')
  * @returns Record of ability scores optimized for the class
  */
 export const assignAbilityScoresByClass = (classSlug: string): Record<AbilityName, number> => {
-  // Get priority array for the class, fallback to balanced distribution if class not found
-  const priorities = CLASS_ABILITY_PRIORITIES[classSlug.toLowerCase()] || ['STR', 'DEX', 'CON', 'INT', 'WIS', 'CHA'];
+  // Get enhanced class data which includes ability priorities
+  const enhancedData = getEnhancedClassData(classSlug.toLowerCase());
+
+  // Get priority array from enhanced data, fallback to balanced distribution if not found
+  const priorities = enhancedData?.abilityPriorities || ['STR', 'DEX', 'CON', 'INT', 'WIS', 'CHA'];
 
   // Create abilities object
   const abilities: Record<AbilityName, number> = {} as Record<AbilityName, number>;

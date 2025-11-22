@@ -407,6 +407,7 @@ export interface Class {
 
   // Enhanced class data for rich selection experience
   category: 'Martial' | 'Arcane' | 'Divine' | 'Primal';
+  abilityPriorities?: AbilityName[]; // Optimal ability score priority order for standard array distribution
   detailedDescription: string;
   roleplayingTips: string[];
   keyFeatures: string[];

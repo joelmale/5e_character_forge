@@ -1,6 +1,7 @@
 {
   "barbarian": {
     "category": "Martial",
+    "abilityPriorities": ["STR", "CON", "DEX", "WIS", "CHA", "INT"],
     "detailedDescription": "Barbarians are fierce warriors who draw on primal rage to enhance their combat abilities. They are often seen as brutish and uncivilized by those who don't understand their ways, but they possess deep wisdom about the natural world and their place in it.",
     "roleplayingTips": [
       "Embrace your primal instincts and connection to nature",
@@ -13,6 +14,7 @@
   },
   "bard": {
     "category": "Arcane",
+    "abilityPriorities": ["CHA", "DEX", "CON", "INT", "WIS", "STR"],
     "detailedDescription": "Bards are versatile performers whose music and magic inspire allies and confound enemies. They are the keepers of lore, the chroniclers of history, and the entertainers who bring joy and inspiration to the world.",
     "roleplayingTips": [
       "Use your performance skills to gather information and influence others",
@@ -25,6 +27,7 @@
   },
   "cleric": {
     "category": "Divine",
+    "abilityPriorities": ["WIS", "CON", "STR", "CHA", "DEX", "INT"],
     "detailedDescription": "Clerics are divine spellcasters who wield the power of their deity to heal, protect, and smite their enemies. They are the mortal representatives of gods, carrying out divine will while serving as spiritual guides to their communities.",
     "roleplayingTips": [
       "Act as a spiritual guide and moral compass for your party",
@@ -37,6 +40,7 @@
   },
   "druid": {
     "category": "Primal",
+    "abilityPriorities": ["WIS", "CON", "DEX", "INT", "STR", "CHA"],
     "detailedDescription": "Druids are guardians of nature who can shapeshift into animals and command the elements. They protect the natural world from those who would harm it, maintaining the delicate balance between civilization and wilderness.",
     "roleplayingTips": [
       "Show reverence for nature and all living things",
@@ -49,6 +53,7 @@
   },
   "fighter": {
     "category": "Martial",
+    "abilityPriorities": ["STR", "CON", "DEX", "WIS", "INT", "CHA"],
     "detailedDescription": "Fighters are masters of martial combat, skilled with a wide variety of weapons and armor. They are versatile warriors who excel in any form of combat, from swordplay to archery to unarmed fighting.",
     "roleplayingTips": [
       "Demonstrate discipline and dedication to your martial training",
@@ -61,6 +66,7 @@
   },
   "monk": {
     "category": "Martial",
+    "abilityPriorities": ["DEX", "WIS", "CON", "STR", "INT", "CHA"],
     "detailedDescription": "Monks are martial artists who harness ki energy to perform superhuman feats. They follow ancient traditions of physical and mental discipline, seeking enlightenment through perfect mastery of body and mind.",
     "roleplayingTips": [
       "Maintain discipline and focus in all your actions",
@@ -73,6 +79,7 @@
   },
   "paladin": {
     "category": "Divine",
+    "abilityPriorities": ["STR", "CHA", "CON", "WIS", "DEX", "INT"],
     "detailedDescription": "Paladins are holy warriors bound by sacred oaths to uphold justice and righteousness. They combine martial prowess with divine magic, serving as beacons of hope and champions against evil.",
     "roleplayingTips": [
       "Uphold your sacred oath with unwavering dedication",
@@ -85,6 +92,7 @@
   },
   "ranger": {
     "category": "Primal",
+    "abilityPriorities": ["DEX", "WIS", "CON", "STR", "INT", "CHA"],
     "detailedDescription": "Rangers are skilled hunters and explorers who protect the wilderness from threats. They are experts in tracking, survival, and ranged combat, often forming deep bonds with animal companions.",
     "roleplayingTips": [
       "Protect the wilderness and its inhabitants from harm",
@@ -97,6 +105,7 @@
   },
   "rogue": {
     "category": "Martial",
+    "abilityPriorities": ["DEX", "CON", "INT", "WIS", "CHA", "STR"],
     "detailedDescription": "Rogues are cunning experts in stealth, deception, and precision strikes. They operate in the shadows, using skill and cunning to overcome obstacles and achieve their goals.",
     "roleplayingTips": [
       "Use stealth and cunning to achieve your objectives",
@@ -109,6 +118,7 @@
   },
   "sorcerer": {
     "category": "Arcane",
+    "abilityPriorities": ["CHA", "CON", "DEX", "INT", "WIS", "STR"],
     "detailedDescription": "Sorcerers wield raw magical power that flows through their bloodline. Their magic is instinctive and powerful, drawing from innate talent rather than studied knowledge.",
     "roleplayingTips": [
       "Embrace the wild, instinctive nature of your magic",
@@ -121,6 +131,7 @@
   },
   "warlock": {
     "category": "Arcane",
+    "abilityPriorities": ["CHA", "CON", "DEX", "WIS", "INT", "STR"],
     "detailedDescription": "Warlocks gain magical power through pacts with otherworldly entities. Their magic is granted by patrons who demand service in return, creating complex relationships of power and obligation.",
     "roleplayingTips": [
       "Navigate the complex relationship with your otherworldly patron",
@@ -133,6 +144,7 @@
   },
   "wizard": {
     "category": "Arcane",
+    "abilityPriorities": ["INT", "CON", "DEX", "WIS", "STR", "CHA"],
     "detailedDescription": "Wizards are scholars of arcane magic who master spells through study and intellect. They are repositories of magical knowledge, capable of wielding incredible power through understanding and preparation.",
     "roleplayingTips": [
       "Pursue knowledge and understanding of magic relentlessly",
