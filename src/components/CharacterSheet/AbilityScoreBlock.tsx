@@ -89,27 +89,23 @@ export const AbilityScoreBlock: React.FC<AbilityScoreBlockProps> = ({
           >
             <span className="text-xs font-bold text-theme-muted uppercase mb-1 font-eb-garamond">{name}</span>
            <div className="relative w-16 h-16">
-             {/* Modifier above - Parchment style badge */}
-             <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-red-900 text-[#fcf6e3] px-2 py-0.5 text-sm rounded-md shadow-sm font-bold border border-red-950 z-10">
+             {/* Modifier on top - Parchment style badge */}
+             <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-red-900 text-[#fcf6e3] px-2 py-0.5 text-sm rounded-md shadow-sm font-bold border border-red-950 z-10">
                {formatModifier(ability.modifier)}
              </div>
              {/* Outer circle */}
               <div className="absolute inset-0 rounded-full border-[3px] border-gray-800 flex items-center justify-center bg-[#fcf6e3] group-hover:border-red-500 transition-all" />
-            {/* Score */}
-            <div className="absolute inset-0 flex items-center justify-center">
-               <span className="font-eb-garamond text-2xl font-bold text-gray-900">{ability.score}</span>
-            </div>
-             {/* Roll indicator */}
-             {getRollIcon() && (
-               <div className="absolute -top-1 -right-1 w-5 h-5 bg-accent-green rounded-full flex items-center justify-center shadow-sm">
-                 <span className="text-xs font-bold text-gray-900">{getRollIcon()}</span>
-               </div>
-             )}
+           {/* Score */}
+           <div className="absolute inset-0 flex items-center justify-center">
+              <span className="font-eb-garamond text-2xl font-bold text-gray-900">{ability.score}</span>
            </div>
-           {/* Modifier below - Parchment style badge */}
-           <div className="-mt-3 bg-red-900 text-[#fcf6e3] px-2 py-0.5 text-sm rounded-md shadow-sm font-bold border border-red-950">
-             {formatModifier(ability.modifier)}
-           </div>
+            {/* Roll indicator */}
+            {getRollIcon() && (
+              <div className="absolute -top-1 -right-1 w-5 h-5 bg-accent-green rounded-full flex items-center justify-center shadow-sm">
+                <span className="text-xs font-bold text-gray-900">{getRollIcon()}</span>
+              </div>
+            )}
+          </div>
         </button>
 
       {showMenu && (
