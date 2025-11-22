@@ -7,6 +7,7 @@ import { loadClasses, getAllRaces, BACKGROUNDS, getCantripsByClass, getLeveledSp
 import { CharacterCreationData, SpellSelectionData } from '../types/dnd';
 import { getSpellcastingType } from '../utils/spellUtils';
 import { SPELL_LEARNING_RULES } from '../data/spellLearning';
+import { assignAbilityScoresByClass } from '../utils/abilityScoreUtils';
 import cantripsData from '../data/cantrips.json';
 
 interface PersonalityWizardProps {
@@ -281,10 +282,8 @@ const PersonalityWizard: React.FC<PersonalityWizardProps> = ({ isOpen, onClose: 
       selectedSkills = [...new Set([...defaultSkills, ...backgroundSkills])];
     }
 
-    // Use custom abilities if user edited them, otherwise use default standard array
-    const abilities = customAbilities || {
-      STR: 15, DEX: 14, CON: 13, INT: 12, WIS: 10, CHA: 8 // Standard array
-    };
+    // Use custom abilities if user edited them, otherwise assign based on class priorities
+    const abilities = customAbilities || assignAbilityScoresByClass(selectedClassData.slug);
 
     // Create complete CharacterCreationData structure
     const characterData: CharacterCreationData = {

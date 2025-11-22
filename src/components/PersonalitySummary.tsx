@@ -4,6 +4,7 @@ import { CharacterProfile } from '../data/characterProfiles';
 import { loadClasses, getAllRaces, BACKGROUNDS, getModifier, getCantripsByClass, getLeveledSpellsByClass } from '../services/dataService';
 import { SpellSelectionData } from '../types/dnd';
 import { getSpellcastingType } from '../utils/spellUtils';
+import { assignAbilityScoresByClass } from '../utils/abilityScoreUtils';
 import SkillTooltip from './SkillTooltip';
 import SpellEditModal from './SpellEditModal';
 import SkillEditModal from './SkillEditModal';
@@ -83,8 +84,8 @@ const PersonalitySummary: React.FC<PersonalitySummaryProps> = ({
     const baseClassName = extractBaseName(currentClass);
     const selectedClassData = allClasses.find(c => c.name === baseClassName);
 
-    // Use custom abilities if user edited them, otherwise use default standard array
-    const baseAbilities = customAbilities || { STR: 15, DEX: 14, CON: 13, INT: 12, WIS: 10, CHA: 8 };
+    // Use custom abilities if user edited them, otherwise assign based on class priorities
+    const baseAbilities = customAbilities || (selectedClassData ? assignAbilityScoresByClass(selectedClassData.slug) : { STR: 15, DEX: 14, CON: 13, INT: 12, WIS: 10, CHA: 8 });
 
     // Calculate modifiers
     const abilities = {
@@ -603,7 +604,7 @@ const PersonalitySummary: React.FC<PersonalitySummaryProps> = ({
           classSlug={spellInfo.classSlug}
           level={1}
           currentSelection={spellSelection}
-          abilities={{ STR: 15, DEX: 14, CON: 13, INT: 12, WIS: 10, CHA: 8 }}
+          abilities={baseAbilities}
           isOpen={showSpellModal}
           onClose={() => setShowSpellModal(false)}
           onSave={(newSelection) => {
@@ -631,7 +632,7 @@ const PersonalitySummary: React.FC<PersonalitySummaryProps> = ({
       {/* Ability Score Edit Modal */}
       {onAbilitiesChange && (
         <AbilityScoreEditModal
-          currentScores={customAbilities || { STR: 15, DEX: 14, CON: 13, INT: 12, WIS: 10, CHA: 8 }}
+          currentScores={baseAbilities}
           isOpen={showAbilityModal}
           onClose={() => setShowAbilityModal(false)}
           onSave={(abilities) => {
