@@ -103,7 +103,7 @@ export const AbilityScoreBlock: React.FC<AbilityScoreBlockProps> = ({
             )}
           </div>
           {/* Modifier below - Parchment style badge */}
-          <div className="-mt-3 bg-red-900 text-[#fcf6e3] px-2 py-0.5 text-sm rounded-md shadow-sm font-bold border border-red-950">
+          <div className="relative -mt-3 bg-red-900 text-[#fcf6e3] px-2 py-0.5 text-sm rounded-md font-bold border border-red-950 shadow-lg z-10" style={{ boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2)' }}>
             {formatModifier(ability.modifier)}
           </div>
         </button>
@@ -184,7 +184,7 @@ export const AbilityScoreBlock: React.FC<AbilityScoreBlockProps> = ({
           )}
 
           {/* Modifier badge overlapping bottom */}
-          <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 px-2 py-1 bg-accent-yellow-dark rounded-full border-2 border-theme-tertiary text-xs font-bold text-theme-primary min-w-8 text-center">
+          <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 px-2 py-1 bg-accent-yellow-dark rounded-full border-2 border-theme-tertiary text-xs font-bold text-theme-primary min-w-8 text-center z-10" style={{ boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3)' }}>
             {formatModifier(ability.modifier)}
           </div>
         </div>

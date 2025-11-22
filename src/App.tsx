@@ -33,7 +33,7 @@ import { APP_VERSION } from './version';
 import levelConstantsData from './data/levelConstants.json';
 import { Ability, Character, CharacterCreationData, Equipment, EquippedItem, Feature, Monster, UserMonster } from './types/dnd';
 
-import { useDiceContext } from './hooks';
+import { useDiceContext, useLayout } from './hooks';
 
 
 
@@ -145,6 +145,9 @@ const App: React.FC = () => {
 
   // Use DiceContext for dice rolling functionality
   const { rollHistory, latestRoll, rollDice, clearHistory, updateRollWithRealResults } = useDiceContext();
+
+  // Use LayoutContext for layout mode
+  const { layoutMode } = useLayout();
 
   const [characters, setCharacters] = useState<Character[]>([]);
   const [selectedCharacterId, setSelectedCharacterId] = useState<string | null>(null);
@@ -953,40 +956,42 @@ const App: React.FC = () => {
   // Full-screen views (CharacterSheet or MonsterStatBlock)
   if (selectedCharacter) {
     return (
-      <>
-        <CharacterSheet
-           character={selectedCharacter}
-           onClose={() => setSelectedCharacterId(null)}
-           onDelete={handleDeleteCharacter}
-           setRollResult={setRollResult}
-           onDiceRoll={handleDiceRoll}
-           onToggleInspiration={handleToggleInspiration}
-           onFeatureClick={handleFeatureClick}
-           onLongRest={handleLongRest}
-           onShortRest={handleShortRest}
-           onLevelUp={handleLevelUp}
-           onLevelDown={handleLevelDown}
-           onUpdateCharacter={handleUpdateCharacter}
-           onEquipArmor={handleEquipArmor}
-           onEquipWeapon={handleEquipWeapon}
-           onUnequipItem={handleUnequipItem}
-           onAddItem={handleAddItem}
-           onRemoveItem={handleRemoveItem}
-           setEquipmentModal={setEquipmentModal}
-            onOpenDiceTray={() => {
-              console.log('🎲 [App] onOpenDiceTray handler called in CharacterSheet');
-              console.log('🎲 [App] Setting isDiceTrayModalOpen to true...');
-              setIsDiceTrayModalOpen(true);
-              console.log('🎲 [App] State update triggered');
-            }}
-         />
+      <div className="flex flex-col h-screen">
+        <div className="flex-1 overflow-auto">
+          <CharacterSheet
+             character={selectedCharacter}
+             onClose={() => setSelectedCharacterId(null)}
+             onDelete={handleDeleteCharacter}
+             setRollResult={setRollResult}
+             onDiceRoll={handleDiceRoll}
+             onToggleInspiration={handleToggleInspiration}
+             onFeatureClick={handleFeatureClick}
+             onLongRest={handleLongRest}
+             onShortRest={handleShortRest}
+             onLevelUp={handleLevelUp}
+             onLevelDown={handleLevelDown}
+             onUpdateCharacter={handleUpdateCharacter}
+             onEquipArmor={handleEquipArmor}
+             onEquipWeapon={handleEquipWeapon}
+             onUnequipItem={handleUnequipItem}
+             onAddItem={handleAddItem}
+             onRemoveItem={handleRemoveItem}
+             setEquipmentModal={setEquipmentModal}
+              onOpenDiceTray={() => {
+                console.log('🎲 [App] onOpenDiceTray handler called in CharacterSheet');
+                console.log('🎲 [App] Setting isDiceTrayModalOpen to true...');
+                setIsDiceTrayModalOpen(true);
+                console.log('🎲 [App] State update triggered');
+              }}
+           />
+        </div>
+        <RollHistoryTicker rolls={rollHistory} layoutMode={layoutMode} />
         <DiceBox3D
           latestRoll={latestRoll}
           onRollResults={(rollId, diceValues, total) => {
             updateRollWithRealResults(rollId, diceValues, total);
           }}
         />
-        <RollHistoryTicker rolls={rollHistory} />
         <RollHistoryModal rolls={rollHistory} onClear={clearHistory} />
         <FeatureModal feature={featureModal} onClose={() => setFeatureModal(null)} />
         <EquipmentDetailModal equipment={equipmentModal} onClose={() => setEquipmentModal(null)} />
@@ -999,7 +1004,7 @@ const App: React.FC = () => {
             setIsDiceTrayModalOpen(false);
           }}
         />
-      </>
+      </div>
     );
   }
 

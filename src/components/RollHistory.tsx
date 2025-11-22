@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { History, X, Trash2 } from 'lucide-react';
 import type { DiceRoll } from '../utils/diceRoller';
+import type { LayoutMode } from '../components/CharacterSheet/AbilityScores';
 
 interface RollHistoryTickerProps {
   rolls: DiceRoll[];
+  layoutMode?: LayoutMode;
 }
 
 interface RollHistoryModalProps {
@@ -11,12 +13,36 @@ interface RollHistoryModalProps {
   onClear: () => void;
 }
 
-export const RollHistoryTicker: React.FC<RollHistoryTickerProps> = ({ rolls }) => {
+export const RollHistoryTicker: React.FC<RollHistoryTickerProps> = ({ rolls, layoutMode = 'modern-stacked' }) => {
   if (rolls.length === 0) return null;
 
+  // Determine styling based on layout mode
+  const getLayoutStyles = () => {
+    switch (layoutMode) {
+      case 'classic-dnd':
+        return {
+          container: 'bg-theme-secondary border-t-2 border-theme-secondary py-3 px-4',
+          maxWidth: 'max-w-[1400px]'
+        };
+      case 'mobile':
+        return {
+          container: 'bg-theme-secondary/95 backdrop-blur-md border-t border-theme-secondary py-2 px-3',
+          maxWidth: 'max-w-full'
+        };
+      case 'modern-stacked':
+      default:
+        return {
+          container: 'bg-theme-secondary/95 backdrop-blur-md border-t border-theme-secondary py-3 px-4',
+          maxWidth: 'max-w-4xl'
+        };
+    }
+  };
+
+  const styles = getLayoutStyles();
+
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-theme-secondary/95 border-t border-theme-secondary py-2 px-4 z-30 overflow-hidden">
-      <div className="max-w-7xl mx-auto flex items-center gap-4 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
+    <div className={styles.container}>
+      <div className={`${styles.maxWidth} mx-auto flex items-center gap-4 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800`}>
         <span className="text-xs font-bold text-theme-muted whitespace-nowrap">
           Recent Rolls:
         </span>
@@ -68,7 +94,7 @@ export const RollHistoryModal: React.FC<RollHistoryModalProps> = ({
     return (
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-[200px] right-4 md:right-[calc((100vw-80rem)/2+1rem)] p-3 bg-accent-red hover:bg-accent-red-light rounded-full shadow-lg transition-colors z-30"
+        className="fixed bottom-[20px] right-4 md:right-[calc((100vw-95rem)/2+1rem)] p-3 bg-accent-red hover:bg-accent-red-light rounded-full shadow-lg transition-colors z-30"
         title="View Roll History"
       >
         <History className="w-6 h-6 text-white" />
