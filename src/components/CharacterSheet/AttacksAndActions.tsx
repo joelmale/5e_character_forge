@@ -229,7 +229,13 @@ export const AttacksAndActions: React.FC<AttacksAndActionsProps> = ({
   };
 
   const handleCombatAction = (actionSlug: string) => {
-    const allActions = [...COMBAT_ACTIONS.basicActions, ...COMBAT_ACTIONS.classFeatureActions];
+    const allActions = [
+      ...COMBAT_ACTIONS.standardActions,
+      ...COMBAT_ACTIONS.bonusActions,
+      ...COMBAT_ACTIONS.reactions,
+      ...COMBAT_ACTIONS.movement,
+      ...COMBAT_ACTIONS.classFeatureActions
+    ];
     const action = allActions.find(a => a.slug === actionSlug);
     if (!action) return;
 
@@ -391,13 +397,14 @@ export const AttacksAndActions: React.FC<AttacksAndActionsProps> = ({
         <div className="mb-4">
           <h4 className="text-sm font-semibold text-theme-tertiary mb-2">Special Attacks</h4>
           <div className="grid grid-cols-2 gap-2">
-            {COMBAT_ACTIONS.basicActions
+            {COMBAT_ACTIONS.standardActions
               .filter(action => action.category === 'special-attack')
               .map(action => (
                 <button
                   key={action.slug}
                   onClick={() => handleCombatAction(action.slug)}
                   className="p-2 bg-orange-700 hover:bg-orange-600 rounded text-sm transition-colors text-left"
+                  title={action.summary}
                 >
                   <div className="font-medium text-theme-primary">{action.name}</div>
                   <div className="text-xs text-theme-muted truncate" title={action.description}>
@@ -444,14 +451,14 @@ export const AttacksAndActions: React.FC<AttacksAndActionsProps> = ({
         <div>
           <h4 className="text-sm font-semibold text-theme-tertiary mb-2">Tactical Actions</h4>
           <div className="grid grid-cols-2 gap-2">
-            {COMBAT_ACTIONS.basicActions
+            {COMBAT_ACTIONS.standardActions
               .filter(action => action.category === 'tactical')
               .map(action => (
                 <button
                   key={action.slug}
                   onClick={() => handleCombatAction(action.slug)}
                   className="p-2 bg-theme-tertiary hover:bg-theme-quaternary rounded text-sm transition-colors text-left"
-                  title={action.description}
+                  title={action.summary}
                 >
                   <div className="font-medium text-theme-primary">{action.name}</div>
                   <div className="text-xs text-theme-muted">

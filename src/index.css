@@ -216,11 +216,6 @@
   border-radius: inherit;
 }
 
-/* Soften shadows for ink bleeding effect */
-[data-theme="paper"] .shadow-lg {
-  box-shadow: 0 4px 6px -1px rgba(74, 54, 34, 0.1), 0 2px 4px -1px rgba(74, 54, 34, 0.06);
-}
-
 /* Handwritten input styling */
 [data-theme="paper"] .input-handwritten {
   background: transparent;
@@ -245,46 +240,9 @@
   margin-bottom: 1rem;
 }
 
-/* Vignette effect for parchment aging */
-[data-theme="paper"] .bg-theme-primary::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: radial-gradient(circle at center, transparent 60%, rgba(74, 54, 34, 0.08) 100%);
-  pointer-events: none;
-  border-radius: inherit;
-}
-
 /* Soften shadows for ink bleeding effect */
 [data-theme="paper"] .shadow-lg {
   box-shadow: 0 4px 6px -1px rgba(74, 54, 34, 0.1), 0 2px 4px -1px rgba(74, 54, 34, 0.06);
-}
-
-/* Handwritten input styling */
-[data-theme="paper"] .input-handwritten {
-  background: transparent;
-  border-bottom: 2px solid rgb(var(--color-text-disabled));
-  outline: none;
-  text-align: center;
-  font-family: var(--font-family-handwriting);
-}
-
-[data-theme="paper"] .input-handwritten:focus {
-  border-bottom-color: rgb(var(--color-accent-red));
-}
-
-/* Enhanced heading styling */
-[data-theme="paper"] .heading-parchment {
-  font-family: var(--font-family-cinzel);
-  letter-spacing: 0.05em;
-  font-weight: 700;
-  color: rgb(var(--color-accent-red));
-  border-bottom: 1px solid rgba(74, 54, 34, 0.2);
-  padding-bottom: 0.25rem;
-  margin-bottom: 1rem;
 }
 
 /* Parchment Texture Effects for Paper Theme */
@@ -308,11 +266,6 @@
   border-radius: inherit;
 }
 
-/* Soften shadows for ink bleeding effect */
-[data-theme="paper"] .shadow-lg {
-  box-shadow: 0 4px 6px -1px rgba(74, 54, 34, 0.1), 0 2px 4px -1px rgba(74, 54, 34, 0.06);
-}
-
 /* Parchment container styling */
 [data-theme="paper"] .container-parchment {
   background: transparent;
@@ -325,94 +278,6 @@
   border-bottom: 2px double rgba(74, 54, 34, 0.2);
   margin: 1rem 0;
 }
-
-/* Handwritten input styling */
-[data-theme="paper"] .input-handwritten {
-  background: transparent;
-  border-bottom: 2px solid rgb(var(--color-text-disabled));
-  outline: none;
-  text-align: center;
-  font-family: var(--font-family-handwriting);
-}
-
-[data-theme="paper"] .input-handwritten:focus {
-  border-bottom-color: rgb(var(--color-accent-red));
-}
-
-/* Enhanced heading styling */
-[data-theme="paper"] .heading-parchment {
-  font-family: var(--font-family-cinzel);
-  letter-spacing: 0.05em;
-  font-weight: 700;
-  color: rgb(var(--color-accent-red));
-  border-bottom: 1px solid rgba(74, 54, 34, 0.2);
-  padding-bottom: 0.25rem;
-  margin-bottom: 1rem;
-}
-
-  /* Text colors - Dark brown ink tones for labels */
-  --color-text-primary: 61 40 23;      /* very dark brown #3d2817 */
-  --color-text-secondary: 74 54 34;    /* dark brown ink #4a3622 */
-  --color-text-tertiary: 92 72 52;     /* medium brown #5c4834 */
-  --color-text-muted: 110 90 70;       /* muted brown */
-  --color-text-disabled: 140 120 100;  /* disabled brown */
-
-  /* Border colors - Subtle brown borders */
-  --color-border-primary: 205 195 170; /* subtle border */
-  --color-border-secondary: 215 205 180; /* lighter border */
-  --color-border-tertiary: 225 215 190; /* lightest border */
-
-  /* Accent colors - Authentic Ink Tones */
-  --color-accent-red-light: 188 108 37;    /* lighter saddle brown */
-  --color-accent-red: 139 69 19;           /* saddle brown #8b4513 (dried blood/maroon) */
-  --color-accent-red-dark: 120 60 16;      /* darker saddle brown */
-  --color-accent-red-darker: 100 50 13;    /* darkest saddle brown */
-
-  /* Accent colors - Purple (Deep ink) */
-  --color-accent-purple-light: 102 51 153; /* deep purple ink */
-  --color-accent-purple: 85 43 128;        /* darker purple ink */
-  --color-accent-purple-dark: 68 34 102;   /* darkest purple ink */
-  --color-accent-purple-darker: 51 26 77;  /* very dark purple ink */
-
-  /* Accent colors - Green (Forest ink) */
-  --color-accent-green-light: 107 142 35;  /* olive green ink */
-  --color-accent-green: 34 139 34;         /* forest green ink */
-  --color-accent-green-dark: 29 117 29;    /* darker forest ink */
-  --color-accent-green-darker: 24 95 24;   /* darkest forest ink */
-
-  /* Accent colors - Blue (Navy ink) */
-  --color-accent-blue-light: 70 130 180;  /* steel blue ink */
-  --color-accent-blue: 25 25 112;         /* midnight blue (navy ink) */
-  --color-accent-blue-dark: 20 20 90;     /* darker midnight */
-  --color-accent-blue-darker: 15 15 70;   /* darkest midnight */
-
-  /* Accent colors - Yellow (Amber ink) */
-  --color-accent-yellow-light: 218 165 32; /* goldenrod ink */
-  --color-accent-yellow: 184 134 11;       /* dark goldenrod ink */
-  --color-accent-yellow-dark: 184 134 11;   /* dark goldenrod */
-  --color-accent-yellow-darker: 150 110 9;  /* darker goldenrod */
-
-  /* Parchment Texture Effects for elements */
-  --parchment-bg-primary: {
-    background-color: rgb(var(--color-bg-primary));
-    background-image: var(--parchment-texture);
-    position: relative;
-  };
-
-  /* Vignette effect for parchment aging */
-  --parchment-vignette::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: radial-gradient(circle at center, transparent 60%, rgba(74, 54, 34, 0.08) 100%);
-    pointer-events: none;
-    border-radius: inherit;
-  }
-
-  /* Soften shadows for ink bleeding effect - defined in the shadow-lg rule above */
 
 /* ========================================
    UTILITY CLASSES - Theme-Aware Styling

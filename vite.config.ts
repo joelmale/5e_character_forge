@@ -1,11 +1,11 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import { execSync } from 'child_process';
 
-// Get git commit SHA for version tracking
-const getGitSha = () => {
+// Get version from package.json for consistent versioning
+const getVersion = () => {
   try {
-    return execSync('git rev-parse --short HEAD').toString().trim();
+    const pkg = require('./package.json');
+    return pkg.version;
   } catch {
     return 'dev';
   }
@@ -15,7 +15,7 @@ const getGitSha = () => {
 export default defineConfig({
   plugins: [react()],
   define: {
-    'import.meta.env.VITE_GIT_SHA': JSON.stringify(getGitSha()),
+    'import.meta.env.VITE_APP_VERSION': JSON.stringify(getVersion()),
   },
   server: {
     port: 3000,

@@ -62,11 +62,14 @@ interface Background {
 export interface CombatAction {
   slug: string;
   name: string;
+  summary: string;
   description: string;
-  rollType: 'skill' | 'attack' | 'healing' | 'damage' | 'none';
+  actionEconomy: 'action' | 'bonus_action' | 'reaction' | 'free' | 'movement' | 'special' | 'varies';
+  rollType: 'skill' | 'attack' | 'healing' | 'damage' | 'none' | 'conditional';
   ability?: 'STR' | 'DEX' | 'CON' | 'INT' | 'WIS' | 'CHA';
   skill?: string;
-  category: 'special-attack' | 'tactical' | 'class-feature';
+  contest?: string;
+  category: 'special-attack' | 'tactical' | 'class-feature' | 'combat' | 'spellcasting' | 'utility' | 'movement';
   class?: string;
   subclass?: string;
   minLevel?: number;
@@ -75,10 +78,19 @@ export interface CombatAction {
   rechargeType?: 'short' | 'long';
   notation?: string;
   damageByLevel?: Record<string, string>;
+  cost?: string;
 }
 
 interface CombatActionsData {
-  basicActions: CombatAction[];
+  metadata: {
+    system: string;
+    version: string;
+    source: string;
+  };
+  standardActions: CombatAction[];
+  bonusActions: CombatAction[];
+  reactions: CombatAction[];
+  movement: CombatAction[];
   classFeatureActions: CombatAction[];
 }
 
@@ -809,7 +821,7 @@ export const FEATURE_DATABASE = loadFeatures();
 export const SUBCLASS_DATABASE = loadSubclasses();
 export const FEAT_DATABASE = loadFeats();
 
-export function loadCombatActions(): { basicActions: CombatAction[]; classFeatureActions: CombatAction[] } {
+export function loadCombatActions(): CombatActionsData {
   return combatActionsData as CombatActionsData;
 }
 
