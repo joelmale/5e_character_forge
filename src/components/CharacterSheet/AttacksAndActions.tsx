@@ -1,6 +1,6 @@
 import React from 'react';
 import { Character, Equipment } from '../../types/dnd';
-import { loadEquipment } from '../../services/dataService';
+import { loadEquipment, COMBAT_ACTIONS } from '../../services/dataService';
 import { DiceRoll } from '../../services/diceService';
 
 type CustomRoll = DiceRoll & {
@@ -205,6 +205,71 @@ export const AttacksAndActions: React.FC<AttacksAndActionsProps> = ({
     onDiceRoll(roll);
   };
 
+  const handleUnarmedStrike = () => {
+    const strMod = character.abilities.STR.modifier;
+    const attackBonus = strMod + character.proficiencyBonus;
+    const attackRoll = `1d20${attackBonus >= 0 ? '+' : ''}${attackBonus}`;
+    const damageRoll = `1${strMod >= 0 ? '+' : ''}${strMod}`;
+
+    const roll: CustomRoll = {
+      id: `unarmed-${crypto.randomUUID()}`,
+      notation: attackRoll,
+      type: 'attack' as const,
+      description: 'Unarmed Strike',
+      damageNotation: damageRoll,
+      damageType: 'bludgeoning',
+      label: 'Unarmed Strike',
+      diceResults: [],
+      modifier: 0,
+      total: 0,
+      timestamp: 0
+    };
+
+    onDiceRoll(roll);
+  };
+
+  const handleCombatAction = (actionSlug: string) => {
+    const allActions = [...COMBAT_ACTIONS.basicActions, ...COMBAT_ACTIONS.classFeatureActions];
+    const action = allActions.find(a => a.slug === actionSlug);
+    if (!action) return;
+
+    // Handle rollable actions
+    if (action.rollType === 'skill' && action.ability && action.skill) {
+      handleSkillCheck(action.skill, action.ability);
+    } else if (action.rollType === 'healing' && action.notation) {
+      const healingRoll = action.notation;
+      const levelBonus = action.slug === 'second-wind' ? character.level : 0;
+      const totalNotation = levelBonus > 0 ? `${healingRoll}+${levelBonus}` : healingRoll;
+
+      const roll: CustomRoll = {
+        id: `healing-${actionSlug}-${crypto.randomUUID()}`,
+        notation: totalNotation,
+        type: 'complex' as const,
+        description: action.name,
+        label: action.name,
+        diceResults: [],
+        modifier: 0,
+        total: 0,
+        timestamp: 0
+      };
+
+      onDiceRoll(roll);
+    }
+  };
+
+  // Get class-specific combat actions
+  const getClassActions = () => {
+    const classSlug = character.class.toLowerCase();
+    return COMBAT_ACTIONS.classFeatureActions.filter(action => {
+      if (action.class !== classSlug) return false;
+      if (action.minLevel && character.level < action.minLevel) return false;
+      if (action.subclass && character.subclass?.toLowerCase() !== action.subclass) return false;
+      return true;
+    });
+  };
+
+  const classActions = getClassActions();
+
   return (
     <div className="space-y-4">
       <h2 className="text-xl font-bold text-red-500 border-b border-red-800 pb-1">⚔️ Attacks & Actions</h2>
@@ -300,76 +365,103 @@ export const AttacksAndActions: React.FC<AttacksAndActionsProps> = ({
         </div>
       )}
 
-      {/* Utility Actions */}
-      <div className="p-4 bg-theme-secondary rounded-xl shadow-lg border-l-4 border-blue-500">
-        <h3 className="text-lg font-bold text-accent-blue-light mb-3">Quick Rolls</h3>
+      {/* Combat Actions */}
+      <div className="p-4 bg-theme-secondary rounded-xl shadow-lg border-l-4 border-orange-500">
+        <h3 className="text-lg font-bold text-orange-400 mb-3">Combat Actions</h3>
 
-        {/* Initiative */}
+        {/* Unarmed Strike */}
         <div className="mb-4">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-theme-tertiary">Initiative</span>
-            <span className="text-theme-primary font-medium">+{character.initiative}</span>
+          <div className="flex items-center justify-between p-3 bg-theme-tertiary/50 rounded-lg">
+            <div className="flex-1">
+              <div className="font-semibold text-theme-primary">Unarmed Strike</div>
+              <div className="text-sm text-theme-muted">
+                +{character.abilities.STR.modifier + character.proficiencyBonus} to hit • 1{character.abilities.STR.modifier >= 0 ? '+' : ''}{character.abilities.STR.modifier} bludgeoning
+              </div>
+            </div>
+            <button
+              onClick={handleUnarmedStrike}
+              className="px-3 py-2 bg-orange-600 hover:bg-orange-500 rounded text-sm font-medium transition-colors"
+            >
+              Attack
+            </button>
           </div>
-          <button
-            onClick={handleInitiative}
-            className="w-full px-3 py-2 bg-accent-blue hover:bg-accent-blue-light rounded text-sm font-medium transition-colors"
-          >
-            Roll Initiative
-          </button>
         </div>
 
-        {/* Saving Throws */}
+        {/* Special Attacks */}
         <div className="mb-4">
-          <h4 className="text-sm font-semibold text-theme-tertiary mb-2">Saving Throws</h4>
+          <h4 className="text-sm font-semibold text-theme-tertiary mb-2">Special Attacks</h4>
           <div className="grid grid-cols-2 gap-2">
-            {(Object.keys(character.abilities) as Array<keyof Character['abilities']>).map(ability => {
-              const modifier = character.abilities[ability].modifier;
-              // TODO: Implement proper saving throw proficiency checking based on class features
-              const isProficient = false; // Temporary fix - saving throw proficiency needs proper implementation
-              const saveBonus = modifier + (isProficient ? character.proficiencyBonus : 0);
-
-              return (
+            {COMBAT_ACTIONS.basicActions
+              .filter(action => action.category === 'special-attack')
+              .map(action => (
                 <button
-                  key={ability}
-                  onClick={() => handleSavingThrow(ability)}
-                  className="p-2 bg-theme-tertiary hover:bg-theme-quaternary rounded text-sm transition-colors text-left"
+                  key={action.slug}
+                  onClick={() => handleCombatAction(action.slug)}
+                  className="p-2 bg-orange-700 hover:bg-orange-600 rounded text-sm transition-colors text-left"
                 >
-                  <div className="font-medium text-theme-primary">{ability}</div>
-                  <div className="text-xs text-theme-muted">
-                    {saveBonus >= 0 ? '+' : ''}{saveBonus}
-                    {isProficient && <span className="text-accent-yellow-light ml-1">●</span>}
+                  <div className="font-medium text-theme-primary">{action.name}</div>
+                  <div className="text-xs text-theme-muted truncate" title={action.description}>
+                    {action.rollType === 'skill' && action.ability && action.skill && (
+                      <>+{character.skills[action.skill as keyof Character['skills']].value} {action.skill}</>
+                    )}
                   </div>
                 </button>
-              );
-            })}
+              ))}
           </div>
         </div>
 
-        {/* Common Combat Skills */}
+        {/* Class Features */}
+        {classActions.length > 0 && (
+          <div className="mb-4">
+            <h4 className="text-sm font-semibold text-theme-tertiary mb-2">Class Features</h4>
+            <div className="space-y-2">
+              {classActions.map(action => (
+                <button
+                  key={action.slug}
+                  onClick={() => handleCombatAction(action.slug)}
+                  className="w-full p-3 bg-orange-700 hover:bg-orange-600 rounded text-sm transition-colors text-left"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="font-medium text-theme-primary">{action.name}</div>
+                    {action.usageType === 'limited' && action.usesPerLevel && (
+                      <div className="text-xs text-orange-300">
+                        {typeof action.usesPerLevel[character.level] === 'number'
+                          ? `${action.usesPerLevel[character.level]}/${action.rechargeType === 'short' ? 'short rest' : 'long rest'}`
+                          : action.usesPerLevel[character.level] === 'CHA'
+                            ? `${character.abilities.CHA.modifier}/${action.rechargeType === 'short' ? 'short rest' : 'long rest'}`
+                            : ''}
+                      </div>
+                    )}
+                  </div>
+                  <div className="text-xs text-theme-muted mt-1 line-clamp-2">{action.description}</div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Tactical Actions */}
         <div>
-          <h4 className="text-sm font-semibold text-theme-tertiary mb-2">Combat Skills</h4>
+          <h4 className="text-sm font-semibold text-theme-tertiary mb-2">Tactical Actions</h4>
           <div className="grid grid-cols-2 gap-2">
-            {[
-              { name: 'Athletics', ability: 'STR' as const },
-              { name: 'Acrobatics', ability: 'DEX' as const },
-              { name: 'SleightOfHand', ability: 'DEX' as const },
-              { name: 'Stealth', ability: 'DEX' as const },
-            ].map(({ name, ability }) => {
-              const skill = character.skills[name as keyof Character['skills']];
-              return (
+            {COMBAT_ACTIONS.basicActions
+              .filter(action => action.category === 'tactical')
+              .map(action => (
                 <button
-                  key={name}
-                  onClick={() => handleSkillCheck(name, ability)}
+                  key={action.slug}
+                  onClick={() => handleCombatAction(action.slug)}
                   className="p-2 bg-theme-tertiary hover:bg-theme-quaternary rounded text-sm transition-colors text-left"
+                  title={action.description}
                 >
-                  <div className="font-medium text-theme-primary">{name.replace(/([A-Z])/g, ' $1').trim()}</div>
+                  <div className="font-medium text-theme-primary">{action.name}</div>
                   <div className="text-xs text-theme-muted">
-                    {skill.value >= 0 ? '+' : ''}{skill.value}
-                    {skill.proficient && <span className="text-accent-yellow-light ml-1">●</span>}
+                    {action.rollType === 'skill' && action.ability && action.skill && (
+                      <>+{character.skills[action.skill as keyof Character['skills']].value} {action.skill}</>
+                    )}
+                    {action.rollType === 'none' && <span className="text-orange-300">No roll</span>}
                   </div>
                 </button>
-              );
-            })}
+              ))}
           </div>
         </div>
       </div>

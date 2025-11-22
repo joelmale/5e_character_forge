@@ -28,6 +28,7 @@ import levelConstantsData from '../data/levelConstants.json';
 import spellcastingTypesData from '../data/spellcastingTypes.json';
 import racialLanguagesData from '../data/racialLanguages.json';
 import backgroundDefaultsData from '../data/backgroundDefaults.json';
+import combatActionsData from '../data/combatActions.json';
 import { generateName } from '../utils/nameGenerator';
 import { AbilityName, Race, Class, Equipment, Feature, Subclass, Feat, RaceCategory, ClassCategory, EquipmentPackage, EquipmentChoice, EquipmentItem, EquippedItem, SpellcastingType, SkillName, Monster, MonsterType } from '../types/dnd';
 
@@ -58,8 +59,28 @@ interface Background {
   roleplaying_suggestions?: string;
 }
 
+export interface CombatAction {
+  slug: string;
+  name: string;
+  description: string;
+  rollType: 'skill' | 'attack' | 'healing' | 'damage' | 'none';
+  ability?: 'STR' | 'DEX' | 'CON' | 'INT' | 'WIS' | 'CHA';
+  skill?: string;
+  category: 'special-attack' | 'tactical' | 'class-feature';
+  class?: string;
+  subclass?: string;
+  minLevel?: number;
+  usageType?: 'limited' | 'ki' | 'spell-slot' | 'pool' | 'spell';
+  usesPerLevel?: Record<string, number | string>;
+  rechargeType?: 'short' | 'long';
+  notation?: string;
+  damageByLevel?: Record<string, string>;
+}
 
-
+interface CombatActionsData {
+  basicActions: CombatAction[];
+  classFeatureActions: CombatAction[];
+}
 
 
 
@@ -787,6 +808,12 @@ export function getSubclassesByClass(classSlug: string): Subclass[] {
 export const FEATURE_DATABASE = loadFeatures();
 export const SUBCLASS_DATABASE = loadSubclasses();
 export const FEAT_DATABASE = loadFeats();
+
+export function loadCombatActions(): { basicActions: CombatAction[]; classFeatureActions: CombatAction[] } {
+  return combatActionsData as CombatActionsData;
+}
+
+export const COMBAT_ACTIONS = loadCombatActions();
 
 // Export raw data for reference
 export { srdSpellsMerged, srdRaces2014, srdClasses2014, srdEquipment2014, srdEquipment2024, srdFeatures2014, srdSubclasses2014 };
