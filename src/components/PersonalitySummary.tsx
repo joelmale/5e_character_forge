@@ -1,7 +1,8 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import { ArrowLeft, ArrowRight, Edit3, Sparkles, Heart, Shield, Zap } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Edit3, Sparkles, Heart, Shield, Zap, HelpCircle } from 'lucide-react';
 import { CharacterProfile } from '../data/characterProfiles';
 import { loadClasses, getAllRaces, BACKGROUNDS, getModifier } from '../services/dataService';
+import SkillTooltip from './SkillTooltip';
 
 interface PersonalitySummaryProps {
   profile: CharacterProfile;
@@ -35,6 +36,7 @@ const PersonalitySummary: React.FC<PersonalitySummaryProps> = ({
   const [editingClass, setEditingClass] = useState(false);
   const [editingRace, setEditingRace] = useState(false);
   const [editingBackground, setEditingBackground] = useState(false);
+  const [showArrayModal, setShowArrayModal] = useState(false);
 
   const [currentClass, setCurrentClass] = useState(selectedClass || profile.recommendedClasses[0]?.class || '');
   const [currentRace, setCurrentRace] = useState(selectedRace || profile.recommendedRaces[0]?.race || '');
@@ -250,9 +252,18 @@ const PersonalitySummary: React.FC<PersonalitySummaryProps> = ({
                 </div>
               ))}
             </div>
-            <p className="text-xs text-gray-400 mt-2">
-              Using standard array distribution. These can be adjusted during character creation.
-            </p>
+            <div className="flex items-center gap-2 mt-2">
+              <p className="text-xs text-gray-400">
+                Using standard array distribution. These can be adjusted during character creation.
+              </p>
+              <button
+                onClick={() => setShowArrayModal(true)}
+                className="text-gray-400 hover:text-white transition-colors"
+                aria-label="Learn about standard array"
+              >
+                <HelpCircle className="w-4 h-4" />
+              </button>
+            </div>
           </div>
 
           {/* Combat Stats */}
@@ -283,13 +294,15 @@ const PersonalitySummary: React.FC<PersonalitySummaryProps> = ({
             <h4 className="text-md font-semibold text-purple-300 mb-3">Proficient Skills</h4>
             <div className="flex flex-wrap gap-2">
               {characterPreview.proficientSkills.map((skill, idx) => (
-                <span key={idx} className="px-3 py-1 bg-purple-700 text-purple-200 text-sm rounded">
-                  {skill}
-                </span>
+                <SkillTooltip key={idx} skillName={skill}>
+                  <span className="px-3 py-1 bg-purple-700 text-purple-200 text-sm rounded cursor-help transition-all hover:bg-purple-600">
+                    {skill}
+                  </span>
+                </SkillTooltip>
               ))}
             </div>
             <p className="text-xs text-gray-400 mt-2">
-              Skills from your class and background. You can choose additional skills during character creation.
+              These skills were chosen from a pool of the best stats given your choices.
             </p>
           </div>
         </div>
@@ -336,6 +349,57 @@ const PersonalitySummary: React.FC<PersonalitySummaryProps> = ({
           </button>
         </div>
       </div>
+
+      {/* Standard Array Info Modal */}
+      {showArrayModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-800 rounded-xl shadow-2xl max-w-md w-full p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-bold text-yellow-300">Standard Array</h3>
+              <button
+                onClick={() => setShowArrayModal(false)}
+                className="text-gray-400 hover:text-white transition-colors"
+              >
+                <span className="text-2xl">&times;</span>
+              </button>
+            </div>
+
+            <div className="mb-4">
+              <div className="flex justify-center gap-2 mb-4">
+                {[15, 14, 13, 12, 10, 8].map((score, idx) => (
+                  <div key={idx} className="bg-gray-700 px-3 py-2 rounded text-center">
+                    <div className="text-lg font-bold text-yellow-300">{score}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <p className="text-sm text-gray-300 mb-4 leading-relaxed">
+              The standard array is a method for determining ability scores for your new D&D character.
+              This method gives you 6 predetermined scores: <span className="font-bold text-yellow-300">15, 14, 13, 12, 10, and 8</span>.
+            </p>
+
+            <p className="text-sm text-gray-300 mb-4 leading-relaxed">
+              To use this method, assign each standard array number to one of the 6 ability scores:
+              <span className="font-semibold"> Strength, Dexterity, Constitution, Intelligence, Wisdom, and Charisma</span>.
+            </p>
+
+            <p className="text-sm text-gray-400 italic">
+              The personality wizard automatically assigns these values based on your class and playstyle preferences,
+              but you can redistribute them in the next step if you want to customize further.
+            </p>
+
+            <div className="mt-6 flex justify-end">
+              <button
+                onClick={() => setShowArrayModal(false)}
+                className="px-4 py-2 bg-purple-600 hover:bg-purple-500 rounded-lg text-white transition-colors"
+              >
+                Got it!
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -3,8 +3,11 @@ import { ArrowLeft, ArrowRight, Heart, Shield, Zap, Sparkles } from 'lucide-reac
 import { generateCharacterProfile, CharacterProfile } from '../data/characterProfiles';
 import PersonalitySummary from './PersonalitySummary';
 import CharacterFinalization from './CharacterFinalization';
-import { loadClasses, getAllRaces, BACKGROUNDS } from '../services/dataService';
-import { CharacterCreationData } from '../types/dnd';
+import { loadClasses, getAllRaces, BACKGROUNDS, getCantripsByClass, getLeveledSpellsByClass } from '../services/dataService';
+import { CharacterCreationData, SpellSelectionData } from '../types/dnd';
+import { getSpellcastingType } from '../utils/spellUtils';
+import { SPELL_LEARNING_RULES } from '../data/spellLearning';
+import cantripsData from '../data/cantrips.json';
 
 interface PersonalityWizardProps {
   isOpen: boolean;
@@ -196,6 +199,65 @@ const PersonalityWizard: React.FC<PersonalityWizardProps> = ({ isOpen, onClose: 
     // Combine and deduplicate skills
     const selectedSkills = [...new Set([...defaultSkills, ...backgroundSkills])];
 
+    // Auto-select spells for spellcasters
+    const spellcastingType = getSpellcastingType(selectedClassData.slug);
+    let autoSpellSelection: SpellSelectionData = {
+      selectedCantrips: [],
+      knownSpells: [],
+      preparedSpells: []
+    };
+
+    if (spellcastingType) {
+      console.log('🔮 [PersonalityWizard] Auto-selecting spells for', selectedClassData.name);
+
+      const availableCantrips = getCantripsByClass(selectedClassData.slug);
+      const availableSpells = getLeveledSpellsByClass(selectedClassData.slug, 1);
+
+      // Get cantrip count for level 1
+      const numCantrips = (cantripsData as any)[selectedClassData.slug]?.['1'] || 0;
+
+      // Randomly select cantrips
+      if (numCantrips > 0 && availableCantrips.length > 0) {
+        const shuffledCantrips = [...availableCantrips].sort(() => Math.random() - 0.5);
+        autoSpellSelection.selectedCantrips = shuffledCantrips.slice(0, numCantrips).map(s => s.slug);
+        console.log(`  ✨ Selected ${numCantrips} cantrips:`, autoSpellSelection.selectedCantrips);
+      }
+
+      // Get spell count based on spellcasting type
+      const learningRules = SPELL_LEARNING_RULES[selectedClassData.slug];
+
+      if (spellcastingType === 'known' && learningRules?.spellsKnown) {
+        const numSpells = learningRules.spellsKnown[0] || 0;
+        if (numSpells > 0 && availableSpells.length > 0) {
+          const shuffledSpells = [...availableSpells].sort(() => Math.random() - 0.5);
+          autoSpellSelection.knownSpells = shuffledSpells.slice(0, numSpells).map(s => s.slug);
+          console.log(`  📖 Selected ${numSpells} known spells:`, autoSpellSelection.knownSpells);
+        }
+      } else if (spellcastingType === 'prepared' && learningRules?.spellsPrepared) {
+        const numSpells = learningRules.spellsPrepared[0] || 0;
+        if (numSpells > 0 && availableSpells.length > 0) {
+          const shuffledSpells = [...availableSpells].sort(() => Math.random() - 0.5);
+          autoSpellSelection.preparedSpells = shuffledSpells.slice(0, numSpells).map(s => s.slug);
+          console.log(`  📋 Selected ${numSpells} prepared spells:`, autoSpellSelection.preparedSpells);
+        }
+      } else if (spellcastingType === 'wizard' && learningRules?.spellbookCapacity) {
+        // Wizard gets 6 spells in spellbook at level 1
+        const numSpellbookSpells = learningRules.spellbookCapacity[0] || 6;
+        if (availableSpells.length > 0) {
+          const shuffledSpells = [...availableSpells].sort(() => Math.random() - 0.5);
+          autoSpellSelection.spellbook = shuffledSpells.slice(0, numSpellbookSpells).map(s => s.slug);
+
+          // Wizard prepares INT mod + level spells (INT is 12 from standard array, so +1 mod + 1 level = 2 spells)
+          const intMod = Math.floor((12 - 10) / 2);
+          const numPrepared = Math.max(1, intMod + 1);
+          autoSpellSelection.preparedSpells = autoSpellSelection.spellbook.slice(0, numPrepared);
+
+          console.log(`  📚 Selected ${numSpellbookSpells} spellbook spells:`, autoSpellSelection.spellbook);
+          console.log(`  📝 Prepared ${numPrepared} spells:`, autoSpellSelection.preparedSpells);
+        }
+      }
+    }
+
     // Create complete CharacterCreationData structure
     const characterData: CharacterCreationData = {
       name: finalizationData.name,
@@ -213,11 +275,7 @@ const PersonalityWizard: React.FC<PersonalityWizardProps> = ({ isOpen, onClose: 
       equipmentChoices: [],
       hpCalculationMethod: 'max' as const,
 
-      spellSelection: {
-        selectedCantrips: [],
-        knownSpells: [],
-        preparedSpells: []
-      },
+      spellSelection: autoSpellSelection,
 
       subclassSlug: null,
       selectedFightingStyle: null,
