@@ -76,12 +76,12 @@
   --color-bg-quaternary: 229 231 235;  /* gray-200 */
   --color-bg-hover: 209 213 219;       /* gray-300 */
 
-  /* Text colors */
-  --color-text-primary: 17 24 39;      /* gray-900 */
-  --color-text-secondary: 31 41 55;    /* gray-800 */
-  --color-text-tertiary: 55 65 81;     /* gray-700 */
-  --color-text-muted: 107 114 128;     /* gray-500 */
-  --color-text-disabled: 156 163 175;  /* gray-400 */
+  /* Text colors - Dark brown for labels */
+  --color-text-primary: 61 40 23;      /* very dark brown #3d2817 */
+  --color-text-secondary: 93 64 55;    /* dark brown #5d4037 */
+  --color-text-tertiary: 109 76 65;    /* medium brown #6d4c41 */
+  --color-text-muted: 121 85 72;       /* muted brown #795548 */
+  --color-text-disabled: 141 110 99;   /* disabled brown #8d6e63 */
 
   /* Border colors */
   --color-border-primary: 209 213 219; /* gray-300 */
@@ -133,12 +133,12 @@
   --color-bg-quaternary: 225 215 190;  /* even darker parchment */
   --color-bg-hover: 215 205 180;       /* hover state */
 
-  /* Text colors - Brown ink tones */
-  --color-text-primary: 74 54 34;      /* brown ink #4a3622 */
-  --color-text-secondary: 92 72 52;    /* lighter brown #5c4834 */
-  --color-text-tertiary: 110 90 70;    /* even lighter brown */
-  --color-text-muted: 140 120 100;     /* muted brown */
-  --color-text-disabled: 170 150 130;  /* disabled brown */
+  /* Text colors - Dark brown ink tones for labels */
+  --color-text-primary: 61 40 23;      /* very dark brown #3d2817 */
+  --color-text-secondary: 74 54 34;    /* dark brown ink #4a3622 */
+  --color-text-tertiary: 92 72 52;     /* medium brown #5c4834 */
+  --color-text-muted: 110 90 70;       /* muted brown */
+  --color-text-disabled: 140 120 100;  /* disabled brown */
 
   /* Border colors - Subtle brown borders */
   --color-border-primary: 205 195 170; /* subtle border */
