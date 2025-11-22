@@ -2,6 +2,7 @@ import React from 'react';
 import { X } from 'lucide-react';
 import { useTheme } from '../hooks';
 import { ThemeType, getThemeDisplayName, getThemeDescription } from '../services/themeService';
+import { APP_VERSION } from '../version';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -67,7 +68,10 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end p-6 border-t border-theme-secondary">
+        <div className="flex items-center justify-between p-6 border-t border-theme-secondary">
+          <div className="text-sm text-theme-muted">
+            Version {APP_VERSION}
+          </div>
           <button
             onClick={onClose}
             className="px-6 py-2 bg-accent-purple hover:bg-accent-purple-light rounded-lg text-white font-semibold transition-colors"

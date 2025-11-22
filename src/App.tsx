@@ -25,6 +25,7 @@ import { generateUUID, DiceRoll } from './services/diceService';
 import { featureDescriptions } from './utils/featureDescriptions';
 import { loadClasses, loadEquipment, loadFeatures, getSubclassesByClass, PROFICIENCY_BONUSES, getModifier, getHitDieForClass, CANTRIPS_KNOWN_BY_CLASS, SPELL_SLOTS_BY_CLASS, AppSubclass } from './services/dataService';
 import { getAllCharacters, addCharacter, deleteCharacter, updateCharacter } from './services/dbService';
+import { APP_VERSION } from './version';
 // REFACTORED: Language utilities moved to languageUtils.ts for the wizard
 // Still used here in main App for character sheet display - can be removed once main app is refactored
 
@@ -1315,6 +1316,11 @@ const App: React.FC = () => {
             setIsDiceTrayModalOpen(false);
           }}
         />
+
+        {/* Version Display */}
+        <div className="fixed bottom-4 right-4 text-theme-muted text-sm opacity-50 hover:opacity-100 transition-opacity">
+          v{APP_VERSION}
+        </div>
       </div>
     </div>
   );
