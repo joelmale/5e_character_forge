@@ -52,6 +52,8 @@ const PersonalityWizard: React.FC<PersonalityWizardProps> = ({ isOpen, onClose: 
     knownSpells: [],
     preparedSpells: []
   });
+  const [customSkills, setCustomSkills] = useState<string[] | null>(null);
+  const [customAbilities, setCustomAbilities] = useState<Record<string, number> | null>(null);
 
   // Reset wizard when opened
   React.useEffect(() => {
@@ -71,6 +73,8 @@ const PersonalityWizard: React.FC<PersonalityWizardProps> = ({ isOpen, onClose: 
         knownSpells: [],
         preparedSpells: []
       });
+      setCustomSkills(null);
+      setCustomAbilities(null);
     }
   }, [isOpen]);
 
@@ -260,16 +264,27 @@ const PersonalityWizard: React.FC<PersonalityWizardProps> = ({ isOpen, onClose: 
       return;
     }
 
-    // Get proficient skills from class (take first N skills as defaults)
-    const numSkills = selectedClassData.num_skill_choices || 0;
-    const defaultSkills = selectedClassData.skill_proficiencies?.slice(0, numSkills) || [];
+    // Use custom skills if user edited them, otherwise auto-select
+    let selectedSkills: string[];
+    if (customSkills) {
+      selectedSkills = customSkills;
+    } else {
+      // Get proficient skills from class (take first N skills as defaults)
+      const numSkills = selectedClassData.num_skill_choices || 0;
+      const defaultSkills = selectedClassData.skill_proficiencies?.slice(0, numSkills) || [];
 
-    // Get background skills
-    const backgroundData = BACKGROUNDS.find(bg => bg.name === selectedBackground);
-    const backgroundSkills = backgroundData?.skill_proficiencies || [];
+      // Get background skills
+      const backgroundData = BACKGROUNDS.find(bg => bg.name === selectedBackground);
+      const backgroundSkills = backgroundData?.skill_proficiencies || [];
 
-    // Combine and deduplicate skills
-    const selectedSkills = [...new Set([...defaultSkills, ...backgroundSkills])];
+      // Combine and deduplicate skills
+      selectedSkills = [...new Set([...defaultSkills, ...backgroundSkills])];
+    }
+
+    // Use custom abilities if user edited them, otherwise use default standard array
+    const abilities = customAbilities || {
+      STR: 15, DEX: 14, CON: 13, INT: 12, WIS: 10, CHA: 8 // Standard array
+    };
 
     // Create complete CharacterCreationData structure
     const characterData: CharacterCreationData = {
@@ -277,9 +292,7 @@ const PersonalityWizard: React.FC<PersonalityWizardProps> = ({ isOpen, onClose: 
       level: 1,
       raceSlug: selectedRaceData.slug,
       classSlug: selectedClassData.slug,
-      abilities: {
-        STR: 15, DEX: 14, CON: 13, INT: 12, WIS: 10, CHA: 8 // Standard array
-      },
+      abilities,
       abilityScoreMethod: 'standard-array' as const,
       background: selectedBackground || '',
       alignment: finalizationData.alignment,
@@ -398,6 +411,10 @@ const PersonalityWizard: React.FC<PersonalityWizardProps> = ({ isOpen, onClose: 
                   selectedBackground={selectedBackground || undefined}
                   spellSelection={spellSelection}
                   onSpellSelectionChange={setSpellSelection}
+                  customSkills={customSkills}
+                  onSkillsChange={setCustomSkills}
+                  customAbilities={customAbilities}
+                  onAbilitiesChange={setCustomAbilities}
                   onContinue={() => setCurrentStep(7)}
                   onBack={() => setCurrentStep(5)}
                 />

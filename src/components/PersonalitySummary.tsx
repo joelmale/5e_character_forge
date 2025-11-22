@@ -6,6 +6,8 @@ import { SpellSelectionData } from '../types/dnd';
 import { getSpellcastingType } from '../utils/spellUtils';
 import SkillTooltip from './SkillTooltip';
 import SpellEditModal from './SpellEditModal';
+import SkillEditModal from './SkillEditModal';
+import AbilityScoreEditModal from './AbilityScoreEditModal';
 
 interface PersonalitySummaryProps {
   profile: CharacterProfile;
@@ -14,6 +16,10 @@ interface PersonalitySummaryProps {
   selectedBackground?: string;
   spellSelection?: SpellSelectionData;
   onSpellSelectionChange?: (selection: SpellSelectionData) => void;
+  customSkills?: string[] | null;
+  onSkillsChange?: (skills: string[]) => void;
+  customAbilities?: Record<string, number> | null;
+  onAbilitiesChange?: (abilities: Record<string, number>) => void;
   onContinue: () => void;
   onBack: () => void;
 }
@@ -25,6 +31,10 @@ const PersonalitySummary: React.FC<PersonalitySummaryProps> = ({
   selectedBackground,
   spellSelection,
   onSpellSelectionChange,
+  customSkills,
+  onSkillsChange,
+  customAbilities,
+  onAbilitiesChange,
   onContinue,
   onBack
 }) => {
@@ -35,6 +45,8 @@ const PersonalitySummary: React.FC<PersonalitySummaryProps> = ({
     selectedRace,
     selectedBackground,
     spellSelection,
+    customSkills,
+    customAbilities,
     recommendedClasses: profile.recommendedClasses.map(c => c.class),
     recommendedRaces: profile.recommendedRaces.map(r => r.race),
     recommendedBackgrounds: profile.recommendedBackgrounds.map(b => b.background)
@@ -46,6 +58,8 @@ const PersonalitySummary: React.FC<PersonalitySummaryProps> = ({
   const [editingBackground, setEditingBackground] = useState(false);
   const [showArrayModal, setShowArrayModal] = useState(false);
   const [showSpellModal, setShowSpellModal] = useState(false);
+  const [showSkillModal, setShowSkillModal] = useState(false);
+  const [showAbilityModal, setShowAbilityModal] = useState(false);
 
   const [currentClass, setCurrentClass] = useState(selectedClass || profile.recommendedClasses[0]?.class || '');
   const [currentRace, setCurrentRace] = useState(selectedRace || profile.recommendedRaces[0]?.race || '');
@@ -69,8 +83,8 @@ const PersonalitySummary: React.FC<PersonalitySummaryProps> = ({
     const baseClassName = extractBaseName(currentClass);
     const selectedClassData = allClasses.find(c => c.name === baseClassName);
 
-    // Base ability scores (standard array)
-    const baseAbilities = { STR: 15, DEX: 14, CON: 13, INT: 12, WIS: 10, CHA: 8 };
+    // Use custom abilities if user edited them, otherwise use default standard array
+    const baseAbilities = customAbilities || { STR: 15, DEX: 14, CON: 13, INT: 12, WIS: 10, CHA: 8 };
 
     // Calculate modifiers
     const abilities = {
@@ -82,20 +96,30 @@ const PersonalitySummary: React.FC<PersonalitySummaryProps> = ({
       CHA: { score: baseAbilities.CHA, modifier: getModifier(baseAbilities.CHA) }
     };
 
-    // Get proficient skills from class
-    const proficientSkills = selectedClassData?.skill_proficiencies || [];
+    // Use custom skills if user edited them, otherwise auto-select
+    let proficientSkills: string[];
+    if (customSkills) {
+      proficientSkills = customSkills;
+    } else {
+      // Get proficient skills from class (take first N skills as defaults)
+      const numSkills = selectedClassData?.num_skill_choices || 0;
+      const classSkills = selectedClassData?.skill_proficiencies?.slice(0, numSkills) || [];
 
-    // Get background skills
-    const backgroundData = BACKGROUNDS.find(bg => bg.name === currentBackground);
-    const backgroundSkills = backgroundData?.skill_proficiencies || [];
+      // Get background skills
+      const backgroundData = BACKGROUNDS.find(bg => bg.name === currentBackground);
+      const backgroundSkills = backgroundData?.skill_proficiencies || [];
+
+      // Combine and deduplicate skills
+      proficientSkills = [...new Set([...classSkills, ...backgroundSkills])];
+    }
 
     return {
       abilities,
-      proficientSkills: [...new Set([...proficientSkills, ...backgroundSkills])],
+      proficientSkills,
       hitDie: selectedClassData?.hit_die || 8,
       armorClass: 10 + abilities.DEX.modifier // Base AC + Dex modifier
     };
-  }, [currentClass, currentBackground]);
+  }, [currentClass, currentBackground, customSkills, customAbilities]);
 
   // Compute spell information for display
   const spellInfo = useMemo(() => {
@@ -312,7 +336,18 @@ const PersonalitySummary: React.FC<PersonalitySummaryProps> = ({
 
           {/* Ability Scores */}
           <div className="mb-6">
-            <h4 className="text-md font-semibold text-yellow-300 mb-3">Ability Scores</h4>
+            <div className="flex items-center justify-between mb-3">
+              <h4 className="text-md font-semibold text-yellow-300">Ability Scores</h4>
+              {onAbilitiesChange && (
+                <button
+                  onClick={() => setShowAbilityModal(true)}
+                  className="text-gray-400 hover:text-white transition-colors p-1"
+                  aria-label="Edit ability scores"
+                >
+                  <Pencil className="w-4 h-4" />
+                </button>
+              )}
+            </div>
             <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
               {Object.entries(characterPreview.abilities).map(([ability, data]) => (
                 <div key={ability} className="bg-gray-700 p-3 rounded text-center">
@@ -363,7 +398,18 @@ const PersonalitySummary: React.FC<PersonalitySummaryProps> = ({
 
           {/* Proficient Skills */}
           <div className="mb-6">
-            <h4 className="text-md font-semibold text-purple-300 mb-3">Proficient Skills</h4>
+            <div className="flex items-center justify-between mb-3">
+              <h4 className="text-md font-semibold text-purple-300">Proficient Skills</h4>
+              {onSkillsChange && (
+                <button
+                  onClick={() => setShowSkillModal(true)}
+                  className="text-gray-400 hover:text-white transition-colors p-1"
+                  aria-label="Edit skills"
+                >
+                  <Pencil className="w-4 h-4" />
+                </button>
+              )}
+            </div>
             <div className="flex flex-wrap gap-2">
               {characterPreview.proficientSkills.map((skill, idx) => (
                 <SkillTooltip key={idx} skillName={skill}>
@@ -563,6 +609,34 @@ const PersonalitySummary: React.FC<PersonalitySummaryProps> = ({
           onSave={(newSelection) => {
             onSpellSelectionChange(newSelection);
             setShowSpellModal(false);
+          }}
+        />
+      )}
+
+      {/* Skill Edit Modal */}
+      {onSkillsChange && (
+        <SkillEditModal
+          classSlug={loadClasses().find(c => c.name === currentClass.split(' (')[0])?.slug || ''}
+          backgroundSlug={currentBackground}
+          currentSkills={characterPreview.proficientSkills}
+          isOpen={showSkillModal}
+          onClose={() => setShowSkillModal(false)}
+          onSave={(skills) => {
+            onSkillsChange(skills);
+            setShowSkillModal(false);
+          }}
+        />
+      )}
+
+      {/* Ability Score Edit Modal */}
+      {onAbilitiesChange && (
+        <AbilityScoreEditModal
+          currentScores={customAbilities || { STR: 15, DEX: 14, CON: 13, INT: 12, WIS: 10, CHA: 8 }}
+          isOpen={showAbilityModal}
+          onClose={() => setShowAbilityModal(false)}
+          onSave={(abilities) => {
+            onAbilitiesChange(abilities);
+            setShowAbilityModal(false);
           }}
         />
       )}
