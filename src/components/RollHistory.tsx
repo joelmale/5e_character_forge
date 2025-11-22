@@ -68,7 +68,7 @@ export const RollHistoryModal: React.FC<RollHistoryModalProps> = ({
     return (
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-4 right-4 p-3 bg-accent-red hover:bg-accent-red-light rounded-full shadow-lg transition-colors z-30"
+        className="fixed bottom-[200px] right-4 md:right-[calc((100vw-80rem)/2+1rem)] p-3 bg-accent-red hover:bg-accent-red-light rounded-full shadow-lg transition-colors z-30"
         title="View Roll History"
       >
         <History className="w-6 h-6 text-white" />
