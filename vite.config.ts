@@ -28,8 +28,22 @@ export default defineConfig({
     },
     rollupOptions: {
       output: {
-        manualChunks: {
-          'react-vendor': ['react', 'react-dom'],
+        manualChunks(id) {
+          // specific split for heavy 3D libraries (optional but recommended)
+          if (id.includes('node_modules/three')) {
+            return 'three';
+          }
+          if (id.includes('node_modules/@react-three')) {
+            return 'react-three';
+          }
+          if (id.includes('node_modules/@3d-dice')) {
+            return 'dice-3d';
+          }
+
+          // Put all other node_modules into a 'vendor' chunk
+          if (id.includes('node_modules')) {
+            return 'vendor';
+          }
         },
       },
     },
