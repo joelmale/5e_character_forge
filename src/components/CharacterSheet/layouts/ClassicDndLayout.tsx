@@ -47,7 +47,7 @@ export const ClassicDndLayout: React.FC<CharacterSheetProps> = ({
   };
 
   return (
-    <div className="p-4 md:p-8 bg-gray-900 text-gray-100 min-h-screen pb-24">
+    <div className="p-4 md:p-8 bg-theme-primary text-theme-primary min-h-screen pb-24">
       <div className="max-w-[1400px] mx-auto space-y-4">
         <CharacterHeader
           character={character}
@@ -67,8 +67,8 @@ export const ClassicDndLayout: React.FC<CharacterSheetProps> = ({
             {/* Two-Column Layout within Left Panel */}
             <div className="grid grid-cols-12 gap-4">
               {/* LEFT SUB-COLUMN (35%) - Ability Scores */}
-              <div className="col-span-4 bg-gray-800 border border-gray-700 rounded-lg p-4 shadow-lg">
-                <h2 className="text-sm font-bold text-center mb-4 text-gray-400 uppercase tracking-wider font-cinzel">
+              <div className="col-span-4 bg-theme-secondary border border-theme-secondary rounded-lg p-4 shadow-lg">
+                <h2 className="text-sm font-bold text-center mb-4 text-theme-muted uppercase tracking-wider font-cinzel">
                   Ability Scores
                 </h2>
                 <AbilityScores
@@ -85,15 +85,15 @@ export const ClassicDndLayout: React.FC<CharacterSheetProps> = ({
                 {/* Inspiration and Proficiency - Stacked Vertically */}
                 <div className="space-y-3">
                   {/* Inspiration */}
-                  <div className="bg-gray-800 border border-gray-700 rounded-lg p-3 shadow-lg">
+                  <div className="bg-theme-secondary border border-theme-secondary rounded-lg p-3 shadow-lg">
                     <div className="flex items-center justify-between">
-                      <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider font-cinzel">
+                      <h3 className="text-sm font-bold text-theme-muted uppercase tracking-wider font-cinzel">
                         Inspiration
                       </h3>
                       <button
                         onClick={() => onToggleInspiration(character.id)}
                         className={`w-10 h-10 rounded-full transition-all cursor-pointer flex items-center justify-center ${
-                          character.inspiration ? 'bg-yellow-500 border-2 border-yellow-400' : 'bg-gray-600 hover:bg-gray-500 border-2 border-gray-500'
+                          character.inspiration ? 'bg-accent-yellow border-2 border-yellow-400' : 'bg-theme-quaternary hover:bg-theme-hover border-2 border-gray-500'
                         }`}
                         title={character.inspiration ? 'Remove Inspiration' : 'Grant Inspiration'}
                       >
@@ -103,9 +103,9 @@ export const ClassicDndLayout: React.FC<CharacterSheetProps> = ({
                   </div>
 
                   {/* Proficiency Bonus */}
-                  <div className="bg-gray-800 border border-gray-700 rounded-lg p-3 shadow-lg">
+                  <div className="bg-theme-secondary border border-theme-secondary rounded-lg p-3 shadow-lg">
                     <div className="flex items-center justify-between">
-                      <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider font-cinzel">
+                      <h3 className="text-sm font-bold text-theme-muted uppercase tracking-wider font-cinzel">
                         Proficiency
                       </h3>
                       <div className="w-12 h-12 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 border-2 border-yellow-300 shadow-lg flex items-center justify-center">
@@ -118,8 +118,8 @@ export const ClassicDndLayout: React.FC<CharacterSheetProps> = ({
                 </div>
 
                 {/* Saving Throws */}
-                <div className="bg-gray-800 border border-gray-700 rounded-lg p-4 shadow-lg">
-                   <h3 className="text-sm font-bold text-center mb-3 text-gray-400 uppercase tracking-wider font-cinzel">
+                <div className="bg-theme-secondary border border-theme-secondary rounded-lg p-4 shadow-lg">
+                   <h3 className="text-sm font-bold text-center mb-3 text-theme-muted uppercase tracking-wider font-cinzel">
                      Saving Throws
                    </h3>
                   <SavingThrows
@@ -132,8 +132,8 @@ export const ClassicDndLayout: React.FC<CharacterSheetProps> = ({
                 </div>
 
                 {/* Skills */}
-                <div className="bg-gray-800 border border-gray-700 rounded-lg p-4 shadow-lg">
-                   <h3 className="text-sm font-bold text-center mb-4 text-gray-400 uppercase tracking-wider font-cinzel">
+                <div className="bg-theme-secondary border border-theme-secondary rounded-lg p-4 shadow-lg">
+                   <h3 className="text-sm font-bold text-center mb-4 text-theme-muted uppercase tracking-wider font-cinzel">
                      Skills
                    </h3>
                   <SkillsSection
@@ -147,7 +147,7 @@ export const ClassicDndLayout: React.FC<CharacterSheetProps> = ({
             </div>
 
              {/* Currency - Condensed */}
-             <div className="bg-gray-800 border border-gray-700 rounded-lg p-2 shadow-lg">
+             <div className="bg-theme-secondary border border-theme-secondary rounded-lg p-2 shadow-lg">
                <CoinManagement
                  character={character}
                  onUpdateCharacter={onUpdateCharacter}
@@ -156,15 +156,15 @@ export const ClassicDndLayout: React.FC<CharacterSheetProps> = ({
              </div>
 
              {/* Languages - Condensed */}
-             <div className="bg-gray-800 border border-gray-700 rounded-lg p-2 shadow-lg">
+             <div className="bg-theme-secondary border border-theme-secondary rounded-lg p-2 shadow-lg">
                <LanguagesPanel
                  character={character}
                />
              </div>
 
             {/* Progression - Experience & Attunement */}
-            <div className="bg-gray-800 border border-gray-700 rounded-lg p-2 shadow-lg">
-              <h2 className="text-sm font-bold mb-2 text-gray-400 uppercase tracking-wider font-cinzel">
+            <div className="bg-theme-secondary border border-theme-secondary rounded-lg p-2 shadow-lg">
+              <h2 className="text-sm font-bold mb-2 text-theme-muted uppercase tracking-wider font-cinzel">
                 Progression
               </h2>
               <div className="space-y-3">
@@ -172,7 +172,7 @@ export const ClassicDndLayout: React.FC<CharacterSheetProps> = ({
                   character={character}
                   onUpdateCharacter={onUpdateCharacter}
                 />
-                <div className="border-t border-gray-700 pt-3">
+                <div className="border-t border-theme-secondary pt-3">
                   <AttunementSlots character={character} />
                 </div>
               </div>
@@ -182,7 +182,7 @@ export const ClassicDndLayout: React.FC<CharacterSheetProps> = ({
           {/* CENTER COLUMN - Combat Stats, Attacks, Equipment */}
           <div className="col-span-6 space-y-4">
             {/* Combat Stats Panel - AC, Initiative, Speed, HP, Hit Dice, Death Saves */}
-            <div className="bg-gray-800 border border-gray-700 rounded-lg p-4 shadow-lg">
+            <div className="bg-theme-secondary border border-theme-secondary rounded-lg p-4 shadow-lg">
                <CombatStatsPanel
                  character={character}
                  setRollResult={setRollResult}
@@ -194,8 +194,8 @@ export const ClassicDndLayout: React.FC<CharacterSheetProps> = ({
 
 
             {/* Attacks & Actions */}
-            <div className="bg-gray-800 border border-gray-700 rounded-lg p-4 shadow-lg">
-               <h2 className="text-sm font-bold mb-3 text-gray-400 uppercase tracking-wider font-cinzel">
+            <div className="bg-theme-secondary border border-theme-secondary rounded-lg p-4 shadow-lg">
+               <h2 className="text-sm font-bold mb-3 text-theme-muted uppercase tracking-wider font-cinzel">
                  Attacks & Spellcasting
                </h2>
               <AttacksAndActions
@@ -207,8 +207,8 @@ export const ClassicDndLayout: React.FC<CharacterSheetProps> = ({
 
              {/* Spellcasting (if applicable) */}
              {character.spellcasting && (
-               <div className="bg-gray-800 border border-gray-700 rounded-lg p-4 shadow-lg">
-                 <h2 className="text-sm font-bold mb-3 text-gray-400 uppercase tracking-wider font-cinzel">
+               <div className="bg-theme-secondary border border-theme-secondary rounded-lg p-4 shadow-lg">
+                 <h2 className="text-sm font-bold mb-3 text-theme-muted uppercase tracking-wider font-cinzel">
                    Spellcasting
                  </h2>
                 <SpellcastingSection
@@ -220,8 +220,8 @@ export const ClassicDndLayout: React.FC<CharacterSheetProps> = ({
              )}
 
               {/* Inventory */}
-             <div className="bg-gray-800 border border-gray-700 rounded-lg p-4 shadow-lg">
-                <h2 className="text-sm font-bold mb-3 text-gray-400 uppercase tracking-wider font-cinzel">
+             <div className="bg-theme-secondary border border-theme-secondary rounded-lg p-4 shadow-lg">
+                <h2 className="text-sm font-bold mb-3 text-theme-muted uppercase tracking-wider font-cinzel">
                   Inventory
                 </h2>
               <EquipmentSection
@@ -242,8 +242,8 @@ export const ClassicDndLayout: React.FC<CharacterSheetProps> = ({
           {/* RIGHT COLUMN - Features, Proficiencies, Traits */}
           <div className="col-span-3 space-y-4">
              {/* Active Equipment */}
-             <div className="bg-gray-800 border border-gray-700 rounded-lg p-4 shadow-lg">
-                <h2 className="text-sm font-bold mb-3 text-gray-400 uppercase tracking-wider font-cinzel">
+             <div className="bg-theme-secondary border border-theme-secondary rounded-lg p-4 shadow-lg">
+                <h2 className="text-sm font-bold mb-3 text-theme-muted uppercase tracking-wider font-cinzel">
                   Active Equipment
                 </h2>
                <ActiveEquipmentPanel
@@ -252,7 +252,7 @@ export const ClassicDndLayout: React.FC<CharacterSheetProps> = ({
               </div>
 
              {/* Conditions */}
-             <div className="bg-gray-800 border border-gray-700 rounded-lg p-2 shadow-lg">
+             <div className="bg-theme-secondary border border-theme-secondary rounded-lg p-2 shadow-lg">
                <Conditions
                  character={character}
                  onUpdateCharacter={onUpdateCharacter}
@@ -260,8 +260,8 @@ export const ClassicDndLayout: React.FC<CharacterSheetProps> = ({
              </div>
 
              {/* Features & Traits */}
-            <div className="bg-gray-800 border border-gray-700 rounded-lg p-4 shadow-lg">
-               <h2 className="text-sm font-bold mb-3 text-gray-400 uppercase tracking-wider font-cinzel">
+            <div className="bg-theme-secondary border border-theme-secondary rounded-lg p-4 shadow-lg">
+               <h2 className="text-sm font-bold mb-3 text-theme-muted uppercase tracking-wider font-cinzel">
                  Features & Traits
                </h2>
               <FeaturesSection

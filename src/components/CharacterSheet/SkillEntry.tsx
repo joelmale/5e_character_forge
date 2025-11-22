@@ -104,29 +104,29 @@ export const SkillEntry: React.FC<SkillEntryProps> = ({
             e.preventDefault();
             setShowMenu(!showMenu);
           }}
-          className="flex items-center justify-between px-2 py-1 hover:bg-gray-700 rounded transition-colors cursor-pointer w-full group"
+          className="flex items-center justify-between px-2 py-1 hover:bg-theme-tertiary rounded transition-colors cursor-pointer w-full group"
           title={`${SKILL_DESCRIPTIONS[name]}\n\nRoll ${skillLabel} check (${rollType}) - Right-click for options`}
         >
           <div className="flex items-center gap-1.5">
              {/* Proficiency bubble */}
-             <div className={`w-3 h-3 rounded-full border ${skill.proficient ? 'bg-yellow-500 border-yellow-500' : 'border-gray-500'}`} />
+             <div className={`w-3 h-3 rounded-full border ${skill.proficient ? 'bg-accent-yellow border-yellow-500' : 'border-gray-500'}`} />
              {/* Roll indicator */}
              {getRollIcon() && (
-               <span className="text-xs font-bold text-green-400">{getRollIcon()}</span>
+               <span className="text-xs font-bold text-accent-green-light">{getRollIcon()}</span>
              )}
-             <span className="text-xs font-medium text-gray-300 group-hover:text-white">{skillLabel}</span>
+             <span className="text-xs font-medium text-theme-tertiary group-hover:text-theme-primary">{skillLabel}</span>
            </div>
-          <span className="font-mono text-sm font-bold text-yellow-300">{formatModifier(skill.value)}</span>
+          <span className="font-mono text-sm font-bold text-accent-yellow-light">{formatModifier(skill.value)}</span>
         </button>
 
         {showMenu && (
-          <div className="absolute top-full left-0 mt-1 bg-gray-800 border border-gray-600 rounded-lg shadow-lg z-50 min-w-32">
+          <div className="absolute top-full left-0 mt-1 bg-theme-secondary border border-theme-primary rounded-lg shadow-lg z-50 min-w-32">
             <button
               onClick={() => {
                 setRollType('normal');
                 handleRoll('normal');
               }}
-              className="w-full text-left px-3 py-2 text-sm hover:bg-gray-700 first:rounded-t-lg"
+              className="w-full text-left px-3 py-2 text-sm hover:bg-theme-tertiary first:rounded-t-lg"
             >
               Normal
             </button>
@@ -135,7 +135,7 @@ export const SkillEntry: React.FC<SkillEntryProps> = ({
                 setRollType('advantage');
                 handleRoll('advantage');
               }}
-              className="w-full text-left px-3 py-2 text-sm hover:bg-gray-700 text-green-400"
+              className="w-full text-left px-3 py-2 text-sm hover:bg-theme-tertiary text-accent-green-light"
             >
               Advantage
             </button>
@@ -144,7 +144,7 @@ export const SkillEntry: React.FC<SkillEntryProps> = ({
                 setRollType('disadvantage');
                 handleRoll('disadvantage');
               }}
-              className="w-full text-left px-3 py-2 text-sm hover:bg-gray-700 text-red-400 last:rounded-b-lg"
+              className="w-full text-left px-3 py-2 text-sm hover:bg-theme-tertiary text-accent-red-light last:rounded-b-lg"
             >
               Disadvantage
             </button>
@@ -173,34 +173,34 @@ export const SkillEntry: React.FC<SkillEntryProps> = ({
         }}
         className={`flex items-center justify-between px-3 py-2 rounded-lg border transition-all cursor-pointer w-full text-sm font-medium ${
           skill.proficient
-            ? 'bg-yellow-900/30 border-yellow-500/50 text-yellow-300 hover:bg-yellow-900/50 hover:border-yellow-400'
-            : 'bg-gray-800/50 border-gray-600 text-gray-300 hover:bg-gray-700 hover:border-gray-500 hover:text-white'
+            ? 'bg-yellow-900/30 border-yellow-500/50 text-accent-yellow-light hover:bg-yellow-900/50 hover:border-yellow-400'
+            : 'bg-theme-secondary/50 border-theme-primary text-theme-tertiary hover:bg-theme-tertiary hover:border-gray-500 hover:text-theme-primary'
         }`}
         title={`${SKILL_DESCRIPTIONS[name]}\n\nRoll ${skillLabel} check (${rollType}) - Right-click for options`}
       >
         <div className="flex items-center gap-2">
            {getRollIcon() && (
-             <span className="text-xs font-bold text-green-400">{getRollIcon()}</span>
+             <span className="text-xs font-bold text-accent-green-light">{getRollIcon()}</span>
            )}
            <span className="truncate">
              {skillLabel}
            </span>
            {/* Proficiency indicator */}
            {skill.proficient && (
-             <span className="text-yellow-400">●</span>
+             <span className="text-accent-yellow-light">●</span>
            )}
          </div>
-        <span className="font-mono font-bold text-yellow-300 ml-1">{formatModifier(skill.value)}</span>
+        <span className="font-mono font-bold text-accent-yellow-light ml-1">{formatModifier(skill.value)}</span>
       </button>
 
       {showMenu && (
-        <div className="absolute top-full left-0 mt-1 bg-gray-800 border border-gray-600 rounded-lg shadow-lg z-50 min-w-32">
+        <div className="absolute top-full left-0 mt-1 bg-theme-secondary border border-theme-primary rounded-lg shadow-lg z-50 min-w-32">
           <button
             onClick={() => {
               setRollType('normal');
               handleRoll('normal');
             }}
-            className="w-full text-left px-3 py-2 text-sm hover:bg-gray-700 first:rounded-t-lg"
+            className="w-full text-left px-3 py-2 text-sm hover:bg-theme-tertiary first:rounded-t-lg"
           >
             Normal
           </button>
@@ -209,7 +209,7 @@ export const SkillEntry: React.FC<SkillEntryProps> = ({
               setRollType('advantage');
               handleRoll('advantage');
             }}
-            className="w-full text-left px-3 py-2 text-sm hover:bg-gray-700 text-green-400"
+            className="w-full text-left px-3 py-2 text-sm hover:bg-theme-tertiary text-accent-green-light"
           >
             Advantage
           </button>
@@ -218,7 +218,7 @@ export const SkillEntry: React.FC<SkillEntryProps> = ({
               setRollType('disadvantage');
               handleRoll('disadvantage');
             }}
-            className="w-full text-left px-3 py-2 text-sm hover:bg-gray-700 text-red-400 last:rounded-b-lg"
+            className="w-full text-left px-3 py-2 text-sm hover:bg-theme-tertiary text-accent-red-light last:rounded-b-lg"
           >
             Disadvantage
           </button>

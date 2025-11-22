@@ -12,7 +12,7 @@ const RandomizeButton: React.FC<RandomizeButtonProps> = ({ onClick, title }) => 
   <button
     onClick={onClick}
     title={title}
-    className="p-2 bg-yellow-600 hover:bg-yellow-500 rounded-lg text-white transition-colors"
+    className="p-2 bg-accent-yellow-dark hover:bg-accent-yellow rounded-lg text-theme-primary transition-colors"
   >
     <Shuffle className="w-4 h-4" />
   </button>
@@ -82,7 +82,7 @@ export const Step3point5FightingStyle: React.FC<StepProps> = ({ data, updateData
   }, [hasFightingStyle, nextStep]);
 
   if (!hasFightingStyle) {
-    return <div className='text-center text-gray-400'>This class doesn't have Fighting Styles. Advancing...</div>;
+    return <div className='text-center text-theme-muted'>This class doesn't have Fighting Styles. Advancing...</div>;
   }
 
   return (
@@ -90,7 +90,7 @@ export const Step3point5FightingStyle: React.FC<StepProps> = ({ data, updateData
       <div className='flex justify-between items-start'>
         <div>
           <h3 className='text-xl font-bold text-red-300'>Choose Fighting Style</h3>
-          <p className='text-sm text-gray-400 mt-2'>
+          <p className='text-sm text-theme-muted mt-2'>
             As a {selectedClass.name}, you learn a particular style of fighting. Select one Fighting Style option.
           </p>
         </div>
@@ -104,11 +104,11 @@ export const Step3point5FightingStyle: React.FC<StepProps> = ({ data, updateData
       </div>
 
       {recommendedStyle && (
-        <div className="bg-blue-900/30 border border-blue-700 rounded-lg p-3">
+        <div className="bg-blue-900/30 border border-accent-blue-dark rounded-lg p-3">
           <div className="text-sm text-blue-300">
             💡 <strong>Recommended for {selectedClass.name}:</strong> {recommendedStyle.name}
             <br />
-            <span className="text-xs text-gray-400">
+            <span className="text-xs text-theme-muted">
               (This is a smart default, but you can choose any style below)
             </span>
           </div>
@@ -127,31 +127,31 @@ export const Step3point5FightingStyle: React.FC<StepProps> = ({ data, updateData
               className={`p-4 rounded-lg text-left border-2 transition-all ${
                 isSelected
                   ? 'bg-orange-800 border-orange-500 shadow-md'
-                  : 'bg-gray-700 border-gray-600 hover:bg-gray-600'
+                  : 'bg-theme-tertiary border-theme-primary hover:bg-theme-quaternary'
               }`}
             >
               <div className="flex items-start justify-between">
-                <p className="text-base font-bold text-yellow-300">{style.name}</p>
+                <p className="text-base font-bold text-accent-yellow-light">{style.name}</p>
                 {isRecommended && (
-                  <span className="text-xs bg-blue-600 text-white px-2 py-1 rounded ml-2">
+                  <span className="text-xs bg-accent-blue text-theme-primary px-2 py-1 rounded ml-2">
                     Recommended
                   </span>
                 )}
               </div>
-              <p className="text-sm text-gray-300 mt-2">{style.description}</p>
+              <p className="text-sm text-theme-tertiary mt-2">{style.description}</p>
             </button>
           );
         })}
       </div>
 
       <div className='flex justify-between'>
-        <button onClick={prevStep} className="px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded-lg text-white flex items-center">
+        <button onClick={prevStep} className="px-4 py-2 bg-theme-quaternary hover:bg-theme-hover rounded-lg text-theme-primary flex items-center">
           <ArrowLeft className="w-4 h-4 mr-2" /> Back
         </button>
         <button
           onClick={nextStep}
           disabled={!data.selectedFightingStyle}
-          className="px-4 py-2 bg-red-600 hover:bg-red-500 rounded-lg text-white flex items-center disabled:bg-gray-600 disabled:cursor-not-allowed"
+          className="px-4 py-2 bg-accent-red hover:bg-accent-red-light rounded-lg text-theme-primary flex items-center disabled:bg-theme-quaternary disabled:cursor-not-allowed"
         >
           Next: {selectedClass.spellcasting ? 'Spells' : 'Abilities'} <ArrowRight className="w-4 h-4 ml-2" />
         </button>

@@ -28,6 +28,7 @@ import levelConstantsData from '../data/levelConstants.json';
 import spellcastingTypesData from '../data/spellcastingTypes.json';
 import racialLanguagesData from '../data/racialLanguages.json';
 import backgroundDefaultsData from '../data/backgroundDefaults.json';
+import { generateName } from '../utils/nameGenerator';
 import { AbilityName, Race, Class, Equipment, Feature, Subclass, Feat, RaceCategory, ClassCategory, EquipmentPackage, EquipmentChoice, EquipmentItem, EquippedItem, SpellcastingType, SkillName, Monster, MonsterType } from '../types/dnd';
 
 // Local type definitions for dataService
@@ -1229,28 +1230,10 @@ const getRandomElement = <T>(array: T[]): T => {
 };
 
 /**
- * Generate a random fantasy character name
+ * Generate a random fantasy character name using the enhanced name generator
  */
 const generateRandomName = (): string => {
-  const firstParts = [
-    'Aer', 'Al', 'Ar', 'Bal', 'Bel', 'Bor', 'Bran', 'Cael', 'Cor', 'Dael', 'Dar', 'Del', 'Eld', 'El', 'Fael', 'Far', 'Gal', 'Gar', 'Glyn', 'Gor', 'Hal', 'Har', 'Hel', 'Hor', 'Jor', 'Kael', 'Kar', 'Kel', 'Keth', 'Kyr', 'Lir', 'Lor', 'Mal', 'Mar', 'Mor', 'Nal', 'Nar', 'Nor', 'Ol', 'Or', 'Pael', 'Par', 'Per', 'Quor', 'Rael', 'Ran', 'Ril', 'Ror', 'Sael', 'Sar', 'Sel', 'Sil', 'Sor', 'Tar', 'Tel', 'Tor', 'Ul', 'Ur', 'Val', 'Vor', 'Wyl', 'Xar', 'Yor', 'Zel', 'Zor'
-  ];
-
-  const secondParts = [
-    'a', 'ae', 'ai', 'al', 'an', 'ar', 'ath', 'el', 'en', 'er', 'eth', 'ia', 'iel', 'in', 'is', 'ith', 'on', 'or', 'oth', 'us', 'ya', 'yn'
-  ];
-
-  const titles = [
-    'Shadow', 'Storm', 'Light', 'Dark', 'Blood', 'Iron', 'Fire', 'Ice', 'Wind', 'Earth', 'Star', 'Moon', 'Sun', 'Void', 'Soul', 'Spirit', 'Heart', 'Mind', 'Will', 'Fate', 'Destiny', 'Hope', 'Fear', 'Rage', 'Peace', 'War', 'Death', 'Life', 'Time', 'Space', 'Dream', 'Nightmare'
-  ];
-
-  const formats = [
-    () => `${getRandomElement(firstParts)}${getRandomElement(secondParts)}`, // FirstLast
-    () => `${getRandomElement(firstParts)}${getRandomElement(secondParts)} ${getRandomElement(titles)}${getRandomElement(['', 'bane', 'born', 'breaker', 'caller', 'dawn', 'eye', 'fall', 'fire', 'fist', 'forge', 'fury', 'guard', 'hammer', 'hand', 'heart', 'hunter', 'keeper', 'lord', 'master', 'rage', 'reaver', 'rider', 'seeker', 'shadow', 'slayer', 'song', 'soul', 'spawn', 'storm', 'sword', 'ward', 'weaver', 'whisper', 'wind', 'wing', 'wisp'])}`, // FirstLast Title
-    () => `${getRandomElement(titles)}${getRandomElement(['', 'bane', 'born', 'breaker', 'caller', 'dawn', 'eye', 'fall', 'fire', 'fist', 'forge', 'fury', 'guard', 'hammer', 'hand', 'heart', 'hunter', 'keeper', 'lord', 'master', 'rage', 'reaver', 'rider', 'seeker', 'shadow', 'slayer', 'song', 'soul', 'spawn', 'storm', 'sword', 'ward', 'weaver', 'whisper', 'wind', 'wing', 'wisp'])} ${getRandomElement(firstParts)}${getRandomElement(secondParts)}` // Title FirstLast
-  ];
-
-  return getRandomElement(formats)();
+  return generateName().name;
 };
 
 /**
@@ -1267,12 +1250,19 @@ export const randomizeLevel = (): number => {
 /**
  * Randomize character identity (name, alignment, background)
  */
-export const randomizeIdentity = (): { name: string; alignment: string; background: string } => {
+export const randomizeIdentity = (race?: string): { name: string; alignment: string; background: string } => {
   return {
-    name: generateRandomName(),
+    name: race ? generateRaceSpecificName(race) : generateRandomName(),
     alignment: getRandomElement(ALIGNMENTS),
     background: getRandomElement(BACKGROUNDS).name
   };
+};
+
+/**
+ * Generate a race-specific name
+ */
+export const generateRaceSpecificName = (race: string, gender?: 'male' | 'female'): string => {
+  return generateName({ race, gender }).name;
 };
 
 /**

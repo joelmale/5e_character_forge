@@ -18,7 +18,7 @@ const RandomizeButton: React.FC<{ onClick: () => void; title?: string; className
   return (
     <button
       onClick={onClick}
-      className={`px-3 py-2 bg-purple-600 hover:bg-purple-500 rounded-lg text-white text-sm font-medium transition-colors flex items-center gap-2 ${className}`}
+      className={`px-3 py-2 bg-accent-purple hover:bg-accent-purple-light rounded-lg text-theme-primary text-sm font-medium transition-colors flex items-center gap-2 ${className}`}
       title={title}
     >
       <Shuffle className="w-4 h-4" />
@@ -99,24 +99,24 @@ export const Step9Languages: React.FC<StepProps> = ({ data, updateData, nextStep
       </div>
 
       {/* Language Limits Info */}
-      <div className="bg-gray-700/50 border border-gray-600 rounded-lg p-4">
-        <h4 className="text-lg font-bold text-yellow-300 mb-2">Language Proficiency</h4>
+      <div className="bg-theme-tertiary/50 border border-theme-primary rounded-lg p-4">
+        <h4 className="text-lg font-bold text-accent-yellow-light mb-2">Language Proficiency</h4>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
           <div>
-            <span className="text-gray-300">Intelligence Score:</span>
-            <span className="text-white font-bold ml-2">{intelligenceScore}</span>
+            <span className="text-theme-tertiary">Intelligence Score:</span>
+            <span className="text-theme-primary font-bold ml-2">{intelligenceScore}</span>
           </div>
           <div>
-            <span className="text-gray-300">Maximum Languages:</span>
-            <span className="text-white font-bold ml-2">{maxLanguages}</span>
+            <span className="text-theme-tertiary">Maximum Languages:</span>
+            <span className="text-theme-primary font-bold ml-2">{maxLanguages}</span>
           </div>
           <div>
-            <span className="text-gray-300">Languages Known:</span>
-            <span className="text-white font-bold ml-2">{autoLanguages.size + selectedLanguages.length}</span>
+            <span className="text-theme-tertiary">Languages Known:</span>
+            <span className="text-theme-primary font-bold ml-2">{autoLanguages.size + selectedLanguages.length}</span>
           </div>
           <div>
-            <span className="text-gray-300">Remaining Slots:</span>
-            <span className={`font-bold ml-2 ${remainingSlots > 0 ? 'text-green-400' : 'text-red-400'}`}>
+            <span className="text-theme-tertiary">Remaining Slots:</span>
+            <span className={`font-bold ml-2 ${remainingSlots > 0 ? 'text-accent-green-light' : 'text-accent-red-light'}`}>
               {remainingSlots}
             </span>
           </div>
@@ -124,14 +124,14 @@ export const Step9Languages: React.FC<StepProps> = ({ data, updateData, nextStep
       </div>
 
       {/* Auto-Included Languages */}
-      <div className="bg-blue-900/20 border border-blue-700 rounded-lg p-4">
+      <div className="bg-accent-blue-darker/20 border border-accent-blue-dark rounded-lg p-4">
         <h4 className="text-lg font-bold text-blue-300 mb-3">Auto-Included Languages</h4>
-        <p className="text-sm text-gray-400 mb-3">
+        <p className="text-sm text-theme-muted mb-3">
           These languages are automatically known based on your race, class, and background choices.
         </p>
         <div className="flex flex-wrap gap-2">
           {Array.from(autoLanguages).sort().map(language => (
-            <span key={language} className="px-3 py-1 bg-blue-800 text-blue-100 rounded-full text-sm">
+            <span key={language} className="px-3 py-1 bg-accent-blue-darker text-blue-100 rounded-full text-sm">
               {language}
             </span>
           ))}
@@ -140,14 +140,14 @@ export const Step9Languages: React.FC<StepProps> = ({ data, updateData, nextStep
 
       {/* Background Language Choices */}
       {backgroundChoices.choices > 0 && (
-        <div className="bg-purple-900/20 border border-purple-700 rounded-lg p-4">
+        <div className="bg-accent-purple-darker/20 border border-accent-purple-dark rounded-lg p-4">
           <h4 className="text-lg font-bold text-purple-300 mb-3">
             Background Choice: {backgroundChoices.choices} Language{backgroundChoices.choices > 1 ? 's' : ''} of Your Choice
           </h4>
-          <p className="text-sm text-gray-400 mb-3">
+          <p className="text-sm text-theme-muted mb-3">
             Your {data.background} background allows you to choose {backgroundChoices.choices} additional language{backgroundChoices.choices > 1 ? 's' : ''}.
           </p>
-          <div className="text-sm text-yellow-300">
+          <div className="text-sm text-accent-yellow-light">
             Selected: {selectedLanguages.length} / {backgroundChoices.choices}
           </div>
         </div>
@@ -155,8 +155,8 @@ export const Step9Languages: React.FC<StepProps> = ({ data, updateData, nextStep
 
       {/* Language Selection */}
       <div className="space-y-3">
-        <h4 className="text-lg font-bold text-yellow-300">Choose Additional Languages</h4>
-        <p className="text-sm text-gray-400">
+        <h4 className="text-lg font-bold text-accent-yellow-light">Choose Additional Languages</h4>
+        <p className="text-sm text-theme-muted">
           Select languages from the categories below. You can learn additional languages through feats, magic items, or DM approval.
         </p>
 
@@ -167,29 +167,29 @@ export const Step9Languages: React.FC<StepProps> = ({ data, updateData, nextStep
           );
 
           return (
-            <div key={category.name} className='border border-gray-600 rounded-lg overflow-hidden'>
+            <div key={category.name} className='border border-theme-primary rounded-lg overflow-hidden'>
               <button
                 onClick={() => toggleCategory(category.name)}
-                className='w-full p-4 bg-gray-700 hover:bg-gray-650 flex items-center justify-between transition-colors'
+                className='w-full p-4 bg-theme-tertiary hover:bg-gray-650 flex items-center justify-between transition-colors'
               >
                 <div className='flex items-center gap-3'>
                   <span className='text-2xl'>{category.icon}</span>
                   <div className='text-left'>
-                    <div className='font-bold text-yellow-300 text-lg'>{category.name} Languages</div>
-                    <div className='text-xs text-gray-400'>{category.description}</div>
+                    <div className='font-bold text-accent-yellow-light text-lg'>{category.name} Languages</div>
+                    <div className='text-xs text-theme-muted'>{category.description}</div>
                   </div>
                 </div>
                 {expandedCategories.has(category.name) ? (
-                  <ChevronUp className='w-5 h-5 text-gray-400' />
+                  <ChevronUp className='w-5 h-5 text-theme-muted' />
                 ) : (
-                  <ChevronDown className='w-5 h-5 text-gray-400' />
+                  <ChevronDown className='w-5 h-5 text-theme-muted' />
                 )}
               </button>
 
               {expandedCategories.has(category.name) && (
-                <div className='p-4 bg-gray-800/50'>
+                <div className='p-4 bg-theme-secondary/50'>
                   {availableInCategory.length === 0 ? (
-                    <p className="text-gray-400 text-sm">No additional {category.name.toLowerCase()} languages available.</p>
+                    <p className="text-theme-muted text-sm">No additional {category.name.toLowerCase()} languages available.</p>
                   ) : (
                     <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
                       {availableInCategory.map(language => {
@@ -205,15 +205,15 @@ export const Step9Languages: React.FC<StepProps> = ({ data, updateData, nextStep
                               isSelected
                                 ? 'bg-green-800 border-green-500'
                                 : canSelect
-                                ? 'bg-gray-700 border-gray-600 hover:bg-gray-600'
-                                : 'bg-gray-800 border-gray-700 opacity-50 cursor-not-allowed'
+                                ? 'bg-theme-tertiary border-theme-primary hover:bg-theme-quaternary'
+                                : 'bg-theme-secondary border-theme-secondary opacity-50 cursor-not-allowed'
                             }`}
                           >
-                            <div className="font-semibold text-white">{language.name}</div>
-                            <div className="text-xs text-gray-400 mt-1">
+                            <div className="font-semibold text-theme-primary">{language.name}</div>
+                            <div className="text-xs text-theme-muted mt-1">
                               {language.typicalSpeakers}
                             </div>
-                            <div className="text-xs text-gray-500 mt-1 line-clamp-2">
+                            <div className="text-xs text-theme-disabled mt-1 line-clamp-2">
                               {language.description}
                             </div>
                           </button>
@@ -230,7 +230,7 @@ export const Step9Languages: React.FC<StepProps> = ({ data, updateData, nextStep
 
       {/* Selected Languages Summary */}
       {selectedLanguages.length > 0 && (
-        <div className="bg-green-900/20 border border-green-700 rounded-lg p-4">
+        <div className="bg-accent-green-darker/20 border border-accent-green-dark rounded-lg p-4">
           <h4 className="text-lg font-bold text-green-300 mb-3">Selected Languages</h4>
           <div className="flex flex-wrap gap-2">
             {selectedLanguages.map(language => (
@@ -238,7 +238,7 @@ export const Step9Languages: React.FC<StepProps> = ({ data, updateData, nextStep
                 <span>{language}</span>
                 <button
                   onClick={() => handleLanguageToggle(language)}
-                  className="text-green-300 hover:text-white ml-1"
+                  className="text-green-300 hover:text-theme-primary ml-1"
                 >
                   ×
                 </button>
@@ -250,16 +250,16 @@ export const Step9Languages: React.FC<StepProps> = ({ data, updateData, nextStep
 
       {/* Navigation */}
       <div className='flex justify-between'>
-        <button onClick={prevStep} className="px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded-lg text-white flex items-center">
+        <button onClick={prevStep} className="px-4 py-2 bg-theme-quaternary hover:bg-theme-hover rounded-lg text-theme-primary flex items-center">
           <ArrowLeft className="w-4 h-4 mr-2" /> Back
         </button>
         <button
           onClick={nextStep}
           disabled={!hasRequiredBackgroundSelections}
-          className={`px-4 py-2 rounded-lg text-white flex items-center ${
+          className={`px-4 py-2 rounded-lg text-theme-primary flex items-center ${
             hasRequiredBackgroundSelections
-              ? 'bg-red-600 hover:bg-red-500'
-              : 'bg-gray-500 cursor-not-allowed'
+              ? 'bg-accent-red hover:bg-accent-red-light'
+              : 'bg-theme-hover cursor-not-allowed'
           }`}
         >
           Next: {getNextStepLabel?.() || 'Continue'} <ArrowRight className="w-4 h-4 ml-2" />

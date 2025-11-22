@@ -1,0 +1,287 @@
+{
+  "races": {
+    "Human": {
+      "male": [
+        "Aric", "Bram", "Cade", "Darian", "Eamon", "Finn", "Gareth", "Hector", "Ian", "Jasper",
+        "Kael", "Liam", "Marcus", "Nolan", "Owen", "Piers", "Quinn", "Roderick", "Seth", "Torin",
+        "Ulrich", "Vance", "Wynn", "Xander", "Yoren", "Zane", "Alden", "Bryn", "Corwin", "Drex",
+        "Ellis", "Fenton", "Gideon", "Harlan", "Irwin", "Jareth", "Kester", "Lorin", "Merrick", "Norin"
+      ],
+      "female": [
+        "Aeliana", "Brianna", "Caitlin", "Dara", "Elara", "Fiona", "Gwen", "Helena", "Ivy", "Jasmine",
+        "Kira", "Liora", "Maya", "Nora", "Olivia", "Piper", "Quinn", "Rhea", "Sienna", "Talia",
+        "Uma", "Vera", "Wren", "Xanthe", "Yara", "Zara", "Alina", "Brynn", "Corinne", "Daphne",
+        "Elowen", "Faye", "Giselle", "Hanna", "Ianthe", "Juno", "Kestra", "Lira", "Mira", "Nerissa"
+      ],
+      "surnames": [
+        "Blackwood", "Brightblade", "Cross", "Darkwater", "Eagleheart", "Fairwind", "Goldleaf", "Hammerfell",
+        "Ironfist", "Jadebrook", "Kingsley", "Lightfoot", "Moonshadow", "Northwind", "Oakheart", "Proudmoor",
+        "Quickblade", "Ravenwood", "Silverbrook", "Thunderheart", "Vale", "Wolfbane", "Youngblood", "Zephyr"
+      ],
+      "cultural_patterns": ["First Last", "First 'of' Place", "First Last-son/daughter"]
+    },
+    "Elf": {
+      "male": [
+        "Aelaris", "Baelor", "Caelum", "Daeron", "Elyndor", "Faelyn", "Galion", "Haldir", "Ithil", "Jorund",
+        "Kaelthas", "Lirael", "Mithril", "Neldor", "Orion", "Phaerun", "Quelar", "Rhaegar", "Sylvar", "Thalion",
+        "Uldor", "Vaeril", "Wynlar", "Xandor", "Yaviel", "Zephyr", "Aether", "Brynth", "Corian", "Dhaelor"
+      ],
+      "female": [
+        "Aeliana", "Briallen", "Caelin", "Daenara", "Elowen", "Faerie", "Galatea", "Hesper", "Ianthe", "Jorina",
+        "Kestra", "Lirael", "Maelys", "Nerissa", "Oriana", "Phaedra", "Quelina", "Rhaella", "Sylphie", "Thalira",
+        "Umbriel", "Vaella", "Wynna", "Xylia", "Yvaine", "Zephyra", "Alyndra", "Brynneth", "Corisande", "Dhaera"
+      ],
+      "surnames": [
+        "Amastacia", "Galanodel", "Holimion", "Ilphelkiir", "Liadon", "Meliamne", "Naïlo", "Siannodel", "Xiloscient", "Moonbow",
+        "Starweaver", "Windwhisper", "Dawnbringer", "Nightshade", "Silverleaf", "Goldpetal", "Crystalbrook", "Everbloom", "Swiftarrow", "Trueheart"
+      ],
+      "cultural_patterns": ["First Last", "First", "First'el", "First'iel"],
+      "pronunciation_guide": {
+        "ae": "ay", "ea": "ee", "th": "th", "ph": "f", "qu": "kw", "x": "ks", "y": "ee", "z": "z"
+      }
+    },
+    "Dwarf": {
+      "male": [
+        "Balin", "Dain", "Gimli", "Thorin", "Gloin", "Bifur", "Bofur", "Bombur", "Dori", "Nori",
+        "Ori", "Fili", "Kili", "Oin", "Gloin", "Dwalin", "Balin", "Dain", "Nain", "Dain",
+        "Thrain", "Thror", "Fundin", "Gimli", "Gloin", "Groin", "Gror", "Halin", "Harlin", "Harbur"
+      ],
+      "female": [
+        "Dís", "Thráin", "Fundin", "Gimli", "Gloin", "Groin", "Gror", "Halin", "Harlin", "Harbur",
+        "Balin", "Dain", "Nain", "Dain", "Thrain", "Thror", "Fundin", "Gimli", "Gloin", "Groin",
+        "Gror", "Halin", "Harlin", "Harbur", "Balin", "Dain", "Nain", "Dain", "Thrain", "Thror"
+      ],
+      "surnames": [
+        "Ironfist", "Stoneheart", "Battlehammer", "Frostbeard", "Goldvein", "Deepdelver", "Mountainshield", "Stormforge",
+        "Oakenshield", "Firebeard", "Silvervein", "Deepminer", "Hillbreaker", "Stormcaller", "Goldfinder", "Stonebreaker",
+        "Ironbreaker", "Frosthammer", "Battleaxe", "Warhammer", "Shieldbearer", "Axeblade", "Hammerhand", "Stonefist"
+      ],
+      "cultural_patterns": ["First Last", "Firstsson", "Firstdottir", "Clan of First"],
+      "pronunciation_guide": {
+        "th": "th", "oi": "oy", "ai": "eye", "au": "ow", "ei": "ay", "ui": "oo-ee"
+      }
+    },
+    "Halfling": {
+      "male": [
+        "Alton", "Bree", "Cade", "Eldon", "Finn", "Garret", "Lindal", "Merric", "Nedda", "Seraphina",
+        "Alton", "Bree", "Cade", "Eldon", "Finn", "Garret", "Lindal", "Merric", "Nedda", "Seraphina",
+        "Alton", "Bree", "Cade", "Eldon", "Finn", "Garret", "Lindal", "Merric", "Nedda", "Seraphina"
+      ],
+      "female": [
+        "Alton", "Bree", "Cade", "Eldon", "Finn", "Garret", "Lindal", "Merric", "Nedda", "Seraphina",
+        "Alton", "Bree", "Cade", "Eldon", "Finn", "Garret", "Lindal", "Merric", "Nedda", "Seraphina",
+        "Alton", "Bree", "Cade", "Eldon", "Finn", "Garret", "Lindal", "Merric", "Nedda", "Seraphina"
+      ],
+      "surnames": [
+        "Brushgather", "Goodbarrel", "Greenbottle", "High-hill", "Hilltopple", "Leagallow", "Tealeaf", "Thorngage", "Tosscobble", "Underbough",
+        "Bramblefoot", "Cloverleaf", "Dewdrop", "Fernbrook", "Goldpetal", "Honeybee", "Ivyvine", "Jollybrook", "Kettleworth", "Lilypond",
+        "Meadowbrook", "Nuttersby", "Oakenshade", "Pebblebrook", "Quickstep", "Rosewood", "Silverbrook", "Thistlebrook", "Underhill", "Violetbrook"
+      ],
+      "cultural_patterns": ["First Last", "First of the Last", "First Last-under"],
+      "pronunciation_guide": {
+        "ea": "ee", "oo": "oo", "ai": "eye", "au": "ow", "oi": "oy"
+      }
+    },
+    "Dragonborn": {
+      "male": [
+        "Arjhan", "Balasar", "Bharash", "Donaar", "Ghesh", "Heskan", "Kriv", "Medrash", "Nadarr", "Patrin",
+        "Arjhan", "Balasar", "Bharash", "Donaar", "Ghesh", "Heskan", "Kriv", "Medrash", "Nadarr", "Patrin",
+        "Arjhan", "Balasar", "Bharash", "Donaar", "Ghesh", "Heskan", "Kriv", "Medrash", "Nadarr", "Patrin"
+      ],
+      "female": [
+        "Akra", "Biri", "Daar", "Farideh", "Harann", "Havilar", "Jheri", "Kava", "Korinn", "Mishann",
+        "Akra", "Biri", "Daar", "Farideh", "Harann", "Havilar", "Jheri", "Kava", "Korinn", "Mishann",
+        "Akra", "Biri", "Daar", "Farideh", "Harann", "Havilar", "Jheri", "Kava", "Korinn", "Mishann"
+      ],
+      "surnames": [
+        "Clethtinthiallor", "Daardendrian", "Delmirev", "Drachedandion", "Fenkenkabradon", "Kepeshkmolik", "Kerrhylon", "Kimbatuul", "Linxakasendalor", "Myastan",
+        "Akambherylliax", "Argenthrixus", "Baharoosh", "Berynthraxus", "Caethix", "Darakathol", "Erax", "Fandarak", "Garurtiax", "Harakanthos"
+      ],
+      "cultural_patterns": ["First Last", "First"],
+      "pronunciation_guide": {
+        "kh": "k", "gh": "g", "th": "th", "sh": "sh", "x": "ks", "ll": "l", "rr": "r"
+      }
+    },
+    "Gnome": {
+      "male": [
+        "Alston", "Alvyn", "Boddynock", "Brocc", "Burgell", "Dimble", "Eldon", "Fonkin", "Orryn", "Wrenn",
+        "Alston", "Alvyn", "Boddynock", "Brocc", "Burgell", "Dimble", "Eldon", "Fonkin", "Orryn", "Wrenn",
+        "Alston", "Alvyn", "Boddynock", "Brocc", "Burgell", "Dimble", "Eldon", "Fonkin", "Orryn", "Wrenn"
+      ],
+      "female": [
+        "Alston", "Alvyn", "Boddynock", "Brocc", "Burgell", "Dimble", "Eldon", "Fonkin", "Orryn", "Wrenn",
+        "Alston", "Alvyn", "Boddynock", "Brocc", "Burgell", "Dimble", "Eldon", "Fonkin", "Orryn", "Wrenn",
+        "Alston", "Alvyn", "Boddynock", "Brocc", "Burgell", "Dimble", "Eldon", "Fonkin", "Orryn", "Wrenn"
+      ],
+      "surnames": [
+        "Beren", "Daergel", "Folkor", "Garrick", "Nackle", "Murnig", "Ningel", "Raulnor", "Scheppen", "Timbers",
+        "Beren", "Daergel", "Folkor", "Garrick", "Nackle", "Murnig", "Ningel", "Raulnor", "Scheppen", "Timbers",
+        "Beren", "Daergel", "Folkor", "Garrick", "Nackle", "Murnig", "Ningel", "Raulnor", "Scheppen", "Timbers"
+      ],
+      "cultural_patterns": ["First Last", "First"],
+      "pronunciation_guide": {
+        "ea": "ee", "oo": "oo", "ai": "eye", "au": "ow", "oi": "oy"
+      }
+    },
+    "Half-Elf": {
+      "male": [
+        "Amakir", "Berrian", "Caelynn", "Enna", "Heian", "Immeral", "Laucian", "Quarion", "Riardon", "Soveliss",
+        "Amakir", "Berrian", "Caelynn", "Enna", "Heian", "Immeral", "Laucian", "Quarion", "Riardon", "Soveliss",
+        "Amakir", "Berrian", "Caelynn", "Enna", "Heian", "Immeral", "Laucian", "Quarion", "Riardon", "Soveliss"
+      ],
+      "female": [
+        "Amakir", "Berrian", "Caelynn", "Enna", "Heian", "Immeral", "Laucian", "Quarion", "Riardon", "Soveliss",
+        "Amakir", "Berrian", "Caelynn", "Enna", "Heian", "Immeral", "Laucian", "Quarion", "Riardon", "Soveliss",
+        "Amakir", "Berrian", "Caelynn", "Enna", "Heian", "Immeral", "Laucian", "Quarion", "Riardon", "Soveliss"
+      ],
+      "surnames": [
+        "Amakir", "Berrian", "Brightwood", "Galanodel", "Moonwhisper", "Nightbreeze", "Shadowstep", "Stargazer", "Windwalker", "Ravenshadow",
+        "Amakir", "Berrian", "Brightwood", "Galanodel", "Moonwhisper", "Nightbreeze", "Shadowstep", "Stargazer", "Windwalker", "Ravenshadow",
+        "Amakir", "Berrian", "Brightwood", "Galanodel", "Moonwhisper", "Nightbreeze", "Shadowstep", "Stargazer", "Windwalker", "Ravenshadow"
+      ],
+      "cultural_patterns": ["First Last", "First"],
+      "pronunciation_guide": {
+        "ea": "ee", "ae": "ay", "ia": "ee-ah", "io": "ee-oh"
+      }
+    },
+    "Half-Orc": {
+      "male": [
+        "Dench", "Feng", "Gell", "Henk", "Holg", "Imsh", "Keth", "Mhurren", "Ront", "Shump",
+        "Dench", "Feng", "Gell", "Henk", "Holg", "Imsh", "Keth", "Mhurren", "Ront", "Shump",
+        "Dench", "Feng", "Gell", "Henk", "Holg", "Imsh", "Keth", "Mhurren", "Ront", "Shump"
+      ],
+      "female": [
+        "Dench", "Feng", "Gell", "Henk", "Holg", "Imsh", "Keth", "Mhurren", "Ront", "Shump",
+        "Dench", "Feng", "Gell", "Henk", "Holg", "Imsh", "Keth", "Mhurren", "Ront", "Shump",
+        "Dench", "Feng", "Gell", "Henk", "Holg", "Imsh", "Keth", "Mhurren", "Ront", "Shump"
+      ],
+      "surnames": [
+        "", "", "", "", "", "", "", "", "", "",
+        "", "", "", "", "", "", "", "", "", ""
+      ],
+      "cultural_patterns": ["First"],
+      "pronunciation_guide": {
+        "kh": "k", "gh": "g", "th": "th", "sh": "sh"
+      }
+    },
+    "Tiefling": {
+      "male": [
+        "Akmenios", "Amnon", "Barakas", "Damakos", "Ekemon", "Iados", "Kairon", "Leucis", "Melech", "Mordai",
+        "Akmenios", "Amnon", "Barakas", "Damakos", "Ekemon", "Iados", "Kairon", "Leucis", "Melech", "Mordai",
+        "Akmenios", "Amnon", "Barakas", "Damakos", "Ekemon", "Iados", "Kairon", "Leucis", "Melech", "Mordai"
+      ],
+      "female": [
+        "Akmenios", "Amnon", "Barakas", "Damakos", "Ekemon", "Iados", "Kairon", "Leucis", "Melech", "Mordai",
+        "Akmenios", "Amnon", "Barakas", "Damakos", "Ekemon", "Iados", "Kairon", "Leucis", "Melech", "Mordai",
+        "Akmenios", "Amnon", "Barakas", "Damakos", "Ekemon", "Iados", "Kairon", "Leucis", "Melech", "Mordai"
+      ],
+      "surnames": [
+        "", "", "", "", "", "", "", "", "", "",
+        "", "", "", "", "", "", "", "", "", ""
+      ],
+      "cultural_patterns": ["First"],
+      "pronunciation_guide": {
+        "ea": "ee", "ae": "ay", "ia": "ee-ah", "io": "ee-oh"
+      }
+    }
+  },
+  "syllables": {
+    "fantasy": {
+      "prefixes": [
+        "Aer", "Al", "Ar", "Bal", "Bel", "Bor", "Bran", "Cael", "Cor", "Dael", "Dar", "Del", "Eld", "El", "Fael", "Far", "Gal", "Gar", "Glyn", "Gor", "Hal", "Har", "Hel", "Hor", "Jor", "Kael", "Kar", "Kel", "Keth", "Kyr", "Lir", "Lor", "Mal", "Mar", "Mor", "Nal", "Nar", "Nor", "Ol", "Or", "Pael", "Par", "Per", "Quor", "Rael", "Ran", "Ril", "Ror", "Sael", "Sar", "Sel", "Sil", "Sor", "Tar", "Tel", "Tor", "Ul", "Ur", "Val", "Vor", "Wyl", "Xar", "Yor", "Zel", "Zor",
+        "Aeth", "Bryn", "Cyr", "Dorn", "Eryn", "Fyr", "Ghor", "Hyr", "Ith", "Jyr", "Kyrn", "Lyr", "Myr", "Nyr", "Oryn", "Pyr", "Qyr", "Ryn", "Syr", "Tyr", "Uryn", "Vyr", "Wryn", "Xyr", "Yryn", "Zyrn"
+      ],
+      "suffixes": [
+        "a", "ae", "ai", "al", "an", "ar", "ath", "el", "en", "er", "eth", "ia", "iel", "in", "is", "ith", "on", "or", "oth", "us", "ya", "yn",
+        "aen", "ael", "aeth", "ain", "air", "aith", "aen", "ael", "aeth", "ain", "air", "aith", "eon", "eor", "eoth", "eus", "eya", "eyn"
+      ]
+    }
+  },
+  "titles": [
+    "Shadow", "Storm", "Light", "Dark", "Blood", "Iron", "Fire", "Ice", "Wind", "Earth", "Star", "Moon", "Sun", "Void", "Soul", "Spirit", "Heart", "Mind", "Will", "Fate", "Destiny", "Hope", "Fear", "Rage", "Peace", "War", "Death", "Life", "Time", "Space", "Dream", "Nightmare",
+    "Dawn", "Dusk", "Twilight", "Midnight", "Noon", "Zenith", "Nadir", "Apex", "Abyss", "Summit", "Depth", "Height", "Breadth", "Length", "Width", "Depth", "Height", "Breadth", "Length", "Width"
+  ],
+  "suffixes": [
+    "", "bane", "born", "breaker", "caller", "dawn", "eye", "fall", "fire", "fist", "forge", "fury", "guard", "hammer", "hand", "heart", "hunter", "keeper", "lord", "master", "rage", "reaver", "rider", "seeker", "shadow", "slayer", "song", "soul", "spawn", "storm", "sword", "ward", "weaver", "whisper", "wind", "wing", "wisp",
+    "blade", "bow", "shield", "helm", "crown", "throne", "scepter", "orb", "crystal", "gem", "stone", "rock", "mountain", "valley", "river", "stream", "ocean", "sea", "lake", "pond"
+  ],
+  "name_meanings": {
+    "Aer": "Air, Sky",
+    "Al": "Noble, Bright",
+    "Ar": "Eagle, High",
+    "Bal": "Strong, Mighty",
+    "Bel": "Beautiful, Fair",
+    "Bor": "Bear, Warrior",
+    "Bran": "Raven, Crow",
+    "Cael": "Heaven, Sky",
+    "Cor": "Heart, Core",
+    "Dael": "Valley, Dale",
+    "Dar": "Dark, Shadow",
+    "Del": "Of the Valley",
+    "Eld": "Old, Ancient",
+    "El": "Star, Light",
+    "Fael": "Fey, Magical",
+    "Far": "Journey, Travel",
+    "Gal": "Joy, Happiness",
+    "Gar": "Spear, Weapon",
+    "Glyn": "Valley, Glen",
+    "Gor": "Dwarf, Mountain",
+    "Hal": "Hero, Champion",
+    "Har": "Army, Warrior",
+    "Hel": "Light, Bright",
+    "Hor": "Time, Hour",
+    "Jor": "Farmer, Earth",
+    "Kael": "Slender, Fair",
+    "Kar": "Helper, Friend",
+    "Kel": "Ship, Vessel",
+    "Keth": "Wind, Breath",
+    "Kyr": "Lord, Ruler",
+    "Lir": "Sea, Ocean",
+    "Lor": "Laurel, Victory",
+    "Mal": "Chief, Leader",
+    "Mar": "Sea, Drop",
+    "Mor": "Dark, Black",
+    "Nal": "Champion, Hero",
+    "Nar": "Fire, Flame",
+    "Nor": "North, Honor",
+    "Ol": "Ancestral, Holy",
+    "Or": "Gold, Light",
+    "Pael": "Pale, White",
+    "Par": "Equal, Peer",
+    "Per": "Rock, Stone",
+    "Quor": "Heart, Core",
+    "Rael": "Counsel, Advice",
+    "Ran": "Shield, Protection",
+    "Ril": "Stream, Brook",
+    "Ror": "Roar, Thunder",
+    "Sael": "Blessed, Holy",
+    "Sar": "Princess, Noble",
+    "Sel": "Moon, Light",
+    "Sil": "Forest, Wood",
+    "Sor": "Sister, Kin",
+    "Tar": "Star, Heaven",
+    "Tel": "Complete, Perfect",
+    "Tor": "Thunder, Tower",
+    "Ul": "Wolf, Howl",
+    "Ur": "Fire, Flame",
+    "Val": "Strong, Mighty",
+    "Vor": "Lord, Master",
+    "Wyl": "Trick, Cunning",
+    "Xar": "Stranger, Foreign",
+    "Yor": "Earth, Ground",
+    "Zel": "Zealous, Ardent",
+    "Zor": "Dawn, Morning"
+  },
+  "formats": [
+    "First Last",
+    "First",
+    "Title First",
+    "First Title",
+    "Title First Last",
+    "First Last Title",
+    "Title Last",
+    "First of Last",
+    "Last-son",
+    "Last-daughter"
+  ]
+}

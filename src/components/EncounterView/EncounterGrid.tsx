@@ -27,10 +27,10 @@ const getSpeedDisplay = (speed: Monster['speed']): string => {
 };
 
 const getCRColor = (cr: number): string => {
-  if (cr <= 4) return 'bg-green-600';
-  if (cr <= 10) return 'bg-yellow-600';
+  if (cr <= 4) return 'bg-accent-green';
+  if (cr <= 10) return 'bg-accent-yellow-dark';
   if (cr <= 16) return 'bg-orange-600';
-  return 'bg-red-600';
+  return 'bg-accent-red';
 };
 
 const CondensedStatBlock: React.FC<{
@@ -39,25 +39,25 @@ const CondensedStatBlock: React.FC<{
   onViewFull: () => void;
 }> = ({ monster, instanceNumber, onViewFull }) => {
   return (
-    <div className="bg-gray-800 rounded-xl shadow-xl overflow-hidden">
+    <div className="bg-theme-secondary rounded-xl shadow-xl overflow-hidden">
       {/* Header */}
       <div className="bg-gradient-to-r from-purple-900 to-red-900 p-4">
         <div className="flex items-start justify-between">
           <div>
-            <h3 className="text-xl font-bold text-white">
+            <h3 className="text-xl font-bold text-theme-primary">
               {monster.name}
               {instanceNumber > 1 && (
-                <span className="ml-2 text-sm text-gray-300">#{instanceNumber}</span>
+                <span className="ml-2 text-sm text-theme-tertiary">#{instanceNumber}</span>
               )}
             </h3>
-            <p className="text-sm text-gray-300 italic">
+            <p className="text-sm text-theme-tertiary italic">
               {monster.size} {monster.type}
             </p>
           </div>
           <span
             className={`px-2 py-1 ${getCRColor(
               monster.challenge_rating
-            )} text-white text-xs font-bold rounded`}
+            )} text-theme-primary text-xs font-bold rounded`}
           >
             CR {monster.challenge_rating}
           </span>
@@ -67,17 +67,17 @@ const CondensedStatBlock: React.FC<{
       {/* Core Stats */}
       <div className="p-4 space-y-3">
         {/* AC, HP, Speed */}
-        <div className="grid grid-cols-3 gap-2 text-center text-xs bg-gray-700/50 p-2 rounded">
+        <div className="grid grid-cols-3 gap-2 text-center text-xs bg-theme-tertiary/50 p-2 rounded">
           <div>
-            <div className="text-gray-400">AC</div>
-            <div className="text-lg font-bold text-yellow-300">{getACDisplay(monster.armor_class)}</div>
+            <div className="text-theme-muted">AC</div>
+            <div className="text-lg font-bold text-accent-yellow-light">{getACDisplay(monster.armor_class)}</div>
           </div>
           <div>
-            <div className="text-gray-400">HP</div>
-            <div className="text-lg font-bold text-green-400">{monster.hit_points}</div>
+            <div className="text-theme-muted">HP</div>
+            <div className="text-lg font-bold text-accent-green-light">{monster.hit_points}</div>
           </div>
           <div>
-            <div className="text-gray-400">Speed</div>
+            <div className="text-theme-muted">Speed</div>
             <div className="text-sm font-bold text-blue-300">{getSpeedDisplay(monster.speed)}</div>
           </div>
         </div>
@@ -92,10 +92,10 @@ const CondensedStatBlock: React.FC<{
             { name: 'WIS', score: monster.wisdom },
             { name: 'CHA', score: monster.charisma },
           ].map((ability) => (
-            <div key={ability.name} className="bg-gray-700/50 p-1 rounded">
-              <div className="text-gray-400">{ability.name}</div>
-              <div className="font-bold text-white">{ability.score}</div>
-              <div className="text-xs text-gray-400">({getModifier(ability.score)})</div>
+            <div key={ability.name} className="bg-theme-tertiary/50 p-1 rounded">
+              <div className="text-theme-muted">{ability.name}</div>
+              <div className="font-bold text-theme-primary">{ability.score}</div>
+              <div className="text-xs text-theme-muted">({getModifier(ability.score)})</div>
             </div>
           ))}
         </div>
@@ -103,8 +103,8 @@ const CondensedStatBlock: React.FC<{
         {/* Key Abilities */}
         {monster.special_abilities && monster.special_abilities.length > 0 && (
           <div className="text-xs">
-            <div className="font-bold text-purple-400 mb-1">Special Abilities:</div>
-            <div className="text-gray-300 line-clamp-2">
+            <div className="font-bold text-accent-purple-light mb-1">Special Abilities:</div>
+            <div className="text-theme-tertiary line-clamp-2">
               {monster.special_abilities.map((a) => a.name).join(', ')}
             </div>
           </div>
@@ -113,8 +113,8 @@ const CondensedStatBlock: React.FC<{
         {/* Actions */}
         {monster.actions && monster.actions.length > 0 && (
           <div className="text-xs">
-            <div className="font-bold text-red-400 mb-1">Actions:</div>
-            <div className="text-gray-300 line-clamp-2">
+            <div className="font-bold text-accent-red-light mb-1">Actions:</div>
+            <div className="text-theme-tertiary line-clamp-2">
               {monster.actions.map((a) => a.name).join(', ')}
             </div>
           </div>
@@ -123,7 +123,7 @@ const CondensedStatBlock: React.FC<{
         {/* View Full Button */}
         <button
           onClick={onViewFull}
-          className="w-full py-2 bg-purple-600 hover:bg-purple-500 rounded-lg text-white font-semibold transition-colors flex items-center justify-center text-sm"
+          className="w-full py-2 bg-accent-purple hover:bg-accent-purple-light rounded-lg text-theme-primary font-semibold transition-colors flex items-center justify-center text-sm"
         >
           <Eye className="w-4 h-4 mr-2" />
           View Full Stat Block

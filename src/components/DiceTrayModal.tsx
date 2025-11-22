@@ -21,23 +21,23 @@ export const DiceTrayModal: React.FC<DiceTrayModalProps> = ({ isOpen, onClose })
       onClick={onClose}
     >
       <div
-        className="bg-gray-800 rounded-xl shadow-2xl w-full max-w-2xl border border-red-700"
+        className="bg-theme-secondary rounded-xl shadow-2xl w-full max-w-2xl border border-accent-red-dark"
         onClick={(e) => e.stopPropagation()}
         style={{ width: '800px', height: '800px' }}
       >
         <div className="p-6 border-b border-red-800 flex justify-between items-center">
-          <h3 className="text-2xl font-bold text-red-400">Dice Rolling Tray</h3>
+          <h3 className="text-2xl font-bold text-accent-red-light">Dice Rolling Tray</h3>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-white transition-colors"
+            className="text-theme-muted hover:text-theme-primary transition-colors"
           >
             <X className="w-6 h-6" />
           </button>
         </div>
         <div className="p-6 flex items-center justify-center h-full">
           <div className="text-center">
-            <h4 className="text-xl font-semibold text-gray-300 mb-4">Future Dice Tray Implementation</h4>
-            <p className="text-gray-400">
+            <h4 className="text-xl font-semibold text-theme-tertiary mb-4">Future Dice Tray Implementation</h4>
+            <p className="text-theme-muted">
               This modal will contain advanced dice rolling tools, custom dice sets,
               roll macros, and enhanced dice visualization features.
             </p>

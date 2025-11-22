@@ -98,26 +98,26 @@ export const CharacterStats: React.FC<CharacterStatsProps> = ({
   if (layoutMode === 'classic') {
     return (
       <div className="grid grid-cols-3 gap-3">
-        <div className="flex flex-col items-center bg-gray-700/50 p-3 rounded border border-gray-600">
+        <div className="flex flex-col items-center bg-theme-tertiary/50 p-3 rounded border border-theme-primary">
           <Shield className="w-5 h-5 text-red-500 mb-1" />
-          <span className="text-xs font-semibold text-gray-400 uppercase">AC</span>
-          <div className="text-3xl font-extrabold text-white">{character.armorClass}</div>
+          <span className="text-xs font-semibold text-theme-muted uppercase">AC</span>
+          <div className="text-3xl font-extrabold text-theme-primary">{character.armorClass}</div>
         </div>
-        <div className="flex flex-col items-center bg-gray-700/50 p-3 rounded border border-gray-600">
+        <div className="flex flex-col items-center bg-theme-tertiary/50 p-3 rounded border border-theme-primary">
           <Zap className="w-5 h-5 text-red-500 mb-1" />
-          <span className="text-xs font-semibold text-gray-400 uppercase">HP</span>
+          <span className="text-xs font-semibold text-theme-muted uppercase">HP</span>
           <div className="text-center">
-            <div className="text-xl font-extrabold text-green-400">
+            <div className="text-xl font-extrabold text-accent-green-light">
               {character.hitPoints}
-              <span className="text-gray-400 text-sm">/{character.maxHitPoints}</span>
+              <span className="text-theme-muted text-sm">/{character.maxHitPoints}</span>
             </div>
             {character.temporaryHitPoints && character.temporaryHitPoints > 0 && (
-              <div className="text-xs font-bold text-blue-400 flex items-center justify-center gap-1">
+              <div className="text-xs font-bold text-accent-blue-light flex items-center justify-center gap-1">
                 +{character.temporaryHitPoints} temp
                 {onUpdateCharacter && (
                   <button
                     onClick={handleRemoveTempHp}
-                    className="text-xs text-red-400 hover:text-red-300 ml-1"
+                    className="text-xs text-accent-red-light hover:text-red-300 ml-1"
                     title="Remove temporary HP"
                   >
                     ×
@@ -133,12 +133,12 @@ export const CharacterStats: React.FC<CharacterStatsProps> = ({
                   onChange={(e) => setTempHpInput(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && handleAddTempHp()}
                   placeholder="+"
-                  className="w-8 h-5 text-xs bg-gray-700 text-white rounded border border-gray-600 focus:border-blue-500 focus:outline-none text-center"
+                  className="w-8 h-5 text-xs bg-theme-tertiary text-theme-primary rounded border border-theme-primary focus:border-blue-500 focus:outline-none text-center"
                   min="1"
                 />
                 <button
                   onClick={handleAddTempHp}
-                  className="text-xs text-blue-400 hover:text-blue-300"
+                  className="text-xs text-accent-blue-light hover:text-blue-300"
                   title="Add temporary HP"
                 >
                   +
@@ -154,35 +154,35 @@ export const CharacterStats: React.FC<CharacterStatsProps> = ({
               e.preventDefault();
               setInitiativeRollType(prev => prev === 'normal' ? 'advantage' : prev === 'advantage' ? 'disadvantage' : 'normal');
             }}
-            className="flex flex-col items-center bg-gray-700/50 p-3 rounded border border-gray-600 hover:bg-red-700/50 transition-colors cursor-pointer w-full h-full"
+            className="flex flex-col items-center bg-theme-tertiary/50 p-3 rounded border border-theme-primary hover:bg-accent-red-dark/50 transition-colors cursor-pointer w-full h-full"
             title={`Roll Initiative (${initiativeRollType}) - Right-click to cycle`}
           >
             <div className="flex items-center gap-1 mb-1">
               <Dice6 className="w-5 h-5 text-red-500" />
               {initiativeRollType !== 'normal' && (
-                <span className="text-xs font-bold text-green-400">
+                <span className="text-xs font-bold text-accent-green-light">
                   {initiativeRollType === 'advantage' ? 'A' : 'D'}
                 </span>
               )}
             </div>
-            <span className="text-xs font-semibold text-gray-400 uppercase">Init</span>
-            <div className="text-2xl font-extrabold text-yellow-300">{formatModifier(character.initiative)}</div>
+            <span className="text-xs font-semibold text-theme-muted uppercase">Init</span>
+            <div className="text-2xl font-extrabold text-accent-yellow-light">{formatModifier(character.initiative)}</div>
           </button>
         </div>
-        <div className="flex flex-col items-center bg-gray-700/50 p-3 rounded border border-gray-600">
+        <div className="flex flex-col items-center bg-theme-tertiary/50 p-3 rounded border border-theme-primary">
           <Footprints className="w-5 h-5 text-red-500 mb-1" />
-          <span className="text-xs font-semibold text-gray-400 uppercase">Speed</span>
-          <div className="text-xl font-extrabold text-blue-400">{getSpeed()} ft</div>
+          <span className="text-xs font-semibold text-theme-muted uppercase">Speed</span>
+          <div className="text-xl font-extrabold text-accent-blue-light">{getSpeed()} ft</div>
         </div>
-        <div className="flex flex-col items-center bg-gray-700/50 p-3 rounded border border-gray-600">
+        <div className="flex flex-col items-center bg-theme-tertiary/50 p-3 rounded border border-theme-primary">
           <BookOpen className="w-5 h-5 text-red-500 mb-1" />
-          <span className="text-xs font-semibold text-gray-400 uppercase">Prof</span>
-          <div className="text-xl font-extrabold text-yellow-300">+{character.proficiencyBonus}</div>
+          <span className="text-xs font-semibold text-theme-muted uppercase">Prof</span>
+          <div className="text-xl font-extrabold text-accent-yellow-light">+{character.proficiencyBonus}</div>
         </div>
-        <div className="flex flex-col items-center bg-gray-700/50 p-3 rounded border border-gray-600">
+        <div className="flex flex-col items-center bg-theme-tertiary/50 p-3 rounded border border-theme-primary">
           <UserIcon className="w-5 h-5 text-red-500 mb-1" />
-          <span className="text-xs font-semibold text-gray-400 uppercase">Pass Perc</span>
-          <div className="text-xl font-extrabold text-white">{passivePerception}</div>
+          <span className="text-xs font-semibold text-theme-muted uppercase">Pass Perc</span>
+          <div className="text-xl font-extrabold text-theme-primary">{passivePerception}</div>
         </div>
       </div>
     );
@@ -190,23 +190,23 @@ export const CharacterStats: React.FC<CharacterStatsProps> = ({
 
   // Modern layout: Horizontal 6-column grid
   return (
-    <div className="grid grid-cols-2 md:grid-cols-6 gap-4 bg-gray-800/70 p-4 rounded-xl shadow-lg border border-red-900">
-      <div className="col-span-1 flex flex-col items-center"><Shield className="w-6 h-6 text-red-500 mb-1" /><span className="text-sm font-semibold text-gray-400">AC</span><div className="text-4xl font-extrabold text-white">{character.armorClass}</div></div>
+    <div className="grid grid-cols-2 md:grid-cols-6 gap-4 bg-theme-secondary/70 p-4 rounded-xl shadow-lg border border-red-900">
+      <div className="col-span-1 flex flex-col items-center"><Shield className="w-6 h-6 text-red-500 mb-1" /><span className="text-sm font-semibold text-theme-muted">AC</span><div className="text-4xl font-extrabold text-theme-primary">{character.armorClass}</div></div>
       <div className="col-span-1 flex flex-col items-center">
         <Zap className="w-6 h-6 text-red-500 mb-1" />
-        <span className="text-sm font-semibold text-gray-400">HP</span>
+        <span className="text-sm font-semibold text-theme-muted">HP</span>
         <div className="text-center">
-          <div className="text-2xl font-extrabold text-green-400">
+          <div className="text-2xl font-extrabold text-accent-green-light">
             {character.hitPoints}
-            <span className="text-gray-400 text-lg">/{character.maxHitPoints}</span>
+            <span className="text-theme-muted text-lg">/{character.maxHitPoints}</span>
           </div>
           {character.temporaryHitPoints && character.temporaryHitPoints > 0 && (
-            <div className="text-sm font-bold text-blue-400 flex items-center justify-center gap-1">
+            <div className="text-sm font-bold text-accent-blue-light flex items-center justify-center gap-1">
               +{character.temporaryHitPoints} temp
               {onUpdateCharacter && (
                 <button
                   onClick={handleRemoveTempHp}
-                  className="text-xs text-red-400 hover:text-red-300 ml-1"
+                  className="text-xs text-accent-red-light hover:text-red-300 ml-1"
                   title="Remove temporary HP"
                 >
                   ×
@@ -222,12 +222,12 @@ export const CharacterStats: React.FC<CharacterStatsProps> = ({
                 onChange={(e) => setTempHpInput(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && handleAddTempHp()}
                 placeholder="+"
-                className="w-8 h-5 text-xs bg-gray-700 text-white rounded border border-gray-600 focus:border-blue-500 focus:outline-none text-center"
+                className="w-8 h-5 text-xs bg-theme-tertiary text-theme-primary rounded border border-theme-primary focus:border-blue-500 focus:outline-none text-center"
                 min="1"
               />
               <button
                 onClick={handleAddTempHp}
-                className="text-xs text-blue-400 hover:text-blue-300"
+                className="text-xs text-accent-blue-light hover:text-blue-300"
                 title="Add temporary HP"
               >
                 +
@@ -244,24 +244,24 @@ export const CharacterStats: React.FC<CharacterStatsProps> = ({
             // Cycle through roll types
             setInitiativeRollType(prev => prev === 'normal' ? 'advantage' : prev === 'advantage' ? 'disadvantage' : 'normal');
           }}
-          className="flex flex-col items-center bg-gray-700/50 p-2 rounded-lg hover:bg-red-700/70 transition-colors cursor-pointer w-full"
+          className="flex flex-col items-center bg-theme-tertiary/50 p-2 rounded-lg hover:bg-accent-red-dark/70 transition-colors cursor-pointer w-full"
           title={`Roll Initiative (${initiativeRollType}) - Right-click to cycle`}
         >
           <div className="flex items-center gap-1 mb-1">
             <Dice6 className="w-5 h-5 text-red-500" />
             {initiativeRollType !== 'normal' && (
-              <span className="text-xs font-bold text-green-400">
+              <span className="text-xs font-bold text-accent-green-light">
                 {initiativeRollType === 'advantage' ? 'A' : 'D'}
               </span>
             )}
           </div>
-          <span className="text-sm font-semibold text-gray-400">Init</span>
-          <div className="text-2xl font-extrabold text-yellow-300">{formatModifier(character.initiative)}</div>
+          <span className="text-sm font-semibold text-theme-muted">Init</span>
+          <div className="text-2xl font-extrabold text-accent-yellow-light">{formatModifier(character.initiative)}</div>
         </button>
       </div>
-      <div className="col-span-1 flex flex-col items-center"><Footprints className="w-6 h-6 text-red-500 mb-1" /><span className="text-sm font-semibold text-gray-400">Speed</span><div className="text-2xl font-extrabold text-blue-400">{getSpeed()} ft</div></div>
-      <div className="col-span-1 flex flex-col items-center"><BookOpen className="w-6 h-6 text-red-500 mb-1" /><span className="text-sm font-semibold text-gray-400">Prof</span><div className="text-2xl font-extrabold text-yellow-300">+{character.proficiencyBonus}</div></div>
-      <div className="col-span-1 flex flex-col items-center"><UserIcon className="w-6 h-6 text-red-500 mb-1" /><span className="text-sm font-semibold text-gray-400">Pass Perc</span><div className="text-2xl font-extrabold text-white">{passivePerception}</div></div>
+      <div className="col-span-1 flex flex-col items-center"><Footprints className="w-6 h-6 text-red-500 mb-1" /><span className="text-sm font-semibold text-theme-muted">Speed</span><div className="text-2xl font-extrabold text-accent-blue-light">{getSpeed()} ft</div></div>
+      <div className="col-span-1 flex flex-col items-center"><BookOpen className="w-6 h-6 text-red-500 mb-1" /><span className="text-sm font-semibold text-theme-muted">Prof</span><div className="text-2xl font-extrabold text-accent-yellow-light">+{character.proficiencyBonus}</div></div>
+      <div className="col-span-1 flex flex-col items-center"><UserIcon className="w-6 h-6 text-red-500 mb-1" /><span className="text-sm font-semibold text-theme-muted">Pass Perc</span><div className="text-2xl font-extrabold text-theme-primary">{passivePerception}</div></div>
     </div>
   );
 };

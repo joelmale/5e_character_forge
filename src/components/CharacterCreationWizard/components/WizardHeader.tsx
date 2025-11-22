@@ -9,11 +9,11 @@ interface WizardHeaderProps {
 
 export const WizardHeader: React.FC<WizardHeaderProps> = ({ currentStep, onClose }) => {
   return (
-    <div className="flex justify-between items-center border-b border-red-700 pb-3">
+    <div className="flex justify-between items-center border-b border-accent-red-dark pb-3">
       <h2 className="text-2xl font-bold text-red-500 flex items-center">
         <Dice6 className="w-6 h-6 mr-2" /> {STEP_TITLES[currentStep]}
       </h2>
-      <button onClick={onClose} className="text-gray-400 hover:text-white text-xl font-bold">&times;</button>
+      <button onClick={onClose} className="text-theme-muted hover:text-theme-primary text-xl font-bold">&times;</button>
     </div>
   );
 };

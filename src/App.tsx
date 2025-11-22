@@ -20,6 +20,7 @@ import { ChooseCantripModal } from './components/ChooseCantripModal';
 import ChooseSubclassModal from './components/ChooseSubclassModal';
 import AbilityScoreIncreaseModal from './components/AbilityScoreIncreaseModal';
 import { DiceRollerModal } from './components/DiceRollerModal';
+import SettingsModal from './components/SettingsModal';
 import { generateUUID, DiceRoll } from './services/diceService';
 import { featureDescriptions } from './utils/featureDescriptions';
 import { loadClasses, loadEquipment, loadFeatures, getSubclassesByClass, PROFICIENCY_BONUSES, getModifier, getHitDieForClass, CANTRIPS_KNOWN_BY_CLASS, SPELL_SLOTS_BY_CLASS, AppSubclass } from './services/dataService';
@@ -1030,12 +1031,12 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 text-gray-100 font-sans">
+    <div className="min-h-screen bg-theme-primary text-theme-primary font-sans">
       <div className="max-w-7xl mx-auto p-4 md:p-8">
         {/* Header and Controls */}
         <header className="mb-8">
           {/* Title and Tabs on same line */}
-          <div className="flex flex-col md:flex-row justify-between items-end mb-4 border-b border-red-700">
+          <div className="flex flex-col md:flex-row justify-between items-end mb-4 border-b border-accent-red-dark">
             <h1 className="text-4xl font-extrabold text-red-500 mb-4 md:mb-0">
               5e Character Forge
             </h1>
@@ -1046,8 +1047,8 @@ const App: React.FC = () => {
                 onClick={() => setActiveTab('characters')}
                 className={`px-6 py-3 font-bold transition-all rounded-t-lg border-t-2 border-l-2 border-r-2 ${
                   activeTab === 'characters'
-                    ? 'bg-gray-900 text-red-400 border-red-700 relative z-10'
-                    : 'bg-gray-800 text-gray-400 border-gray-700 hover:bg-gray-750 translate-y-1'
+                    ? 'bg-theme-primary text-accent-red-light border-accent-red-dark relative z-10'
+                    : 'bg-theme-secondary text-theme-muted border-theme-secondary hover:bg-gray-750 translate-y-1'
                 }`}
                 style={activeTab === 'characters' ? { borderBottom: '2px solid rgb(17, 24, 39)' } : {}}
               >
@@ -1058,8 +1059,8 @@ const App: React.FC = () => {
                 onClick={() => setActiveTab('monsters')}
                 className={`px-6 py-3 font-bold transition-all rounded-t-lg border-t-2 border-l-2 border-r-2 ${
                   activeTab === 'monsters'
-                    ? 'bg-gray-900 text-purple-400 border-purple-700 relative z-10'
-                    : 'bg-gray-800 text-gray-400 border-gray-700 hover:bg-gray-750 translate-y-1'
+                    ? 'bg-theme-primary text-accent-purple-light border-accent-purple-dark relative z-10'
+                    : 'bg-theme-secondary text-theme-muted border-theme-secondary hover:bg-gray-750 translate-y-1'
                 }`}
                 style={activeTab === 'monsters' ? { borderBottom: '2px solid rgb(17, 24, 39)' } : {}}
               >
@@ -1074,7 +1075,7 @@ const App: React.FC = () => {
             <div className="flex flex-col space-y-3 md:space-y-0 md:flex-row md:space-x-3 w-full md:w-auto">
                <button
                 onClick={() => setIsNewCharacterModalOpen(true)}
-                className="w-full md:w-auto px-6 py-3 bg-red-600 hover:bg-red-500 rounded-xl text-white font-bold shadow-red-800/50 shadow-lg transition-all flex items-center justify-center"
+                className="w-full md:w-auto px-6 py-3 bg-accent-red hover:bg-accent-red-light rounded-xl text-theme-primary font-bold shadow-red-theme/50 shadow-lg transition-all flex items-center justify-center"
               >
                 <Plus className="w-5 h-5 mr-2" />
                 New Character
@@ -1082,7 +1083,7 @@ const App: React.FC = () => {
              <button
                onClick={handleExportData}
                disabled={characters.length === 0}
-               className="w-full md:w-auto px-6 py-3 bg-blue-600 hover:bg-blue-500 rounded-xl text-white font-bold shadow-blue-800/50 shadow-lg transition-all flex items-center justify-center disabled:bg-gray-600 disabled:cursor-not-allowed"
+               className="w-full md:w-auto px-6 py-3 bg-accent-blue hover:bg-accent-blue-light rounded-xl text-theme-primary font-bold shadow-blue-800/50 shadow-lg transition-all flex items-center justify-center disabled:bg-theme-quaternary disabled:cursor-not-allowed"
              >
                <Download className="w-5 h-5 mr-2" />
                Export Data
@@ -1090,13 +1091,13 @@ const App: React.FC = () => {
              <button
                onClick={handleDeleteSelectedCharacters}
                disabled={selectedCharacterIds.size === 0}
-               className="w-full md:w-auto px-6 py-3 bg-red-700 hover:bg-red-600 rounded-xl text-white font-bold shadow-red-900/50 shadow-lg transition-all flex items-center justify-center disabled:bg-gray-600 disabled:cursor-not-allowed"
+               className="w-full md:w-auto px-6 py-3 bg-accent-red-dark hover:bg-accent-red rounded-xl text-theme-primary font-bold shadow-red-900/50 shadow-lg transition-all flex items-center justify-center disabled:bg-theme-quaternary disabled:cursor-not-allowed"
                title={selectedCharacterIds.size > 0 ? `Delete ${selectedCharacterIds.size} selected character${selectedCharacterIds.size !== 1 ? 's' : ''}` : 'Select characters to delete'}
              >
                <Trash2 className="w-5 h-5 mr-2" />
                Delete Selected ({selectedCharacterIds.size})
              </button>
-              <label className="w-full md:w-auto px-6 py-3 bg-green-600 hover:bg-green-500 rounded-xl text-white font-bold shadow-green-800/50 shadow-lg transition-all flex items-center justify-center cursor-pointer">
+              <label className="w-full md:w-auto px-6 py-3 bg-accent-green hover:bg-accent-green rounded-xl text-theme-primary font-bold shadow-green-800/50 shadow-lg transition-all flex items-center justify-center cursor-pointer">
                 <Upload className="w-5 h-5 mr-2" />
                 Import Data
                 <input
@@ -1108,7 +1109,7 @@ const App: React.FC = () => {
               </label>
               <button
                 onClick={() => setIsSettingsModalOpen(true)}
-                className="w-full md:w-auto px-4 py-3 bg-gray-600 hover:bg-gray-500 rounded-xl text-white font-bold shadow-gray-800/50 shadow-lg transition-all flex items-center justify-center"
+                className="w-full md:w-auto px-4 py-3 bg-theme-quaternary hover:bg-theme-hover rounded-xl text-theme-primary font-bold shadow-theme-lg shadow-lg transition-all flex items-center justify-center"
                 title="Settings"
               >
                 <Settings className="w-5 h-5" />
@@ -1120,23 +1121,23 @@ const App: React.FC = () => {
 
         {/* Enhanced Dice Roll Display */}
         <div className={`fixed top-4 right-4 p-4 rounded-lg shadow-xl transition-all duration-300 z-40 max-w-xs
-          ${rollResult.value !== null ? 'bg-green-800/90 border border-green-500' : 'bg-gray-800/90 border border-gray-600'}`}
+          ${rollResult.value !== null ? 'bg-green-800/90 border border-green-500' : 'bg-theme-secondary/90 border border-theme-primary'}`}
         >
-          <div className="text-sm font-semibold text-gray-300">{rollResult.text}</div>
+          <div className="text-sm font-semibold text-theme-tertiary">{rollResult.text}</div>
           {rollResult.value !== null && (
-            <div className="text-4xl font-extrabold text-yellow-300 mt-1">
+            <div className="text-4xl font-extrabold text-accent-yellow-light mt-1">
               {rollResult.value}
             </div>
           )}
           {rollResult.details && (
-            <div className="mt-2 text-xs text-gray-400">
+            <div className="mt-2 text-xs text-theme-muted">
               {rollResult.details.map((detail, idx) => (
                 <div key={idx} className="flex items-center gap-1">
-                  <span className={detail.kept ? 'text-yellow-300 font-semibold' : 'text-gray-500'}>
+                  <span className={detail.kept ? 'text-accent-yellow-light font-semibold' : 'text-theme-disabled'}>
                     {detail.value}
                   </span>
                   {detail.critical && (
-                    <span className="text-red-400 font-bold">
+                    <span className="text-accent-red-light font-bold">
                       {detail.critical === 'success' ? '!' : '💀'}
                     </span>
                   )}
@@ -1149,40 +1150,40 @@ const App: React.FC = () => {
         {/* Main Content - Conditional based on active tab */}
         {activeTab === 'characters' ? (
           <section>
-            <h2 className="text-2xl font-bold text-gray-200 mb-4">Your Heroes ({characters.length})</h2>
+            <h2 className="text-2xl font-bold text-theme-secondary mb-4">Your Heroes ({characters.length})</h2>
 
           {characters.length === 0 ? (
-            <div className="text-center p-12 bg-gray-800 rounded-xl border-2 border-dashed border-gray-700">
+            <div className="text-center p-12 bg-theme-secondary rounded-xl border-2 border-dashed border-theme-secondary">
               <Shield className="w-12 h-12 text-red-500 mx-auto mb-3" />
-              <p className="text-xl font-semibold text-gray-400">Ready your destiny!</p>
-              <p className="text-gray-500">Use the "New Character Wizard" button to start forging your hero.</p>
+              <p className="text-xl font-semibold text-theme-muted">Ready your destiny!</p>
+              <p className="text-theme-disabled">Use the "New Character Wizard" button to start forging your hero.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {characters.map((char) => (
-                <div key={char.id} className="bg-gray-800 rounded-xl shadow-xl hover:shadow-red-700/30 transition-shadow duration-300 overflow-hidden">
+                <div key={char.id} className="bg-theme-secondary rounded-xl shadow-xl hover:shadow-red-700/30 transition-shadow duration-300 overflow-hidden">
                   <div className="p-5">
                     {/* Checkbox for selection */}
                     <div className="flex items-start justify-between mb-2">
                       <div className="flex-grow">
-                        <h3 className="text-2xl font-bold text-red-400 truncate">{char.name}</h3>
-                        <p className="text-sm text-gray-400 mb-3">{char.race} | {char.class} (Level {char.level})</p>
+                        <h3 className="text-2xl font-bold text-accent-red-light truncate">{char.name}</h3>
+                        <p className="text-sm text-theme-muted mb-3">{char.race} | {char.class} (Level {char.level})</p>
                       </div>
                       <label className="flex items-center cursor-pointer ml-2" title="Select for export">
                         <input
                           type="checkbox"
                           checked={selectedCharacterIds.has(char.id)}
                           onChange={() => toggleCharacterSelection(char.id)}
-                          className="w-5 h-5 text-red-600 bg-gray-700 border-gray-600 rounded focus:ring-red-500 focus:ring-2 cursor-pointer"
+                          className="w-5 h-5 text-accent-red bg-theme-tertiary border-theme-primary rounded focus:ring-red-500 focus:ring-2 cursor-pointer"
                         />
                       </label>
                     </div>
 
                     {/* Quick Stats Grid */}
-                    <div className="grid grid-cols-3 gap-2 text-center text-xs font-medium bg-gray-700/50 p-3 rounded-lg">
-                       <div>AC: <span className="text-yellow-300 block text-lg font-bold">{char.armorClass}</span></div>
-                       <div>HP: <span className="text-green-400 block text-lg font-bold">{char.hitPoints}</span></div>
-                       <div>Prof: <span className="text-yellow-300 block text-lg font-bold">{formatModifier(char.proficiencyBonus)}</span></div>
+                    <div className="grid grid-cols-3 gap-2 text-center text-xs font-medium bg-theme-tertiary/50 p-3 rounded-lg">
+                       <div>AC: <span className="text-accent-yellow-light block text-lg font-bold">{char.armorClass}</span></div>
+                       <div>HP: <span className="text-accent-green-light block text-lg font-bold">{char.hitPoints}</span></div>
+                       <div>Prof: <span className="text-accent-yellow-light block text-lg font-bold">{formatModifier(char.proficiencyBonus)}</span></div>
                     </div>
 
                     {/* Actions */}
@@ -1192,16 +1193,16 @@ const App: React.FC = () => {
                           console.log('📖 [CHARACTER] Opening character sheet for:', char.name, char.id);
                           setSelectedCharacterId(char.id);
                         }}
-                        className="flex-grow py-2 bg-red-600 hover:bg-red-500 rounded-lg text-white font-semibold transition-colors flex items-center justify-center text-sm"
+                        className="flex-grow py-2 bg-accent-red hover:bg-accent-red-light rounded-lg text-theme-primary font-semibold transition-colors flex items-center justify-center text-sm"
                       >
                         <BookOpen className="w-4 h-4 mr-2" /> View Sheet
                       </button>
                       <button
                         onClick={() => handleDeleteCharacter(char.id)}
-                        className="p-2 bg-gray-600 hover:bg-red-700 rounded-lg transition-colors"
+                        className="p-2 bg-theme-quaternary hover:bg-accent-red-dark rounded-lg transition-colors"
                         title="Delete Character"
                       >
-                        <Trash2 className="w-5 h-5 text-white" />
+                        <Trash2 className="w-5 h-5 text-theme-primary" />
                       </button>
                     </div>
                   </div>
@@ -1301,22 +1302,10 @@ const App: React.FC = () => {
         })()}
 
         {/* Settings Modal */}
-        {isSettingsModalOpen && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-gray-800 p-6 rounded-lg shadow-xl max-w-md w-full mx-4">
-              <h2 className="text-xl font-bold text-white mb-4">Settings</h2>
-              <p className="text-gray-300">Settings TODO</p>
-              <div className="mt-6 flex justify-end">
-                <button
-                  onClick={() => setIsSettingsModalOpen(false)}
-                  className="px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded text-white transition-colors"
-                >
-                  Close
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+        <SettingsModal
+          isOpen={isSettingsModalOpen}
+          onClose={() => setIsSettingsModalOpen(false)}
+        />
 
         {/* Dice Roller Modal */}
         <DiceRollerModal

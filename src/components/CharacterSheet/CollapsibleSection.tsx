@@ -98,8 +98,8 @@ export const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({
         onDragEnd={isAdjustMode && isCollapsed ? handleDragEnd : undefined}
         className={`w-full px-6 py-4 text-left flex items-center justify-between transition-colors group ${
           isAdjustMode && isCollapsed
-            ? 'hover:bg-gray-700/70 cursor-grab active:cursor-grabbing'
-            : 'hover:bg-gray-800/50'
+            ? 'hover:bg-theme-tertiary/70 cursor-grab active:cursor-grabbing'
+            : 'hover:bg-theme-secondary/50'
         }`}
         aria-expanded={!isCollapsed}
         aria-controls={`section-${title.toLowerCase().replace(/\s+/g, '-')}`}
@@ -108,16 +108,16 @@ export const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({
           {Icon && <Icon className="w-5 h-5 text-current" />}
           <h3 className="text-lg font-bold">{title}</h3>
           {badge && (
-            <span className="px-2 py-1 bg-gray-700 text-gray-300 rounded-full text-xs font-medium">
+            <span className="px-2 py-1 bg-theme-tertiary text-theme-tertiary rounded-full text-xs font-medium">
               {badge}
             </span>
           )}
         </div>
         <div className="flex items-center gap-2">
           {isCollapsed ? (
-            <ChevronRight className="w-6 h-6 text-white group-hover:text-yellow-300 transition-colors" />
+            <ChevronRight className="w-6 h-6 text-theme-primary group-hover:text-accent-yellow-light transition-colors" />
           ) : (
-            <ChevronDown className="w-6 h-6 text-white group-hover:text-yellow-300 transition-colors" />
+            <ChevronDown className="w-6 h-6 text-theme-primary group-hover:text-accent-yellow-light transition-colors" />
           )}
         </div>
       </button>

@@ -36,17 +36,17 @@ const getSpeedText = (speed: Monster['speed']): string => {
 };
 
 const getCRColor = (cr: number): string => {
-  if (cr <= 4) return 'bg-green-600';
-  if (cr <= 10) return 'bg-yellow-600';
+  if (cr <= 4) return 'bg-accent-green';
+  if (cr <= 10) return 'bg-accent-yellow-dark';
   if (cr <= 16) return 'bg-orange-600';
-  return 'bg-red-600';
+  return 'bg-accent-red';
 };
 
 export const EncounterTabs: React.FC<EncounterTabsProps> = ({ monsters }) => {
   const [activeIndex, setActiveIndex] = useState(0);
 
   if (monsters.length === 0) {
-    return <div className="text-center text-gray-400">No monsters in encounter</div>;
+    return <div className="text-center text-theme-muted">No monsters in encounter</div>;
   }
 
   const monster = monsters[activeIndex];
@@ -86,11 +86,11 @@ export const EncounterTabs: React.FC<EncounterTabsProps> = ({ monsters }) => {
   return (
     <div className="max-w-5xl mx-auto">
       {/* Tab Navigation */}
-      <div className="mb-6 bg-gray-800 rounded-lg p-2">
+      <div className="mb-6 bg-theme-secondary rounded-lg p-2">
         <div className="flex items-center gap-2 mb-3">
           <button
             onClick={handlePrevious}
-            className="p-2 bg-purple-600 hover:bg-purple-700 rounded-lg transition-colors"
+            className="p-2 bg-accent-purple hover:bg-purple-700 rounded-lg transition-colors"
             title="Previous monster"
           >
             <ChevronLeft className="w-5 h-5" />
@@ -107,8 +107,8 @@ export const EncounterTabs: React.FC<EncounterTabsProps> = ({ monsters }) => {
                     onClick={() => setActiveIndex(index)}
                     className={`px-4 py-2 rounded-lg whitespace-nowrap transition-colors ${
                       isActive
-                        ? 'bg-purple-600 text-white font-bold'
-                        : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                        ? 'bg-accent-purple text-theme-primary font-bold'
+                        : 'bg-theme-tertiary text-theme-tertiary hover:bg-theme-quaternary'
                     }`}
                   >
                     {m.name} {inst > 1 && `#${inst}`}
@@ -120,32 +120,32 @@ export const EncounterTabs: React.FC<EncounterTabsProps> = ({ monsters }) => {
 
           <button
             onClick={handleNext}
-            className="p-2 bg-purple-600 hover:bg-purple-700 rounded-lg transition-colors"
+            className="p-2 bg-accent-purple hover:bg-purple-700 rounded-lg transition-colors"
             title="Next monster"
           >
             <ChevronRight className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="text-center text-sm text-gray-400">
+        <div className="text-center text-sm text-theme-muted">
           {activeIndex + 1} of {monsters.length}
         </div>
       </div>
 
       {/* Full Stat Block */}
-      <div className="bg-gray-900 rounded-xl shadow-2xl overflow-hidden">
+      <div className="bg-theme-primary rounded-xl shadow-2xl overflow-hidden">
         {/* Header */}
         <div className="bg-gradient-to-r from-purple-900 to-red-900 p-6">
           <div className="flex items-center gap-3 mb-2">
-            <h1 className="text-4xl font-bold text-white">
+            <h1 className="text-4xl font-bold text-theme-primary">
               {monster.name}
-              {instanceNumber > 1 && <span className="ml-2 text-2xl text-gray-300">#{instanceNumber}</span>}
+              {instanceNumber > 1 && <span className="ml-2 text-2xl text-theme-tertiary">#{instanceNumber}</span>}
             </h1>
-            <span className={`px-3 py-1 ${getCRColor(monster.challenge_rating)} text-white text-sm rounded-full`}>
+            <span className={`px-3 py-1 ${getCRColor(monster.challenge_rating)} text-theme-primary text-sm rounded-full`}>
               CR {monster.challenge_rating}
             </span>
           </div>
-          <p className="text-xl text-gray-300 italic">
+          <p className="text-xl text-theme-tertiary italic">
             {monster.size} {monster.type}
             {monster.subtype && ` (${monster.subtype})`}, {monster.alignment}
           </p>
@@ -154,25 +154,25 @@ export const EncounterTabs: React.FC<EncounterTabsProps> = ({ monsters }) => {
         {/* Stat Block Content */}
         <div className="p-6 space-y-4">
           {/* Basic Stats */}
-          <div className="space-y-2 pb-4 border-b-2 border-red-700">
+          <div className="space-y-2 pb-4 border-b-2 border-accent-red-dark">
             <div className="flex gap-2">
-              <span className="font-bold text-red-400">Armor Class</span>
-              <span className="text-gray-300">{getACText(monster.armor_class)}</span>
+              <span className="font-bold text-accent-red-light">Armor Class</span>
+              <span className="text-theme-tertiary">{getACText(monster.armor_class)}</span>
             </div>
             <div className="flex gap-2">
-              <span className="font-bold text-red-400">Hit Points</span>
-              <span className="text-gray-300">
+              <span className="font-bold text-accent-red-light">Hit Points</span>
+              <span className="text-theme-tertiary">
                 {monster.hit_points} ({monster.hit_points_roll})
               </span>
             </div>
             <div className="flex gap-2">
-              <span className="font-bold text-red-400">Speed</span>
-              <span className="text-gray-300">{getSpeedText(monster.speed)}</span>
+              <span className="font-bold text-accent-red-light">Speed</span>
+              <span className="text-theme-tertiary">{getSpeedText(monster.speed)}</span>
             </div>
           </div>
 
           {/* Ability Scores */}
-          <div className="grid grid-cols-6 gap-3 pb-4 border-b-2 border-red-700">
+          <div className="grid grid-cols-6 gap-3 pb-4 border-b-2 border-accent-red-dark">
             {[
               { name: 'STR', score: monster.strength },
               { name: 'DEX', score: monster.dexterity },
@@ -182,86 +182,86 @@ export const EncounterTabs: React.FC<EncounterTabsProps> = ({ monsters }) => {
               { name: 'CHA', score: monster.charisma },
             ].map((ability) => (
               <div key={ability.name} className="text-center">
-                <div className="font-bold text-red-400 text-sm">{ability.name}</div>
-                <div className="text-2xl font-bold text-white">{ability.score}</div>
-                <div className="text-sm text-gray-400">({getModifier(ability.score)})</div>
+                <div className="font-bold text-accent-red-light text-sm">{ability.name}</div>
+                <div className="text-2xl font-bold text-theme-primary">{ability.score}</div>
+                <div className="text-sm text-theme-muted">({getModifier(ability.score)})</div>
               </div>
             ))}
           </div>
 
           {/* Additional Stats */}
-          <div className="space-y-2 pb-4 border-b-2 border-red-700 text-sm">
+          <div className="space-y-2 pb-4 border-b-2 border-accent-red-dark text-sm">
             {getSavingThrows() && (
               <div className="flex gap-2">
-                <span className="font-bold text-red-400">Saving Throws</span>
-                <span className="text-gray-300">{getSavingThrows()}</span>
+                <span className="font-bold text-accent-red-light">Saving Throws</span>
+                <span className="text-theme-tertiary">{getSavingThrows()}</span>
               </div>
             )}
             {getSkills() && (
               <div className="flex gap-2">
-                <span className="font-bold text-red-400">Skills</span>
-                <span className="text-gray-300">{getSkills()}</span>
+                <span className="font-bold text-accent-red-light">Skills</span>
+                <span className="text-theme-tertiary">{getSkills()}</span>
               </div>
             )}
             {monster.damage_vulnerabilities.length > 0 && (
               <div className="flex gap-2">
-                <span className="font-bold text-red-400">Damage Vulnerabilities</span>
-                <span className="text-gray-300">{monster.damage_vulnerabilities.join(', ')}</span>
+                <span className="font-bold text-accent-red-light">Damage Vulnerabilities</span>
+                <span className="text-theme-tertiary">{monster.damage_vulnerabilities.join(', ')}</span>
               </div>
             )}
             {monster.damage_resistances.length > 0 && (
               <div className="flex gap-2">
-                <span className="font-bold text-red-400">Damage Resistances</span>
-                <span className="text-gray-300">{monster.damage_resistances.join(', ')}</span>
+                <span className="font-bold text-accent-red-light">Damage Resistances</span>
+                <span className="text-theme-tertiary">{monster.damage_resistances.join(', ')}</span>
               </div>
             )}
             {monster.damage_immunities.length > 0 && (
               <div className="flex gap-2">
-                <span className="font-bold text-red-400">Damage Immunities</span>
-                <span className="text-gray-300">{monster.damage_immunities.join(', ')}</span>
+                <span className="font-bold text-accent-red-light">Damage Immunities</span>
+                <span className="text-theme-tertiary">{monster.damage_immunities.join(', ')}</span>
               </div>
             )}
             {monster.condition_immunities.length > 0 && (
               <div className="flex gap-2">
-                <span className="font-bold text-red-400">Condition Immunities</span>
-                <span className="text-gray-300">
+                <span className="font-bold text-accent-red-light">Condition Immunities</span>
+                <span className="text-theme-tertiary">
                   {monster.condition_immunities.map((c) => c.name).join(', ')}
                 </span>
               </div>
             )}
             <div className="flex gap-2">
-              <span className="font-bold text-red-400">Senses</span>
-              <span className="text-gray-300">
+              <span className="font-bold text-accent-red-light">Senses</span>
+              <span className="text-theme-tertiary">
                 {Object.entries(monster.senses)
                   .map(([key, value]) => `${key} ${value}`)
                   .join(', ')}
               </span>
             </div>
             <div className="flex gap-2">
-              <span className="font-bold text-red-400">Languages</span>
-              <span className="text-gray-300">{monster.languages || '—'}</span>
+              <span className="font-bold text-accent-red-light">Languages</span>
+              <span className="text-theme-tertiary">{monster.languages || '—'}</span>
             </div>
             <div className="flex gap-2">
-              <span className="font-bold text-red-400">Challenge</span>
-              <span className="text-gray-300">
+              <span className="font-bold text-accent-red-light">Challenge</span>
+              <span className="text-theme-tertiary">
                 {monster.challenge_rating} ({monster.xp.toLocaleString()} XP)
               </span>
             </div>
             <div className="flex gap-2">
-              <span className="font-bold text-red-400">Proficiency Bonus</span>
-              <span className="text-gray-300">+{monster.proficiency_bonus}</span>
+              <span className="font-bold text-accent-red-light">Proficiency Bonus</span>
+              <span className="text-theme-tertiary">+{monster.proficiency_bonus}</span>
             </div>
           </div>
 
           {/* Special Abilities */}
           {monster.special_abilities && monster.special_abilities.length > 0 && (
-            <div className="pb-4 border-b-2 border-red-700">
-              <h3 className="text-lg font-bold text-red-400 mb-3">Special Abilities</h3>
+            <div className="pb-4 border-b-2 border-accent-red-dark">
+              <h3 className="text-lg font-bold text-accent-red-light mb-3">Special Abilities</h3>
               <div className="space-y-3">
                 {monster.special_abilities.map((ability, idx) => (
                   <div key={idx} className="text-sm">
-                    <p className="font-bold text-purple-400 italic">{ability.name}.</p>
-                    <p className="text-gray-300 mt-1">{ability.desc}</p>
+                    <p className="font-bold text-accent-purple-light italic">{ability.name}.</p>
+                    <p className="text-theme-tertiary mt-1">{ability.desc}</p>
                   </div>
                 ))}
               </div>
@@ -270,13 +270,13 @@ export const EncounterTabs: React.FC<EncounterTabsProps> = ({ monsters }) => {
 
           {/* Actions */}
           {monster.actions && monster.actions.length > 0 && (
-            <div className="pb-4 border-b-2 border-red-700">
-              <h3 className="text-lg font-bold text-red-400 mb-3">Actions</h3>
+            <div className="pb-4 border-b-2 border-accent-red-dark">
+              <h3 className="text-lg font-bold text-accent-red-light mb-3">Actions</h3>
               <div className="space-y-3">
                 {monster.actions.map((action, idx) => (
                   <div key={idx} className="text-sm">
-                    <p className="font-bold text-red-400 italic">{action.name}.</p>
-                    <p className="text-gray-300 mt-1">{action.desc}</p>
+                    <p className="font-bold text-accent-red-light italic">{action.name}.</p>
+                    <p className="text-theme-tertiary mt-1">{action.desc}</p>
                   </div>
                 ))}
               </div>
@@ -285,9 +285,9 @@ export const EncounterTabs: React.FC<EncounterTabsProps> = ({ monsters }) => {
 
           {/* Legendary Actions */}
           {monster.legendary_actions && monster.legendary_actions.length > 0 && (
-            <div className="pb-4 border-b-2 border-red-700">
-              <h3 className="text-lg font-bold text-red-400 mb-3">Legendary Actions</h3>
-              <p className="text-sm text-gray-300 italic mb-3">
+            <div className="pb-4 border-b-2 border-accent-red-dark">
+              <h3 className="text-lg font-bold text-accent-red-light mb-3">Legendary Actions</h3>
+              <p className="text-sm text-theme-tertiary italic mb-3">
                 The {monster.name} can take 3 legendary actions, choosing from the options below. Only
                 one legendary action option can be used at a time and only at the end of another
                 creature's turn. The {monster.name} regains spent legendary actions at the start of its
@@ -296,8 +296,8 @@ export const EncounterTabs: React.FC<EncounterTabsProps> = ({ monsters }) => {
               <div className="space-y-3">
                 {monster.legendary_actions.map((action, idx) => (
                   <div key={idx} className="text-sm">
-                    <p className="font-bold text-yellow-400 italic">{action.name}.</p>
-                    <p className="text-gray-300 mt-1">{action.desc}</p>
+                    <p className="font-bold text-accent-yellow-light italic">{action.name}.</p>
+                    <p className="text-theme-tertiary mt-1">{action.desc}</p>
                   </div>
                 ))}
               </div>
@@ -307,12 +307,12 @@ export const EncounterTabs: React.FC<EncounterTabsProps> = ({ monsters }) => {
           {/* Reactions */}
           {monster.reactions && monster.reactions.length > 0 && (
             <div>
-              <h3 className="text-lg font-bold text-red-400 mb-3">Reactions</h3>
+              <h3 className="text-lg font-bold text-accent-red-light mb-3">Reactions</h3>
               <div className="space-y-3">
                 {monster.reactions.map((reaction, idx) => (
                   <div key={idx} className="text-sm">
-                    <p className="font-bold text-blue-400 italic">{reaction.name}.</p>
-                    <p className="text-gray-300 mt-1">{reaction.desc}</p>
+                    <p className="font-bold text-accent-blue-light italic">{reaction.name}.</p>
+                    <p className="text-theme-tertiary mt-1">{reaction.desc}</p>
                   </div>
                 ))}
               </div>

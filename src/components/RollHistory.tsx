@@ -15,9 +15,9 @@ export const RollHistoryTicker: React.FC<RollHistoryTickerProps> = ({ rolls }) =
   if (rolls.length === 0) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-gray-800/95 border-t border-gray-700 py-2 px-4 z-30 overflow-hidden">
+    <div className="fixed bottom-0 left-0 right-0 bg-theme-secondary/95 border-t border-theme-secondary py-2 px-4 z-30 overflow-hidden">
       <div className="max-w-7xl mx-auto flex items-center gap-4 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
-        <span className="text-xs font-bold text-gray-400 whitespace-nowrap">
+        <span className="text-xs font-bold text-theme-muted whitespace-nowrap">
           Recent Rolls:
         </span>
         <div className="flex gap-4 flex-nowrap">
@@ -26,27 +26,27 @@ export const RollHistoryTicker: React.FC<RollHistoryTickerProps> = ({ rolls }) =
               key={roll.id}
               className="flex items-center gap-2 text-sm whitespace-nowrap"
             >
-              <span className="text-gray-300">{roll.label}:</span>
-              <span className="font-mono text-yellow-300">{roll.notation}</span>
-              <span className="text-gray-500">→</span>
+              <span className="text-theme-tertiary">{roll.label}:</span>
+              <span className="font-mono text-accent-yellow-light">{roll.notation}</span>
+              <span className="text-theme-disabled">→</span>
               {roll.pools?.length ? (
-                <span className="text-xs text-gray-400">
+                <span className="text-xs text-theme-muted">
                   [{roll.pools[0].results.join(',')}] →
                 </span>
               ) : null}
               <span
                 className={`font-bold ${
                   roll.critical === 'success'
-                    ? 'text-green-400'
+                    ? 'text-accent-green-light'
                     : roll.critical === 'failure'
-                    ? 'text-red-400'
-                    : 'text-white'
+                    ? 'text-accent-red-light'
+                    : 'text-theme-primary'
                 }`}
               >
                 {roll.total}
               </span>
               {roll.critical && (
-                <span className="text-xs px-1.5 py-0.5 rounded bg-gray-700">
+                <span className="text-xs px-1.5 py-0.5 rounded bg-theme-tertiary">
                   {roll.critical === 'success' ? 'CRIT!' : 'FAIL!'}
                 </span>
               )}
@@ -68,10 +68,10 @@ export const RollHistoryModal: React.FC<RollHistoryModalProps> = ({
     return (
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-4 right-4 p-3 bg-red-600 hover:bg-red-500 rounded-full shadow-lg transition-colors z-30"
+        className="fixed bottom-4 right-4 p-3 bg-accent-red hover:bg-accent-red-light rounded-full shadow-lg transition-colors z-30"
         title="View Roll History"
       >
-        <History className="w-6 h-6 text-white" />
+        <History className="w-6 h-6 text-theme-primary" />
       </button>
     );
   }
@@ -87,11 +87,11 @@ export const RollHistoryModal: React.FC<RollHistoryModalProps> = ({
       onClick={() => setIsOpen(false)}
     >
       <div
-        className="bg-gray-800 rounded-xl shadow-2xl w-full max-w-2xl max-h-[80vh] overflow-hidden"
+        className="bg-theme-secondary rounded-xl shadow-2xl w-full max-w-2xl max-h-[80vh] overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex justify-between items-center border-b border-gray-700 p-4">
+        <div className="flex justify-between items-center border-b border-theme-secondary p-4">
           <h2 className="text-xl font-bold text-red-500 flex items-center gap-2">
             <History className="w-5 h-5" />
             Roll History
@@ -104,7 +104,7 @@ export const RollHistoryModal: React.FC<RollHistoryModalProps> = ({
                     onClear();
                   }
                 }}
-                className="p-2 text-gray-400 hover:text-red-400 transition-colors"
+                className="p-2 text-theme-muted hover:text-accent-red-light transition-colors"
                 title="Clear History"
               >
                 <Trash2 className="w-5 h-5" />
@@ -112,7 +112,7 @@ export const RollHistoryModal: React.FC<RollHistoryModalProps> = ({
             )}
             <button
               onClick={() => setIsOpen(false)}
-              className="p-2 text-gray-400 hover:text-white transition-colors"
+              className="p-2 text-theme-muted hover:text-theme-primary transition-colors"
               title="Close"
             >
               <X className="w-5 h-5" />
@@ -123,7 +123,7 @@ export const RollHistoryModal: React.FC<RollHistoryModalProps> = ({
         {/* Content */}
         <div className="p-4 overflow-y-auto max-h-[calc(80vh-80px)]">
           {rolls.length === 0 ? (
-            <div className="text-center py-12 text-gray-500">
+            <div className="text-center py-12 text-theme-disabled">
               <History className="w-12 h-12 mx-auto mb-3 opacity-50" />
               <p className="text-lg font-semibold">No rolls yet</p>
               <p className="text-sm">
@@ -140,23 +140,23 @@ export const RollHistoryModal: React.FC<RollHistoryModalProps> = ({
                     key={roll.id}
                     className={`p-4 rounded-lg border-l-4 ${
                       roll.critical === 'success'
-                        ? 'bg-green-900/20 border-green-500'
+                        ? 'bg-accent-green-darker/20 border-green-500'
                         : roll.critical === 'failure'
                         ? 'bg-red-900/20 border-red-500'
-                        : 'bg-gray-700/50 border-gray-600'
+                        : 'bg-theme-tertiary/50 border-theme-primary'
                     }`}
                   >
                     <div className="flex justify-between items-start mb-2">
                       <div className="flex items-center gap-2">
-                        <span className="font-bold text-white">
+                        <span className="font-bold text-theme-primary">
                           {roll.label}
                         </span>
                         {roll.critical && (
                           <span
                             className={`text-xs px-2 py-1 rounded font-bold ${
                               roll.critical === 'success'
-                                ? 'bg-green-500 text-white'
-                                : 'bg-red-500 text-white'
+                                ? 'bg-accent-green text-theme-primary'
+                                : 'bg-accent-red-light text-theme-primary'
                             }`}
                           >
                             {roll.critical === 'success'
@@ -165,27 +165,27 @@ export const RollHistoryModal: React.FC<RollHistoryModalProps> = ({
                           </span>
                         )}
                       </div>
-                      <span className="text-xs text-gray-400">
+                      <span className="text-xs text-theme-muted">
                         {formatTime(roll.timestamp)}
                       </span>
                     </div>
 
                      <div className="flex items-center gap-3 text-lg">
-                       <span className="font-mono text-yellow-300">
+                       <span className="font-mono text-accent-yellow-light">
                          {roll.notation}
                        </span>
-                       <span className="text-gray-500">→</span>
+                       <span className="text-theme-disabled">→</span>
                        <div className="flex items-center gap-2">
                          {roll.pools?.length ? (
                            // Complex roll with pools
-                           <div className="text-sm text-gray-400">
+                           <div className="text-sm text-theme-muted">
                              {roll.pools.map((pool, poolIdx) => (
                                <span key={poolIdx}>
                                  [
                                  {pool.results.map((die, i) => {
                                    const isKept = roll.diceResults?.includes(die);
                                    return (
-                                     <span key={i} className={isKept ? 'text-yellow-300 font-semibold' : 'text-gray-500 line-through'}>
+                                     <span key={i} className={isKept ? 'text-accent-yellow-light font-semibold' : 'text-theme-disabled line-through'}>
                                        {die}
                                        {i < pool.results.length - 1 && ', '}
                                      </span>
@@ -198,7 +198,7 @@ export const RollHistoryModal: React.FC<RollHistoryModalProps> = ({
                            </div>
                          ) : (
                            // Simple roll
-                           <span className="text-sm text-gray-400">
+                           <span className="text-sm text-theme-muted">
                              [
                              {roll.diceResults.map((die, i) => (
                                <span key={i}>
@@ -210,19 +210,19 @@ export const RollHistoryModal: React.FC<RollHistoryModalProps> = ({
                            </span>
                          )}
                          {roll.modifier !== 0 && (
-                           <span className="text-sm text-gray-400">
+                           <span className="text-sm text-theme-muted">
                              {roll.modifier > 0 ? '+' : ''}
                              {roll.modifier}
                            </span>
                          )}
-                         <span className="text-gray-500">=</span>
+                         <span className="text-theme-disabled">=</span>
                          <span
                            className={`text-2xl font-bold ${
                              roll.critical === 'success'
-                               ? 'text-green-400'
+                               ? 'text-accent-green-light'
                                : roll.critical === 'failure'
-                               ? 'text-red-400'
-                               : 'text-white'
+                               ? 'text-accent-red-light'
+                               : 'text-theme-primary'
                            }`}
                          >
                            {roll.total}

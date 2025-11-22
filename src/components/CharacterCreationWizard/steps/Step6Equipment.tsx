@@ -28,8 +28,8 @@ const EquipmentPackDisplay: React.FC<EquipmentPackDisplayProps> = ({
   return (
     <div className={`border-2 rounded-lg transition-all ${
       isSelected
-        ? 'bg-blue-800 border-blue-500'
-        : 'bg-gray-700 border-gray-600 hover:bg-gray-600'
+        ? 'bg-accent-blue-darker border-blue-500'
+        : 'bg-theme-tertiary border-theme-primary hover:bg-theme-quaternary'
     }`}>
       <button
         onClick={onClick}
@@ -37,12 +37,12 @@ const EquipmentPackDisplay: React.FC<EquipmentPackDisplayProps> = ({
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <span className="text-white font-medium">{pack.name}</span>
+            <span className="text-theme-primary font-medium">{pack.name}</span>
             {pack.startingGold && pack.startingGold > 0 && (
-              <span className="text-yellow-400 text-sm">({pack.startingGold} gp)</span>
+              <span className="text-accent-yellow-light text-sm">({pack.startingGold} gp)</span>
             )}
             {showRecommendation && isRecommended && (
-              <span className="px-2 py-1 text-xs bg-green-700 text-green-200 rounded">
+              <span className="px-2 py-1 text-xs bg-accent-green-dark text-green-200 rounded">
                 Recommended
               </span>
             )}
@@ -52,7 +52,7 @@ const EquipmentPackDisplay: React.FC<EquipmentPackDisplayProps> = ({
               e.stopPropagation();
               setIsExpanded(!isExpanded);
             }}
-            className="p-1 hover:bg-gray-600 rounded"
+            className="p-1 hover:bg-theme-quaternary rounded"
           >
             <ChevronDown className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
           </button>
@@ -60,23 +60,23 @@ const EquipmentPackDisplay: React.FC<EquipmentPackDisplayProps> = ({
       </button>
 
       {isExpanded && (
-        <div className="px-3 pb-3 border-t border-gray-600 mt-2 pt-2">
-          <div className="text-xs text-gray-400 mb-2">Contents:</div>
+        <div className="px-3 pb-3 border-t border-theme-primary mt-2 pt-2">
+          <div className="text-xs text-theme-muted mb-2">Contents:</div>
           <ul className="text-sm space-y-1">
             {pack.items.map((item, idx) => (
               <li key={idx} className="flex items-center justify-between">
-                <span className="text-gray-300">
+                <span className="text-theme-tertiary">
                   • {item.name}
-                  {item.quantity > 1 && <span className="text-gray-400 ml-1">x{item.quantity}</span>}
+                  {item.quantity > 1 && <span className="text-theme-muted ml-1">x{item.quantity}</span>}
                 </span>
                 {item.equipped && (
-                  <span className="text-xs text-green-400">(equipped)</span>
+                  <span className="text-xs text-accent-green-light">(equipped)</span>
                 )}
               </li>
             ))}
           </ul>
           {pack.description && (
-            <p className="text-xs text-gray-500 mt-2 italic">{pack.description}</p>
+            <p className="text-xs text-theme-disabled mt-2 italic">{pack.description}</p>
           )}
         </div>
       )}
@@ -92,7 +92,7 @@ const RandomizeButton: React.FC<{ onClick: () => void; title?: string; className
   return (
     <button
       onClick={onClick}
-      className={`px-3 py-2 bg-purple-600 hover:bg-purple-500 rounded-lg text-white text-sm font-medium transition-colors flex items-center gap-2 ${className}`}
+      className={`px-3 py-2 bg-accent-purple hover:bg-accent-purple-light rounded-lg text-theme-primary text-sm font-medium transition-colors flex items-center gap-2 ${className}`}
       title={title}
     >
       <Shuffle className="w-4 h-4" />
@@ -153,7 +153,7 @@ export const Step6Equipment: React.FC<StepProps & { skipToStep?: (step: number) 
       <div className='flex justify-between items-start'>
         <div className='flex-1'>
           <h3 className='text-xl font-bold text-red-300'>Select Starting Equipment</h3>
-          <p className="text-sm text-gray-400 mt-1">
+          <p className="text-sm text-theme-muted mt-1">
             Choose your starting equipment based on your class. Your background will also grant additional items.
           </p>
         </div>
@@ -168,8 +168,8 @@ export const Step6Equipment: React.FC<StepProps & { skipToStep?: (step: number) 
 
       {/* Equipment Choices */}
       {(data.equipmentChoices || []).map((choice, idx) => (
-        <div key={choice.choiceId} className="bg-gray-700/50 border border-gray-600 rounded-lg p-4 space-y-3">
-          <h4 className="font-semibold text-yellow-300">
+        <div key={choice.choiceId} className="bg-theme-tertiary/50 border border-theme-primary rounded-lg p-4 space-y-3">
+          <h4 className="font-semibold text-accent-yellow-light">
             {idx + 1}. {choice.description}
           </h4>
 
@@ -201,19 +201,19 @@ export const Step6Equipment: React.FC<StepProps & { skipToStep?: (step: number) 
                     onClick={() => handleEquipmentChoice(choice.choiceId, optionIdx)}
                     className={`p-3 rounded-lg border-2 text-left transition-all ${
                       choice.selected === optionIdx
-                        ? 'bg-blue-800 border-blue-500'
-                        : 'bg-gray-700 border-gray-600 hover:bg-gray-600'
+                        ? 'bg-accent-blue-darker border-blue-500'
+                        : 'bg-theme-tertiary border-theme-primary hover:bg-theme-quaternary'
                     }`}
                   >
                     <div className="space-y-1">
                       {option.map((item, itemIdx) => (
                         <div key={itemIdx} className="text-sm">
-                          <span className="text-white font-medium">{item.name}</span>
+                          <span className="text-theme-primary font-medium">{item.name}</span>
                           {item.quantity > 1 && (
-                            <span className="text-gray-400 ml-1">x{item.quantity}</span>
+                            <span className="text-theme-muted ml-1">x{item.quantity}</span>
                           )}
                           {item.weight && item.weight > 0 && (
-                            <span className="text-gray-500 text-xs ml-2">({item.weight} lb)</span>
+                            <span className="text-theme-disabled text-xs ml-2">({item.weight} lb)</span>
                           )}
                         </div>
                       ))}
@@ -231,16 +231,16 @@ export const Step6Equipment: React.FC<StepProps & { skipToStep?: (step: number) 
         const backgroundData = BACKGROUNDS.find(bg => bg.name === data.background);
         if (backgroundData?.equipment) {
           return (
-            <div className="p-3 bg-green-900/20 border border-green-700 rounded-lg">
-              <div className="text-xs font-semibold text-green-400 mb-2">
+            <div className="p-3 bg-accent-green-darker/20 border border-accent-green-dark rounded-lg">
+              <div className="text-xs font-semibold text-accent-green-light mb-2">
                 Background Equipment (Auto-granted from {data.background}):
               </div>
               <div className="space-y-1">
                 {Array.isArray(backgroundData.equipment)
                   ? backgroundData.equipment.map((item, index) => (
-                    <div key={index} className="text-sm text-gray-300">• {item}</div>
+                    <div key={index} className="text-sm text-theme-tertiary">• {item}</div>
                   ))
-                  : <p className="text-sm text-gray-300">{backgroundData.equipment}</p>
+                  : <p className="text-sm text-theme-tertiary">{backgroundData.equipment}</p>
                 }
               </div>
             </div>
@@ -250,76 +250,76 @@ export const Step6Equipment: React.FC<StepProps & { skipToStep?: (step: number) 
       })()}
 
        {!allChoicesMade && (
-         <div className="text-xs text-yellow-400">
+         <div className="text-xs text-accent-yellow-light">
            ⚠️ Please make all equipment choices before continuing
          </div>
        )}
 
        {/* Fighter Build Recommendations */}
        {selectedClass?.slug === 'fighter' && (
-         <div className="bg-gray-700/50 border border-gray-600 rounded-lg p-4 space-y-4">
-           <h4 className="text-lg font-bold text-yellow-300">Fighter Build Recommendations</h4>
-           <p className="text-xs text-gray-400">
+         <div className="bg-theme-tertiary/50 border border-theme-primary rounded-lg p-4 space-y-4">
+           <h4 className="text-lg font-bold text-accent-yellow-light">Fighter Build Recommendations</h4>
+           <p className="text-xs text-theme-muted">
              Choose your starting equipment based on your preferred playstyle. Each build optimizes for different combat roles.
            </p>
 
            {/* Build 1: The Defender (Tank) */}
-           <div className="border border-green-600 rounded-lg p-3 bg-green-900/10">
-             <h5 className="font-semibold text-green-400 text-sm">Build 1: The Defender (Tank)</h5>
-             <p className="text-xs text-gray-300 mt-1">Highest possible Armor Class from level 1. You are the party's protector.</p>
-             <div className="text-xs text-gray-400 mt-2 space-y-1">
+           <div className="border border-accent-green rounded-lg p-3 bg-green-900/10">
+             <h5 className="font-semibold text-accent-green-light text-sm">Build 1: The Defender (Tank)</h5>
+             <p className="text-xs text-theme-tertiary mt-1">Highest possible Armor Class from level 1. You are the party's protector.</p>
+             <div className="text-xs text-theme-muted mt-2 space-y-1">
                <p><strong>Choice 1:</strong> (a) Chain Mail → Gives you 16 AC right away</p>
                <p><strong>Choice 2:</strong> (a) Martial weapon + shield → Shield gives +2 AC bonus</p>
                <p><strong>Choice 3:</strong> (b) Two handaxes → Strength-based ranged backup</p>
                <p><strong>Choice 4:</strong> (a) Dungeoneer's pack → Crowbar and utility items</p>
-               <p className="text-yellow-300 font-medium mt-2">Result: 18 AC, solid melee weapon, ranged backup</p>
+               <p className="text-accent-yellow-light font-medium mt-2">Result: 18 AC, solid melee weapon, ranged backup</p>
              </div>
            </div>
 
            {/* Build 2: The Striker (Two-Handed Damage) */}
-           <div className="border border-red-600 rounded-lg p-3 bg-red-900/10">
-             <h5 className="font-semibold text-red-400 text-sm">Build 2: The Striker (Two-Handed Damage)</h5>
-             <p className="text-xs text-gray-300 mt-1">Maximum damage output, sacrificing some AC for power.</p>
-             <div className="text-xs text-gray-400 mt-2 space-y-1">
+           <div className="border border-accent-red rounded-lg p-3 bg-red-900/10">
+             <h5 className="font-semibold text-accent-red-light text-sm">Build 2: The Striker (Two-Handed Damage)</h5>
+             <p className="text-xs text-theme-tertiary mt-1">Maximum damage output, sacrificing some AC for power.</p>
+             <div className="text-xs text-theme-muted mt-2 space-y-1">
                <p><strong>Choice 1:</strong> (a) Chain Mail → Best armor available (16 AC)</p>
                <p><strong>Choice 2:</strong> (b) Two martial weapons → Greatsword/Maul (2d6 damage)</p>
                <p><strong>Choice 3:</strong> (b) Two handaxes → Strength-based ranged backup</p>
                <p><strong>Choice 4:</strong> (a) Dungeoneer's pack → Utility items</p>
-               <p className="text-yellow-300 font-medium mt-2">Result: 16 AC, highest damage dice, ranged backups</p>
+               <p className="text-accent-yellow-light font-medium mt-2">Result: 16 AC, highest damage dice, ranged backups</p>
              </div>
            </div>
 
            {/* Build 3: The Archer (Dexterity-Based) */}
-           <div className="border border-blue-600 rounded-lg p-3 bg-blue-900/10">
-             <h5 className="font-semibold text-blue-400 text-sm">Build 3: The Archer (Dexterity-Based)</h5>
-             <p className="text-xs text-gray-300 mt-1">Ranged combat specialist using high Dexterity.</p>
-             <div className="text-xs text-gray-400 mt-2 space-y-1">
+           <div className="border border-accent-blue rounded-lg p-3 bg-blue-900/10">
+             <h5 className="font-semibold text-accent-blue-light text-sm">Build 3: The Archer (Dexterity-Based)</h5>
+             <p className="text-xs text-theme-tertiary mt-1">Ranged combat specialist using high Dexterity.</p>
+             <div className="text-xs text-theme-muted mt-2 space-y-1">
                <p><strong>Choice 1:</strong> (b) Leather armor + longbow + 20 arrows</p>
                <p><strong>Choice 2:</strong> (a) Rapier + shield → Finesse melee backup</p>
                <p><strong>Choice 3:</strong> (a) Light crossbow → Sell for 25 gp</p>
                <p><strong>Choice 4:</strong> (a) Dungeoneer's pack → Rope/pitons for positioning</p>
-               <p className="text-yellow-300 font-medium mt-2">Result: 14 AC, best bow, finesse melee option</p>
+               <p className="text-accent-yellow-light font-medium mt-2">Result: 14 AC, best bow, finesse melee option</p>
              </div>
            </div>
 
            {/* Build 4: Gold Option */}
-           <div className="border border-yellow-600 rounded-lg p-3 bg-yellow-900/10">
-             <h5 className="font-semibold text-yellow-400 text-sm">Pro-Tip: The Gold Option</h5>
-             <p className="text-xs text-gray-300 mt-1">Take starting gold instead of equipment for maximum flexibility.</p>
-             <div className="text-xs text-gray-400 mt-2 space-y-1">
+           <div className="border border-accent-yellow rounded-lg p-3 bg-yellow-900/10">
+             <h5 className="font-semibold text-accent-yellow-light text-sm">Pro-Tip: The Gold Option</h5>
+             <p className="text-xs text-theme-tertiary mt-1">Take starting gold instead of equipment for maximum flexibility.</p>
+             <div className="text-xs text-theme-muted mt-2 space-y-1">
                <p><strong>Average Gold:</strong> 175 gp (5d4 × 10)</p>
                <p><strong>Can Buy:</strong> Chain Mail (50 gp) + Greatsword (50 gp) + 2 Handaxes (10 gp) + Dungeoneer's Pack (12 gp)</p>
                <p><strong>Remaining:</strong> 53 gp for javelins, potions, etc.</p>
-               <p className="text-yellow-300 font-medium mt-2">Advantage: More flexibility, potentially better gear</p>
+               <p className="text-accent-yellow-light font-medium mt-2">Advantage: More flexibility, potentially better gear</p>
              </div>
            </div>
          </div>
        )}
 
        {/* Trinket Rolling Section */}
-       <div className="bg-gray-700/50 border border-gray-600 rounded-lg p-4 space-y-3">
-         <h4 className="text-lg font-bold text-yellow-300">Roll for Trinket</h4>
-         <p className="text-xs text-gray-400">
+       <div className="bg-theme-tertiary/50 border border-theme-primary rounded-lg p-4 space-y-3">
+         <h4 className="text-lg font-bold text-accent-yellow-light">Roll for Trinket</h4>
+         <p className="text-xs text-theme-muted">
            Optionally roll for a trinket from the Player's Handbook. Extended trinkets include additional items from The Wild Beyond the Witchlight.
          </p>
 
@@ -329,18 +329,18 @@ export const Step6Equipment: React.FC<StepProps & { skipToStep?: (step: number) 
              type="checkbox"
              checked={useExtendedTrinkets}
              onChange={(e) => setUseExtendedTrinkets(e.target.checked)}
-             className="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500 focus:ring-2"
+             className="w-4 h-4 text-accent-blue bg-theme-tertiary border-theme-primary rounded focus:ring-blue-500 focus:ring-2"
            />
-           <span className="text-sm text-gray-300">Extended Trinkets</span>
+           <span className="text-sm text-theme-tertiary">Extended Trinkets</span>
            <span title="Trinkets from The Wild Beyond the Witchlight">
-             <Info className="w-4 h-4 text-gray-400" />
+             <Info className="w-4 h-4 text-theme-muted" />
            </span>
          </label>
 
          {/* Roll Button */}
          <button
            onClick={rollForTrinket}
-           className="flex items-center space-x-2 px-4 py-2 bg-purple-600 hover:bg-purple-500 rounded-lg text-white transition-colors"
+           className="flex items-center space-x-2 px-4 py-2 bg-accent-purple hover:bg-accent-purple-light rounded-lg text-theme-primary transition-colors"
          >
            <Dice6 className="w-4 h-4" />
            <span>Roll d{useExtendedTrinkets ? '200' : '100'}</span>
@@ -348,17 +348,17 @@ export const Step6Equipment: React.FC<StepProps & { skipToStep?: (step: number) 
 
          {/* Rolled Trinket Display */}
          {rolledTrinket && (
-           <div className="bg-gray-800/50 border border-gray-600 rounded-lg p-3 space-y-2">
+           <div className="bg-theme-secondary/50 border border-theme-primary rounded-lg p-3 space-y-2">
              <div className="flex items-center justify-between">
-               <h5 className="text-sm font-semibold text-yellow-300">
+               <h5 className="text-sm font-semibold text-accent-yellow-light">
                  {rolledTrinket.short_name} (Roll: {rolledTrinket.roll})
                </h5>
-               <span className="text-xs text-gray-500">{rolledTrinket.source}</span>
+               <span className="text-xs text-theme-disabled">{rolledTrinket.source}</span>
              </div>
-             <p className="text-sm text-gray-300 leading-relaxed">
+             <p className="text-sm text-theme-tertiary leading-relaxed">
                {rolledTrinket.description}
              </p>
-             <div className="border-t border-gray-600 pt-2">
+             <div className="border-t border-theme-primary pt-2">
                <p className="text-xs text-blue-300 italic">
                  {rolledTrinket.roleplay_prompt}
                </p>
@@ -368,13 +368,13 @@ export const Step6Equipment: React.FC<StepProps & { skipToStep?: (step: number) 
        </div>
 
        <div className='flex justify-between items-center gap-3'>
-        <button onClick={prevStep} className="px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded-lg text-white flex items-center">
+        <button onClick={prevStep} className="px-4 py-2 bg-theme-quaternary hover:bg-theme-hover rounded-lg text-theme-primary flex items-center">
           <ArrowLeft className="w-4 h-4 mr-2" /> Back
         </button>
         <button
           onClick={nextStep}
           disabled={!allChoicesMade}
-          className="px-4 py-2 bg-yellow-600 hover:bg-yellow-500 rounded-lg text-white flex items-center disabled:bg-gray-600 disabled:cursor-not-allowed"
+          className="px-4 py-2 bg-accent-yellow-dark hover:bg-accent-yellow rounded-lg text-theme-primary flex items-center disabled:bg-theme-quaternary disabled:cursor-not-allowed"
         >
           {getNextStepLabel?.() || 'Continue'} <ArrowRight className="w-4 h-4 ml-2" />
         </button>
@@ -386,7 +386,7 @@ export const Step6Equipment: React.FC<StepProps & { skipToStep?: (step: number) 
             }
           }}
           disabled={!allChoicesMade}
-          className="px-4 py-2 bg-red-600 hover:bg-red-500 rounded-lg text-white flex items-center disabled:bg-gray-600 disabled:cursor-not-allowed"
+          className="px-4 py-2 bg-accent-red hover:bg-accent-red-light rounded-lg text-theme-primary flex items-center disabled:bg-theme-quaternary disabled:cursor-not-allowed"
         >
           Skip to Traits <ArrowRight className="w-4 h-4 ml-2" />
         </button>

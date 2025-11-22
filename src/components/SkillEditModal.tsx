@@ -74,31 +74,31 @@ const SkillEditModal: React.FC<SkillEditModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-gray-800 rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
+      <div className="bg-theme-secondary rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-700">
+        <div className="flex items-center justify-between p-6 border-b border-theme-secondary">
           <div>
-            <h2 className="text-xl font-bold text-white">Edit Skills</h2>
-            <p className="text-sm text-gray-400">
+            <h2 className="text-xl font-bold text-theme-primary">Edit Skills</h2>
+            <p className="text-sm text-theme-muted">
               Choose {maxSkills} skill{maxSkills !== 1 ? 's' : ''} from your class proficiencies
             </p>
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
+            className="p-2 hover:bg-theme-tertiary rounded-lg transition-colors"
           >
-            <X className="w-5 h-5 text-gray-400" />
+            <X className="w-5 h-5 text-theme-muted" />
           </button>
         </div>
 
         {/* Content */}
         <div className="p-6 overflow-y-auto max-h-[calc(90vh-180px)]">
           {/* Selection Summary */}
-          <div className="bg-purple-900/20 border border-purple-700 rounded-lg p-4 mb-6">
-            <h3 className="text-lg font-bold text-purple-400 mb-2">
+          <div className="bg-accent-purple-darker/20 border border-accent-purple-dark rounded-lg p-4 mb-6">
+            <h3 className="text-lg font-bold text-accent-purple-light mb-2">
               Class Skills Selected ({selectedClassSkills.length}/{maxSkills})
             </h3>
-            <p className="text-sm text-gray-400">
+            <p className="text-sm text-theme-muted">
               Select {maxSkills} skill proficienc{maxSkills !== 1 ? 'ies' : 'y'} from your {classData?.name} class options
             </p>
           </div>
@@ -106,7 +106,7 @@ const SkillEditModal: React.FC<SkillEditModalProps> = ({
           {/* Background Skills (Locked) */}
           {backgroundSkills.length > 0 && (
             <div className="mb-6">
-              <h3 className="text-lg font-semibold text-green-400 mb-3 flex items-center gap-2">
+              <h3 className="text-lg font-semibold text-accent-green-light mb-3 flex items-center gap-2">
                 Background Skills (Locked)
                 <Lock className="w-4 h-4" />
               </h3>
@@ -116,17 +116,17 @@ const SkillEditModal: React.FC<SkillEditModalProps> = ({
                   return (
                     <div
                       key={skill}
-                      className="p-4 rounded-lg border-2 bg-green-800/30 border-green-600"
+                      className="p-4 rounded-lg border-2 bg-accent-green-darker/30 border-accent-green"
                     >
                       <div className="flex items-start justify-between mb-2">
                         <div>
-                          <h4 className="font-semibold text-white">{skill}</h4>
-                          <p className="text-xs text-gray-400">{skillInfo?.ability || 'Unknown'}</p>
+                          <h4 className="font-semibold text-theme-primary">{skill}</h4>
+                          <p className="text-xs text-theme-muted">{skillInfo?.ability || 'Unknown'}</p>
                         </div>
-                        <Lock className="w-5 h-5 text-green-400 flex-shrink-0" />
+                        <Lock className="w-5 h-5 text-accent-green-light flex-shrink-0" />
                       </div>
                       {skillInfo && (
-                        <p className="text-xs text-gray-400 mt-2">{skillInfo.description}</p>
+                        <p className="text-xs text-theme-muted mt-2">{skillInfo.description}</p>
                       )}
                     </div>
                   );
@@ -137,7 +137,7 @@ const SkillEditModal: React.FC<SkillEditModalProps> = ({
 
           {/* Class Skills (Selectable) */}
           <div className="mb-6">
-            <h3 className="text-lg font-semibold text-purple-400 mb-3">
+            <h3 className="text-lg font-semibold text-accent-purple-light mb-3">
               Class Skills (Choose {maxSkills})
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -153,26 +153,26 @@ const SkillEditModal: React.FC<SkillEditModalProps> = ({
                     disabled={isBackgroundSkill || (!isSelected && selectedClassSkills.length >= maxSkills)}
                     className={`p-4 rounded-lg border-2 transition-all text-left ${
                       isBackgroundSkill
-                        ? 'bg-gray-700/50 border-gray-600 opacity-50 cursor-not-allowed'
+                        ? 'bg-theme-tertiary/50 border-theme-primary opacity-50 cursor-not-allowed'
                         : isSelected
-                        ? 'bg-purple-800 border-purple-500 shadow-md'
-                        : 'bg-gray-700 border-gray-600 hover:bg-gray-600'
+                        ? 'bg-accent-purple-darker border-accent-purple shadow-md'
+                        : 'bg-theme-tertiary border-theme-primary hover:bg-theme-quaternary'
                     }`}
                   >
                     <div className="flex items-start justify-between mb-2">
                       <div>
-                        <h4 className="font-semibold text-white flex items-center gap-2">
+                        <h4 className="font-semibold text-theme-primary flex items-center gap-2">
                           {skill}
-                          {isBackgroundSkill && <span className="text-xs text-green-400">(from background)</span>}
+                          {isBackgroundSkill && <span className="text-xs text-accent-green-light">(from background)</span>}
                         </h4>
-                        <p className="text-xs text-gray-400">{skillInfo?.ability || 'Unknown'}</p>
+                        <p className="text-xs text-theme-muted">{skillInfo?.ability || 'Unknown'}</p>
                       </div>
                       {isSelected && !isBackgroundSkill && (
-                        <Check className="w-5 h-5 text-purple-400 flex-shrink-0" />
+                        <Check className="w-5 h-5 text-accent-purple-light flex-shrink-0" />
                       )}
                     </div>
                     {skillInfo && (
-                      <p className="text-xs text-gray-400 mt-2">{skillInfo.description}</p>
+                      <p className="text-xs text-theme-muted mt-2">{skillInfo.description}</p>
                     )}
                   </button>
                 );
@@ -182,10 +182,10 @@ const SkillEditModal: React.FC<SkillEditModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between p-6 border-t border-gray-700 bg-gray-900">
+        <div className="flex items-center justify-between p-6 border-t border-theme-secondary bg-theme-primary">
           <button
             onClick={onClose}
-            className="px-6 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-white transition-colors"
+            className="px-6 py-2 bg-theme-tertiary hover:bg-theme-quaternary rounded-lg text-theme-primary transition-colors"
           >
             Cancel
           </button>
@@ -194,8 +194,8 @@ const SkillEditModal: React.FC<SkillEditModalProps> = ({
             disabled={selectedClassSkills.length !== maxSkills}
             className={`px-6 py-2 rounded-lg font-semibold transition-colors flex items-center gap-2 ${
               selectedClassSkills.length === maxSkills
-                ? 'bg-purple-600 hover:bg-purple-500 text-white'
-                : 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                ? 'bg-accent-purple hover:bg-accent-purple-light text-theme-primary'
+                : 'bg-theme-quaternary text-theme-muted cursor-not-allowed'
             }`}
           >
             <Check className="w-5 h-5" />

@@ -57,7 +57,7 @@ const SkillTooltip: React.FC<SkillTooltipProps> = ({ skillName, children }) => {
       {isVisible && (
         <div
           ref={tooltipRef}
-          className="fixed z-[9999] bg-gray-900 text-white rounded-lg shadow-2xl border border-gray-600 p-4 w-80 pointer-events-none"
+          className="fixed z-[9999] bg-theme-primary text-theme-primary rounded-lg shadow-2xl border border-theme-primary p-4 w-80 pointer-events-none"
           style={{
             top: `${position.top}px`,
             left: `${position.left}px`,
@@ -66,25 +66,25 @@ const SkillTooltip: React.FC<SkillTooltipProps> = ({ skillName, children }) => {
           {/* Skill Name and Ability */}
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-lg font-bold text-purple-300">{skillData.name}</h3>
-            <span className="text-xs px-2 py-1 bg-gray-700 rounded text-gray-300">
+            <span className="text-xs px-2 py-1 bg-theme-tertiary rounded text-theme-tertiary">
               {skillData.ability}
             </span>
           </div>
 
           {/* Description */}
-          <p className="text-sm text-gray-300 mb-3 leading-relaxed">
+          <p className="text-sm text-theme-tertiary mb-3 leading-relaxed">
             {skillData.description}
           </p>
 
           {/* Example */}
-          <div className="bg-gray-800 rounded p-3 border-l-4 border-purple-500">
-            <p className="text-xs text-gray-400 mb-1 font-semibold">Example Usage:</p>
+          <div className="bg-theme-secondary rounded p-3 border-l-4 border-accent-purple">
+            <p className="text-xs text-theme-muted mb-1 font-semibold">Example Usage:</p>
             <p className="text-sm text-purple-200 italic">"{skillData.example}"</p>
           </div>
 
           {/* Arrow pointer */}
           <div
-            className="absolute w-3 h-3 bg-gray-900 border-r border-b border-gray-600 transform rotate-45"
+            className="absolute w-3 h-3 bg-theme-primary border-r border-b border-theme-primary transform rotate-45"
             style={{
               bottom: position.top < triggerRef.current?.getBoundingClientRect().top! ? 'auto' : '-6px',
               top: position.top < triggerRef.current?.getBoundingClientRect().top! ? '-6px' : 'auto',

@@ -85,20 +85,20 @@ const AbilityScoreEditModal: React.FC<AbilityScoreEditModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-gray-800 rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden">
+      <div className="bg-theme-secondary rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-700">
+        <div className="flex items-center justify-between p-6 border-b border-theme-secondary">
           <div>
-            <h2 className="text-xl font-bold text-white">Edit Ability Scores</h2>
-            <p className="text-sm text-gray-400">
+            <h2 className="text-xl font-bold text-theme-primary">Edit Ability Scores</h2>
+            <p className="text-sm text-theme-muted">
               Redistribute the standard array values (15, 14, 13, 12, 10, 8)
             </p>
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
+            className="p-2 hover:bg-theme-tertiary rounded-lg transition-colors"
           >
-            <X className="w-5 h-5 text-gray-400" />
+            <X className="w-5 h-5 text-theme-muted" />
           </button>
         </div>
 
@@ -107,13 +107,13 @@ const AbilityScoreEditModal: React.FC<AbilityScoreEditModalProps> = ({
           {/* Points Available */}
           <div className={`mb-6 p-4 rounded-lg border-2 ${
             pointsAvailable === 0
-              ? 'bg-green-900/20 border-green-700'
-              : 'bg-yellow-900/20 border-yellow-700'
+              ? 'bg-accent-green-darker/20 border-accent-green-dark'
+              : 'bg-accent-yellow-darker/20 border-accent-yellow-dark'
           }`}>
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-lg font-bold text-white">Points Avail</h3>
-                <p className="text-xs text-gray-400">
+                <h3 className="text-lg font-bold text-theme-primary">Points Avail</h3>
+                <p className="text-xs text-theme-muted">
                   {pointsAvailable === 0
                     ? 'All standard array values assigned correctly'
                     : 'Adjust scores to use all standard array values'
@@ -121,7 +121,7 @@ const AbilityScoreEditModal: React.FC<AbilityScoreEditModalProps> = ({
                 </p>
               </div>
               <div className={`text-3xl font-bold ${
-                pointsAvailable === 0 ? 'text-green-400' : 'text-yellow-400'
+                pointsAvailable === 0 ? 'text-accent-green-light' : 'text-accent-yellow-light'
               }`}>
                 {pointsAvailable}
               </div>
@@ -137,15 +137,15 @@ const AbilityScoreEditModal: React.FC<AbilityScoreEditModalProps> = ({
               const canDecrease = availableValues.some(val => val < score) || score > Math.min(...STANDARD_ARRAY);
 
               return (
-                <div key={ability} className="bg-gray-700 rounded-lg p-4">
+                <div key={ability} className="bg-theme-tertiary rounded-lg p-4">
                   <div className="flex items-center justify-between mb-3">
                     <div>
-                      <h4 className="text-sm font-semibold text-gray-400 uppercase">{ability}</h4>
-                      <p className="text-xs text-gray-500">{ABILITY_FULL_NAMES[ability]}</p>
+                      <h4 className="text-sm font-semibold text-theme-muted uppercase">{ability}</h4>
+                      <p className="text-xs text-theme-disabled">{ABILITY_FULL_NAMES[ability]}</p>
                     </div>
                     <div className="text-right">
-                      <div className="text-2xl font-bold text-yellow-300">{score}</div>
-                      <div className="text-sm text-green-400">
+                      <div className="text-2xl font-bold text-accent-yellow-light">{score}</div>
+                      <div className="text-sm text-accent-green-light">
                         {modifier >= 0 ? '+' : ''}{modifier}
                       </div>
                     </div>
@@ -157,8 +157,8 @@ const AbilityScoreEditModal: React.FC<AbilityScoreEditModalProps> = ({
                       disabled={!canDecrease}
                       className={`flex-1 px-3 py-2 rounded-lg font-semibold transition-colors flex items-center justify-center gap-1 ${
                         canDecrease
-                          ? 'bg-red-700 hover:bg-red-600 text-white'
-                          : 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                          ? 'bg-accent-red-dark hover:bg-accent-red text-theme-primary'
+                          : 'bg-theme-quaternary text-theme-muted cursor-not-allowed'
                       }`}
                     >
                       <Minus className="w-4 h-4" />
@@ -168,8 +168,8 @@ const AbilityScoreEditModal: React.FC<AbilityScoreEditModalProps> = ({
                       disabled={!canIncrease}
                       className={`flex-1 px-3 py-2 rounded-lg font-semibold transition-colors flex items-center justify-center gap-1 ${
                         canIncrease
-                          ? 'bg-green-700 hover:bg-green-600 text-white'
-                          : 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                          ? 'bg-accent-green-dark hover:bg-accent-green text-theme-primary'
+                          : 'bg-theme-quaternary text-theme-muted cursor-not-allowed'
                       }`}
                     >
                       <Plus className="w-4 h-4" />
@@ -181,33 +181,33 @@ const AbilityScoreEditModal: React.FC<AbilityScoreEditModalProps> = ({
           </div>
 
           {/* Standard Array Reference */}
-          <div className="bg-gray-700/50 rounded-lg p-4">
-            <h4 className="text-sm font-semibold text-gray-400 mb-2">Standard Array Values</h4>
+          <div className="bg-theme-tertiary/50 rounded-lg p-4">
+            <h4 className="text-sm font-semibold text-theme-muted mb-2">Standard Array Values</h4>
             <div className="flex gap-2 flex-wrap">
               {STANDARD_ARRAY.map((value, idx) => (
-                <div key={idx} className="px-3 py-1 bg-gray-600 rounded text-center">
-                  <div className="text-lg font-bold text-yellow-300">{value}</div>
+                <div key={idx} className="px-3 py-1 bg-theme-quaternary rounded text-center">
+                  <div className="text-lg font-bold text-accent-yellow-light">{value}</div>
                 </div>
               ))}
             </div>
-            <p className="text-xs text-gray-500 mt-2">
+            <p className="text-xs text-theme-disabled mt-2">
               Each value must be used exactly once across all six abilities
             </p>
           </div>
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between p-6 border-t border-gray-700 bg-gray-900">
+        <div className="flex items-center justify-between p-6 border-t border-theme-secondary bg-theme-primary">
           <button
             onClick={handleReset}
-            className="px-6 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-white transition-colors"
+            className="px-6 py-2 bg-theme-tertiary hover:bg-theme-quaternary rounded-lg text-theme-primary transition-colors"
           >
             Reset
           </button>
           <div className="flex gap-3">
             <button
               onClick={onClose}
-              className="px-6 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-white transition-colors"
+              className="px-6 py-2 bg-theme-tertiary hover:bg-theme-quaternary rounded-lg text-theme-primary transition-colors"
             >
               Cancel
             </button>
@@ -216,8 +216,8 @@ const AbilityScoreEditModal: React.FC<AbilityScoreEditModalProps> = ({
               disabled={pointsAvailable !== 0}
               className={`px-6 py-2 rounded-lg font-semibold transition-colors flex items-center gap-2 ${
                 pointsAvailable === 0
-                  ? 'bg-purple-600 hover:bg-purple-500 text-white'
-                  : 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                  ? 'bg-accent-purple hover:bg-accent-purple-light text-theme-primary'
+                  : 'bg-theme-quaternary text-theme-muted cursor-not-allowed'
               }`}
             >
               <Check className="w-5 h-5" />

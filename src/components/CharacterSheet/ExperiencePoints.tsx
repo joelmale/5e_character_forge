@@ -49,7 +49,7 @@ export const ExperiencePoints: React.FC<ExperiencePointsProps> = ({
 
   return (
     <div className="bg-indigo-900 rounded-xl shadow-lg border-l-4 border-yellow-500 p-4">
-      <h3 className="text-lg font-bold text-yellow-400 mb-4 flex items-center gap-2">
+      <h3 className="text-lg font-bold text-accent-yellow-light mb-4 flex items-center gap-2">
         <Trophy className="w-5 h-5" />
         Experience Points
       </h3>
@@ -57,25 +57,25 @@ export const ExperiencePoints: React.FC<ExperiencePointsProps> = ({
       <div className="space-y-4">
         {/* Current XP Display */}
         <div className="text-center">
-          <div className="text-3xl font-bold text-white mb-1">
+          <div className="text-3xl font-bold text-theme-primary mb-1">
             {currentXP.toLocaleString()}
           </div>
-          <div className="text-sm text-gray-400">Total XP</div>
+          <div className="text-sm text-theme-muted">Total XP</div>
         </div>
 
         {/* Level Progress */}
         <div className="space-y-2">
           <div className="flex justify-between text-sm">
-            <span className="text-gray-400">Level {character.level}</span>
-            <span className="text-gray-400">Level {character.level + 1}</span>
+            <span className="text-theme-muted">Level {character.level}</span>
+            <span className="text-theme-muted">Level {character.level + 1}</span>
           </div>
-          <div className="w-full bg-gray-700 rounded-full h-3">
+          <div className="w-full bg-theme-tertiary rounded-full h-3">
             <div
               className="bg-gradient-to-r from-yellow-500 to-yellow-400 h-3 rounded-full transition-all duration-300"
               style={{ width: `${progressPercent}%` }}
             ></div>
           </div>
-          <div className="text-center text-sm text-gray-400">
+          <div className="text-center text-sm text-theme-muted">
             {xpToNext.toLocaleString()} XP to next level
           </div>
         </div>
@@ -87,11 +87,11 @@ export const ExperiencePoints: React.FC<ExperiencePointsProps> = ({
             value={xpInput}
             onChange={(e) => setXpInput(e.target.value)}
             placeholder="Enter XP to add"
-            className="flex-1 px-3 py-2 bg-gray-800 text-white rounded border border-gray-600 focus:border-yellow-500 focus:outline-none"
+            className="flex-1 px-3 py-2 bg-theme-secondary text-theme-primary rounded border border-theme-primary focus:border-yellow-500 focus:outline-none"
           />
           <button
             onClick={addXP}
-            className="px-4 py-2 bg-yellow-600 hover:bg-yellow-500 rounded text-sm font-medium transition-colors flex items-center gap-1"
+            className="px-4 py-2 bg-accent-yellow-dark hover:bg-accent-yellow rounded text-sm font-medium transition-colors flex items-center gap-1"
           >
             <TrendingUp className="w-4 h-4" />
             Add XP
@@ -102,7 +102,7 @@ export const ExperiencePoints: React.FC<ExperiencePointsProps> = ({
         {currentXP >= nextLevelXP && (
           <button
             onClick={levelUp}
-            className="w-full py-3 bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-500 hover:to-purple-400 rounded-lg text-white font-bold transition-all duration-200 transform hover:scale-105 shadow-lg"
+            className="w-full py-3 bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-500 hover:to-purple-400 rounded-lg text-theme-primary font-bold transition-all duration-200 transform hover:scale-105 shadow-lg"
           >
             🎉 LEVEL UP AVAILABLE! 🎉
           </button>
@@ -110,13 +110,13 @@ export const ExperiencePoints: React.FC<ExperiencePointsProps> = ({
 
         {/* XP Milestones */}
         <div className="grid grid-cols-2 gap-2 text-xs">
-          <div className="bg-gray-800/50 p-2 rounded text-center">
-            <div className="text-yellow-400 font-semibold">This Level</div>
-            <div className="text-gray-300">{currentLevelXP.toLocaleString()} XP</div>
+          <div className="bg-theme-secondary/50 p-2 rounded text-center">
+            <div className="text-accent-yellow-light font-semibold">This Level</div>
+            <div className="text-theme-tertiary">{currentLevelXP.toLocaleString()} XP</div>
           </div>
-          <div className="bg-gray-800/50 p-2 rounded text-center">
-            <div className="text-yellow-400 font-semibold">Next Level</div>
-            <div className="text-gray-300">{nextLevelXP.toLocaleString()} XP</div>
+          <div className="bg-theme-secondary/50 p-2 rounded text-center">
+            <div className="text-accent-yellow-light font-semibold">Next Level</div>
+            <div className="text-theme-tertiary">{nextLevelXP.toLocaleString()} XP</div>
           </div>
         </div>
       </div>

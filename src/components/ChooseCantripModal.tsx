@@ -37,12 +37,12 @@ export const ChooseCantripModal: React.FC<ChooseCantripModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-gray-900 bg-opacity-90 flex items-center justify-center z-50 p-4">
-      <div className="bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md transition-all transform duration-300 scale-100 flex flex-col max-h-[calc(100vh-4rem)]">
-        <div className="flex-shrink-0 p-6 border-b border-red-700">
+    <div className="fixed inset-0 bg-theme-primary bg-opacity-90 flex items-center justify-center z-50 p-4">
+      <div className="bg-theme-secondary rounded-2xl shadow-2xl w-full max-w-md transition-all transform duration-300 scale-100 flex flex-col max-h-[calc(100vh-4rem)]">
+        <div className="flex-shrink-0 p-6 border-b border-accent-red-dark">
           <div className="flex justify-between items-center">
             <h2 className="text-2xl font-bold text-red-500">Choose a New Cantrip</h2>
-            <button onClick={onClose} className="text-gray-400 hover:text-white">
+            <button onClick={onClose} className="text-theme-muted hover:text-theme-primary">
               <XCircle className="w-6 h-6" />
             </button>
           </div>
@@ -55,21 +55,21 @@ export const ChooseCantripModal: React.FC<ChooseCantripModalProps> = ({
                 onClick={() => setSelectedCantrip(cantrip.slug)}
                 className={`w-full p-4 rounded-lg text-left border-2 transition-all ${
                   selectedCantrip === cantrip.slug
-                    ? 'bg-blue-800 border-blue-500'
-                    : 'bg-gray-700 border-gray-600 hover:bg-gray-600'
+                    ? 'bg-accent-blue-darker border-blue-500'
+                    : 'bg-theme-tertiary border-theme-primary hover:bg-theme-quaternary'
                 }`}
               >
-                <h3 className="font-bold text-yellow-300">{cantrip.name}</h3>
-                <p className="text-sm text-gray-300 mt-1 line-clamp-2">{cantrip.description}</p>
+                <h3 className="font-bold text-accent-yellow-light">{cantrip.name}</h3>
+                <p className="text-sm text-theme-tertiary mt-1 line-clamp-2">{cantrip.description}</p>
               </button>
             ))}
           </div>
         </div>
-        <div className="flex-shrink-0 p-6 border-t border-red-700">
+        <div className="flex-shrink-0 p-6 border-t border-accent-red-dark">
           <button
             onClick={handleConfirm}
             disabled={!selectedCantrip}
-            className="w-full py-3 bg-green-600 hover:bg-green-500 rounded-xl text-white font-bold transition-colors disabled:bg-gray-600"
+            className="w-full py-3 bg-accent-green hover:bg-accent-green rounded-xl text-theme-primary font-bold transition-colors disabled:bg-theme-quaternary"
           >
             Confirm Selection
           </button>

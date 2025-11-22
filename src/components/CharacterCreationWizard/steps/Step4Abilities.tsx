@@ -23,7 +23,7 @@ const RandomizeButton: React.FC<{ onClick: () => void; title?: string; className
   return (
     <button
       onClick={onClick}
-      className={`px-3 py-2 bg-purple-600 hover:bg-purple-500 rounded-lg text-white text-sm font-medium transition-colors flex items-center gap-2 ${className}`}
+      className={`px-3 py-2 bg-accent-purple hover:bg-accent-purple-light rounded-lg text-theme-primary text-sm font-medium transition-colors flex items-center gap-2 ${className}`}
       title={title}
     >
       <Shuffle className="w-4 h-4" />
@@ -172,11 +172,11 @@ export const Step4Abilities: React.FC<StepProps> = ({ data, updateData, nextStep
     <div className='space-y-6'>
       {/* Method Selection Dropdown */}
       <div>
-        <label className="block text-sm font-medium text-gray-300 mb-2">Ability Score Method</label>
+        <label className="block text-sm font-medium text-theme-tertiary mb-2">Ability Score Method</label>
         <select
           value={data.abilityScoreMethod}
           onChange={(e) => handleMethodChange(e.target.value as CharacterCreationData['abilityScoreMethod'])}
-          className="w-full p-3 bg-gray-700 text-white rounded-lg font-semibold text-lg"
+          className="w-full p-3 bg-theme-tertiary text-theme-primary rounded-lg font-semibold text-lg"
         >
           {Object.entries(ABILITY_METHOD_TITLES).map(([key, title]) => (
             <option key={key} value={key}>{title}</option>
@@ -200,10 +200,10 @@ export const Step4Abilities: React.FC<StepProps> = ({ data, updateData, nextStep
       {/* Standard Array UI */}
       {data.abilityScoreMethod === 'standard-array' && (
         <>
-          <div className='flex flex-wrap gap-2 mb-4 p-3 bg-gray-700 rounded-lg'>
-            <span className='text-sm font-semibold text-gray-400 mr-2'>Scores to Assign:</span>
+          <div className='flex flex-wrap gap-2 mb-4 p-3 bg-theme-tertiary rounded-lg'>
+            <span className='text-sm font-semibold text-theme-muted mr-2'>Scores to Assign:</span>
             {standardArrayScores.map(s => (
-              <span key={s} className={`px-3 py-1 text-lg font-bold rounded-full ${availableScores.includes(s) ? 'bg-yellow-500 text-gray-900' : 'bg-gray-600 text-gray-400'}`}>
+              <span key={s} className={`px-3 py-1 text-lg font-bold rounded-full ${availableScores.includes(s) ? 'bg-accent-yellow text-gray-900' : 'bg-theme-quaternary text-theme-muted'}`}>
                 {s}
               </span>
             ))}
@@ -217,13 +217,13 @@ export const Step4Abilities: React.FC<StepProps> = ({ data, updateData, nextStep
               const modifier = getModifier(finalScore);
 
               return (
-                <div key={ability} className='p-3 bg-gray-800 rounded-lg border-l-4 border-red-500'>
-                  <p className='text-lg font-bold text-red-400 mb-1'>{ability}</p>
+                <div key={ability} className='p-3 bg-theme-secondary rounded-lg border-l-4 border-red-500'>
+                  <p className='text-lg font-bold text-accent-red-light mb-1'>{ability}</p>
                   <div className='flex items-center justify-between'>
                     <select
                       value={baseScore}
                       onChange={(e) => handleAssignScore(ability, parseInt(e.target.value))}
-                      className="p-2 bg-gray-700 rounded-lg text-white font-mono"
+                      className="p-2 bg-theme-tertiary rounded-lg text-theme-primary font-mono"
                     >
                       <option value={0}>Select...</option>
                       {standardArrayScores.map(s => (
@@ -237,11 +237,11 @@ export const Step4Abilities: React.FC<StepProps> = ({ data, updateData, nextStep
                       ))}
                     </select>
 
-                    <span className='text-xl text-yellow-300 font-bold'>
+                    <span className='text-xl text-accent-yellow-light font-bold'>
                       {baseScore > 0 && `${finalScore} (${formatModifier(modifier)})`}
                     </span>
                   </div>
-                  {racialBonus > 0 && baseScore > 0 && <p className='text-xs text-green-400 mt-1'>+ {racialBonus} (Racial)</p>}
+                  {racialBonus > 0 && baseScore > 0 && <p className='text-xs text-accent-green-light mt-1'>+ {racialBonus} (Racial)</p>}
                 </div>
               );
             })}
@@ -254,7 +254,7 @@ export const Step4Abilities: React.FC<StepProps> = ({ data, updateData, nextStep
         <>
           <button
             onClick={() => rollAbilityScores(data.abilityScoreMethod as 'standard-roll' | 'classic-roll' | '5d6-drop-2')}
-            className="w-full p-3 bg-purple-600 hover:bg-purple-500 rounded-lg text-white font-bold flex items-center justify-center gap-2"
+            className="w-full p-3 bg-accent-purple hover:bg-accent-purple-light rounded-lg text-theme-primary font-bold flex items-center justify-center gap-2"
           >
             <Dice6 className="w-5 h-5" />
             {rolledSets.length === 0 ? 'Roll Ability Scores' : 'Re-roll All Scores'}
@@ -263,14 +263,14 @@ export const Step4Abilities: React.FC<StepProps> = ({ data, updateData, nextStep
           {rolledSets.length > 0 && (
             <>
               {data.abilityScoreMethod !== 'classic-roll' && (
-                <div className='p-3 bg-gray-700 rounded-lg'>
-                  <span className='text-sm font-semibold text-gray-400'>Rolled Sets (assign to abilities):</span>
+                <div className='p-3 bg-theme-tertiary rounded-lg'>
+                  <span className='text-sm font-semibold text-theme-muted'>Rolled Sets (assign to abilities):</span>
                   <div className='flex flex-wrap gap-2 mt-2'>
                     {rolledSets.map((set, idx) => {
                       const total = set.reduce((a, b) => a + b, 0);
                       const isAssigned = Object.values(data.abilities).includes(total);
                       return (
-                        <div key={idx} className={`px-3 py-2 rounded-lg ${isAssigned ? 'bg-gray-600' : 'bg-yellow-500 text-gray-900'}`}>
+                        <div key={idx} className={`px-3 py-2 rounded-lg ${isAssigned ? 'bg-theme-quaternary' : 'bg-accent-yellow text-gray-900'}`}>
                           <div className='text-xs font-mono'>[{set.join(', ')}]</div>
                           <div className='text-lg font-bold text-center'>{total}</div>
                         </div>
@@ -288,18 +288,18 @@ export const Step4Abilities: React.FC<StepProps> = ({ data, updateData, nextStep
                   const modifier = getModifier(finalScore);
 
                   return (
-                    <div key={ability} className='p-3 bg-gray-800 rounded-lg border-l-4 border-red-500'>
-                      <p className='text-lg font-bold text-red-400 mb-1'>{ability}</p>
+                    <div key={ability} className='p-3 bg-theme-secondary rounded-lg border-l-4 border-red-500'>
+                      <p className='text-lg font-bold text-accent-red-light mb-1'>{ability}</p>
                       <div className='flex items-center justify-between'>
                         {data.abilityScoreMethod === 'classic-roll' ? (
-                          <div className='text-sm font-mono text-gray-400'>
+                          <div className='text-sm font-mono text-theme-muted'>
                             [{rolledSets[idx]?.join(', ')}]
                           </div>
                         ) : (
                           <select
                             value={baseScore}
                             onChange={(e) => handleAssignRolledScore(ability, parseInt(e.target.value))}
-                            className="p-2 bg-gray-700 rounded-lg text-white font-mono"
+                            className="p-2 bg-theme-tertiary rounded-lg text-theme-primary font-mono"
                           >
                             <option value={0}>Select...</option>
                             {rolledSets.map((set, setIdx) => {
@@ -313,11 +313,11 @@ export const Step4Abilities: React.FC<StepProps> = ({ data, updateData, nextStep
                           </select>
                         )}
 
-                        <span className='text-xl text-yellow-300 font-bold'>
+                        <span className='text-xl text-accent-yellow-light font-bold'>
                           {baseScore > 0 && `${finalScore} (${formatModifier(modifier)})`}
                         </span>
                       </div>
-                      {racialBonus > 0 && baseScore > 0 && <p className='text-xs text-green-400 mt-1'>+ {racialBonus} (Racial)</p>}
+                      {racialBonus > 0 && baseScore > 0 && <p className='text-xs text-accent-green-light mt-1'>+ {racialBonus} (Racial)</p>}
                     </div>
                   );
                 })}
@@ -330,12 +330,12 @@ export const Step4Abilities: React.FC<StepProps> = ({ data, updateData, nextStep
       {/* Point Buy UI */}
       {data.abilityScoreMethod === 'point-buy' && (
         <>
-          <div className='p-4 bg-purple-900/30 border border-purple-500 rounded-lg'>
+          <div className='p-4 bg-purple-900/30 border border-accent-purple rounded-lg'>
             <div className='flex justify-between items-center'>
-              <span className='text-sm font-semibold text-gray-300'>Points Remaining:</span>
-              <span className='text-3xl font-bold text-yellow-300'>{pointBuyPoints}</span>
+              <span className='text-sm font-semibold text-theme-tertiary'>Points Remaining:</span>
+              <span className='text-3xl font-bold text-accent-yellow-light'>{pointBuyPoints}</span>
             </div>
-            <p className='text-xs text-gray-400 mt-2'>Scores range from 8-15. Higher scores cost more points.</p>
+            <p className='text-xs text-theme-muted mt-2'>Scores range from 8-15. Higher scores cost more points.</p>
           </div>
 
           <div className='grid grid-cols-2 gap-4'>
@@ -346,13 +346,13 @@ export const Step4Abilities: React.FC<StepProps> = ({ data, updateData, nextStep
               const modifier = getModifier(finalScore);
 
               return (
-                <div key={ability} className='p-3 bg-gray-800 rounded-lg border-l-4 border-red-500'>
-                  <p className='text-lg font-bold text-red-400 mb-1'>{ability}</p>
+                <div key={ability} className='p-3 bg-theme-secondary rounded-lg border-l-4 border-red-500'>
+                  <p className='text-lg font-bold text-accent-red-light mb-1'>{ability}</p>
                   <div className='flex items-center justify-between'>
                     <select
                       value={baseScore}
                       onChange={(e) => handlePointBuyChange(ability, parseInt(e.target.value))}
-                      className="p-2 bg-gray-700 rounded-lg text-white font-mono"
+                      className="p-2 bg-theme-tertiary rounded-lg text-theme-primary font-mono"
                     >
                       {Object.keys(POINT_BUY_COSTS).map(score => {
                         const s = parseInt(score);
@@ -368,11 +368,11 @@ export const Step4Abilities: React.FC<StepProps> = ({ data, updateData, nextStep
                       })}
                     </select>
 
-                    <span className='text-xl text-yellow-300 font-bold'>
+                    <span className='text-xl text-accent-yellow-light font-bold'>
                       {finalScore} ({formatModifier(modifier)})
                     </span>
                   </div>
-                  {racialBonus > 0 && <p className='text-xs text-green-400 mt-1'>+ {racialBonus} (Racial)</p>}
+                  {racialBonus > 0 && <p className='text-xs text-accent-green-light mt-1'>+ {racialBonus} (Racial)</p>}
                 </div>
               );
             })}
@@ -397,8 +397,8 @@ export const Step4Abilities: React.FC<StepProps> = ({ data, updateData, nextStep
               const modifier = getModifier(finalScore);
 
               return (
-                <div key={ability} className='p-3 bg-gray-800 rounded-lg border-l-4 border-red-500'>
-                  <p className='text-lg font-bold text-red-400 mb-1'>{ability}</p>
+                <div key={ability} className='p-3 bg-theme-secondary rounded-lg border-l-4 border-red-500'>
+                  <p className='text-lg font-bold text-accent-red-light mb-1'>{ability}</p>
                   <div className='flex items-center justify-between'>
                     <input
                       type="number"
@@ -406,15 +406,15 @@ export const Step4Abilities: React.FC<StepProps> = ({ data, updateData, nextStep
                       max="20"
                       value={baseScore || ''}
                       onChange={(e) => handleCustomInput(ability, e.target.value)}
-                      className="p-2 bg-gray-700 rounded-lg text-white font-mono w-20"
+                      className="p-2 bg-theme-tertiary rounded-lg text-theme-primary font-mono w-20"
                       placeholder="0"
                     />
 
-                    <span className='text-xl text-yellow-300 font-bold'>
+                    <span className='text-xl text-accent-yellow-light font-bold'>
                       {baseScore > 0 && `${finalScore} (${formatModifier(modifier)})`}
                     </span>
                   </div>
-                  {racialBonus > 0 && baseScore > 0 && <p className='text-xs text-green-400 mt-1'>+ {racialBonus} (Racial)</p>}
+                  {racialBonus > 0 && baseScore > 0 && <p className='text-xs text-accent-green-light mt-1'>+ {racialBonus} (Racial)</p>}
                 </div>
               );
             })}
@@ -423,13 +423,13 @@ export const Step4Abilities: React.FC<StepProps> = ({ data, updateData, nextStep
       )}
 
       <div className='flex justify-between'>
-        <button onClick={prevStep} className="px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded-lg text-white flex items-center">
+        <button onClick={prevStep} className="px-4 py-2 bg-theme-quaternary hover:bg-theme-hover rounded-lg text-theme-primary flex items-center">
           <ArrowLeft className="w-4 h-4 mr-2" /> Back
         </button>
         <button
           onClick={nextStep}
           disabled={!isComplete}
-          className="px-4 py-2 bg-red-600 hover:bg-red-500 rounded-lg text-white flex items-center disabled:bg-gray-600 disabled:cursor-not-allowed"
+          className="px-4 py-2 bg-accent-red hover:bg-accent-red-light rounded-lg text-theme-primary flex items-center disabled:bg-theme-quaternary disabled:cursor-not-allowed"
         >
           Next: {getNextStepLabel?.() || 'Continue'} <ArrowRight className="w-4 h-4 ml-2" />
         </button>

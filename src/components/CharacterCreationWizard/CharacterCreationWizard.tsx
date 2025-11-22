@@ -117,9 +117,9 @@ export const CharacterCreationWizard: React.FC<WizardProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-gray-900 bg-opacity-90 flex items-center justify-center z-50 p-4 overflow-y-auto" onClick={onClose}>
+    <div className="fixed inset-0 bg-theme-primary bg-opacity-90 flex items-center justify-center z-50 p-4 overflow-y-auto" onClick={onClose}>
       <div
-        className="bg-gray-800 rounded-2xl shadow-2xl w-full max-w-5xl transition-all transform duration-300 scale-100 my-8 flex flex-col max-h-[calc(100vh-4rem)]"
+        className="bg-theme-secondary rounded-2xl shadow-2xl w-full max-w-5xl transition-all transform duration-300 scale-100 my-8 flex flex-col max-h-[calc(100vh-4rem)]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Fixed Header */}
@@ -131,10 +131,10 @@ export const CharacterCreationWizard: React.FC<WizardProps> = ({
         {/* Error Display */}
         {error && (
           <div className="flex-shrink-0 mx-6 md:mx-8 mb-4">
-            <div className="bg-red-900 border border-red-700 rounded-lg p-4">
+            <div className="bg-red-900 border border-accent-red-dark rounded-lg p-4">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
-                  <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                  <svg className="h-5 w-5 text-accent-red-light" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                   </svg>
                 </div>
@@ -149,7 +149,7 @@ export const CharacterCreationWizard: React.FC<WizardProps> = ({
                 <div className="ml-auto pl-3">
                   <button
                     onClick={() => setError(null)}
-                    className="inline-flex rounded-md bg-red-900 p-1.5 text-red-400 hover:bg-red-800 focus:outline-none focus:ring-2 focus:ring-red-600 focus:ring-offset-2"
+                    className="inline-flex rounded-md bg-red-900 p-1.5 text-accent-red-light hover:bg-accent-red-darker focus:outline-none focus:ring-2 focus:ring-red-600 focus:ring-offset-2"
                   >
                     <span className="sr-only">Dismiss</span>
                     <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">

@@ -62,9 +62,9 @@ export const HitDice: React.FC<HitDiceProps> = ({
   };
 
   return (
-    <div className="bg-gray-700/50 border border-gray-600 rounded p-3">
+    <div className="bg-theme-tertiary/50 border border-theme-primary rounded p-3">
       <div className="flex items-center justify-between mb-2">
-        <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1">
+        <h3 className="text-xs font-bold text-theme-muted uppercase tracking-wider flex items-center gap-1">
           <Dice6 className="w-3 h-3" />
           Hit Dice
         </h3>
@@ -74,25 +74,25 @@ export const HitDice: React.FC<HitDiceProps> = ({
         {/* Current Hit Dice Display */}
         <div className="flex items-center justify-between">
           <div>
-            <div className="text-xs text-gray-400">Available</div>
-            <div className="text-lg font-bold text-white">
+            <div className="text-xs text-theme-muted">Available</div>
+            <div className="text-lg font-bold text-theme-primary">
               {hitDiceInfo.current} / {hitDiceInfo.max}
             </div>
-            <div className="text-xs text-gray-400">d{hitDiceInfo.dieType}</div>
+            <div className="text-xs text-theme-muted">d{hitDiceInfo.dieType}</div>
           </div>
 
           <div className="flex gap-1">
             <button
               onClick={spendHitDie}
               disabled={hitDiceInfo.available <= 0}
-              className="px-2 py-1 bg-red-600 hover:bg-red-500 disabled:bg-gray-600 rounded text-xs transition-colors"
+              className="px-2 py-1 bg-accent-red hover:bg-accent-red-light disabled:bg-theme-quaternary rounded text-xs transition-colors"
               title="Spend hit die (short rest)"
             >
               Spend
             </button>
             <button
               onClick={resetHitDice}
-              className="px-2 py-1 bg-green-600 hover:bg-green-500 rounded text-xs transition-colors"
+              className="px-2 py-1 bg-accent-green hover:bg-accent-green rounded text-xs transition-colors"
               title="Reset hit dice (long rest)"
             >
               Reset
@@ -102,11 +102,11 @@ export const HitDice: React.FC<HitDiceProps> = ({
 
         {/* Hit Die Healing Preview */}
         {hitDiceInfo.available > 0 && (
-          <div className="pt-2 border-t border-gray-600">
-            <div className="text-xs text-gray-400">Next healing:</div>
-            <div className="text-sm text-white">
+          <div className="pt-2 border-t border-theme-primary">
+            <div className="text-xs text-theme-muted">Next healing:</div>
+            <div className="text-sm text-theme-primary">
               {Math.max(1, Math.floor(hitDiceInfo.dieType / 2) + getModifier(character.abilities.CON.score))} HP
-              <span className="text-gray-400 text-xs ml-1">
+              <span className="text-theme-muted text-xs ml-1">
                 (avg + CON)
               </span>
             </div>

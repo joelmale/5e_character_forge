@@ -144,23 +144,23 @@ const SpellEditModal: React.FC<SpellEditModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-gray-800 rounded-xl shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-hidden">
+      <div className="bg-theme-secondary rounded-xl shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-700">
+        <div className="flex items-center justify-between p-6 border-b border-theme-secondary">
           <div className="flex items-center gap-3">
-            <Sparkles className="w-6 h-6 text-purple-400" />
+            <Sparkles className="w-6 h-6 text-accent-purple-light" />
             <div>
-              <h2 className="text-xl font-bold text-white">Edit Spells</h2>
-              <p className="text-sm text-gray-400">
+              <h2 className="text-xl font-bold text-theme-primary">Edit Spells</h2>
+              <p className="text-sm text-theme-muted">
                 Choose your starting spells for your {classSlug} character
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
+            className="p-2 hover:bg-theme-tertiary rounded-lg transition-colors"
           >
-            <X className="w-5 h-5 text-gray-400" />
+            <X className="w-5 h-5 text-theme-muted" />
           </button>
         </div>
 
@@ -169,11 +169,11 @@ const SpellEditModal: React.FC<SpellEditModalProps> = ({
           {/* Cantrips Section */}
           {numCantrips > 0 && (
             <div className="mb-8">
-              <div className="bg-blue-900/20 border border-blue-700 rounded-lg p-4 mb-4">
-                <h3 className="text-lg font-bold text-blue-400 mb-2">
+              <div className="bg-accent-blue-darker/20 border border-accent-blue-dark rounded-lg p-4 mb-4">
+                <h3 className="text-lg font-bold text-accent-blue-light mb-2">
                   Cantrips ({selectedCantrips.length}/{numCantrips})
                 </h3>
-                <p className="text-sm text-gray-400">
+                <p className="text-sm text-theme-muted">
                   Select {numCantrips} cantrip{numCantrips !== 1 ? 's' : ''} to know
                 </p>
               </div>
@@ -187,16 +187,16 @@ const SpellEditModal: React.FC<SpellEditModalProps> = ({
                       onClick={() => handleCantripToggle(spell.slug)}
                       className={`p-4 rounded-lg border-2 transition-all text-left ${
                         isSelected
-                          ? 'bg-blue-800 border-blue-500 shadow-md'
-                          : 'bg-gray-700 border-gray-600 hover:bg-gray-600'
+                          ? 'bg-accent-blue-darker border-blue-500 shadow-md'
+                          : 'bg-theme-tertiary border-theme-primary hover:bg-theme-quaternary'
                       }`}
                       disabled={!isSelected && selectedCantrips.length >= numCantrips}
                     >
                       <div className="flex items-start justify-between mb-2">
-                        <h4 className="font-semibold text-white">{spell.name}</h4>
-                        {isSelected && <Check className="w-5 h-5 text-blue-400 flex-shrink-0" />}
+                        <h4 className="font-semibold text-theme-primary">{spell.name}</h4>
+                        {isSelected && <Check className="w-5 h-5 text-accent-blue-light flex-shrink-0" />}
                       </div>
-                      <p className="text-xs text-gray-400">{spell.school?.name || 'Cantrip'}</p>
+                      <p className="text-xs text-theme-muted">{spell.school?.name || 'Cantrip'}</p>
                     </button>
                   );
                 })}
@@ -207,11 +207,11 @@ const SpellEditModal: React.FC<SpellEditModalProps> = ({
           {/* Spells Section - Known Casters */}
           {spellcastingType === 'known' && numSpells > 0 && (
             <div className="mb-8">
-              <div className="bg-purple-900/20 border border-purple-700 rounded-lg p-4 mb-4">
-                <h3 className="text-lg font-bold text-purple-400 mb-2">
+              <div className="bg-accent-purple-darker/20 border border-accent-purple-dark rounded-lg p-4 mb-4">
+                <h3 className="text-lg font-bold text-accent-purple-light mb-2">
                   Known Spells ({selectedKnownSpells.length}/{numSpells})
                 </h3>
-                <p className="text-sm text-gray-400">
+                <p className="text-sm text-theme-muted">
                   Select {numSpells} spell{numSpells !== 1 ? 's' : ''} to add to your known spells
                 </p>
               </div>
@@ -225,16 +225,16 @@ const SpellEditModal: React.FC<SpellEditModalProps> = ({
                       onClick={() => handleSpellToggle(spell.slug)}
                       className={`p-4 rounded-lg border-2 transition-all text-left ${
                         isSelected
-                          ? 'bg-purple-800 border-purple-500 shadow-md'
-                          : 'bg-gray-700 border-gray-600 hover:bg-gray-600'
+                          ? 'bg-accent-purple-darker border-accent-purple shadow-md'
+                          : 'bg-theme-tertiary border-theme-primary hover:bg-theme-quaternary'
                       }`}
                       disabled={!isSelected && selectedKnownSpells.length >= numSpells}
                     >
                       <div className="flex items-start justify-between mb-2">
-                        <h4 className="font-semibold text-white">{spell.name}</h4>
-                        {isSelected && <Check className="w-5 h-5 text-purple-400 flex-shrink-0" />}
+                        <h4 className="font-semibold text-theme-primary">{spell.name}</h4>
+                        {isSelected && <Check className="w-5 h-5 text-accent-purple-light flex-shrink-0" />}
                       </div>
-                      <p className="text-xs text-gray-400">Level {spell.level} • {spell.school?.name || 'Unknown'}</p>
+                      <p className="text-xs text-theme-muted">Level {spell.level} • {spell.school?.name || 'Unknown'}</p>
                     </button>
                   );
                 })}
@@ -245,11 +245,11 @@ const SpellEditModal: React.FC<SpellEditModalProps> = ({
           {/* Spells Section - Prepared Casters */}
           {spellcastingType === 'prepared' && numSpells > 0 && (
             <div className="mb-8">
-              <div className="bg-green-900/20 border border-green-700 rounded-lg p-4 mb-4">
-                <h3 className="text-lg font-bold text-green-400 mb-2">
+              <div className="bg-accent-green-darker/20 border border-accent-green-dark rounded-lg p-4 mb-4">
+                <h3 className="text-lg font-bold text-accent-green-light mb-2">
                   Prepared Spells ({selectedPreparedSpells.length}/{numSpells})
                 </h3>
-                <p className="text-sm text-gray-400">
+                <p className="text-sm text-theme-muted">
                   Select {numSpells} spell{numSpells !== 1 ? 's' : ''} to prepare today
                 </p>
               </div>
@@ -264,15 +264,15 @@ const SpellEditModal: React.FC<SpellEditModalProps> = ({
                       className={`p-4 rounded-lg border-2 transition-all text-left ${
                         isSelected
                           ? 'bg-green-800 border-green-500 shadow-md'
-                          : 'bg-gray-700 border-gray-600 hover:bg-gray-600'
+                          : 'bg-theme-tertiary border-theme-primary hover:bg-theme-quaternary'
                       }`}
                       disabled={!isSelected && selectedPreparedSpells.length >= numSpells}
                     >
                       <div className="flex items-start justify-between mb-2">
-                        <h4 className="font-semibold text-white">{spell.name}</h4>
-                        {isSelected && <Check className="w-5 h-5 text-green-400 flex-shrink-0" />}
+                        <h4 className="font-semibold text-theme-primary">{spell.name}</h4>
+                        {isSelected && <Check className="w-5 h-5 text-accent-green-light flex-shrink-0" />}
                       </div>
-                      <p className="text-xs text-gray-400">Level {spell.level} • {spell.school?.name || 'Unknown'}</p>
+                      <p className="text-xs text-theme-muted">Level {spell.level} • {spell.school?.name || 'Unknown'}</p>
                     </button>
                   );
                 })}
@@ -285,14 +285,14 @@ const SpellEditModal: React.FC<SpellEditModalProps> = ({
             <>
               {/* Spellbook */}
               <div className="mb-8">
-                <div className="bg-purple-900/20 border border-purple-700 rounded-lg p-4 mb-4">
+                <div className="bg-accent-purple-darker/20 border border-accent-purple-dark rounded-lg p-4 mb-4">
                   <div className="flex items-center gap-2 mb-2">
-                    <BookOpen className="w-5 h-5 text-purple-400" />
-                    <h3 className="text-lg font-bold text-purple-400">
+                    <BookOpen className="w-5 h-5 text-accent-purple-light" />
+                    <h3 className="text-lg font-bold text-accent-purple-light">
                       Spellbook ({selectedSpellbook.length}/{numSpells})
                     </h3>
                   </div>
-                  <p className="text-sm text-gray-400">
+                  <p className="text-sm text-theme-muted">
                     Select {numSpells} spell{numSpells !== 1 ? 's' : ''} for your spellbook
                   </p>
                 </div>
@@ -306,16 +306,16 @@ const SpellEditModal: React.FC<SpellEditModalProps> = ({
                         onClick={() => handleSpellToggle(spell.slug)}
                         className={`p-4 rounded-lg border-2 transition-all text-left ${
                           isSelected
-                            ? 'bg-purple-800 border-purple-500 shadow-md'
-                            : 'bg-gray-700 border-gray-600 hover:bg-gray-600'
+                            ? 'bg-accent-purple-darker border-accent-purple shadow-md'
+                            : 'bg-theme-tertiary border-theme-primary hover:bg-theme-quaternary'
                         }`}
                         disabled={!isSelected && selectedSpellbook.length >= numSpells}
                       >
                         <div className="flex items-start justify-between mb-2">
-                          <h4 className="font-semibold text-white">{spell.name}</h4>
-                          {isSelected && <Check className="w-5 h-5 text-purple-400 flex-shrink-0" />}
+                          <h4 className="font-semibold text-theme-primary">{spell.name}</h4>
+                          {isSelected && <Check className="w-5 h-5 text-accent-purple-light flex-shrink-0" />}
                         </div>
-                        <p className="text-xs text-gray-400">Level {spell.level} • {spell.school?.name || 'Unknown'}</p>
+                        <p className="text-xs text-theme-muted">Level {spell.level} • {spell.school?.name || 'Unknown'}</p>
                       </button>
                     );
                   })}
@@ -325,11 +325,11 @@ const SpellEditModal: React.FC<SpellEditModalProps> = ({
               {/* Prepared from Spellbook */}
               {selectedSpellbook.length > 0 && (
                 <div className="mb-8">
-                  <div className="bg-blue-900/20 border border-blue-700 rounded-lg p-4 mb-4">
-                    <h3 className="text-lg font-bold text-blue-400 mb-2">
+                  <div className="bg-accent-blue-darker/20 border border-accent-blue-dark rounded-lg p-4 mb-4">
+                    <h3 className="text-lg font-bold text-accent-blue-light mb-2">
                       Daily Prepared Spells ({selectedPreparedSpells.length}/{numWizardPrepared})
                     </h3>
-                    <p className="text-sm text-gray-400">
+                    <p className="text-sm text-theme-muted">
                       Select {numWizardPrepared} spell{numWizardPrepared !== 1 ? 's' : ''} from your spellbook to prepare
                     </p>
                   </div>
@@ -345,16 +345,16 @@ const SpellEditModal: React.FC<SpellEditModalProps> = ({
                           onClick={() => handleWizardPreparedToggle(spell.slug)}
                           className={`p-4 rounded-lg border-2 transition-all text-left ${
                             isSelected
-                              ? 'bg-blue-800 border-blue-500 shadow-md'
-                              : 'bg-gray-700 border-gray-600 hover:bg-gray-600'
+                              ? 'bg-accent-blue-darker border-blue-500 shadow-md'
+                              : 'bg-theme-tertiary border-theme-primary hover:bg-theme-quaternary'
                           }`}
                           disabled={!isSelected && selectedPreparedSpells.length >= numWizardPrepared}
                         >
                           <div className="flex items-start justify-between mb-2">
-                            <h4 className="font-semibold text-white">{spell.name}</h4>
-                            {isSelected && <Check className="w-5 h-5 text-blue-400 flex-shrink-0" />}
+                            <h4 className="font-semibold text-theme-primary">{spell.name}</h4>
+                            {isSelected && <Check className="w-5 h-5 text-accent-blue-light flex-shrink-0" />}
                           </div>
-                          <p className="text-xs text-gray-400">Level {spell.level} • {spell.school?.name || 'Unknown'}</p>
+                          <p className="text-xs text-theme-muted">Level {spell.level} • {spell.school?.name || 'Unknown'}</p>
                         </button>
                       );
                     })}
@@ -366,16 +366,16 @@ const SpellEditModal: React.FC<SpellEditModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between p-6 border-t border-gray-700 bg-gray-900">
+        <div className="flex items-center justify-between p-6 border-t border-theme-secondary bg-theme-primary">
           <button
             onClick={onClose}
-            className="px-6 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-white transition-colors"
+            className="px-6 py-2 bg-theme-tertiary hover:bg-theme-quaternary rounded-lg text-theme-primary transition-colors"
           >
             Cancel
           </button>
           <button
             onClick={handleSave}
-            className="px-6 py-2 bg-purple-600 hover:bg-purple-500 rounded-lg text-white font-semibold transition-colors flex items-center gap-2"
+            className="px-6 py-2 bg-accent-purple hover:bg-accent-purple-light rounded-lg text-theme-primary font-semibold transition-colors flex items-center gap-2"
           >
             <Check className="w-5 h-5" />
             Save Spells

@@ -14,7 +14,7 @@ const RandomizeButton: React.FC<{ onClick: () => void; title?: string; className
   return (
     <button
       onClick={onClick}
-      className={`px-3 py-2 bg-purple-600 hover:bg-purple-500 rounded-lg text-white text-sm font-medium transition-colors flex items-center gap-2 ${className}`}
+      className={`px-3 py-2 bg-accent-purple hover:bg-accent-purple-light rounded-lg text-theme-primary text-sm font-medium transition-colors flex items-center gap-2 ${className}`}
       title={title}
     >
       <Shuffle className="w-4 h-4" />
@@ -60,50 +60,50 @@ export const Step8Traits: React.FC<StepProps & { onSubmit: (data: CharacterCreat
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-300 mb-2">
+        <label className="block text-sm font-medium text-theme-tertiary mb-2">
           Personality Traits
         </label>
         <textarea
           placeholder="Describe your character's personality traits and quirks..."
           value={data.personality || ''}
           onChange={(e) => updateData({ personality: e.target.value })}
-          className="w-full h-20 p-3 bg-gray-700 text-white rounded-lg focus:ring-red-500 focus:border-red-500 resize-none"
+          className="w-full h-20 p-3 bg-theme-tertiary text-theme-primary rounded-lg focus:ring-red-500 focus:border-red-500 resize-none"
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-300 mb-2">
+        <label className="block text-sm font-medium text-theme-tertiary mb-2">
           Ideals
         </label>
         <textarea
           placeholder="What principles and beliefs guide your character?"
           value={data.ideals || ''}
           onChange={(e) => updateData({ ideals: e.target.value })}
-          className="w-full h-16 p-3 bg-gray-700 text-white rounded-lg focus:ring-red-500 focus:border-red-500 resize-none"
+          className="w-full h-16 p-3 bg-theme-tertiary text-theme-primary rounded-lg focus:ring-red-500 focus:border-red-500 resize-none"
         />
       </div>
 
       <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">
+          <label className="block text-sm font-medium text-theme-tertiary mb-2">
             Bonds
           </label>
           <textarea
             placeholder="Who or what is your character connected to?"
             value={data.bonds || ''}
             onChange={(e) => updateData({ bonds: e.target.value })}
-            className="w-full h-16 p-3 bg-gray-700 text-white rounded-lg focus:ring-red-500 focus:border-red-500 resize-none"
+            className="w-full h-16 p-3 bg-theme-tertiary text-theme-primary rounded-lg focus:ring-red-500 focus:border-red-500 resize-none"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">
+          <label className="block text-sm font-medium text-theme-tertiary mb-2">
             Flaws
           </label>
           <textarea
             placeholder="What weaknesses does your character have?"
             value={data.flaws || ''}
             onChange={(e) => updateData({ flaws: e.target.value })}
-            className="w-full h-16 p-3 bg-gray-700 text-white rounded-lg focus:ring-red-500 focus:border-red-500 resize-none"
+            className="w-full h-16 p-3 bg-theme-tertiary text-theme-primary rounded-lg focus:ring-red-500 focus:border-red-500 resize-none"
           />
         </div>
       </div>
@@ -117,9 +117,9 @@ export const Step8Traits: React.FC<StepProps & { onSubmit: (data: CharacterCreat
         const conModifier = getModifier(data.abilities.CON);
 
         return (
-          <div className="bg-gray-700/50 border border-gray-600 rounded-lg p-4 space-y-3">
-            <h4 className="text-lg font-bold text-yellow-300">Starting Hit Points</h4>
-            <p className="text-xs text-gray-400">
+          <div className="bg-theme-tertiary/50 border border-theme-primary rounded-lg p-4 space-y-3">
+            <h4 className="text-lg font-bold text-accent-yellow-light">Starting Hit Points</h4>
+            <p className="text-xs text-theme-muted">
               Choose how to determine your starting HP (at 1st level, most players take maximum).
             </p>
 
@@ -128,15 +128,15 @@ export const Step8Traits: React.FC<StepProps & { onSubmit: (data: CharacterCreat
                 onClick={() => updateData({ hpCalculationMethod: 'max', rolledHP: undefined })}
                 className={`p-3 rounded-lg border-2 text-left transition-all ${
                   data.hpCalculationMethod === 'max'
-                    ? 'bg-blue-800 border-blue-500'
-                    : 'bg-gray-700 border-gray-600 hover:bg-gray-600'
+                    ? 'bg-accent-blue-darker border-blue-500'
+                    : 'bg-theme-tertiary border-theme-primary hover:bg-theme-quaternary'
                 }`}
               >
-                <div className="font-semibold text-white">Take Maximum (Recommended)</div>
-                <div className="text-sm text-gray-300 mt-1">
+                <div className="font-semibold text-theme-primary">Take Maximum (Recommended)</div>
+                <div className="text-sm text-theme-tertiary mt-1">
                   {selectedClass.hit_die} + {conModifier} = {selectedClass.hit_die + conModifier} HP
                 </div>
-                <div className="text-xs text-gray-400 mt-1">Standard for 1st level characters</div>
+                <div className="text-xs text-theme-muted mt-1">Standard for 1st level characters</div>
               </button>
 
               <button
@@ -147,12 +147,12 @@ export const Step8Traits: React.FC<StepProps & { onSubmit: (data: CharacterCreat
                 }}
                 className={`p-3 rounded-lg border-2 text-left transition-all ${
                   data.hpCalculationMethod === 'rolled'
-                    ? 'bg-blue-800 border-blue-500'
-                    : 'bg-gray-700 border-gray-600 hover:bg-gray-600'
+                    ? 'bg-accent-blue-darker border-blue-500'
+                    : 'bg-theme-tertiary border-theme-primary hover:bg-theme-quaternary'
                 }`}
               >
-                <div className="font-semibold text-white">Roll Hit Die</div>
-                <div className="text-sm text-gray-300 mt-1">
+                <div className="font-semibold text-theme-primary">Roll Hit Die</div>
+                <div className="text-sm text-theme-tertiary mt-1">
                   {data.hpCalculationMethod === 'rolled' && data.rolledHP ? (
                     <>
                       Rolled: {data.rolledHP} + {conModifier} = {data.rolledHP + conModifier} HP
@@ -163,14 +163,14 @@ export const Step8Traits: React.FC<StepProps & { onSubmit: (data: CharacterCreat
                     </>
                   )}
                 </div>
-                <div className="text-xs text-gray-400 mt-1">
+                <div className="text-xs text-theme-muted mt-1">
                   {data.hpCalculationMethod === 'rolled' ? 'Click to re-roll' : 'Click to roll'}
                 </div>
               </button>
             </div>
 
-            <div className="text-xs text-gray-500 mt-2">
-              Final HP: <span className="text-white font-bold">
+            <div className="text-xs text-theme-disabled mt-2">
+              Final HP: <span className="text-theme-primary font-bold">
                 {data.hpCalculationMethod === 'max'
                   ? selectedClass.hit_die + conModifier
                   : data.rolledHP ? data.rolledHP + conModifier : 0
@@ -182,16 +182,16 @@ export const Step8Traits: React.FC<StepProps & { onSubmit: (data: CharacterCreat
       })()}
 
       <div className='flex justify-between'>
-        <button onClick={prevStep} className="px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded-lg text-white flex items-center">
+        <button onClick={prevStep} className="px-4 py-2 bg-theme-quaternary hover:bg-theme-hover rounded-lg text-theme-primary flex items-center">
           <ArrowLeft className="w-4 h-4 mr-2" /> Back
         </button>
         <button
           onClick={() => onSubmit(data)}
           disabled={!validateTraits(data)}
-          className={`px-4 py-2 rounded-lg text-white flex items-center font-bold ${
+          className={`px-4 py-2 rounded-lg text-theme-primary flex items-center font-bold ${
             validateTraits(data)
-              ? 'bg-green-600 hover:bg-green-500'
-              : 'bg-gray-500 cursor-not-allowed'
+              ? 'bg-accent-green hover:bg-accent-green'
+              : 'bg-theme-hover cursor-not-allowed'
           }`}
         >
           Create Character <Check className="w-4 h-4 ml-2" />
