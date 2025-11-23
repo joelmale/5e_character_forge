@@ -3,6 +3,9 @@ import { ChevronUp, ChevronDown, XCircle, Shuffle, ArrowLeft, ArrowRight } from 
 import { StepProps } from '../types/wizard.types';
 import { loadClasses, CLASS_CATEGORIES, BACKGROUNDS, getSubclassesByClass, randomizeClassAndSkills } from '../../../services/dataService';
 import { SkillName } from '../../../types/dnd';
+import { SelectionPoolWidget, BranchChoiceWidget, AutomaticWidget } from '../widgets';
+import { Level1Feature } from '../../../types/widgets';
+import { AnySkillPickerModal } from '../AnySkillPickerModal';
 
 interface RandomizeButtonProps {
   onClick: () => void;
@@ -22,6 +25,10 @@ const RandomizeButton: React.FC<RandomizeButtonProps> = ({ onClick, title }) => 
 export const Step3Class: React.FC<StepProps> = ({ data, updateData, nextStep, prevStep, getNextStepLabel }) => {
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set(['Core Classes']));
   const [showClassInfo, setShowClassInfo] = useState(true);
+
+  // Duplicate skill modal state
+  const [showDuplicateSkillModal, setShowDuplicateSkillModal] = useState(false);
+  const [duplicateSkill, setDuplicateSkill] = useState<string | null>(null);
 
   const allClasses = loadClasses(data.edition);
   const selectedClass = allClasses.find(c => c.slug === data.classSlug);
@@ -205,7 +212,17 @@ export const Step3Class: React.FC<StepProps> = ({ data, updateData, nextStep, pr
                 <button
                   key={skill}
                   onClick={() => {
-                    if (isBackgroundSkill) return; // Can't select background skills
+                    // 2024 Rule: If skill is already granted by background, trigger "Any Skill" replacement
+                    if (isBackgroundSkill && data.edition === '2024') {
+                      setDuplicateSkill(skill);
+                      setShowDuplicateSkillModal(true);
+                      return;
+                    }
+
+                    // 2014 Rule: Can't select background skills at all
+                    if (isBackgroundSkill && data.edition === '2014') {
+                      return;
+                    }
 
                     if (isSelected) {
                       // Deselect
@@ -219,20 +236,29 @@ export const Step3Class: React.FC<StepProps> = ({ data, updateData, nextStep, pr
                       });
                     }
                   }}
-                  disabled={isBackgroundSkill}
+                  disabled={isBackgroundSkill && data.edition === '2014'}
                   className={`p-2 rounded-lg text-sm border-2 transition-all ${
-                    isBackgroundSkill
+                    isBackgroundSkill && data.edition === '2014'
                       ? 'bg-accent-green-darker/20 border-accent-green-dark text-accent-green-light cursor-not-allowed opacity-60'
-                      : isSelected
-                        ? 'bg-accent-blue-darker border-blue-500 text-white'
-                        : canSelect
-                          ? 'bg-theme-tertiary border-theme-primary hover:bg-theme-quaternary text-theme-tertiary'
-                          : 'bg-theme-secondary border-theme-secondary text-theme-disabled cursor-not-allowed'
+                      : isBackgroundSkill && data.edition === '2024'
+                        ? 'bg-amber-900/30 border-amber-500/50 hover:border-amber-400 text-amber-300 cursor-pointer'
+                        : isSelected
+                          ? 'bg-accent-blue-darker border-blue-500 text-white'
+                          : canSelect
+                            ? 'bg-theme-tertiary border-theme-primary hover:bg-theme-quaternary text-theme-tertiary'
+                            : 'bg-theme-secondary border-theme-secondary text-theme-disabled cursor-not-allowed'
                   }`}
-                  title={isBackgroundSkill ? 'Already granted by background' : ''}
+                  title={
+                    isBackgroundSkill && data.edition === '2014'
+                      ? 'Already granted by background'
+                      : isBackgroundSkill && data.edition === '2024'
+                        ? 'Click to replace with any skill (2024 rule)'
+                        : ''
+                  }
                 >
                   {skill}
-                  {isBackgroundSkill && <span className="ml-1 text-xs">(BG)</span>}
+                  {isBackgroundSkill && data.edition === '2014' && <span className="ml-1 text-xs">(BG)</span>}
+                  {isBackgroundSkill && data.edition === '2024' && <span className="ml-1 text-xs">⚠️</span>}
                 </button>
               );
             })}
@@ -246,68 +272,69 @@ export const Step3Class: React.FC<StepProps> = ({ data, updateData, nextStep, pr
         </div>
       )}
 
-      {/* Divine Order Selection (2024 Cleric Level 1 Feature) */}
-      {selectedClass && data.classSlug === 'cleric' && data.edition === '2024' && (
-        <div className="bg-theme-tertiary/50 border border-theme-primary rounded-lg p-4 space-y-3">
-          <div>
-            <h4 className="text-lg font-bold text-accent-yellow-light">
-              Choose Divine Order (Level 1 Feature)
-            </h4>
-            <p className="text-xs text-theme-muted mt-1">
-              As a 2024 Cleric, you must choose your Divine Order at level 1
-            </p>
-          </div>
+      {/* Level 1 Features (Widget System) */}
+      {selectedClass && selectedClass.level_1_features && selectedClass.level_1_features.length > 0 && (
+        <div className="space-y-4">
+          {selectedClass.level_1_features.map((feature: Level1Feature) => {
+            // Render appropriate widget based on widget_type
+            switch (feature.widget_type) {
+              case 'selection_pool':
+                return (
+                  <SelectionPoolWidget
+                    key={feature.id}
+                    feature={feature}
+                    data={data}
+                    currentSelections={
+                      feature.id === 'expertise'
+                        ? data.expertiseSkills || []
+                        : feature.id === 'weapon_mastery'
+                          ? data.weaponMastery || []
+                          : []
+                    }
+                    onSelectionsChange={(selections) => {
+                      if (feature.id === 'expertise') {
+                        updateData({ expertiseSkills: selections });
+                      } else if (feature.id === 'weapon_mastery') {
+                        updateData({ weaponMastery: selections });
+                      }
+                    }}
+                  />
+                );
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <button
-              onClick={() => updateData({ divineOrder: 'protector' })}
-              className={`p-4 rounded-lg text-left border-2 transition-all ${
-                data.divineOrder === 'protector'
-                  ? 'bg-accent-blue-darker border-blue-500 shadow-md'
-                  : 'bg-theme-tertiary border-theme-primary hover:bg-theme-quaternary'
-              }`}
-            >
-              <p className="text-lg font-bold text-accent-yellow-light mb-2">🛡️ Protector</p>
-              <p className="text-sm text-theme-tertiary mb-2">
-                Trained for battle, you protect the faithful
-              </p>
-              <div className="text-xs text-theme-disabled space-y-1">
-                <p><strong className="text-accent-green-light">Proficiencies:</strong></p>
-                <ul className="list-disc list-inside ml-2">
-                  <li>Heavy Armor</li>
-                  <li>Martial Weapons</li>
-                </ul>
-              </div>
-            </button>
+              case 'branch_choice':
+                return (
+                  <BranchChoiceWidget
+                    key={feature.id}
+                    feature={feature}
+                    currentChoice={
+                      feature.id === 'divine_order'
+                        ? data.divineOrder || null
+                        : feature.id === 'primal_order'
+                          ? data.primalOrder || null
+                          : feature.id === 'pact_boon'
+                            ? data.pactBoon || null
+                            : null
+                    }
+                    onChoiceChange={(choice) => {
+                      if (feature.id === 'divine_order') {
+                        updateData({ divineOrder: choice as 'protector' | 'thaumaturge' });
+                      } else if (feature.id === 'primal_order') {
+                        updateData({ primalOrder: choice as 'magician' | 'warden' });
+                      } else if (feature.id === 'pact_boon') {
+                        updateData({ pactBoon: choice as 'blade' | 'chain' | 'tome' });
+                      }
+                    }}
+                  />
+                );
 
-            <button
-              onClick={() => updateData({ divineOrder: 'thaumaturge' })}
-              className={`p-4 rounded-lg text-left border-2 transition-all ${
-                data.divineOrder === 'thaumaturge'
-                  ? 'bg-accent-blue-darker border-blue-500 shadow-md'
-                  : 'bg-theme-tertiary border-theme-primary hover:bg-theme-quaternary'
-              }`}
-            >
-              <p className="text-lg font-bold text-accent-yellow-light mb-2">✨ Thaumaturge</p>
-              <p className="text-sm text-theme-tertiary mb-2">
-                Focused on divine magic and knowledge
-              </p>
-              <div className="text-xs text-theme-disabled space-y-1">
-                <p><strong className="text-accent-green-light">Benefits:</strong></p>
-                <ul className="list-disc list-inside ml-2">
-                  <li>+1 Cantrip known</li>
-                  <li>Add WIS modifier to Arcana checks</li>
-                  <li>Add WIS modifier to Religion checks</li>
-                </ul>
-              </div>
-            </button>
-          </div>
+              case 'automatic':
+                return <AutomaticWidget key={feature.id} feature={feature} />;
 
-          {!data.divineOrder && (
-            <div className="text-xs text-accent-yellow-light mt-2">
-              ⚠️ Please choose a Divine Order
-            </div>
-          )}
+              default:
+                console.warn(`Unknown widget type: ${feature.widget_type}`);
+                return null;
+            }
+          })}
         </div>
       )}
 
@@ -398,13 +425,66 @@ export const Step3Class: React.FC<StepProps> = ({ data, updateData, nextStep, pr
              !selectedClass ||
              data.selectedSkills.length < (selectedClass.num_skill_choices || 0) ||
              (getSubclassesByClass(data.classSlug).length > 0 && data.level >= 3 && !data.subclassSlug) ||
-             (data.classSlug === 'cleric' && data.edition === '2024' && !data.divineOrder)
+             // Check Level 1 feature completion (widget system)
+             (selectedClass.level_1_features?.some((feature: Level1Feature) => {
+               switch (feature.widget_type) {
+                 case 'selection_pool':
+                   if (feature.id === 'expertise') {
+                     return (data.expertiseSkills?.length || 0) < (feature.widget_config as any).count;
+                   }
+                   if (feature.id === 'weapon_mastery') {
+                     return (data.weaponMastery?.length || 0) < (feature.widget_config as any).count;
+                   }
+                   return false;
+                 case 'branch_choice':
+                   if (feature.id === 'divine_order') {
+                     return !data.divineOrder;
+                   }
+                   if (feature.id === 'primal_order') {
+                     return !data.primalOrder;
+                   }
+                   if (feature.id === 'pact_boon') {
+                     return !data.pactBoon;
+                   }
+                   return false;
+                 case 'automatic':
+                   return false; // Automatic features don't require validation
+                 default:
+                   return false;
+               }
+             }) ?? false)
            }
           className="px-4 py-2 bg-accent-red hover:bg-accent-red-light rounded-lg text-white flex items-center disabled:bg-theme-quaternary disabled:cursor-not-allowed"
         >
           Next: {getNextStepLabel?.() || 'Continue'} <ArrowRight className="w-4 h-4 ml-2" />
         </button>
       </div>
+
+      {/* Duplicate Skill Modal (2024 Rule) */}
+      {duplicateSkill && (
+        <AnySkillPickerModal
+          isOpen={showDuplicateSkillModal}
+          onClose={() => {
+            setShowDuplicateSkillModal(false);
+            setDuplicateSkill(null);
+          }}
+          duplicateSkill={duplicateSkill}
+          alreadySelectedSkills={[
+            ...(data.selectedSkills || []),
+            ...(BACKGROUNDS.find(bg => bg.name === data.background)?.skill_proficiencies || []),
+            ...(data.overflowSkills || [])
+          ]}
+          onSelectReplacement={(replacementSkill) => {
+            // Add replacement skill to overflow skills array
+            updateData({
+              overflowSkills: [...(data.overflowSkills || []), replacementSkill],
+              selectedSkills: [...data.selectedSkills, duplicateSkill as SkillName] // Keep duplicate in class skills for tracking
+            });
+            setShowDuplicateSkillModal(false);
+            setDuplicateSkill(null);
+          }}
+        />
+      )}
     </div>
   );
 };
