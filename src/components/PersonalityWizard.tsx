@@ -9,6 +9,8 @@ import { getSpellcastingType } from '../utils/spellUtils';
 import { SPELL_LEARNING_RULES } from '../data/spellLearning';
 import { assignAbilityScoresByClass } from '../utils/abilityScoreUtils';
 import cantripsData from '../data/cantrips.json';
+import { generateQuickStartEquipment } from '../services/equipmentService';
+import { rollRandomTrinket } from '../utils/trinketUtils';
 
 interface PersonalityWizardProps {
   isOpen: boolean;
@@ -285,6 +287,12 @@ const PersonalityWizard: React.FC<PersonalityWizardProps> = ({ isOpen, onClose: 
     // Use custom abilities if user edited them, otherwise assign based on class priorities
     const abilities = customAbilities || assignAbilityScoresByClass(selectedClassData.slug);
 
+    // Generate quick start equipment based on class and background
+    const quickStartEquipment = generateQuickStartEquipment(selectedClassData.slug, selectedBackground || '');
+
+    // Roll for a random trinket
+    const randomTrinket = rollRandomTrinket();
+
     // Create complete CharacterCreationData structure
     const characterData: CharacterCreationData = {
       name: finalizationData.name,
@@ -297,7 +305,7 @@ const PersonalityWizard: React.FC<PersonalityWizardProps> = ({ isOpen, onClose: 
       alignment: finalizationData.alignment,
 
       selectedSkills: selectedSkills as any[],
-      equipmentChoices: [],
+      equipmentChoices: [], // Keep empty since we're using startingInventory
       hpCalculationMethod: 'max' as const,
 
       spellSelection: spellSelection,
@@ -306,6 +314,14 @@ const PersonalityWizard: React.FC<PersonalityWizardProps> = ({ isOpen, onClose: 
       selectedFightingStyle: null,
       selectedFeats: [],
       knownLanguages: [],
+
+      // Quick start equipment and trinket
+      startingInventory: quickStartEquipment.items.map(item => ({
+        equipmentSlug: item.equipmentSlug,
+        quantity: item.quantity,
+        equipped: item.equipped || false
+      })),
+      selectedTrinket: randomTrinket,
 
       // Custom text for traits
       personality: finalizationData.personality,

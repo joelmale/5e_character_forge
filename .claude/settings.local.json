@@ -31,7 +31,8 @@
       "Bash(docker image inspect:*)",
       "Bash(chmod:*)",
       "Bash(./migrate-theme.sh)",
-      "Bash(git rev-parse:*)"
+      "Bash(git rev-parse:*)",
+      "Bash(gh pr create:*)"
     ],
     "deny": [],
     "ask": [],

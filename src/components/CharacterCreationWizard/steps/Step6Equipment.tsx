@@ -5,6 +5,11 @@ import { EquipmentPackage, TrinketData } from '../../../types/dnd';
 import { loadClasses, BACKGROUNDS, EQUIPMENT_PACKAGES } from '../../../services/dataService';
 import { validateEquipmentChoices } from '../../../utils/equipmentSelectionUtils';
 import trinketTable from '../../../data/trinketTable.json';
+import { QuickStartEquipment } from '../components/QuickStartEquipment';
+import { EquipmentShop } from '../components/EquipmentShop';
+import { TrinketRoller } from '../components/TrinketRoller';
+import { rollStartingWealth } from '../../../services/equipmentService';
+import { PurchasedItem } from '../../../types/equipment';
 
 interface EquipmentPackDisplayProps {
   pack: EquipmentPackage;
@@ -112,6 +117,13 @@ export const Step6Equipment: React.FC<StepProps & { skipToStep?: (step: number) 
   const allClasses = loadClasses();
   const selectedClass = allClasses.find(c => c.slug === data.classSlug);
 
+  // Equipment mode state
+  const [equipmentMode, setEquipmentMode] = React.useState<'choices' | 'quickstart' | 'buy'>('quickstart');
+
+  // Buy equipment state
+  const [startingGold, setStartingGold] = React.useState<number>(0);
+  const [goldRolled, setGoldRolled] = React.useState(false);
+
   // Trinket rolling state
   const [useExtendedTrinkets, setUseExtendedTrinkets] = React.useState(false);
   const [rolledTrinket, setRolledTrinket] = React.useState<TrinketData | null>(data.selectedTrinket || null);
@@ -134,7 +146,9 @@ export const Step6Equipment: React.FC<StepProps & { skipToStep?: (step: number) 
     updateData({ equipmentChoices: updatedChoices });
   };
 
-  const allChoicesMade = validateEquipmentChoices(data.equipmentChoices || []);
+  const allChoicesMade = equipmentMode === 'choices'
+    ? validateEquipmentChoices(data.equipmentChoices || [])
+    : equipmentMode === 'quickstart' || (equipmentMode === 'buy' && goldRolled);
 
   // Trinket rolling function
   const rollForTrinket = () => {
@@ -166,8 +180,128 @@ export const Step6Equipment: React.FC<StepProps & { skipToStep?: (step: number) 
         />
       </div>
 
-      {/* Equipment Choices */}
-      {(data.equipmentChoices || []).map((choice, idx) => (
+      {/* Equipment Mode Selection */}
+      <div className="bg-theme-secondary/50 border border-theme-primary rounded-lg p-4 space-y-4">
+        <h4 className="text-lg font-bold text-accent-yellow-light">Choose Equipment Method</h4>
+        <p className="text-sm text-theme-muted">
+          Select how you want to equip your character. Quick Start gives you a curated loadout, while Buy Equipment lets you spend starting wealth on custom gear.
+        </p>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <button
+            onClick={() => setEquipmentMode('quickstart')}
+            className={`p-4 rounded-lg border-2 transition-all text-left ${
+              equipmentMode === 'quickstart'
+                ? 'bg-accent-green-darker border-accent-green'
+                : 'bg-theme-tertiary border-theme-primary hover:border-theme-secondary'
+            }`}
+          >
+            <h5 className="font-semibold text-accent-green-light mb-2">Quick Start Loadout</h5>
+            <p className="text-sm text-theme-tertiary">
+              Get a curated set of equipment perfectly suited for your class and background. Recommended for beginners.
+            </p>
+          </button>
+
+          <button
+            onClick={() => setEquipmentMode('buy')}
+            className={`p-4 rounded-lg border-2 transition-all text-left ${
+              equipmentMode === 'buy'
+                ? 'bg-accent-blue-darker border-accent-blue'
+                : 'bg-theme-tertiary border-theme-primary hover:border-theme-secondary'
+            }`}
+          >
+            <h5 className="font-semibold text-accent-blue-light mb-2">Buy Equipment</h5>
+            <p className="text-sm text-theme-tertiary">
+              Roll for starting wealth and spend it in the shop. Maximum flexibility for advanced players.
+            </p>
+          </button>
+
+          <button
+            onClick={() => setEquipmentMode('choices')}
+            className={`p-4 rounded-lg border-2 transition-all text-left ${
+              equipmentMode === 'choices'
+                ? 'bg-accent-purple-darker border-accent-purple'
+                : 'bg-theme-tertiary border-theme-primary hover:border-theme-secondary'
+            }`}
+          >
+            <h5 className="font-semibold text-accent-purple-light mb-2">Custom Choices</h5>
+            <p className="text-sm text-theme-tertiary">
+              Make individual equipment selections from your class options. Full control over every item.
+            </p>
+          </button>
+        </div>
+      </div>
+
+      {/* Equipment Content Based on Mode */}
+      {equipmentMode === 'quickstart' && (
+        <QuickStartEquipment
+          classSlug={data.classSlug}
+          backgroundName={data.background}
+          onAccept={() => {
+            // Mark equipment as complete and move to trinket
+            // The actual equipment assignment happens in character creation
+          }}
+          onBuyInstead={() => setEquipmentMode('buy')}
+        />
+      )}
+
+      {equipmentMode === 'buy' && (
+        <div className="space-y-4">
+          {!goldRolled ? (
+            <div className="bg-theme-tertiary/50 border border-theme-primary rounded-lg p-4 space-y-4">
+              <h4 className="text-lg font-bold text-accent-yellow-light">Roll Starting Wealth</h4>
+              <p className="text-sm text-theme-muted">
+                Roll dice to determine your starting gold pieces. You can also take the average amount.
+              </p>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    const rolledGold = rollStartingWealth(data.classSlug);
+                    setStartingGold(rolledGold);
+                    setGoldRolled(true);
+                  }}
+                  className="px-4 py-2 bg-accent-purple hover:bg-accent-purple-light rounded-lg text-white font-medium"
+                >
+                  Roll for Gold
+                </button>
+                <button
+                  onClick={() => {
+                    const averageGold = rollStartingWealth(data.classSlug); // This will return average
+                    setStartingGold(averageGold);
+                    setGoldRolled(true);
+                  }}
+                  className="px-4 py-2 bg-accent-blue hover:bg-accent-blue-dark rounded-lg text-white font-medium"
+                >
+                  Take Average
+                </button>
+              </div>
+            </div>
+          ) : (
+            <EquipmentShop
+              startingGold={startingGold}
+              onPurchaseComplete={(purchasedItems: PurchasedItem[]) => {
+                // Handle purchased equipment
+                console.log('Purchased items:', purchasedItems);
+              }}
+              onBack={() => setEquipmentMode('quickstart')}
+            />
+          )}
+        </div>
+      )}
+
+      {/* Equipment Choices - Only show in custom mode */}
+      {equipmentMode === 'choices' && (
+        <>
+          <div className="bg-theme-secondary/50 border border-theme-primary rounded-lg p-4">
+            <h4 className="text-lg font-bold text-accent-purple-light mb-2">Custom Equipment Selection</h4>
+            <p className="text-sm text-theme-muted">
+              Make your equipment choices from the options available to your class.
+            </p>
+          </div>
+
+          {/* Equipment Choices */}
+          {(data.equipmentChoices || []).map((choice, idx) => (
         <div key={choice.choiceId} className="bg-theme-tertiary/50 border border-theme-primary rounded-lg p-4 space-y-3">
           <h4 className="font-semibold text-accent-yellow-light">
             {idx + 1}. {choice.description}
@@ -225,6 +359,8 @@ export const Step6Equipment: React.FC<StepProps & { skipToStep?: (step: number) 
           </div>
         </div>
       ))}
+        </>
+      )}
 
       {/* Background Equipment Info */}
       {(() => {
@@ -316,56 +452,14 @@ export const Step6Equipment: React.FC<StepProps & { skipToStep?: (step: number) 
          </div>
        )}
 
-       {/* Trinket Rolling Section */}
-       <div className="bg-theme-tertiary/50 border border-theme-primary rounded-lg p-4 space-y-3">
-         <h4 className="text-lg font-bold text-accent-yellow-light">Roll for Trinket</h4>
-         <p className="text-xs text-theme-muted">
-           Optionally roll for a trinket from the Player's Handbook. Extended trinkets include additional items from The Wild Beyond the Witchlight.
-         </p>
-
-         {/* Extended Trinkets Checkbox */}
-         <label className="flex items-center space-x-2 cursor-pointer">
-           <input
-             type="checkbox"
-             checked={useExtendedTrinkets}
-             onChange={(e) => setUseExtendedTrinkets(e.target.checked)}
-             className="w-4 h-4 text-accent-blue bg-theme-tertiary border-theme-primary rounded focus:ring-blue-500 focus:ring-2"
-           />
-           <span className="text-sm text-theme-tertiary">Extended Trinkets</span>
-           <span title="Trinkets from The Wild Beyond the Witchlight">
-             <Info className="w-4 h-4 text-theme-muted" />
-           </span>
-         </label>
-
-         {/* Roll Button */}
-         <button
-           onClick={rollForTrinket}
-           className="flex items-center space-x-2 px-4 py-2 bg-accent-purple hover:bg-accent-purple-light rounded-lg text-white transition-colors"
-         >
-           <Dice6 className="w-4 h-4" />
-           <span>Roll d{useExtendedTrinkets ? '200' : '100'}</span>
-         </button>
-
-         {/* Rolled Trinket Display */}
-         {rolledTrinket && (
-           <div className="bg-theme-secondary/50 border border-theme-primary rounded-lg p-3 space-y-2">
-             <div className="flex items-center justify-between">
-               <h5 className="text-sm font-semibold text-accent-yellow-light">
-                 {rolledTrinket.short_name} (Roll: {rolledTrinket.roll})
-               </h5>
-               <span className="text-xs text-theme-disabled">{rolledTrinket.source}</span>
-             </div>
-             <p className="text-sm text-theme-tertiary leading-relaxed">
-               {rolledTrinket.description}
-             </p>
-             <div className="border-t border-theme-primary pt-2">
-               <p className="text-xs text-blue-300 italic">
-                 {rolledTrinket.roleplay_prompt}
-               </p>
-             </div>
-           </div>
-         )}
-       </div>
+        {/* Trinket Roller */}
+        <TrinketRoller
+          onTrinketSelected={(trinket) => {
+            updateData({ selectedTrinket: trinket });
+            setRolledTrinket(trinket);
+          }}
+          initialTrinket={rolledTrinket}
+        />
 
        <div className='flex justify-between items-center gap-3'>
         <button onClick={prevStep} className="px-4 py-2 bg-theme-quaternary hover:bg-theme-hover rounded-lg text-white flex items-center">

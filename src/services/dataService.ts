@@ -19,6 +19,11 @@ import featsData from '../data/feats.json';
 import alignmentsData from '../data/alignments.json';
 import backgroundsData from '../data/backgrounds.json';
 import equipmentPackagesData from '../data/equipmentPackages.json';
+import racesData from '../data/races.json';
+import { quickStartEquipmentPresets } from '../data/quickStartEquipment';
+import startingWealthData from '../data/startingWealth.json';
+import newPlayerShopData from '../data/newPlayerShop.json';
+import { ClassWealthRule, ShopItem, QuickStartPresets } from '../types/equipment';
 import fightingStylesData from '../data/fightingStyles.json';
 import raceCategoriesData from '../data/raceCategories.json';
 import classCategoriesData from '../data/classCategories.json';
@@ -673,8 +678,8 @@ export const getLeveledSpellsByClass = (classSlug: string, level: number = 1): A
 };
 
 export function loadRaces(): Race[] {
-  // Return comprehensive race database instead of just SRD
-  return COMPREHENSIVE_RACES;
+  // Return comprehensive race database from JSON
+  return (racesData as { races: Race[] }).races;
 }
 
 // Legacy function for backward compatibility - returns SRD races only
@@ -862,335 +867,8 @@ export const ALIGNMENT_INFO: Record<string, string> = ALIGNMENTS_DATA.reduce((ac
 export const BACKGROUNDS: Background[] = backgroundsData;
 
 // Comprehensive race database with 40+ races from multiple sources
-const COMPREHENSIVE_RACES: Race[] = [
-  // Core Races (Player's Handbook)
-  {
-    slug: 'human',
-    name: 'Human',
-    source: 'PHB',
-    speed: 30,
-    ability_bonuses: { STR: 1, DEX: 1, CON: 1, INT: 1, WIS: 1, CHA: 1 },
-    racial_traits: ['Versatile', 'Skilled'],
-    description: 'Humans are the most adaptable and ambitious people among the common races. Whatever drives them, humans are the innovators, the achievers, and the pioneers of the worlds.',
-    typicalRoles: ['Fighter', 'Wizard', 'Rogue', 'Cleric', 'Any']
-  },
-  {
-    slug: 'mountain-dwarf',
-    name: 'Mountain Dwarf',
-    source: 'PHB',
-    speed: 25,
-    ability_bonuses: { STR: 2, CON: 2 },
-    racial_traits: ['Darkvision', 'Dwarven Resilience', 'Stonecunning', 'Dwarven Combat Training', 'Tool Proficiency'],
-    description: 'Bold and hardy, dwarves are known as skilled warriors, miners, and workers of stone and metal. Mountain dwarves are strong and hardy inhabitants of the mountains.',
-    typicalRoles: ['Fighter', 'Barbarian', 'Cleric', 'Paladin']
-  },
-  {
-    slug: 'hill-dwarf',
-    name: 'Hill Dwarf',
-    source: 'PHB',
-    speed: 25,
-    ability_bonuses: { CON: 2, WIS: 1 },
-    racial_traits: ['Darkvision', 'Dwarven Resilience', 'Stonecunning', 'Dwarven Combat Training', 'Tool Proficiency'],
-    description: 'Bold and hardy, dwarves are known as skilled warriors, miners, and workers of stone and metal. Hill dwarves are wise and tough inhabitants of the hills.',
-    typicalRoles: ['Cleric', 'Fighter', 'Barbarian', 'Paladin']
-  },
-  {
-    slug: 'high-elf',
-    name: 'High Elf',
-    speed: 30,
-    source: 'PHB',
-    ability_bonuses: { DEX: 2, INT: 1 },
-    racial_traits: ['Darkvision', 'Fey Ancestry', 'Trance', 'Elf Weapon Training', 'Cantrip'],
-    description: 'Elves are a magical people of otherworldly grace, living in the world but not entirely part of it. High elves are the most common elves, known for their intelligence and magical affinity.',
-    typicalRoles: ['Wizard', 'Fighter', 'Rogue', 'Cleric', 'Any']
-  },
-  {
-    slug: 'wood-elf',
-    name: 'Wood Elf',
-    speed: 30,
-    source: 'PHB',
-    ability_bonuses: { DEX: 2, WIS: 1 },
-    racial_traits: ['Darkvision', 'Fey Ancestry', 'Trance', 'Keen Senses', 'Elf Weapon Training', 'Fleet of Foot', 'Mask of the Wild'],
-    description: 'Elves are a magical people of otherworldly grace, living in the world but not entirely part of it. Wood elves are reclusive and suspicious of non-elves.',
-    typicalRoles: ['Ranger', 'Druid', 'Fighter', 'Rogue']
-  },
-  {
-    slug: 'drow',
-    name: 'Drow (Dark Elf)',
-    speed: 30,
-    source: 'PHB',
-    ability_bonuses: { DEX: 2, CHA: 1 },
-    racial_traits: ['Superior Darkvision (120ft)', 'Fey Ancestry', 'Trance', 'Keen Senses', 'Drow Magic', 'Sunlight Sensitivity'],
-    description: 'Elves are a magical people of otherworldly grace, living in the world but not entirely part of it. Drow, or dark elves, have black skin that resembles polished obsidian and stark white or pale yellow hair.',
-    typicalRoles: ['Wizard', 'Rogue', 'Fighter', 'Warlock']
-  },
-  {
-    slug: 'lightfoot-halfling',
-    name: 'Lightfoot Halfling',
-    speed: 30,
-    source: 'PHB',
-    ability_bonuses: { DEX: 2, CHA: 1 },
-    racial_traits: ['Lucky', 'Brave', 'Halfling Nimbleness', 'Naturally Stealthy'],
-    description: 'Halflings are cheerful, brave, and lucky people who live in close-knit communities. Lightfoot halflings are stealthy and charismatic.',
-    typicalRoles: ['Rogue', 'Bard', 'Cleric', 'Wizard', 'Any']
-  },
-  {
-    slug: 'stout-halfling',
-    name: 'Stout Halfling',
-    speed: 30,
-    source: 'PHB',
-    ability_bonuses: { DEX: 2, CON: 1 },
-    racial_traits: ['Lucky', 'Brave', 'Halfling Nimbleness', 'Stout Resilience (poison advantage)'],
-    description: 'Halflings are an affable and cheerful people. They cherish the bonds of family and friendship as well as the comforts of hearth and home. Stout halflings are hardier than average and have some resistance to poison.',
-    typicalRoles: ['Rogue', 'Barbarian', 'Fighter', 'Cleric']
-  },
-  {
-    slug: 'forest-gnome',
-    name: 'Forest Gnome',
-    speed: 30,
-    source: 'PHB',
-    ability_bonuses: { INT: 2, DEX: 1 },
-    racial_traits: ['Darkvision', 'Gnome Cunning', 'Natural Illusionist', 'Speak with Small Beasts'],
-    description: 'Gnomes are small folk full of quirky inventiveness. Forest gnomes have a natural knack for illusion and a way with animals.',
-    typicalRoles: ['Wizard', 'Druid', 'Bard', 'Rogue']
-  },
-  {
-    slug: 'rock-gnome',
-    name: 'Rock Gnome',
-    speed: 30,
-    source: 'PHB',
-    ability_bonuses: { INT: 2, CON: 1 },
-    racial_traits: ['Darkvision', 'Gnome Cunning', 'Artificer\'s Lore', 'Tinker'],
-    description: 'Gnomes are small folk full of quirky inventiveness. Rock gnomes are natural inventors and tinkerers.',
-    typicalRoles: ['Wizard', 'Artificer', 'Bard', 'Rogue']
-  },
-  {
-    slug: 'dragonborn',
-    name: 'Dragonborn',
-    speed: 30,
-    source: 'PHB',
-    ability_bonuses: { STR: 2, CHA: 1 },
-    racial_traits: ['Draconic Ancestry', 'Breath Weapon', 'Damage Resistance'],
-    description: 'Dragonborn look very much like dragons standing erect in humanoid form, though they lack wings or a tail. Dragonborn are proud, honorable warriors.',
-    typicalRoles: ['Fighter', 'Barbarian', 'Paladin', 'Sorcerer']
-  },
-  {
-    slug: 'half-elf',
-    name: 'Half-Elf',
-    speed: 30,
-    source: 'PHB',
-    ability_bonuses: { CHA: 2 },
-    racial_traits: ['Darkvision', 'Fey Ancestry', 'Skill Versatility (2 skills)'],
-    description: 'Half-elves combine what some say are the best qualities of their elf and human parents: human curiosity, inventiveness, and ambition tempered by the refined senses, love of nature, and artistic tastes of the elves.',
-    typicalRoles: ['Bard', 'Fighter', 'Rogue', 'Paladin', 'Any']
-  },
-  {
-    slug: 'half-orc',
-    name: 'Half-Orc',
-    speed: 30,
-    source: 'PHB',
-    ability_bonuses: { STR: 2, CON: 1 },
-    racial_traits: ['Darkvision', 'Menacing (Intimidation)', 'Relentless Endurance', 'Savage Attacks'],
-    description: 'Half-orcs are the short-tempered and sullen result of human and orc pairings. They are strong and tough, but they are often shunned by both races.',
-    typicalRoles: ['Barbarian', 'Fighter', 'Rogue', 'Paladin']
-  },
-  {
-    slug: 'tiefling',
-    name: 'Tiefling',
-    speed: 30,
-    source: 'PHB',
-    ability_bonuses: { INT: 1, CHA: 2 },
-    racial_traits: ['Darkvision', 'Hellish Resistance (fire)', 'Infernal Legacy'],
-    description: 'Tieflings are derived from human bloodlines, and in the broadest possible sense, they still look human. However, their infernal heritage has left a clear imprint on their appearance.',
-    typicalRoles: ['Warlock', 'Wizard', 'Rogue', 'Bard']
-  },
-
-  // Exotic Races (Volo's Guide to Monsters)
-  {
-    slug: 'aasimar',
-    name: 'Aasimar',
-    speed: 30,
-    source: 'VGtM',
-    ability_bonuses: { WIS: 1, CHA: 2 },
-    racial_traits: ['Darkvision', 'Celestial Resistance', 'Healing Hands', 'Light Bearer'],
-    description: 'Aasimars are mortals who carry a spark of the Upper Planes within their souls. They are humanoids with a touch of the celestial in their appearance.',
-    typicalRoles: ['Paladin', 'Cleric', 'Bard', 'Fighter']
-  },
-  {
-    slug: 'firbolg',
-    name: 'Firbolg',
-    speed: 30,
-    source: 'VGtM',
-    ability_bonuses: { STR: 1, WIS: 2 },
-    racial_traits: ['Firbolg Magic', 'Hidden Step', 'Powerful Build', 'Speech of Beast and Leaf'],
-    description: 'Firbolgs are reclusive giant-kin who dwell in remote forests and mountains. They are peaceful and wise, but they can be terrifying when roused to anger.',
-    typicalRoles: ['Druid', 'Barbarian', 'Fighter', 'Cleric']
-  },
-  {
-    slug: 'goliath',
-    name: 'Goliath',
-    speed: 30,
-    source: 'VGtM',
-    ability_bonuses: { STR: 2, CON: 1 },
-    racial_traits: ['Stone\'s Endurance', 'Powerful Build', 'Mountain Born'],
-    description: 'Goliaths are strong and reclusive people who dwell in remote mountain peaks. They are known for their great strength and endurance.',
-    typicalRoles: ['Barbarian', 'Fighter', 'Ranger', 'Paladin']
-  },
-  {
-    slug: 'kenku',
-    name: 'Kenku',
-    speed: 30,
-    source: 'VGtM',
-    ability_bonuses: { DEX: 2, WIS: 1 },
-    racial_traits: ['Expert Forgery', 'Kenku Training', 'Mimicry'],
-    description: 'Kenku are crow-like humanoids who were transformed by powerful magic. They are cunning and resourceful, but they cannot speak except by mimicking sounds they have heard.',
-    typicalRoles: ['Rogue', 'Bard', 'Monk', 'Wizard']
-  },
-  {
-    slug: 'tabaxi',
-    name: 'Tabaxi',
-    speed: 30,
-    source: 'VGtM',
-    ability_bonuses: { DEX: 2, CHA: 1 },
-    racial_traits: ['Darkvision', 'Feline Agility', 'Cat\'s Claws', 'Cat\'s Talent'],
-    description: 'Tabaxi are cat-like humanoids who hail from distant jungles. They are curious, agile, and often follow their whims.',
-    typicalRoles: ['Rogue', 'Bard', 'Druid', 'Fighter']
-  },
-  {
-    slug: 'triton',
-    name: 'Triton',
-    speed: 30,
-    source: 'VGtM',
-    ability_bonuses: { STR: 1, CON: 1, CHA: 1 },
-    racial_traits: ['Amphibious', 'Control Air and Water', 'Emissary of the Sea', 'Guardians of the Depths'],
-    description: 'Tritons are fish-like humanoids who dwell in the depths of the ocean. They are guardians of the sea and often serve powerful aquatic beings.',
-    typicalRoles: ['Cleric', 'Fighter', 'Paladin', 'Wizard']
-  },
-
-  // Monstrous Races (Volo's Guide to Monsters)
-  {
-    slug: 'bugbear',
-    name: 'Bugbear',
-    speed: 30,
-    source: 'VGtM',
-    ability_bonuses: { STR: 2, DEX: 1 },
-    racial_traits: ['Darkvision', 'Long-Limbed', 'Powerful Build', 'Sneaky', 'Surprise Attack'],
-    description: 'Bugbears are hulking, furry goblinoids that tower over their goblin and hobgoblin kin. They are stealthy predators who strike from the shadows.',
-    typicalRoles: ['Rogue', 'Barbarian', 'Fighter', 'Ranger']
-  },
-  {
-    slug: 'goblin',
-    name: 'Goblin',
-    speed: 30,
-    source: 'VGtM',
-    ability_bonuses: { DEX: 2, CON: 1 },
-    racial_traits: ['Darkvision', 'Fury of the Small', 'Nimble Escape'],
-    description: 'Goblins are small, green-skinned creatures that dwell in dark, cramped places. They are cunning and vicious, but they are often cowardly.',
-    typicalRoles: ['Rogue', 'Wizard', 'Bard', 'Warlock']
-  },
-  {
-    slug: 'hobgoblin',
-    name: 'Hobgoblin',
-    speed: 30,
-    source: 'VGtM',
-    ability_bonuses: { CON: 2, INT: 1 },
-    racial_traits: ['Darkvision', 'Martial Training', 'Saving Face'],
-    description: 'Hobgoblins are large, militaristic goblinoids that organize themselves into legions. They are disciplined warriors who value honor and tradition.',
-    typicalRoles: ['Fighter', 'Barbarian', 'Rogue', 'Wizard']
-  },
-  {
-    slug: 'kobold',
-    name: 'Kobold',
-    speed: 30,
-    source: 'VGtM',
-    ability_bonuses: { DEX: 2, STR: -2 },
-    racial_traits: ['Darkvision', 'Grovel, Cower, and Beg', 'Pack Tactics', 'Sunlight Sensitivity'],
-    description: 'Kobolds are small, reptilian humanoids that dwell in dark places. They are cowardly and subservient, but they can be surprisingly cunning.',
-    typicalRoles: ['Rogue', 'Wizard', 'Sorcerer', 'Warlock']
-  },
-  {
-    slug: 'orc',
-    name: 'Orc',
-    speed: 30,
-    source: 'VGtM',
-    ability_bonuses: { STR: 2, CON: 1, INT: -2 },
-    racial_traits: ['Darkvision', 'Aggressive', 'Menacing (Intimidation)', 'Powerful Build'],
-    description: 'Orcs are brutish, green-skinned humanoids that dwell in tribal societies. They are fierce warriors who revel in battle.',
-    typicalRoles: ['Barbarian', 'Fighter', 'Rogue', 'Shaman']
-  },
-  {
-    slug: 'yuan-ti-pureblood',
-    name: 'Yuan-Ti Pureblood',
-    speed: 30,
-    source: 'VGtM',
-    ability_bonuses: { CHA: 2, INT: 1 },
-    racial_traits: ['Darkvision', 'Innate Spellcasting', 'Magic Resistance', 'Poison Immunity'],
-    description: 'Yuan-ti purebloods are snake-like humanoids who appear mostly human. They are cunning and manipulative, with a natural affinity for magic.',
-    typicalRoles: ['Warlock', 'Wizard', 'Rogue', 'Sorcerer']
-  },
-
-  // Planar Races (Various Sources)
-  {
-    slug: 'fairy',
-    name: 'Fairy',
-    speed: 30,
-    source: 'WGtE',
-    ability_bonuses: { DEX: 2, CHA: 1 },
-    racial_traits: ['Fairy Magic', 'Flight'],
-    description: 'Fairies are tiny, magical beings from the Feywild. They are playful and mischievous, with a natural affinity for illusion magic.',
-    typicalRoles: ['Bard', 'Druid', 'Rogue', 'Wizard']
-  },
-  {
-    slug: 'harengon',
-    name: 'Harengon',
-    source: 'WGtE',
-    speed: 30,
-    ability_bonuses: { DEX: 2, WIS: 1 },
-    racial_traits: ['Hare-Trigger', 'Leporine Senses', 'Lucky Footwork', 'Rabbit Hop'],
-    description: 'Harengons are rabbit-like humanoids who hail from the Feywild. They are quick and lucky, with enhanced senses and agility.',
-    typicalRoles: ['Rogue', 'Ranger', 'Bard', 'Monk']
-  },
-  {
-    slug: 'loxodon',
-    name: 'Loxodon',
-    speed: 30,
-    source: 'GGtR',
-    ability_bonuses: { CON: 2, WIS: 1 },
-    racial_traits: ['Powerful Build', 'Loxodon Serenity', 'Natural Armor', 'Trunk'],
-    description: 'Loxodons are elephant-like humanoids known for their wisdom and calm demeanor. They are peaceful and introspective.',
-    typicalRoles: ['Cleric', 'Druid', 'Monk', 'Paladin']
-  },
-  {
-    slug: 'owlin',
-    name: 'Owlin',
-    speed: 30,
-    source: 'Strixhaven',
-    ability_bonuses: { DEX: 2, WIS: 1 },
-    racial_traits: ['Darkvision', 'Flight', 'Silent Feathers'],
-    description: 'Owlin are owl-like humanoids who can fly silently through the night. They are wise and observant.',
-    typicalRoles: ['Druid', 'Wizard', 'Rogue', 'Cleric']
-  },
-  {
-    slug: 'githyanki',
-    name: 'Githyanki',
-    speed: 30,
-    source: 'MToF',
-    ability_bonuses: { STR: 1, INT: 1 },
-    racial_traits: ['Decadent Mastery', 'Githyanki Psionics', 'Martial Prodigy'],
-    description: 'Githyanki are humanoid warriors from the Astral Plane. They are fierce fighters with psionic abilities.',
-    typicalRoles: ['Fighter', 'Wizard', 'Rogue', 'Barbarian']
-  },
-  {
-    slug: 'fire-genasi',
-    name: 'Fire Genasi',
-    speed: 30,
-    source: 'EE',
-    ability_bonuses: { CON: 2, INT: 1 },
-    racial_traits: ['Darkvision', 'Fire Resistance', 'Reach to the Blaze'],
-    description: 'Fire genasi are humanoids infused with elemental fire. They have a fiery temper and resistance to heat.',
-    typicalRoles: ['Sorcerer', 'Fighter', 'Barbarian', 'Wizard']
-  }
-];
+// Load races from JSON data
+const COMPREHENSIVE_RACES: Race[] = loadRaces();
 
 interface RaceCategoryData {
   name: string;
@@ -1846,6 +1524,19 @@ export const loadMonsters = (): Monster[] => {
     ) as Record<string, string | number>
   })) as Monster[];
 };
+
+// Equipment System Functions
+export function loadQuickStartEquipment(): QuickStartPresets {
+  return quickStartEquipmentPresets;
+}
+
+export function loadStartingWealthRules(): ClassWealthRule[] {
+  return (startingWealthData as { starting_wealth: ClassWealthRule[] }).starting_wealth;
+}
+
+export function loadNewPlayerShop(): ShopItem[] {
+  return (newPlayerShopData as { shop_inventory: ShopItem[] }).shop_inventory;
+}
 
 /**
  * Monster database constant (334 SRD monsters)
