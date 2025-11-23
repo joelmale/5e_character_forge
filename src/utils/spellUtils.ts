@@ -165,6 +165,39 @@ export function areSpellSelectionsComplete(
 }
 
 /**
+ * Get the maximum spell level available for a class at a given character level
+ */
+export function getMaxSpellLevel(classSlug: string, characterLevel: number): number {
+  const slotTable = SPELL_SLOT_TABLES[classSlug];
+  if (!slotTable || !slotTable.byLevel || !slotTable.byLevel[characterLevel]) {
+    return 0;
+  }
+
+  const slots = slotTable.byLevel[characterLevel];
+  // Slots array: [cantrips, 1st, 2nd, 3rd, 4th, 5th, 6th, 7th, 8th, 9th]
+  // Find the highest spell level with slots available
+  for (let i = slots.length - 1; i >= 1; i--) {
+    if (slots[i] > 0) {
+      return i; // Return spell level (1-9)
+    }
+  }
+  return 0; // No spell slots available
+}
+
+/**
+ * Get all available spell levels for character creation
+ * Returns array of available levels [1, 2, 3, etc.]
+ */
+export function getAvailableSpellLevels(classSlug: string, characterLevel: number): number[] {
+  const maxLevel = getMaxSpellLevel(classSlug, characterLevel);
+  const levels: number[] = [];
+  for (let i = 1; i <= maxLevel; i++) {
+    levels.push(i);
+  }
+  return levels;
+}
+
+/**
  * Clean up invalid spell selections when character data changes
  */
 export function cleanupInvalidSpellSelections(

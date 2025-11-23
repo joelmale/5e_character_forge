@@ -1,11 +1,14 @@
 import React, { useRef, useEffect } from 'react';
 import { ArrowLeft, ArrowRight, Check, Shuffle } from 'lucide-react';
 import { StepProps } from '../types/wizard.types';
-import { loadClasses, getCantripsByClass, getLeveledSpellsByClass } from '../../../services/dataService';
+import { loadClasses, getCantripsByClass, getLeveledSpellsByClass, AppSpell } from '../../../services/dataService';
 import {
   getSpellcastingType,
-  cleanupInvalidSpellSelections
+  cleanupInvalidSpellSelections,
+  getAvailableSpellLevels,
+  getMaxPreparedSpells
 } from '../../../utils/spellUtils';
+import cantripsData from '../../../data/cantrips.json';
 
 const RandomizeButton: React.FC<{ onClick: () => void; title?: string; className?: string }> = ({
   onClick,
@@ -67,7 +70,22 @@ export const Step4Spells: React.FC<StepProps> = ({ data, updateData, nextStep, p
   const spellcasting = selectedClass.spellcasting!;
   const spellcastingType = getSpellcastingType(selectedClass.slug);
   const availableCantrips = getCantripsByClass(data.classSlug);
-  const availableSpells = getLeveledSpellsByClass(data.classSlug, 1);
+
+  // Get all available spell levels based on character level
+  const availableSpellLevels = getAvailableSpellLevels(data.classSlug, data.level);
+
+  // Get all spells from available levels
+  const availableSpells: AppSpell[] = availableSpellLevels.flatMap(level =>
+    getLeveledSpellsByClass(data.classSlug, level)
+  );
+
+  // Calculate level-aware cantrip and spell counts
+  const cantripsKnownAtLevel = (cantripsData as Record<string, Record<string, number>>)[data.classSlug]?.[data.level] || spellcasting.cantripsKnown;
+
+  // For prepared casters (Cleric, Druid, Paladin), calculate max prepared spells
+  const maxPreparedSpellsAtLevel = spellcastingType === 'prepared'
+    ? getMaxPreparedSpells(data.abilities, spellcasting.ability, data.level)
+    : spellcasting.spellsKnownOrPrepared;
 
   const handleCantripToggle = (spellSlug: string) => {
     const current = data.spellSelection.selectedCantrips;
@@ -81,7 +99,7 @@ export const Step4Spells: React.FC<StepProps> = ({ data, updateData, nextStep, p
           selectedCantrips: current.filter(s => s !== spellSlug),
         },
       });
-    } else if (current.length < spellcasting.cantripsKnown) {
+    } else if (current.length < cantripsKnownAtLevel) {
       // Select (if under limit)
       updateData({
         spellSelection: {
@@ -96,6 +114,9 @@ export const Step4Spells: React.FC<StepProps> = ({ data, updateData, nextStep, p
     const current = (data.spellSelection[field] as string[]) || [];
     const isSelected = current.includes(spellSlug);
 
+    // Determine max count based on field and spell type
+    const maxCount = (field === 'preparedSpells' || field === 'knownSpells') ? maxPreparedSpellsAtLevel : spellcasting.spellsKnownOrPrepared;
+
     if (isSelected) {
       // Deselect
       updateData({
@@ -104,7 +125,7 @@ export const Step4Spells: React.FC<StepProps> = ({ data, updateData, nextStep, p
           [field]: current.filter(s => s !== spellSlug),
         },
       });
-    } else if (current.length < spellcasting.spellsKnownOrPrepared) {
+    } else if (current.length < maxCount) {
       // Select (if under limit)
       updateData({
         spellSelection: {
@@ -115,16 +136,17 @@ export const Step4Spells: React.FC<StepProps> = ({ data, updateData, nextStep, p
     }
   };
 
-  const cantripsComplete = data.spellSelection.selectedCantrips.length === spellcasting.cantripsKnown;
+  const cantripsComplete = data.spellSelection.selectedCantrips.length === cantripsKnownAtLevel;
 
   let spellsComplete = false;
   if (spellcastingType === 'known') {
-    spellsComplete = (data.spellSelection.knownSpells?.length || 0) === spellcasting.spellsKnownOrPrepared;
+    spellsComplete = (data.spellSelection.knownSpells?.length || 0) === maxPreparedSpellsAtLevel;
   } else if (spellcastingType === 'prepared') {
-    spellsComplete = (data.spellSelection.preparedSpells?.length || 0) === spellcasting.spellsKnownOrPrepared;
+    spellsComplete = (data.spellSelection.preparedSpells?.length || 0) === maxPreparedSpellsAtLevel;
   } else if (spellcastingType === 'wizard') {
     const spellbookComplete = (data.spellSelection.spellbook?.length || 0) === 6;
-    const dailyComplete = (data.spellSelection.dailyPrepared?.length || 0) === Math.max(1, Math.floor((data.abilities.INT - 10) / 2) + 1);
+    const dailyPreparedMax = getMaxPreparedSpells(data.abilities, 'INT', data.level);
+    const dailyComplete = (data.spellSelection.dailyPrepared?.length || 0) === dailyPreparedMax;
     spellsComplete = spellbookComplete && dailyComplete;
   }
 
@@ -161,7 +183,7 @@ export const Step4Spells: React.FC<StepProps> = ({ data, updateData, nextStep, p
       {/* Cantrips Section */}
       <div className="bg-theme-tertiary/50 border border-theme-primary rounded-lg p-4 space-y-3">
         <h4 className="text-lg font-bold text-accent-yellow-light">
-          Cantrips ({data.spellSelection.selectedCantrips.length} / {spellcasting.cantripsKnown} selected)
+          Cantrips ({data.spellSelection.selectedCantrips.length} / {cantripsKnownAtLevel} selected)
         </h4>
         <p className="text-xs text-theme-muted">
           Cantrips are 0-level spells that can be cast at will, without expending spell slots.
@@ -170,7 +192,7 @@ export const Step4Spells: React.FC<StepProps> = ({ data, updateData, nextStep, p
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {availableCantrips.map((spell) => {
             const isSelected = data.spellSelection.selectedCantrips.includes(spell.slug);
-            const canSelect = data.spellSelection.selectedCantrips.length < spellcasting.cantripsKnown;
+            const canSelect = data.spellSelection.selectedCantrips.length < cantripsKnownAtLevel;
 
             return (
               <button
@@ -313,98 +335,124 @@ export const Step4Spells: React.FC<StepProps> = ({ data, updateData, nextStep, p
       {spellcastingType === 'known' && (
         <div className="bg-theme-tertiary/50 border border-theme-primary rounded-lg p-4 space-y-3">
           <h4 className="text-lg font-bold text-accent-yellow-light">
-            Spells Known ({data.spellSelection.knownSpells?.length || 0} / {spellcasting.spellsKnownOrPrepared} selected)
+            Spells Known ({data.spellSelection.knownSpells?.length || 0} / {maxPreparedSpellsAtLevel} selected)
           </h4>
           <p className="text-xs text-theme-muted">
             These are the spells your character knows permanently. You can change them when you level up.
           </p>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {availableSpells.map((spell) => {
-              const isSelected = data.spellSelection.knownSpells?.includes(spell.slug) || false;
-              const canSelect = (data.spellSelection.knownSpells?.length || 0) < spellcasting.spellsKnownOrPrepared;
+          {/* Group spells by level */}
+          {availableSpellLevels.map(spellLevel => {
+            const spellsOfLevel = availableSpells.filter(s => s.level === spellLevel);
+            if (spellsOfLevel.length === 0) return null;
 
-              return (
-                <button
-                  key={spell.slug}
-                  onClick={() => handleSpellToggle(spell.slug, 'knownSpells')}
-                  disabled={!isSelected && !canSelect}
-                  className={`p-3 rounded-lg border-2 text-left transition-all ${
-                    isSelected
-                      ? 'bg-blue-900 border-blue-500'
-                      : canSelect
-                      ? 'bg-theme-tertiary border-theme-primary hover:border-blue-400'
-                      : 'bg-theme-secondary border-theme-secondary opacity-50 cursor-not-allowed'
-                  }`}
-                >
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="font-semibold text-white">{spell.name}</div>
-                      <div className="text-xs text-purple-300">{spell.school}</div>
-                    </div>
-                    {isSelected && <Check className="w-5 h-5 text-accent-green-light" />}
-                  </div>
-                  <div className="text-xs text-theme-muted mt-2 line-clamp-2">
-                    {spell.description}
-                  </div>
-                  <div className="text-xs text-theme-disabled mt-1">
-                    {spell.castingTime} • {spell.range}
-                    {spell.concentration && ' • Concentration'}
-                    {spell.ritual && ' • Ritual'}
-                  </div>
-                </button>
-              );
-            })}
-          </div>
+            return (
+              <div key={spellLevel} className="space-y-2">
+                <h5 className="text-sm font-semibold text-accent-blue-light">
+                  Level {spellLevel} Spells
+                </h5>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {spellsOfLevel.map((spell) => {
+                    const isSelected = data.spellSelection.knownSpells?.includes(spell.slug) || false;
+                    const canSelect = (data.spellSelection.knownSpells?.length || 0) < maxPreparedSpellsAtLevel;
+
+                    return (
+                      <button
+                        key={spell.slug}
+                        onClick={() => handleSpellToggle(spell.slug, 'knownSpells')}
+                        disabled={!isSelected && !canSelect}
+                        className={`p-3 rounded-lg border-2 text-left transition-all ${
+                          isSelected
+                            ? 'bg-blue-900 border-blue-500'
+                            : canSelect
+                            ? 'bg-theme-tertiary border-theme-primary hover:border-blue-400'
+                            : 'bg-theme-secondary border-theme-secondary opacity-50 cursor-not-allowed'
+                        }`}
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="font-semibold text-white">{spell.name}</div>
+                            <div className="text-xs text-purple-300">{spell.school}</div>
+                          </div>
+                          {isSelected && <Check className="w-5 h-5 text-accent-green-light" />}
+                        </div>
+                        <div className="text-xs text-theme-muted mt-2 line-clamp-2">
+                          {spell.description}
+                        </div>
+                        <div className="text-xs text-theme-disabled mt-1">
+                          {spell.castingTime} • {spell.range}
+                          {spell.concentration && ' • Concentration'}
+                          {spell.ritual && ' • Ritual'}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
         </div>
       )}
 
       {spellcastingType === 'prepared' && (
         <div className="bg-theme-tertiary/50 border border-theme-primary rounded-lg p-4 space-y-3">
           <h4 className="text-lg font-bold text-accent-yellow-light">
-            Prepared Spells ({data.spellSelection.preparedSpells?.length || 0} / {spellcasting.spellsKnownOrPrepared} selected)
+            Prepared Spells ({data.spellSelection.preparedSpells?.length || 0} / {maxPreparedSpellsAtLevel} selected)
           </h4>
           <p className="text-xs text-theme-muted">
             Choose spells to prepare. You can change your prepared spells after a long rest.
           </p>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {availableSpells.map((spell) => {
-              const isSelected = data.spellSelection.preparedSpells?.includes(spell.slug) || false;
-              const canSelect = (data.spellSelection.preparedSpells?.length || 0) < spellcasting.spellsKnownOrPrepared;
+          {/* Group spells by level */}
+          {availableSpellLevels.map(spellLevel => {
+            const spellsOfLevel = availableSpells.filter(s => s.level === spellLevel);
+            if (spellsOfLevel.length === 0) return null;
 
-              return (
-                <button
-                  key={spell.slug}
-                  onClick={() => handleSpellToggle(spell.slug, 'preparedSpells')}
-                  disabled={!isSelected && !canSelect}
-                  className={`p-3 rounded-lg border-2 text-left transition-all ${
-                    isSelected
-                      ? 'bg-blue-900 border-blue-500'
-                      : canSelect
-                      ? 'bg-theme-tertiary border-theme-primary hover:border-blue-400'
-                      : 'bg-theme-secondary border-theme-secondary opacity-50 cursor-not-allowed'
-                  }`}
-                >
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="font-semibold text-white">{spell.name}</div>
-                      <div className="text-xs text-purple-300">{spell.school}</div>
-                    </div>
-                    {isSelected && <Check className="w-5 h-5 text-accent-green-light" />}
-                  </div>
-                  <div className="text-xs text-theme-muted mt-2 line-clamp-2">
-                    {spell.description}
-                  </div>
-                  <div className="text-xs text-theme-disabled mt-1">
-                    {spell.castingTime} • {spell.range}
-                    {spell.concentration && ' • Concentration'}
-                    {spell.ritual && ' • Ritual'}
-                  </div>
-                </button>
-              );
-            })}
-          </div>
+            return (
+              <div key={spellLevel} className="space-y-2">
+                <h5 className="text-sm font-semibold text-accent-blue-light">
+                  Level {spellLevel} Spells
+                </h5>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {spellsOfLevel.map((spell) => {
+                    const isSelected = data.spellSelection.preparedSpells?.includes(spell.slug) || false;
+                    const canSelect = (data.spellSelection.preparedSpells?.length || 0) < maxPreparedSpellsAtLevel;
+
+                    return (
+                      <button
+                        key={spell.slug}
+                        onClick={() => handleSpellToggle(spell.slug, 'preparedSpells')}
+                        disabled={!isSelected && !canSelect}
+                        className={`p-3 rounded-lg border-2 text-left transition-all ${
+                          isSelected
+                            ? 'bg-blue-900 border-blue-500'
+                            : canSelect
+                            ? 'bg-theme-tertiary border-theme-primary hover:border-blue-400'
+                            : 'bg-theme-secondary border-theme-secondary opacity-50 cursor-not-allowed'
+                        }`}
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="font-semibold text-white">{spell.name}</div>
+                            <div className="text-xs text-purple-300">{spell.school}</div>
+                          </div>
+                          {isSelected && <Check className="w-5 h-5 text-accent-green-light" />}
+                        </div>
+                        <div className="text-xs text-theme-muted mt-2 line-clamp-2">
+                          {spell.description}
+                        </div>
+                        <div className="text-xs text-theme-disabled mt-1">
+                          {spell.castingTime} • {spell.range}
+                          {spell.concentration && ' • Concentration'}
+                          {spell.ritual && ' • Ritual'}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
         </div>
       )}
 
