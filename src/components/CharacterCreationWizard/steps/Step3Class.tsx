@@ -397,7 +397,8 @@ export const Step3Class: React.FC<StepProps> = ({ data, updateData, nextStep, pr
              !data.classSlug ||
              !selectedClass ||
              data.selectedSkills.length < (selectedClass.num_skill_choices || 0) ||
-             (getSubclassesByClass(data.classSlug).length > 0 && data.level >= 3 && !data.subclassSlug)
+             (getSubclassesByClass(data.classSlug).length > 0 && data.level >= 3 && !data.subclassSlug) ||
+             (data.classSlug === 'cleric' && data.edition === '2024' && !data.divineOrder)
            }
           className="px-4 py-2 bg-accent-red hover:bg-accent-red-light rounded-lg text-white flex items-center disabled:bg-theme-quaternary disabled:cursor-not-allowed"
         >

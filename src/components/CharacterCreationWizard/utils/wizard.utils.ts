@@ -45,9 +45,18 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
     const modifier = finalAbilities[ability].modifier;
     const isProficient = allProficientSkills.includes(skillName);
 
+    let skillValue = modifier + (isProficient ? pb : 0);
+
+    // 2024 Cleric Thaumaturge adds WIS modifier to Arcana and Religion
+    if (data.classSlug === 'cleric' && data.edition === '2024' && data.divineOrder === 'thaumaturge') {
+      if (skillName === 'Arcana' || skillName === 'Religion') {
+        skillValue += finalAbilities.WIS.modifier;
+      }
+    }
+
     finalSkills[skillName] = {
       proficient: isProficient,
-      value: modifier + (isProficient ? pb : 0),
+      value: skillValue,
     };
   });
 
@@ -186,7 +195,23 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
   // 10. Calculate Known Languages
   const knownLanguages = calculateKnownLanguages(data);
 
-  // 11. Construct Final Character Object
+  // 11. Calculate Proficiencies (including Divine Order bonuses)
+  const proficiencies: Character['proficiencies'] = {
+    armor: [],
+    weapons: [],
+    tools: []
+  };
+
+  // Add base class proficiencies from class data
+  // (This would ideally come from classData.proficiencies, but for now we handle Divine Order)
+
+  // 2024 Cleric Protector gets Heavy Armor and Martial Weapons
+  if (data.classSlug === 'cleric' && data.edition === '2024' && data.divineOrder === 'protector') {
+    proficiencies.armor?.push('Heavy Armor');
+    proficiencies.weapons?.push('Martial Weapons');
+  }
+
+  // 12. Construct Final Character Object
   return {
     id: generateUUID(), // Generate UUID for IndexedDB
     name: data.name || "Unnamed Hero",
@@ -212,6 +237,7 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
     initiative: finalAbilities.DEX.modifier,
     abilities: finalAbilities,
     skills: finalSkills,
+    proficiencies,
     featuresAndTraits: {
       personality: data.personality,
       ideals: data.ideals,
