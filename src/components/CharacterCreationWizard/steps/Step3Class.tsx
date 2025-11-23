@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ChevronUp, ChevronDown, XCircle, Shuffle, ArrowLeft, ArrowRight } from 'lucide-react';
 import { StepProps } from '../types/wizard.types';
-import { loadClasses, CLASS_CATEGORIES, BACKGROUNDS, getSubclassesByClass, randomizeClassAndSkills } from '../../../services/dataService';
+import { loadClasses, getClassCategories, BACKGROUNDS, getSubclassesByClass, randomizeClassAndSkills } from '../../../services/dataService';
 import { SkillName } from '../../../types/dnd';
 import { SelectionPoolWidget, BranchChoiceWidget, AutomaticWidget } from '../widgets';
 import { Level1Feature } from '../../../types/widgets';
@@ -66,7 +66,7 @@ export const Step3Class: React.FC<StepProps> = ({ data, updateData, nextStep, pr
 
       {/* Class Categories */}
       <div className='space-y-3'>
-        {CLASS_CATEGORIES.map(category => (
+        {getClassCategories(data.edition).map(category => (
           <div key={category.name} className='border border-theme-primary rounded-lg overflow-hidden'>
             {/* Category Header */}
             <button

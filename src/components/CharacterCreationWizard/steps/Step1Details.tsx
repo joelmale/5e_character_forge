@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { XCircle, Shuffle, Volume2, Heart, History, BookOpen } from 'lucide-react';
+import { XCircle, Shuffle, Volume2, Heart, History, BookOpen, ArrowLeft, ArrowRight } from 'lucide-react';
 import { StepProps } from '../types/wizard.types';
 import { ALIGNMENTS_DATA, BACKGROUNDS, ALIGNMENTS, randomizeIdentity, randomizeRace, randomizeClassAndSkills, randomizeFightingStyle, randomizeSpells, randomizeAbilities, randomizeFeats, randomizeEquipmentChoices, randomizeAdditionalEquipment, randomizeLanguages, randomizePersonality } from '../../../services/dataService';
 import { generateName, generateNames, GeneratedName } from '../../../utils/nameGenerator';
@@ -45,7 +45,7 @@ interface NameHistoryItem extends GeneratedName {
   isFavorite: boolean;
 }
 
-export const Step1Details: React.FC<StepProps> = ({ data, updateData, nextStep, getNextStepLabel }) => {
+export const Step1Details: React.FC<StepProps> = ({ data, updateData, nextStep, prevStep, getNextStepLabel }) => {
   const [showAlignmentInfo, setShowAlignmentInfo] = useState(true);
   const [showBackgroundInfo, setShowBackgroundInfo] = useState(true);
   const [showNameGenerator, setShowNameGenerator] = useState(false);
@@ -523,13 +523,22 @@ export const Step1Details: React.FC<StepProps> = ({ data, updateData, nextStep, 
         </div>
       )}
 
-      <button
-        onClick={nextStep}
-        disabled={!data.name || !data.alignment || !data.background}
-        className="w-full py-3 bg-accent-red hover:bg-accent-red-light rounded-xl text-white font-bold transition-colors disabled:bg-theme-quaternary"
-      >
-        Next: {getNextStepLabel?.() || 'Continue'}
-      </button>
+      <div className='flex justify-between'>
+        <button
+          onClick={prevStep}
+          className="px-4 py-2 bg-theme-quaternary hover:bg-theme-hover rounded-lg text-white flex items-center"
+        >
+          <ArrowLeft className="w-4 h-4 mr-2" /> Back to Level
+        </button>
+
+        <button
+          onClick={nextStep}
+          disabled={!data.name || !data.alignment || !data.background}
+          className="px-4 py-2 bg-accent-red hover:bg-accent-red-light rounded-lg text-white flex items-center disabled:bg-theme-quaternary"
+        >
+          Next: {getNextStepLabel?.() || 'Continue'} <ArrowRight className="w-4 h-4 ml-2" />
+        </button>
+      </div>
     </div>
   );
 };

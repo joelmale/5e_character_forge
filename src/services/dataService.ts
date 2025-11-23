@@ -927,18 +927,23 @@ export function getEnhancedClassData(classSlug: string): Partial<Class> | undefi
   return (enhancedClassData as EnhancedClassData)[classSlug];
 }
 
-// Enhanced class categories with rich data
-export const CLASS_CATEGORIES: ClassCategory[] = classCategoriesData.map((category: ClassCategoryData) => ({
-  name: category.name,
-  icon: category.icon,
-  description: category.description,
-  classes: loadClasses().filter(cls =>
-    category.classSlugs.includes(cls.slug)
-  ).map(cls => {
-    const enhanced = (enhancedClassData as EnhancedClassData)[cls.slug];
-    return enhanced ? { ...cls, ...enhanced } : cls;
-  })
-}));
+// Enhanced class categories with rich data - filtered by edition
+export function getClassCategories(edition?: Edition): ClassCategory[] {
+  return classCategoriesData.map((category: ClassCategoryData) => ({
+    name: category.name,
+    icon: category.icon,
+    description: category.description,
+    classes: loadClasses(edition).filter(cls =>
+      category.classSlugs.includes(cls.slug)
+    ).map(cls => {
+      const enhanced = (enhancedClassData as EnhancedClassData)[cls.slug];
+      return enhanced ? { ...cls, ...enhanced } : cls;
+    })
+  }));
+}
+
+// Legacy constant for backward compatibility - shows all classes
+export const CLASS_CATEGORIES: ClassCategory[] = getClassCategories();
 
 export const EQUIPMENT_PACKAGES: EquipmentPackage[] = equipmentPackagesData;
 
