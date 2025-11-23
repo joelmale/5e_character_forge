@@ -174,6 +174,15 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
     allClassFeatures.push(`Fighting Style: ${data.selectedFightingStyle}`);
   }
 
+  // Add Divine Order for 2024 Cleric
+  if (data.classSlug === 'cleric' && data.edition === '2024' && data.divineOrder) {
+    if (data.divineOrder === 'protector') {
+      allClassFeatures.push('Divine Order: Protector (Heavy Armor & Martial Weapons proficiency)');
+    } else if (data.divineOrder === 'thaumaturge') {
+      allClassFeatures.push('Divine Order: Thaumaturge (+1 Cantrip, WIS to Arcana & Religion checks)');
+    }
+  }
+
   // 10. Calculate Known Languages
   const knownLanguages = calculateKnownLanguages(data);
 

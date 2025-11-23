@@ -246,27 +246,97 @@ export const Step3Class: React.FC<StepProps> = ({ data, updateData, nextStep, pr
         </div>
       )}
 
+      {/* Divine Order Selection (2024 Cleric Level 1 Feature) */}
+      {selectedClass && data.classSlug === 'cleric' && data.edition === '2024' && (
+        <div className="bg-theme-tertiary/50 border border-theme-primary rounded-lg p-4 space-y-3">
+          <div>
+            <h4 className="text-lg font-bold text-accent-yellow-light">
+              Choose Divine Order (Level 1 Feature)
+            </h4>
+            <p className="text-xs text-theme-muted mt-1">
+              As a 2024 Cleric, you must choose your Divine Order at level 1
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <button
+              onClick={() => updateData({ divineOrder: 'protector' })}
+              className={`p-4 rounded-lg text-left border-2 transition-all ${
+                data.divineOrder === 'protector'
+                  ? 'bg-accent-blue-darker border-blue-500 shadow-md'
+                  : 'bg-theme-tertiary border-theme-primary hover:bg-theme-quaternary'
+              }`}
+            >
+              <p className="text-lg font-bold text-accent-yellow-light mb-2">🛡️ Protector</p>
+              <p className="text-sm text-theme-tertiary mb-2">
+                Trained for battle, you protect the faithful
+              </p>
+              <div className="text-xs text-theme-disabled space-y-1">
+                <p><strong className="text-accent-green-light">Proficiencies:</strong></p>
+                <ul className="list-disc list-inside ml-2">
+                  <li>Heavy Armor</li>
+                  <li>Martial Weapons</li>
+                </ul>
+              </div>
+            </button>
+
+            <button
+              onClick={() => updateData({ divineOrder: 'thaumaturge' })}
+              className={`p-4 rounded-lg text-left border-2 transition-all ${
+                data.divineOrder === 'thaumaturge'
+                  ? 'bg-accent-blue-darker border-blue-500 shadow-md'
+                  : 'bg-theme-tertiary border-theme-primary hover:bg-theme-quaternary'
+              }`}
+            >
+              <p className="text-lg font-bold text-accent-yellow-light mb-2">✨ Thaumaturge</p>
+              <p className="text-sm text-theme-tertiary mb-2">
+                Focused on divine magic and knowledge
+              </p>
+              <div className="text-xs text-theme-disabled space-y-1">
+                <p><strong className="text-accent-green-light">Benefits:</strong></p>
+                <ul className="list-disc list-inside ml-2">
+                  <li>+1 Cantrip known</li>
+                  <li>Add WIS modifier to Arcana checks</li>
+                  <li>Add WIS modifier to Religion checks</li>
+                </ul>
+              </div>
+            </button>
+          </div>
+
+          {!data.divineOrder && (
+            <div className="text-xs text-accent-yellow-light mt-2">
+              ⚠️ Please choose a Divine Order
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Subclass Selection */}
       {selectedClass && (() => {
         const availableSubclasses = getSubclassesByClass(data.classSlug);
 
         if (availableSubclasses.length === 0) return null;
 
+        // Determine subclass level requirement based on class and edition
+        // 2014 Cleric gets Divine Domain at Level 1, 2024 Cleric at Level 3
+        const subclassLevel = (data.classSlug === 'cleric' && data.edition === '2014') ? 1 : 3;
+        const hasSubclassUnlocked = data.level >= subclassLevel;
+
         return (
           <div className="bg-theme-tertiary/50 border border-theme-primary rounded-lg p-4 space-y-3">
             <div>
               <h4 className="text-lg font-bold text-accent-yellow-light">
-                Choose {selectedClass.name} Subclass {data.level >= 3 ? '(Required)' : '(Level 3 Feature)'}
+                Choose {selectedClass.name} Subclass {hasSubclassUnlocked ? '(Required)' : `(Level ${subclassLevel} Feature)`}
               </h4>
               <p className="text-xs text-theme-muted mt-1">
-                {data.level >= 3
+                {hasSubclassUnlocked
                   ? `Select your ${selectedClass.name} specialization`
-                  : `Subclasses are chosen at level 3. This character will need to select one when they reach level 3.`
+                  : `Subclasses are chosen at level ${subclassLevel}. This character will need to select one when they reach level ${subclassLevel}.`
                 }
               </p>
             </div>
 
-             {data.level >= 3 ? (
+             {hasSubclassUnlocked ? (
                <>
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                    {availableSubclasses.map(subclass => (

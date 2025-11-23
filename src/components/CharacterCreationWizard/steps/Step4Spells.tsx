@@ -80,7 +80,12 @@ export const Step4Spells: React.FC<StepProps> = ({ data, updateData, nextStep, p
   );
 
   // Calculate level-aware cantrip and spell counts
-  const cantripsKnownAtLevel = (cantripsData as Record<string, Record<string, number>>)[data.classSlug]?.[data.level] || spellcasting.cantripsKnown;
+  let cantripsKnownAtLevel = (cantripsData as Record<string, Record<string, number>>)[data.classSlug]?.[data.level] || spellcasting.cantripsKnown;
+
+  // 2024 Cleric Thaumaturge gets +1 cantrip
+  if (data.classSlug === 'cleric' && data.edition === '2024' && data.divineOrder === 'thaumaturge') {
+    cantripsKnownAtLevel += 1;
+  }
 
   // For prepared casters (Cleric, Druid, Paladin), calculate max prepared spells
   const maxPreparedSpellsAtLevel = spellcastingType === 'prepared'
