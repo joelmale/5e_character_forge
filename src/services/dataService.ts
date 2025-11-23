@@ -5,6 +5,7 @@
 import srdSpellsMerged from '../data/srd/5e-SRD-Spells-Merged.json';
 import srdRaces2014 from '../data/srd/2014/5e-SRD-Races.json';
 import srdClasses2014 from '../data/srd/2014/5e-SRD-Classes.json';
+import srdClasses2024 from '../data/srd/2024/5e-SRD-Classes.json';
 import srdEquipment2014 from '../data/srd/2014/5e-SRD-Equipment.json';
 import srdEquipment2024 from '../data/srd/2024/5e-SRD-Equipment.json';
 // Sprint 5: Features, Subclasses, and Feats
@@ -35,7 +36,7 @@ import racialLanguagesData from '../data/racialLanguages.json';
 import backgroundDefaultsData from '../data/backgroundDefaults.json';
 import combatActionsData from '../data/combatActions.json';
 import { generateName } from '../utils/nameGenerator';
-import { AbilityName, Race, Class, Equipment, Feature, Subclass, Feat, RaceCategory, ClassCategory, EquipmentPackage, EquipmentChoice, EquipmentItem, EquippedItem, SpellcastingType, SkillName, Monster, MonsterType } from '../types/dnd';
+import { AbilityName, Race, Class, Equipment, Feature, Subclass, Feat, RaceCategory, ClassCategory, EquipmentPackage, EquipmentChoice, EquipmentItem, EquippedItem, SpellcastingType, SkillName, Monster, MonsterType, Edition } from '../types/dnd';
 
 // Local type definitions for dataService
 interface Alignment {
@@ -383,10 +384,13 @@ export function transformRace(srdRace: SRDRace, year: number = 2014): Race {
 }
 
 export function transformClass(srdClass: SRDClass, year: number = 2014): Class {
+  // Determine edition based on year
+  const edition: Edition = year === 2024 ? '2024' : '2014';
+
   // Extract skill proficiencies from proficiency_choices (with safety checks)
   const skillProficiencies = (srdClass.proficiency_choices || [])
     .filter(choice => choice && choice.type === 'proficiencies')
-    .flatMap(choice => 
+    .flatMap(choice =>
       (choice.from?.options || [])
         .filter(opt => opt && opt.item && opt.item.name)
         .map(opt => opt.item.name)
@@ -522,6 +526,7 @@ export function transformClass(srdClass: SRDClass, year: number = 2014): Class {
     slug: srdClass.index,
     name: srdClass.name,
     source: `SRD ${year}`,
+    edition, // Add edition field
     hit_die: srdClass.hit_die,
     primary_stat: 'Varies', // SRD doesn't specify, would need manual mapping
     save_throws: srdClass.saving_throws.map(st => st.name),
@@ -693,9 +698,18 @@ export function getAllRaces(): Race[] {
   return RACE_CATEGORIES.flatMap(category => category.races);
 }
 
-export function loadClasses(): Class[] {
+export function loadClasses(edition?: Edition): Class[] {
   const classes2014 = (srdClasses2014 as SRDClass[]).map(cls => transformClass(cls, 2014));
-  return classes2014;
+  const classes2024 = (srdClasses2024 as SRDClass[]).map(cls => transformClass(cls, 2024));
+
+  const allClasses = [...classes2014, ...classes2024];
+
+  // Filter by edition if specified
+  if (edition) {
+    return allClasses.filter(cls => cls.edition === edition);
+  }
+
+  return allClasses;
 }
 
 export function loadEquipment(): Equipment[] {

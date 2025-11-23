@@ -23,7 +23,7 @@ export const Step3Class: React.FC<StepProps> = ({ data, updateData, nextStep, pr
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set(['Core Classes']));
   const [showClassInfo, setShowClassInfo] = useState(true);
 
-  const allClasses = loadClasses();
+  const allClasses = loadClasses(data.edition);
   const selectedClass = allClasses.find(c => c.slug === data.classSlug);
 
   const toggleCategory = (categoryName: string) => {

@@ -53,6 +53,8 @@ export type CantripsKnownByClass = Record<string, number[]>;
 export interface AbilityScore { score: number; modifier: number; }
 export interface Skill { value: number; proficient: boolean; }
 
+export type Edition = '2014' | '2024';
+
 export interface Character {
   id: string;
   name: string;
@@ -61,6 +63,8 @@ export interface Character {
   level: number;
   alignment: string;
   background: string;
+  edition: Edition; // D&D edition (2014 or 2024 rules)
+  divineOrder?: 'protector' | 'thaumaturge'; // 2024 Cleric Level 1 choice
   inspiration: boolean;
   proficiencyBonus: number;
   armorClass: number;
@@ -287,6 +291,7 @@ export interface Subclass {
   keyFeatures?: string[];
   roleplayingTips?: string[];
   source?: string;
+  edition?: Edition; // D&D edition (2014 or 2024 rules)
   icon?: string;
   themeColor?: string;
 }
@@ -309,12 +314,14 @@ export interface Feat {
 export interface CharacterCreationData {
   name: string;
   level: number;
+  edition: Edition; // D&D edition (2014 or 2024 rules)
   raceSlug: string;
   classSlug: string;
   abilities: Record<AbilityName, number>; // Raw scores only during creation
   abilityScoreMethod: 'standard-array' | 'standard-roll' | 'classic-roll' | '5d6-drop-2' | 'point-buy' | 'custom';
   background: string;
   alignment: string;
+  divineOrder?: 'protector' | 'thaumaturge'; // 2024 Cleric Level 1 choice
 
   // Sprint 1 additions
   selectedSkills: SkillName[]; // Skills chosen from class options
@@ -350,6 +357,7 @@ export interface Race {
   slug: string;
   name: string;
   source: string;
+  edition?: Edition; // D&D edition (2014 or 2024 rules)
   speed?: number;
   ability_bonuses: Partial<Record<AbilityName, number>>;
   racial_traits: string[];
@@ -376,6 +384,7 @@ export interface Class {
   slug: string;
   name: string;
   source: string;
+  edition: Edition; // D&D edition (2014 or 2024 rules)
   hit_die: number;
   primary_stat: string;
   save_throws: string[];

@@ -6,7 +6,7 @@ import { calculateKnownLanguages } from '../../../utils/languageUtils';
 
 export const calculateCharacterStats = (data: CharacterCreationData): Character => {
   const raceData = getAllRaces().find(r => r.slug === data.raceSlug);
-  const classData = loadClasses().find(c => c.slug === data.classSlug);
+  const classData = loadClasses(data.edition).find(c => c.slug === data.classSlug);
 
   if (!raceData || !classData) {
     throw new Error("Incomplete creation data.");
@@ -181,6 +181,7 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
   return {
     id: generateUUID(), // Generate UUID for IndexedDB
     name: data.name || "Unnamed Hero",
+    edition: data.edition, // Store edition (2014 or 2024)
     race: raceData.name,
     class: classData.name,
     subclass: data.subclassSlug, // Sprint 5: Store subclass slug
@@ -228,6 +229,7 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
       subclassFeatures: subclassFeatures.map(f => ({ name: f.name, slug: f.slug, level: f.level, source: 'subclass' as const })),
     },
     selectedFeats: data.selectedFeats || [],
+    divineOrder: data.divineOrder, // 2024 Cleric Divine Order choice
   };
 };
 
