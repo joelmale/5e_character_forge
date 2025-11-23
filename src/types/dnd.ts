@@ -51,7 +51,11 @@ export type CantripsKnownByClass = Record<string, number[]>;
 
 // --- D&D 5e Character Interface (Must be adhered to) ---
 export interface AbilityScore { score: number; modifier: number; }
-export interface Skill { value: number; proficient: boolean; }
+export interface Skill {
+  value: number;
+  proficient: boolean;
+  expertise?: boolean; // True if skill has expertise (double proficiency bonus)
+}
 
 export type Edition = '2014' | '2024';
 

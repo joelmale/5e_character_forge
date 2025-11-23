@@ -45,7 +45,14 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
     const modifier = finalAbilities[ability].modifier;
     const isProficient = allProficientSkills.includes(skillName);
 
-    let skillValue = modifier + (isProficient ? pb : 0);
+    // Check if skill has expertise (doubles proficiency bonus)
+    const hasExpertise = data.expertiseSkills?.includes(skillName) ?? false;
+
+    // Calculate skill value: modifier + proficiency (or double proficiency for expertise)
+    let skillValue = modifier;
+    if (isProficient) {
+      skillValue += hasExpertise ? pb * 2 : pb;
+    }
 
     // 2024 Cleric Thaumaturge adds WIS modifier to Arcana and Religion
     if (data.classSlug === 'cleric' && data.edition === '2024' && data.divineOrder === 'thaumaturge') {
@@ -57,6 +64,7 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
     finalSkills[skillName] = {
       proficient: isProficient,
       value: skillValue,
+      expertise: hasExpertise, // Store expertise flag for character sheet display
     };
   });
 
@@ -264,7 +272,14 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
       subclassFeatures: subclassFeatures.map(f => ({ name: f.name, slug: f.slug, level: f.level, source: 'subclass' as const })),
     },
     selectedFeats: data.selectedFeats || [],
+    // 2024 Level 1 Feature Choices
     divineOrder: data.divineOrder, // 2024 Cleric Divine Order choice
+    primalOrder: data.primalOrder, // 2024 Druid Primal Order choice
+    pactBoon: data.pactBoon, // 2024 Warlock Pact Boon choice
+    expertiseSkills: data.expertiseSkills, // Rogue, Ranger, Bard: Skills/tools with double proficiency
+    weaponMastery: data.weaponMastery, // Rogue, Fighter, Barbarian, Paladin: Mastered weapon slugs
+    fightingStyle: data.fightingStyle, // Fighter, Paladin, Ranger: Fighting Style slug
+    backgroundFeat: data.backgroundFeat, // 2024 Origin Feat from background
   };
 };
 
