@@ -213,9 +213,16 @@ export interface CharacterCreationData {
 - Implemented Protector proficiencies
 - Added proficiencies to character object
 
-### Phase 5: Documentation & Testing (TBD)
-- Created testing guide
-- Updated CLAUDE.md
+### Phase 5: Character Migration (Current Commit)
+- Bumped database version from 2 to 3
+- Implemented edition field migration for existing characters
+- Added fallback protection in getAllCharacters()
+- Default existing characters to '2014' edition
+- See MIGRATION_TEST_RESULTS.md for details
+
+### Phase 6: Documentation & Testing (e07ff22)
+- Created testing guide (TESTING_2024_CLERIC.md)
+- Updated CLAUDE.md with edition system documentation
 - Created implementation summary
 - Final verification and cleanup
 
@@ -254,7 +261,7 @@ export interface CharacterCreationData {
 
 3. **Subclass Features:** Divine Domain features beyond the domain itself are not yet differentiated between editions.
 
-4. **Character Migration:** Existing 2014 characters are not automatically migrated to 2024 rules.
+4. **Character Edition Upgrade:** Existing 2014 characters cannot be upgraded to 2024 rules (users must create new characters).
 
 ---
 

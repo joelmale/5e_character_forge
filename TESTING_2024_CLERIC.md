@@ -142,6 +142,43 @@ This document provides comprehensive testing scenarios for the 2024 Cleric imple
 
 ---
 
+### Test 7: Database Migration (v2 → v3)
+
+**Objective:** Verify existing characters are properly migrated to include edition field
+
+**Prerequisites:**
+- Existing characters in database (version 2 or earlier)
+- Use `test-migration.html` for controlled testing
+
+**Test Steps:**
+1. Open browser console
+2. Open `test-migration.html` in browser
+3. Click "Test Migration" to add legacy character without edition field
+4. Check database version (should be 3)
+5. Reload main application
+6. Check console for migration messages
+7. View characters in app
+8. Verify legacy character has `edition: '2014'`
+
+**Expected Results:**
+- ✅ Migration runs automatically on first load after v3 deployment
+- ✅ Console shows: "🔄 [DB Migration] Migrating X characters to version 3"
+- ✅ Console shows: "✏️ Adding edition field to character: [Name]"
+- ✅ Console shows: "✅ [DB Migration] Edition field migration complete"
+- ✅ Legacy characters default to '2014' edition
+- ✅ Migration runs only once (subsequent reloads skip migration)
+- ✅ New characters have edition from creation
+- ✅ No errors or crashes
+
+**Fallback Test:**
+1. Add character without edition field (bypass migration)
+2. Load characters via app
+3. Check console for fallback warning: "⚠️ [DB] Character [Name] loaded without edition field. Defaulting to 2014."
+
+**Reference:** See `MIGRATION_TEST_RESULTS.md` for detailed migration documentation
+
+---
+
 ## Known Issues
 (Document any issues found during testing)
 
@@ -157,6 +194,7 @@ This document provides comprehensive testing scenarios for the 2024 Cleric imple
 | Edition Selector | ⏳ Pending | |
 | Character Sheet Display | ⏳ Pending | |
 | Validation | ⏳ Pending | |
+| Database Migration (v2→v3) | ⏳ Pending | See MIGRATION_TEST_RESULTS.md |
 
 ---
 

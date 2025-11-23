@@ -2,7 +2,7 @@ import { Character, UserMonster, Encounter } from '../types/dnd';
 
 // --- IndexedDB Configuration ---
 const DB_NAME = '5e_character_forge';
-const DB_VERSION = 2;
+const DB_VERSION = 3; // Version 3: Add edition field migration
 const STORE_NAME = 'characters';
 const CUSTOM_MONSTERS_STORE = 'customMonsters';
 const FAVORITES_STORE = 'favoriteMonsters';
@@ -52,8 +52,59 @@ const openDB = (): Promise<IDBDatabase> => {
           encountersStore.createIndex('createdAt', 'createdAt', { unique: false });
         }
       }
+
+      // Version 3: Migrate existing characters to include edition field
+      if (oldVersion < 3 && oldVersion > 0) {
+        const transaction = (event.target as IDBOpenDBRequest).transaction!;
+        const characterStore = transaction.objectStore(STORE_NAME);
+
+        const getAllRequest = characterStore.getAll();
+        getAllRequest.onsuccess = () => {
+          const characters = getAllRequest.result as Character[];
+
+          console.log(`🔄 [DB Migration] Migrating ${characters.length} characters to version 3`);
+
+          characters.forEach((character) => {
+            // Only migrate if edition field is missing
+            if (!character.edition) {
+              console.log(`  ✏️ Adding edition field to character: ${character.name}`);
+
+              // Default to 2014 edition for existing characters
+              // (they were created under 2014 rules)
+              character.edition = '2014';
+
+              // Update the character in the store
+              characterStore.put(character);
+            }
+          });
+
+          console.log('✅ [DB Migration] Edition field migration complete');
+        };
+
+        getAllRequest.onerror = () => {
+          console.error('❌ [DB Migration] Failed to migrate characters:', getAllRequest.error);
+        };
+      }
     };
   });
+};
+
+// --- Migration Helper Functions ---
+
+/**
+ * Ensures legacy characters have required edition field.
+ * This is a fallback in case a character somehow loads without the edition field.
+ * The primary migration happens in the database upgrade handler.
+ */
+const ensureCharacterHasEdition = (character: Character): Character => {
+  if (!character.edition) {
+    console.warn(`⚠️ [DB] Character "${character.name}" loaded without edition field. Defaulting to 2014.`);
+    return {
+      ...character,
+      edition: '2014', // Default to 2014 for legacy characters
+    };
+  }
+  return character;
 };
 
 export const getAllCharacters = async (): Promise<Character[]> => {
@@ -64,7 +115,11 @@ export const getAllCharacters = async (): Promise<Character[]> => {
     const request = objectStore.getAll();
 
     request.onerror = () => reject(request.error);
-    request.onsuccess = () => resolve(request.result);
+    request.onsuccess = () => {
+      // Apply fallback migration to ensure all characters have edition field
+      const characters = (request.result as Character[]).map(ensureCharacterHasEdition);
+      resolve(characters);
+    };
   });
 };
 

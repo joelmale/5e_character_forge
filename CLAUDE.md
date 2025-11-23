@@ -400,14 +400,25 @@ This is used as a reference when adding new SRD content. Copy files into `/src/d
 ## IndexedDB Schema
 
 **Database:** `5e_character_forge`
-**Object Store:** `characters`
-**Key Path:** `id` (UUID string)
-**Indexes:**
+**Database Version:** 3
+**Object Stores:**
+- `characters` - Player characters (key: `id`)
+- `customMonsters` - User-created monsters (key: `id`)
+- `favoriteMonsters` - Favorited monster IDs (key: `monsterId`)
+- `encounters` - Saved encounters (key: `id`)
+
+**Characters Store Indexes:**
 - `name` (character name)
 - `class` (character class)
 - `level` (character level)
 
-**Migration:** Database version is 1. If schema changes are needed, increment `DB_VERSION` in `dbService.ts` and handle migration in `onupgradeneeded`.
+**Migration History:**
+- Version 1: Initial schema (characters store)
+- Version 2: Added monster-related stores (customMonsters, favoriteMonsters, encounters)
+- Version 3: Character migration - adds `edition` field to existing characters (defaults to '2014')
+
+**Adding Migrations:**
+If schema changes are needed, increment `DB_VERSION` in `dbService.ts` and handle migration in `onupgradeneeded`. See Version 3 migration (lines 56-87) for reference implementation.
 
 ## Utility Functions
 
