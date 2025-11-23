@@ -64,7 +64,18 @@ export interface Character {
   alignment: string;
   background: string;
   edition: Edition; // D&D edition (2014 or 2024 rules)
+
+  // 2024 Level 1 Feature Choices (class-specific)
   divineOrder?: 'protector' | 'thaumaturge'; // 2024 Cleric Level 1 choice
+  primalOrder?: 'magician' | 'warden'; // 2024 Druid Level 1 choice
+  pactBoon?: 'blade' | 'chain' | 'tome'; // 2024 Warlock Level 1 choice (moved from Level 3)
+  expertiseSkills?: string[]; // Rogue, Ranger, Bard: Skills/tools with double proficiency
+  weaponMastery?: string[]; // Rogue, Fighter, Barbarian, Paladin: Mastered weapon slugs
+  fightingStyle?: string; // Fighter, Paladin, Ranger: Fighting Style slug
+
+  // Background data (2024)
+  backgroundFeat?: string; // Origin Feat from background
+
   inspiration: boolean;
   proficiencyBonus: number;
   armorClass: number;
@@ -321,13 +332,26 @@ export interface CharacterCreationData {
   abilityScoreMethod: 'standard-array' | 'standard-roll' | 'classic-roll' | '5d6-drop-2' | 'point-buy' | 'custom';
   background: string;
   alignment: string;
-  divineOrder?: 'protector' | 'thaumaturge'; // 2024 Cleric Level 1 choice
+
+  // 2024 Universal Wizard Flow Fields
+  backgroundSkills?: string[]; // Skills granted by background (Step 1)
+  backgroundTools?: string[]; // Tools granted by background (Step 1)
+  backgroundFeat?: string; // Origin Feat from background (Step 1)
 
   // Sprint 1 additions
-  selectedSkills: SkillName[]; // Skills chosen from class options
+  selectedSkills: SkillName[]; // Skills chosen from class options (Step 2)
+  overflowSkills?: string[]; // Skills chosen via "Any Skill" duplicate rule (Step 2)
   equipmentChoices: EquipmentChoice[]; // Equipment selection choices
   hpCalculationMethod: 'max' | 'rolled';
   rolledHP?: number; // If rolled, store the result
+
+  // 2024 Level 1 Feature Choices (Step 3 - Variable by Class)
+  divineOrder?: 'protector' | 'thaumaturge'; // 2024 Cleric
+  primalOrder?: 'magician' | 'warden'; // 2024 Druid
+  pactBoon?: 'blade' | 'chain' | 'tome'; // 2024 Warlock
+  expertiseSkills?: string[]; // Rogue, Ranger, Bard: 2 skills/tools
+  weaponMastery?: string[]; // Rogue, Fighter, Barbarian, Paladin: 2-3 weapons
+  fightingStyle?: string; // Fighter, Paladin, Ranger
 
   // Sprint 2: Spell selection
   spellSelection: SpellSelectionData;
