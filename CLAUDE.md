@@ -229,6 +229,84 @@ Located in `/src/data/srd/`:
 - Spell database: **Merged 2014+2024 SRD** loaded in `dataService.ts` as `SPELL_DATABASE`
 - Source tracking: Each spell has `source` field ('2014' or '2024')
 
+### Edition System (2014 vs 2024 Rules)
+
+**Edition Support:**
+The app supports both D&D 2014 (original 5e) and 2024 (revised 5e) rules through an edition system.
+
+**Edition Type:**
+- Defined as `type Edition = '2014' | '2024'` in `/src/types/dnd.ts`
+- Stored in `Character.edition` and `CharacterCreationData.edition`
+- Default edition: `'2024'` (set in `/src/data/wizardConfig.json`)
+
+**Edition Selection:**
+- User selects edition in Step0Level of character creation wizard
+- Edition selector with visual toggle between 2014 and 2024 rules
+- Edition choice affects class features, subclass timing, and proficiencies
+
+**Edition-Specific Class Data:**
+- 2014 classes: `/src/data/srd/2014/5e-SRD-Classes.json`
+- 2024 classes: `/src/data/srd/2024/5e-SRD-Classes.json`
+- `loadClasses(edition?: Edition)` merges both and filters by edition if specified
+- Each class has `edition` field to identify its rule set
+
+### 2024 Cleric - Divine Order System
+
+**Divine Order Feature (Level 1):**
+The 2024 Cleric has a unique Level 1 feature called Divine Order, replacing the 2014 Cleric's Level 1 Divine Domain.
+
+**Two Divine Order Choices:**
+
+1. **Protector** - Battle-focused divine warrior
+   - **Proficiencies:** Heavy Armor, Martial Weapons
+   - **Implementation:** Added to `character.proficiencies.armor` and `character.proficiencies.weapons`
+   - **Stored in:** `Character.divineOrder = 'protector'`
+
+2. **Thaumaturge** - Magic and knowledge focused
+   - **Benefits:**
+     - +1 Cantrip known (total 4 at level 1 instead of 3)
+     - Add WIS modifier to Arcana skill checks
+     - Add WIS modifier to Religion skill checks
+   - **Implementation:**
+     - Cantrip bonus in `Step4Spells.tsx` (line 85-88)
+     - Skill bonuses in `wizard.utils.ts` skill calculation (line 50-55)
+   - **Stored in:** `Character.divineOrder = 'thaumaturge'`
+
+**Divine Order Selection:**
+- Displayed in `Step3Class.tsx` (line 249-312)
+- Required for 2024 Clerics before proceeding
+- Validation in next button disabled logic (line 401)
+- Stored in character features list with description
+
+**Subclass Timing Differences:**
+- **2014 Cleric:** Divine Domain at Level 1
+- **2024 Cleric:** Divine Domain at Level 3
+- Implementation: Dynamic subclass level requirement in `Step3Class.tsx` (line 320-323)
+
+**Character Creation Flow (2024 Cleric):**
+1. Select Level (1-20)
+2. Select Edition: 2024
+3. Select Cleric class
+4. **Choose Divine Order** (Protector or Thaumaturge) - Level 1 feature
+5. Choose Divine Domain (Life, War, etc.) - Only if Level 3+
+6. Select skills
+7. Select spells (cantrip count adjusted for Thaumaturge)
+8. Complete character
+
+**Key Files:**
+- Types: `/src/types/dnd.ts` (Edition type, divineOrder field)
+- Class Data: `/src/data/srd/2024/5e-SRD-Classes.json`
+- Divine Order UI: `/src/components/CharacterCreationWizard/steps/Step3Class.tsx`
+- Edition Selector: `/src/components/CharacterCreationWizard/steps/Step0Level.tsx`
+- Cantrip Adjustment: `/src/components/CharacterCreationWizard/steps/Step4Spells.tsx`
+- Skill Bonuses: `/src/components/CharacterCreationWizard/utils/wizard.utils.ts`
+- Character Calculation: `/src/utils/spellUtils.ts`, `/src/services/characterService.ts`
+
+**Testing:**
+- See `/TESTING_2024_CLERIC.md` for comprehensive test scenarios
+- Test both Protector and Thaumaturge paths
+- Verify 2014 Cleric still works correctly (domain at Level 1, no Divine Order)
+
 ### Equipment System
 
 **Equipped Item Flow:**
