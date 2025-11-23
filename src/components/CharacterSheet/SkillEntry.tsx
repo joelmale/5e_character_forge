@@ -28,7 +28,7 @@ const SKILL_DESCRIPTIONS: Record<SkillName, string> = {
 
 interface SkillEntryProps {
   name: SkillName;
-  skill: { value: number; proficient: boolean };
+  skill: { value: number; proficient: boolean; expertise?: boolean };
   setRollResult: (result: {
     text: string;
     value: number | null;
@@ -110,6 +110,10 @@ export const SkillEntry: React.FC<SkillEntryProps> = ({
           <div className="flex items-center gap-1.5">
              {/* Proficiency bubble */}
              <div className={`w-3 h-3 rounded-full border ${skill.proficient ? 'bg-accent-yellow border-yellow-500' : 'border-gray-500'}`} />
+             {/* Expertise indicator */}
+             {skill.expertise && (
+               <span className="text-amber-400 text-xs" title="Expertise: Proficiency bonus doubled">⭐</span>
+             )}
              {/* Roll indicator */}
              {getRollIcon() && (
                <span className="text-xs font-bold text-accent-green-light">{getRollIcon()}</span>
@@ -186,8 +190,12 @@ export const SkillEntry: React.FC<SkillEntryProps> = ({
              {skillLabel}
            </span>
            {/* Proficiency indicator */}
-           {skill.proficient && (
+           {skill.proficient && !skill.expertise && (
              <span className="text-accent-yellow-light">●</span>
+           )}
+           {/* Expertise indicator */}
+           {skill.expertise && (
+             <span className="text-amber-400" title="Expertise: Proficiency bonus doubled">⭐</span>
            )}
          </div>
         <span className="font-mono font-bold text-accent-yellow-light ml-1">{formatModifier(skill.value)}</span>

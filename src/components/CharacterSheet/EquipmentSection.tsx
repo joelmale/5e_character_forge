@@ -55,26 +55,40 @@ export const EquipmentSection: React.FC<EquipmentSectionProps> = ({
           </div>
         ) : (
           <div className="space-y-2 max-h-[400px] overflow-y-auto">
-            {character.inventory.map((item, idx) => (
-              <div key={idx} className="bg-theme-tertiary/50 p-2 rounded hover:bg-theme-tertiary transition-colors">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex-grow min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <button
-                        onClick={() => {
-                          const equipment = loadEquipment().find(eq => eq.slug === item.equipmentSlug);
-                          setEquipmentModal(equipment || null);
-                        }}
-                        className="font-semibold text-theme-primary hover:text-orange-300 transition-colors text-left"
-                      >
-                        {item.equipmentSlug}
-                      </button>
-                      {item.equipped && <span className="text-xs bg-accent-green px-2 py-0.5 rounded">Equipped</span>}
+            {character.inventory.map((item, idx) => {
+              const equipment = loadEquipment().find(eq => eq.slug === item.equipmentSlug);
+              const isWeapon = equipment?.weapon_category !== undefined;
+              const isMastered = character.weaponMastery?.includes(item.equipmentSlug);
+              const masteryProperty = equipment?.mastery;
+
+              return (
+                <div key={idx} className="bg-theme-tertiary/50 p-2 rounded hover:bg-theme-tertiary transition-colors">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-grow min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <button
+                          onClick={() => {
+                            setEquipmentModal(equipment || null);
+                          }}
+                          className="font-semibold text-theme-primary hover:text-orange-300 transition-colors text-left"
+                        >
+                          {item.equipmentSlug}
+                        </button>
+                        {item.equipped && <span className="text-xs bg-accent-green px-2 py-0.5 rounded">Equipped</span>}
+                        {/* Weapon Mastery Indicator */}
+                        {isWeapon && isMastered && masteryProperty && (
+                          <span
+                            className="text-xs bg-amber-900/50 border border-amber-500/50 text-amber-300 px-2 py-0.5 rounded flex items-center gap-1"
+                            title={`Mastery: ${masteryProperty.name} - ${masteryProperty.description || 'Special weapon technique'}`}
+                          >
+                            ⚔️ {masteryProperty.name}
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-xs text-theme-muted">
+                        Equipment | Weight: {item.quantity * 1} lb
+                      </div>
                     </div>
-                    <div className="text-xs text-theme-muted">
-                      Equipment | Weight: {item.quantity * 1} lb
-                    </div>
-                  </div>
                   <div className="flex items-center gap-2 flex-shrink-0">
                     <span className="font-mono text-sm text-theme-tertiary">×{item.quantity}</span>
                     <div className="flex gap-1">
@@ -89,7 +103,8 @@ export const EquipmentSection: React.FC<EquipmentSectionProps> = ({
                   </div>
                 </div>
               </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
