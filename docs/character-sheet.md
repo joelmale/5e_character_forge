@@ -4,23 +4,207 @@ The 5e Character Forge character sheet is a comprehensive, interactive hub for m
 
 ## Table of Contents
 
-1. [Layout Options](#layout-options)
-2. [Core Character Information](#core-character-information)
-3. [Ability Scores & Checks](#ability-scores--checks)
-4. [Skills & Saving Throws](#skills--saving-throws)
-5. [Combat Statistics](#combat-statistics)
-6. [Hit Points & Health Management](#hit-points--health-management)
-7. [Spellcasting](#spellcasting)
-8. [Equipment & Inventory](#equipment--inventory)
-9. [Features & Traits](#features--traits)
-10. [Conditions & Status Effects](#conditions--status-effects)
-11. [Currency Management](#currency-management)
-12. [Experience & Leveling](#experience--leveling)
-13. [Attunement & Magic Items](#attunement--magic-items)
-14. [Proficiencies & Languages](#proficiencies--languages)
-15. [Dice Rolling & Initiative](#dice-rolling--initiative)
-16. [Resting & Recovery](#resting--recovery)
-17. [Customization & Settings](#customization--settings)
+1. [Edition Selection (2014 vs 2024 Rules)](#edition-selection-2014-vs-2024-rules)
+2. [2024 Cleric - Divine Order System](#2024-cleric---divine-order-system)
+3. [Layout Options](#layout-options)
+4. [Core Character Information](#core-character-information)
+5. [Ability Scores & Checks](#ability-scores--checks)
+6. [Skills & Saving Throws](#skills--saving-throws)
+7. [Combat Statistics](#combat-statistics)
+8. [Hit Points & Health Management](#hit-points--health-management)
+9. [Spellcasting](#spellcasting)
+10. [Equipment & Inventory](#equipment--inventory)
+11. [Features & Traits](#features--traits)
+12. [Conditions & Status Effects](#conditions--status-effects)
+13. [Currency Management](#currency-management)
+14. [Experience & Leveling](#experience--leveling)
+15. [Attunement & Magic Items](#attunement--magic-items)
+16. [Proficiencies & Languages](#proficiencies--languages)
+17. [Dice Rolling & Initiative](#dice-rolling--initiative)
+18. [Resting & Recovery](#resting--recovery)
+19. [Customization & Settings](#customization--settings)
+
+## Edition Selection (2014 vs 2024 Rules)
+
+The 5e Character Forge now supports both the 2014 (original 5th Edition) and 2024 (revised 5th Edition) D&D rules. Your choice of edition affects class features, subclass timing, proficiencies, and special abilities.
+
+### Choosing Your Edition
+
+During character creation (Step 0: Level Selection), you'll see an **Edition Selector** with two options:
+
+**2014 Rules (Classic 5th Edition)**
+- Original Player's Handbook rules
+- Traditional class features and progression
+- Level 1 subclass for Clerics
+- Standard proficiency progression
+
+**2024 Rules (Updated 5th Edition)** - *Default*
+- Revised rules and features
+- Updated class mechanics
+- Level 3 subclass for Clerics
+- New features like Divine Order for Clerics
+
+### How Edition Affects Your Character
+
+**Class Features:**
+- 2024 Cleric: Divine Order at Level 1, Divine Domain at Level 3
+- 2014 Cleric: Divine Domain at Level 1
+
+**Proficiencies:**
+- 2024 Cleric Protector: Heavy Armor + Martial Weapons
+- 2024 Cleric Thaumaturge: Standard armor proficiencies
+
+**Spellcasting:**
+- 2024 Cleric Thaumaturge: +1 bonus cantrip
+- Level-aware spell selection for all casters
+
+**Skill Bonuses:**
+- 2024 Cleric Thaumaturge: WIS modifier to Arcana and Religion checks
+
+### Important Notes
+
+- **Edition is set during character creation** and stored with your character
+- **Cannot be changed later** - create a new character to use a different edition
+- **All classes default to 2024 rules** when 2024 edition is selected
+- **Only Cleric has full 2024 implementation** currently (other classes use 2014 rules)
+- **Character sheet automatically applies** edition-specific bonuses and features
+
+## 2024 Cleric - Divine Order System
+
+The 2024 Cleric introduces a new Level 1 feature called **Divine Order**, replacing the 2014 Cleric's Level 1 Divine Domain selection. This choice fundamentally shapes your Cleric's role and capabilities.
+
+### Divine Order: Protector
+
+**Theme:** Battle-hardened divine warrior who protects the faithful in heavy armor
+
+**Proficiencies Granted:**
+- **Heavy Armor:** Can wear plate mail, splint armor, and other heavy armor
+- **Martial Weapons:** Can wield longswords, greatswords, warhammers, and all martial weapons
+
+**Best For:**
+- Front-line melee combat Clerics
+- Tank builds focused on high AC
+- Characters who want to be in the thick of battle
+- Life Domain, War Domain, and Forge Domain synergies
+
+**Gameplay Impact:**
+- Significantly higher AC potential (18+ with plate armor)
+- Access to powerful two-handed weapons for damage
+- Can serve as party tank or melee striker
+- Still retains full spellcasting capabilities
+
+**Equipment Recommendations:**
+- Plate Armor (AC 18) or Chain Mail (AC 16)
+- Longsword and Shield (AC +2) or Greatsword for damage
+- Holy Symbol as spellcasting focus
+
+### Divine Order: Thaumaturge
+
+**Theme:** Magic and knowledge-focused divine scholar channeling raw divine power
+
+**Bonuses Granted:**
+- **+1 Cantrip Known:** 4 cantrips at Level 1 instead of 3
+- **Wisdom to Arcana:** Add your WIS modifier to Arcana skill checks
+- **Wisdom to Religion:** Add your WIS modifier to Religion skill checks
+
+**Best For:**
+- Spellcasting-focused Clerics
+- Knowledge and utility builds
+- Characters who want to excel at divine lore
+- Knowledge Domain, Arcana Domain, and Magic Domain synergies
+
+**Gameplay Impact:**
+- More cantrip versatility (Guidance, Sacred Flame, Spare the Dying, + 1 more)
+- Superior knowledge skills (potentially +3 to +5 on Arcana/Religion checks)
+- Better at identifying magical effects and religious context
+- Retains standard Cleric armor proficiencies (Light/Medium)
+
+**Skill Calculation Example:**
+- Intelligence 14 (+2 modifier) + Wisdom 16 (+3 modifier) + Proficiency Bonus +2
+- **Arcana:** +2 (INT) +3 (WIS) +2 (proficiency) = **+7 total**
+- **Religion:** +2 (INT) +3 (WIS) +2 (proficiency) = **+7 total**
+
+**Cantrip Selection Tips:**
+- Take offensive cantrips (Sacred Flame, Toll the Dead)
+- Include utility (Guidance, Thaumaturgy)
+- Consider support (Spare the Dying, Resistance)
+- Your 4th cantrip offers great flexibility
+
+### Divine Order Selection Process
+
+1. **Create a 2024 Cleric** (select 2024 edition in Step 0)
+2. **Choose your class** (Cleric) in Step 3
+3. **Divine Order appears** as required Level 1 feature
+4. **Select Protector or Thaumaturge** - cannot proceed without selection
+5. **Continue with character creation** - your choice affects later steps
+
+**Visual Indicators:**
+- Protector: 🛡️ Shield icon
+- Thaumaturge: ✨ Sparkles icon
+- Both options show detailed benefit descriptions
+
+### Divine Domain (Subclass) Timing
+
+**2024 Cleric:**
+- Level 1: Choose Divine Order (Protector or Thaumaturge)
+- Level 3: Choose Divine Domain (Life, War, Knowledge, etc.)
+
+**2014 Cleric:**
+- Level 1: Choose Divine Domain immediately
+- No Divine Order feature
+
+### Character Sheet Display
+
+Your Divine Order choice appears in several places on your character sheet:
+
+**Features & Traits Section:**
+- "Divine Order: Protector (Heavy Armor & Martial Weapons proficiency)"
+- "Divine Order: Thaumaturge (+1 Cantrip, WIS to Arcana & Religion checks)"
+
+**Proficiencies Section:**
+- Protector: Lists "Heavy Armor" and "Martial Weapons"
+- Thaumaturge: Standard Cleric proficiencies
+
+**Skills Section:**
+- Thaumaturge: Arcana and Religion show bonus from WIS modifier
+- Hover over skill to see bonus breakdown
+
+**Spellcasting Section:**
+- Thaumaturge: Shows 4 cantrips known at Level 1
+- Protector: Shows standard 3 cantrips
+
+### Strategic Considerations
+
+**Choose Protector if:**
+- You want high AC and melee capabilities
+- Your party lacks a frontline tank
+- You're playing Life, War, or Forge Domain
+- You enjoy tactical positioning in combat
+
+**Choose Thaumaturge if:**
+- You want to maximize spellcasting versatility
+- Your party needs knowledge and investigation skills
+- You're playing Knowledge, Arcana, or Light Domain
+- You prefer staying at range and casting spells
+
+**Can't Decide?**
+- Consider your party composition - fill gaps
+- Think about your Domain choice (if Level 3+)
+- Review your ability scores (high STR/CON favors Protector, high WIS favors Thaumaturge)
+- Both options are viable and powerful!
+
+### Technical Details
+
+**Implementation:**
+- Divine Order stored in `character.divineOrder` field
+- Proficiencies added to `character.proficiencies` object
+- Skill bonuses calculated in skill value computation
+- Cantrip bonus applied in spell selection
+- Validation requires Divine Order before proceeding
+
+**Testing Resources:**
+- See `TESTING_2024_CLERIC.md` for comprehensive test scenarios
+- See `2024_CLERIC_IMPLEMENTATION.md` for technical implementation details
 
 ## Layout Options
 
