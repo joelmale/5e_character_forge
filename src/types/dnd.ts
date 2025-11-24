@@ -1,4 +1,5 @@
 import gameConstantsData from '../data/gameConstants.json';
+import type { Level1Feature } from './widgets';
 
 export const ABILITY_SCORES = gameConstantsData.ABILITY_SCORES as readonly string[];
 export type Ability = typeof ABILITY_SCORES[number];
@@ -453,6 +454,9 @@ export interface Class {
   keyFeatures: string[];
   icon: string;
   themeColor: string;
+
+  // 2024 Universal Widget System
+  level_1_features?: Level1Feature[]; // Widget-driven Level 1 features
 }
 
 export interface ClassCategory {

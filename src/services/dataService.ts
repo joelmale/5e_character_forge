@@ -194,6 +194,13 @@ interface SRDClass {
       desc: string[];
     }>;
   };
+  level_1_features?: Array<{
+    id: string;
+    name: string;
+    desc: string;
+    widget_type: string;
+    widget_config: unknown;
+  }>;
 }
 
 // Equipment SRD Type Definitions
@@ -441,8 +448,8 @@ export function transformClass(srdClass: SRDClass, year: number = 2014): Class {
         type = 'prepared';
         break;
       case 'druid':
-        cantripsKnown = 2;
-        spellsKnownOrPrepared = 2;
+        cantripsKnown = 2; // Base count, +1 for Magician Primal Order applied in wizard
+        spellsKnownOrPrepared = 0; // Calculated dynamically: WIS modifier + level
         type = 'prepared';
         break;
       case 'paladin':
@@ -543,7 +550,10 @@ export function transformClass(srdClass: SRDClass, year: number = 2014): Class {
     roleplayingTips: ['Play to your character\'s strengths and background'],
     keyFeatures: [],
     icon: '⚔️',
-    themeColor: '#666666'
+    themeColor: '#666666',
+
+    // Preserve level_1_features for 2024 widget system
+    ...(srdClass.level_1_features && { level_1_features: srdClass.level_1_features as any })
   };
 }
 

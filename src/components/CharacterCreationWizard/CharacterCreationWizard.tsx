@@ -106,8 +106,8 @@ export const CharacterCreationWizard: React.FC<WizardProps> = ({
       case 2: return <Step2Race {...commonProps} />;
       case 3: return <Step3Class {...commonProps} />;
       case 4: return <Step3point5FightingStyle {...commonProps} />;
-      case 5: return <Step4Spells {...commonProps} />;
-      case 6: return <Step4Abilities {...commonProps} />;
+      case 5: return <Step4Abilities {...commonProps} />;
+      case 6: return <Step4Spells {...commonProps} />;
       case 7: return <Step5point5Feats {...commonProps} />;
       case 8: return <Step9Languages {...commonProps} />;
       case 9: return <Step6Equipment {...commonProps} skipToStep={skipToStep} />;
