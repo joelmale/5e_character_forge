@@ -307,9 +307,16 @@
 .text-theme-disabled { color: rgb(var(--color-text-disabled)); }
 .text-white { color: 255 255 255; }
 
+/* Theme-aware text colors */
+.text-theme-aware {
+  color: rgb(var(--color-text-primary));
+}
+
 /* Theme-specific overrides for text-white */
-[data-theme="paper"] .text-white { color: 0 0 0; }
-[data-theme="light"] .text-white { color: 0 0 0; }
+[data-theme="paper"] .text-white,
+[data-theme="light"] .text-white {
+  color: 0 0 0 !important;
+}
 
 /* Border utilities */
 .border-theme-primary { border-color: rgb(var(--color-border-primary)); }

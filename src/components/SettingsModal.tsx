@@ -25,7 +25,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
       <div className="bg-theme-secondary rounded-xl shadow-theme-lg w-full max-w-md">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-theme-secondary">
-          <h2 className="text-xl font-bold text-white">Settings</h2>
+          <h2 className="text-xl font-bold text-theme-primary">Settings</h2>
           <button
             onClick={onClose}
             className="p-2 hover:bg-theme-tertiary rounded-lg transition-colors"
@@ -54,7 +54,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
                     className="mt-1 w-4 h-4 accent-accent-purple"
                   />
                   <div className="flex-1">
-                    <div className="font-medium text-white">
+                    <div className="font-medium text-theme-primary">
                       {getThemeDisplayName(themeOption)}
                     </div>
                     <div className="text-sm text-theme-muted mt-1">
@@ -74,7 +74,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
           </div>
           <button
             onClick={onClose}
-            className="px-6 py-2 bg-accent-purple hover:bg-accent-purple-light rounded-lg text-white font-semibold transition-colors"
+            className="px-6 py-2 bg-accent-purple hover:bg-accent-purple-light rounded-lg text-theme-aware font-semibold transition-colors"
           >
             Close
           </button>
