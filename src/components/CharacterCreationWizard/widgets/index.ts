@@ -8,6 +8,7 @@
 export { SelectionPoolWidget } from './SelectionPoolWidget';
 export { BranchChoiceWidget } from './BranchChoiceWidget';
 export { AutomaticWidget } from './AutomaticWidget';
+export { ListSelectionWidget } from './ListSelectionWidget';
 
 // Re-export widget types for convenience
 export type {
@@ -17,10 +18,12 @@ export type {
   Level1Feature,
   SelectionPoolConfig,
   BranchChoiceConfig,
+  ListSelectionConfig,
   AutomaticConfig,
   BaseWidgetProps,
   SelectionPoolWidgetProps,
   BranchChoiceWidgetProps,
+  ListSelectionWidgetProps,
   AutomaticWidgetProps,
   SkillOption,
   WeaponOption,

@@ -114,9 +114,20 @@ export const SelectionPoolWidget: React.FC<SelectionPoolWidgetProps> = ({
     const allEquipment = loadEquipment();
     const weapons = allEquipment.filter(eq => eq.equipment_category === 'Weapon');
 
-    // Filter based on class proficiencies
+    // Filter based on class proficiencies and restrictions
     const proficientWeapons = weapons.filter(weapon => {
-      return isWeaponProficient(weapon);
+      // First check if proficient
+      if (!isWeaponProficient(weapon)) {
+        return false;
+      }
+
+      // Apply additional filters based on config
+      if (config.filter === 'proficient_melee_weapons') {
+        // Barbarian restriction: melee weapons only
+        return isWeaponMelee(weapon);
+      }
+
+      return true;
     });
 
     return proficientWeapons.map(weapon => ({
@@ -145,6 +156,20 @@ export const SelectionPoolWidget: React.FC<SelectionPoolWidgetProps> = ({
     }
 
     return false;
+  };
+
+  /**
+   * Check if weapon is melee (for Barbarian melee-only restriction)
+   */
+  const isWeaponMelee = (weapon: Equipment): boolean => {
+    const properties = weapon.properties?.map(p => p.index) || [];
+
+    // Weapon is ranged if it has the 'ammunition' or 'thrown' property
+    // OR if its weapon_range is 'Ranged'
+    const isRanged = weapon.weapon_range === 'Ranged' ||
+                     properties.includes('ammunition');
+
+    return !isRanged;
   };
 
   // ============================================================================

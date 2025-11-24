@@ -33,25 +33,28 @@ Implement Druid, Warlock, Fighter, Barbarian, and Paladin for 2024 edition using
 
 ---
 
-## Phase 2: Widget Components ⏸️ PENDING
-**Estimated Time:** 1-2 hours
+## Phase 2: Widget Components ✅ COMPLETE
+**Estimated Time:** 1-2 hours | **Actual Time:** 30 minutes
 
 ### 2.1 Create ListSelectionWidget
 **File:** `src/components/CharacterCreationWizard/widgets/ListSelectionWidget.tsx`
-- [ ] Radio-style selection (choose 1 from list)
-- [ ] Support Fighting Styles (with descriptions)
-- [ ] Support Eldritch Invocations (with descriptions)
-- [ ] Display prerequisites if applicable
-- [ ] Amber theme matching existing widgets
+- [x] Radio-style selection (choose 1 from list)
+- [x] Support Fighting Styles (10 options with descriptions)
+- [x] Support Eldritch Invocations (6 level-1 compatible options)
+- [x] Display prerequisites if applicable
+- [x] Amber theme matching existing widgets
+- [x] 300+ lines of code with full documentation
 
 ### 2.2 Update SelectionPoolWidget
 **File:** `src/components/CharacterCreationWizard/widgets/SelectionPoolWidget.tsx`
-- [ ] Add `proficient_melee_weapons` filter case
-- [ ] Filter out ranged weapons for Barbarian weapon mastery
+- [x] Add `proficient_melee_weapons` filter case
+- [x] Filter out ranged weapons with `isWeaponMelee()` function
+- [x] Exclude weapons with 'ammunition' property or weapon_range='Ranged'
 
 ### 2.3 Update Widget Index
 **File:** `src/components/CharacterCreationWizard/widgets/index.ts`
-- [ ] Export ListSelectionWidget
+- [x] Export ListSelectionWidget
+- [x] Export ListSelectionConfig and ListSelectionWidgetProps types
 
 ---
 
@@ -194,14 +197,14 @@ Implement Druid, Warlock, Fighter, Barbarian, and Paladin for 2024 edition using
 | Phase | Status | Progress |
 |-------|--------|----------|
 | Phase 1: Type System | ✅ Complete | 3/3 tasks |
-| Phase 2: Widget Components | ⏸️ Pending | 0/3 tasks |
+| Phase 2: Widget Components | ✅ Complete | 3/3 tasks |
 | Phase 3: Class Data Files | ⏸️ Pending | 0/5 tasks |
 | Phase 4: Calculations | ⏸️ Pending | 0/3 tasks |
 | Phase 5: Integration | ⏸️ Pending | 0/2 tasks |
 | Phase 6: Level Progression | ⏸️ Pending | 0/3 tasks |
 | Phase 7: Data Files | ⏸️ Pending | 0/2 tasks |
 | Phase 8: Testing | ⏸️ Pending | 0/2 tasks |
-| **TOTAL** | **13%** | **3/23 tasks** |
+| **TOTAL** | **26%** | **6/23 tasks** |
 
 ---
 
