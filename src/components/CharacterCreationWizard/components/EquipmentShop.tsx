@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { ShoppingCart, Minus, Plus, Coins, AlertTriangle } from 'lucide-react';
+import { ShoppingCart, Minus, Plus, Coins, AlertTriangle, X, Info } from 'lucide-react';
 import { loadNewPlayerShop } from '../../../services/dataService';
 import { calculatePurchaseCost, canAffordPurchase } from '../../../services/equipmentService';
 import { ShopItem, PurchasedItem } from '../../../types/equipment';
@@ -21,6 +21,10 @@ export const EquipmentShop: React.FC<EquipmentShopProps> = ({
 }) => {
   const shopInventory = loadNewPlayerShop();
   const [cart, setCart] = useState<Map<string, CartItem>>(new Map());
+  const [descriptionModal, setDescriptionModal] = useState<{ item: ShopItem | null; isOpen: boolean }>({
+    item: null,
+    isOpen: false
+  });
 
   // Group items by category
   const itemsByCategory = useMemo(() => {
@@ -93,6 +97,19 @@ export const EquipmentShop: React.FC<EquipmentShopProps> = ({
 
   const getCartQuantity = (itemId: string): number => {
     return cart.get(itemId)?.quantity || 0;
+  };
+
+  const openDescriptionModal = (item: ShopItem) => {
+    setDescriptionModal({ item, isOpen: true });
+  };
+
+  const closeDescriptionModal = () => {
+    setDescriptionModal({ item: null, isOpen: false });
+  };
+
+  const isDescriptionTruncated = (description: string | undefined): boolean => {
+    // Rough estimation: if description is longer than ~150 characters, it's likely more than 3 lines
+    return description ? description.length > 150 : false;
   };
 
   return (
@@ -220,9 +237,24 @@ export const EquipmentShop: React.FC<EquipmentShopProps> = ({
                   )}
 
                   {item.description && (
-                    <p className="text-xs text-theme-tertiary mb-3 line-clamp-2">
-                      {item.description}
-                    </p>
+                    <div className="text-xs text-theme-tertiary mb-3">
+                      <p className={`line-clamp-3 ${isDescriptionTruncated(item.description) ? 'cursor-pointer hover:text-theme-primary' : ''}`}
+                         onClick={() => isDescriptionTruncated(item.description) && openDescriptionModal(item)}>
+                        {item.description}
+                        {isDescriptionTruncated(item.description) && (
+                          <span className="text-theme-muted ml-1">...</span>
+                        )}
+                      </p>
+                      {isDescriptionTruncated(item.description) && (
+                        <button
+                          onClick={() => openDescriptionModal(item)}
+                          className="text-xs text-accent-blue-light hover:text-accent-blue mt-1 flex items-center gap-1"
+                        >
+                          <Info className="w-3 h-3" />
+                          Read more
+                        </button>
+                      )}
+                    </div>
                   )}
 
                   <div className="flex items-center justify-between">
@@ -271,6 +303,37 @@ export const EquipmentShop: React.FC<EquipmentShopProps> = ({
           Complete Purchase ({cartItems.length} items)
         </button>
       </div>
+
+      {/* Description Modal */}
+      {descriptionModal.isOpen && descriptionModal.item && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-theme-secondary rounded-xl shadow-2xl w-full max-w-lg max-h-[80vh] overflow-hidden">
+            <div className="flex items-center justify-between p-6 border-b border-theme-secondary">
+              <h3 className="text-lg font-bold text-theme-primary">{descriptionModal.item.name}</h3>
+              <button
+                onClick={closeDescriptionModal}
+                className="p-2 hover:bg-theme-tertiary rounded-lg transition-colors"
+                aria-label="Close description"
+              >
+                <X className="w-5 h-5 text-theme-muted" />
+              </button>
+            </div>
+            <div className="p-6 overflow-y-auto max-h-[60vh]">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-accent-yellow-light font-bold">{descriptionModal.item.cost_gp} gp</span>
+                  {descriptionModal.item.ac && (
+                    <span className="text-accent-green-light">AC: {descriptionModal.item.ac}</span>
+                  )}
+                </div>
+                <div className="text-theme-tertiary leading-relaxed">
+                  {descriptionModal.item.description}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
