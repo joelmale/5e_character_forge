@@ -61,6 +61,13 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
       }
     }
 
+    // 2024 Druid Magician adds WIS modifier to Arcana and Nature
+    if (data.classSlug === 'druid' && data.edition === '2024' && data.primalOrder === 'magician') {
+      if (skillName === 'Arcana' || skillName === 'Nature') {
+        skillValue += finalAbilities.WIS.modifier;
+      }
+    }
+
     finalSkills[skillName] = {
       proficient: isProficient,
       value: skillValue,
@@ -279,6 +286,8 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
     expertiseSkills: data.expertiseSkills, // Rogue, Ranger, Bard: Skills/tools with double proficiency
     weaponMastery: data.weaponMastery, // Rogue, Fighter, Barbarian, Paladin: Mastered weapon slugs
     fightingStyle: data.fightingStyle, // Fighter, Paladin, Ranger: Fighting Style slug
+    eldritchInvocations: data.eldritchInvocations, // 2024 Warlock: Eldritch Invocations
+    secondWindUses: data.secondWindUses, // 2024 Fighter: Second Wind uses remaining
     backgroundFeat: data.backgroundFeat, // 2024 Origin Feat from background
   };
 };

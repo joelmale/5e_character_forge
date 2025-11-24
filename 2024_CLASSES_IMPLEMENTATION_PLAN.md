@@ -99,24 +99,24 @@ Implement Druid, Warlock, Fighter, Barbarian, and Paladin for 2024 edition using
 
 ---
 
-## Phase 4: Calculation Updates ⏸️ PENDING
-**Estimated Time:** 1 hour
+## Phase 4: Calculation Updates ✅ COMPLETE
+**Estimated Time:** 1 hour | **Actual Time:** 15 minutes
 
 ### 4.1 Implement Primal Order Bonuses
 **File:** `src/components/CharacterCreationWizard/utils/wizard.utils.ts`
-- [ ] Add skill bonus calculation for Druid Magician
-- [ ] +WIS to Arcana and Nature (similar to Thaumaturge)
+- [x] Add skill bonus calculation for Druid Magician (lines 64-69)
+- [x] +WIS to Arcana and Nature (similar to Thaumaturge)
 
 ### 4.2 Store New Level 1 Features
 **File:** `src/components/CharacterCreationWizard/utils/wizard.utils.ts`
-- [ ] Transfer `eldritchInvocations` array to Character
-- [ ] Transfer `secondWindUses` (default 2 for level 1 Fighter)
-- [ ] Verify `primalOrder` already transferred
+- [x] Transfer `eldritchInvocations` array to Character (line 289)
+- [x] Transfer `secondWindUses` (line 290)
+- [x] Verify `primalOrder` already transferred (line 284) ✓
 
 ### 4.3 Cantrip Bonus for Druid Magician
 **File:** `src/components/CharacterCreationWizard/steps/Step4Spells.tsx`
-- [ ] Check `data.primalOrder === 'magician'`
-- [ ] Add +1 to cantrip count
+- [x] Check `data.primalOrder === 'magician'` (lines 90-93)
+- [x] Add +1 to cantrip count
 
 ---
 
@@ -199,12 +199,12 @@ Implement Druid, Warlock, Fighter, Barbarian, and Paladin for 2024 edition using
 | Phase 1: Type System | ✅ Complete | 3/3 tasks |
 | Phase 2: Widget Components | ✅ Complete | 3/3 tasks |
 | Phase 3: Class Data Files | ✅ Complete | 5/5 tasks |
-| Phase 4: Calculations | ⏸️ Pending | 0/3 tasks |
+| Phase 4: Calculations | ✅ Complete | 3/3 tasks |
 | Phase 5: Integration | ⏸️ Pending | 0/2 tasks |
 | Phase 6: Level Progression | ⏸️ Pending | 0/3 tasks |
 | Phase 7: Data Files | ⏸️ Pending | 0/2 tasks |
 | Phase 8: Testing | ⏸️ Pending | 0/2 tasks |
-| **TOTAL** | **48%** | **11/23 tasks** |
+| **TOTAL** | **61%** | **14/23 tasks** |
 
 ---
 
@@ -212,4 +212,4 @@ Implement Druid, Warlock, Fighter, Barbarian, and Paladin for 2024 edition using
 
 ---
 
-**Last Updated:** Phase 3 complete (20 minutes)
+**Last Updated:** Phase 4 complete (15 minutes)

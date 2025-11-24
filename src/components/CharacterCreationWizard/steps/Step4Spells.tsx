@@ -87,6 +87,11 @@ export const Step4Spells: React.FC<StepProps> = ({ data, updateData, nextStep, p
     cantripsKnownAtLevel += 1;
   }
 
+  // 2024 Druid Magician gets +1 cantrip
+  if (data.classSlug === 'druid' && data.edition === '2024' && data.primalOrder === 'magician') {
+    cantripsKnownAtLevel += 1;
+  }
+
   // For prepared casters (Cleric, Druid, Paladin), calculate max prepared spells
   const maxPreparedSpellsAtLevel = spellcastingType === 'prepared'
     ? getMaxPreparedSpells(data.abilities, spellcasting.ability, data.level)
