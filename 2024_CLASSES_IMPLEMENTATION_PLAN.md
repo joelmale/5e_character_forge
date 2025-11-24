@@ -120,21 +120,22 @@ Implement Druid, Warlock, Fighter, Barbarian, and Paladin for 2024 edition using
 
 ---
 
-## Phase 5: Step3Class Integration ⏸️ PENDING
-**Estimated Time:** 30 minutes
+## Phase 5: Step3Class Integration ✅ COMPLETE
+**Estimated Time:** 30 minutes | **Actual Time:** 20 minutes
 
 ### 5.1 Update Widget Rendering
 **File:** `src/components/CharacterCreationWizard/steps/Step3Class.tsx`
-- [ ] Add `list_selection` case to switch statement
-- [ ] Handle Fighting Style selection
-- [ ] Handle Eldritch Invocation selection
+- [x] Import ListSelectionWidget (line 6)
+- [x] Add `list_selection` case to switch statement (lines 330-350)
+- [x] Handle Fighting Style selection (lines 336-344)
+- [x] Handle Eldritch Invocation selection (lines 338-346)
 
 ### 5.2 Update Validation
 **File:** `src/components/CharacterCreationWizard/steps/Step3Class.tsx`
-- [ ] Check `list_selection` widgets require selection
-- [ ] Check Primal Order for Druid
-- [ ] Check Fighting Style for Fighter
-- [ ] Check Eldritch Invocation for Warlock
+- [x] Check `list_selection` widgets require selection (lines 472-479)
+- [x] Check Primal Order for Druid (line 466)
+- [x] Check Fighting Style for Fighter (line 474)
+- [x] Check Eldritch Invocation for Warlock (line 477)
 
 ---
 
@@ -200,11 +201,11 @@ Implement Druid, Warlock, Fighter, Barbarian, and Paladin for 2024 edition using
 | Phase 2: Widget Components | ✅ Complete | 3/3 tasks |
 | Phase 3: Class Data Files | ✅ Complete | 5/5 tasks |
 | Phase 4: Calculations | ✅ Complete | 3/3 tasks |
-| Phase 5: Integration | ⏸️ Pending | 0/2 tasks |
+| Phase 5: Integration | ✅ Complete | 2/2 tasks |
 | Phase 6: Level Progression | ⏸️ Pending | 0/3 tasks |
 | Phase 7: Data Files | ⏸️ Pending | 0/2 tasks |
 | Phase 8: Testing | ⏸️ Pending | 0/2 tasks |
-| **TOTAL** | **61%** | **14/23 tasks** |
+| **TOTAL** | **70%** | **16/23 tasks** |
 
 ---
 
@@ -212,4 +213,4 @@ Implement Druid, Warlock, Fighter, Barbarian, and Paladin for 2024 edition using
 
 ---
 
-**Last Updated:** Phase 4 complete (15 minutes)
+**Last Updated:** Phase 5 complete (20 minutes)

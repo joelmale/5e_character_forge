@@ -3,7 +3,7 @@ import { ChevronUp, ChevronDown, XCircle, Shuffle, ArrowLeft, ArrowRight } from 
 import { StepProps } from '../types/wizard.types';
 import { loadClasses, getClassCategories, BACKGROUNDS, getSubclassesByClass, randomizeClassAndSkills } from '../../../services/dataService';
 import { SkillName } from '../../../types/dnd';
-import { SelectionPoolWidget, BranchChoiceWidget, AutomaticWidget } from '../widgets';
+import { SelectionPoolWidget, BranchChoiceWidget, AutomaticWidget, ListSelectionWidget } from '../widgets';
 import { Level1Feature } from '../../../types/widgets';
 import { AnySkillPickerModal } from '../AnySkillPickerModal';
 
@@ -327,6 +327,28 @@ export const Step3Class: React.FC<StepProps> = ({ data, updateData, nextStep, pr
                   />
                 );
 
+              case 'list_selection':
+                return (
+                  <ListSelectionWidget
+                    key={feature.id}
+                    feature={feature}
+                    currentSelection={
+                      feature.id === 'fighting_style'
+                        ? data.fightingStyle ? [data.fightingStyle] : []
+                        : feature.id === 'eldritch_invocations'
+                          ? data.eldritchInvocations || []
+                          : []
+                    }
+                    onSelectionChange={(selections) => {
+                      if (feature.id === 'fighting_style') {
+                        updateData({ fightingStyle: selections[0] || null });
+                      } else if (feature.id === 'eldritch_invocations') {
+                        updateData({ eldritchInvocations: selections });
+                      }
+                    }}
+                  />
+                );
+
               case 'automatic':
                 return <AutomaticWidget key={feature.id} feature={feature} />;
 
@@ -445,6 +467,14 @@ export const Step3Class: React.FC<StepProps> = ({ data, updateData, nextStep, pr
                    }
                    if (feature.id === 'pact_boon') {
                      return !data.pactBoon;
+                   }
+                   return false;
+                 case 'list_selection':
+                   if (feature.id === 'fighting_style') {
+                     return !data.fightingStyle;
+                   }
+                   if (feature.id === 'eldritch_invocations') {
+                     return (data.eldritchInvocations?.length || 0) < (feature.widget_config as any).count;
                    }
                    return false;
                  case 'automatic':
