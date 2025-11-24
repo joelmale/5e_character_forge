@@ -71,7 +71,7 @@ export const MonsterLibrary: React.FC<MonsterLibraryProps> = ({ onSelectMonster,
       <div className="mb-8">
         <div className="flex justify-between items-center mb-4">
           <div>
-            <h1 className="text-4xl font-bold">Monster Library</h1>
+            <h1 className="text-4xl font-bold text-theme-primary">Monster Library</h1>
             <p className="text-gray-600 mt-2">
               {filteredMonsters.length} monster{filteredMonsters.length !== 1 ? 's' : ''} available
             </p>
@@ -139,7 +139,7 @@ export const MonsterLibrary: React.FC<MonsterLibraryProps> = ({ onSelectMonster,
           className="w-full flex items-center justify-between p-4 bg-theme-secondary hover:bg-gray-750 rounded-lg transition-colors mb-3"
         >
           <div className="flex items-center gap-2">
-            <span className="text-lg font-bold">Saved Encounters</span>
+            <span className="text-lg font-bold text-theme-primary">Saved Encounters</span>
             <span className="px-2 py-0.5 bg-accent-purple text-white text-xs rounded-full">
               {encounters.length}
             </span>

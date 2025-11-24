@@ -57,7 +57,7 @@ export const SavedEncountersList: React.FC = () => {
         >
           <div className="flex items-start justify-between">
             <div className="flex-grow">
-              <h3 className="text-lg font-bold text-accent-purple-light mb-1">{encounter.name}</h3>
+              <h3 className="text-lg font-bold text-theme-primary mb-1">{encounter.name}</h3>
               <p className="text-sm text-theme-muted mb-2">{getEncounterSummary(encounter.monsterIds)}</p>
               <div className="flex items-center gap-2 text-xs text-theme-disabled">
                 <Calendar className="w-3 h-3" />

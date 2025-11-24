@@ -168,17 +168,17 @@ export const MonsterCard: React.FC<MonsterCardProps> = ({
         <div className="grid grid-cols-3 gap-2 text-center text-xs font-medium bg-theme-tertiary/50 p-3 rounded-lg mb-3">
           <div>
             AC:{' '}
-            <span className="text-accent-yellow-light block text-lg font-bold">
+            <span className="text-theme-primary block text-lg font-bold">
               {getACDisplay(monster.armor_class)}
             </span>
           </div>
           <div>
             HP:{' '}
-            <span className="text-accent-green-light block text-lg font-bold">{monster.hit_points}</span>
+            <span className="text-theme-primary block text-lg font-bold">{monster.hit_points}</span>
           </div>
           <div>
             Speed:{' '}
-            <span className="text-blue-300 block text-sm font-bold">
+            <span className="text-theme-secondary block text-sm font-bold">
               {getSpeedDisplay(monster.speed)}
             </span>
           </div>

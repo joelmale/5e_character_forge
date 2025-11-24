@@ -27,7 +27,7 @@ const CollapsibleSection: React.FC<{
         onClick={() => setIsOpen(!isOpen)}
         className="w-full flex justify-between items-center p-4 hover:bg-theme-tertiary/30 transition-colors"
       >
-        <h3 className="text-lg font-bold text-accent-red-light">{title}</h3>
+        <h3 className="text-lg font-bold text-theme-primary">{title}</h3>
         {isOpen ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
       </button>
       {isOpen && <div className="p-4 pt-0">{children}</div>}
@@ -98,7 +98,7 @@ export const MonsterStatBlock: React.FC<MonsterStatBlockProps> = ({ monster, onC
             <div className="flex justify-between items-start">
               <div className="flex-grow">
                 <div className="flex items-center gap-3 mb-2">
-                  <h1 className="text-4xl font-bold text-white">{monster.name}</h1>
+                  <h1 className="text-4xl font-bold text-theme-aware">{monster.name}</h1>
                   {isCustom && (
                     <span className="px-3 py-1 bg-accent-green text-white text-sm rounded-full">
                       Custom
