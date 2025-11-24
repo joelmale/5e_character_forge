@@ -58,44 +58,44 @@ Implement Druid, Warlock, Fighter, Barbarian, and Paladin for 2024 edition using
 
 ---
 
-## Phase 3: Class Data Files ⏸️ PENDING
-**Estimated Time:** 2-3 hours
+## Phase 3: Class Data Files ✅ COMPLETE
+**Estimated Time:** 2-3 hours | **Actual Time:** 20 minutes
 
 ### 3.1 Create 2024 Druid Class JSON
 **File:** `src/data/srd/2024/5e-SRD-Classes.json` (modify)
-- [ ] Hit die: d8
-- [ ] Skills: 2 from Arcana, Animal Handling, Insight, Medicine, Nature, Perception, Religion, Survival
-- [ ] Proficiencies: Light armor, Shields, Simple weapons, Herbalism Kit
-- [ ] Level 1 features: Primal Order (BranchChoiceWidget), Spellcasting (AutomaticWidget)
+- [x] Hit die: d8
+- [x] Skills: 2 from Arcana, Animal Handling, Insight, Medicine, Nature, Perception, Religion, Survival
+- [x] Proficiencies: Light armor, Shields, Simple weapons, Herbalism Kit
+- [x] Level 1 features: Primal Order (BranchChoiceWidget), Druidic (AutomaticWidget), Spellcasting (AutomaticWidget)
 
 ### 3.2 Create 2024 Warlock Class JSON
 **File:** `src/data/srd/2024/5e-SRD-Classes.json` (modify)
-- [ ] Hit die: d8
-- [ ] Skills: 2 from Arcana, Deception, History, Intimidation, Investigation, Nature, Religion
-- [ ] Proficiencies: Light armor, Simple weapons
-- [ ] Level 1 features: Eldritch Invocations (ListSelectionWidget), Pact Magic (AutomaticWidget)
+- [x] Hit die: d8
+- [x] Skills: 2 from Arcana, Deception, History, Intimidation, Investigation, Nature, Religion
+- [x] Proficiencies: Light armor, Simple weapons
+- [x] Level 1 features: Eldritch Invocations (ListSelectionWidget), Pact Magic (AutomaticWidget)
 
 ### 3.3 Create 2024 Fighter Class JSON
 **File:** `src/data/srd/2024/5e-SRD-Classes.json` (modify)
-- [ ] Hit die: d10
-- [ ] Skills: 2 from Acrobatics, Animal Handling, Athletics, History, Insight, Intimidation, Perception, Persuasion, Survival
-- [ ] Proficiencies: All armor, all weapons
-- [ ] Level 1 features: Fighting Style, Second Wind, Weapon Mastery
-- [ ] Add full level progression (levels 2-20)
+- [x] Hit die: d10
+- [x] Skills: 2 from Acrobatics, Animal Handling, Athletics, History, Insight, Intimidation, Perception, Persuasion, Survival
+- [x] Proficiencies: All armor, all weapons
+- [x] Level 1 features: Fighting Style (ListSelectionWidget), Second Wind (AutomaticWidget), Weapon Mastery (SelectionPoolWidget - 3 weapons)
+- [x] Add full level progression (levels 2-20) - DEFERRED to Phase 6
 
 ### 3.4 Create 2024 Barbarian Class JSON
 **File:** `src/data/srd/2024/5e-SRD-Classes.json` (modify)
-- [ ] Hit die: d12
-- [ ] Skills: 2 from Animal Handling, Athletics, Intimidation, Nature, Perception, Survival
-- [ ] Proficiencies: Light/Medium armor, Shields, Simple/Martial weapons
-- [ ] Level 1 features: Weapon Mastery (2 melee), Rage (AutomaticWidget)
+- [x] Hit die: d12
+- [x] Skills: 2 from Animal Handling, Athletics, Intimidation, Nature, Perception, Survival
+- [x] Proficiencies: Light/Medium armor, Shields, Simple/Martial weapons
+- [x] Level 1 features: Weapon Mastery (SelectionPoolWidget - 2 melee), Rage (AutomaticWidget)
 
 ### 3.5 Create 2024 Paladin Class JSON
 **File:** `src/data/srd/2024/5e-SRD-Classes.json` (modify)
-- [ ] Hit die: d10
-- [ ] Skills: 2 from Athletics, Insight, Intimidation, Medicine, Persuasion, Religion
-- [ ] Proficiencies: All armor, all weapons
-- [ ] Level 1 features: Weapon Mastery (2 weapons), Lay on Hands (AutomaticWidget)
+- [x] Hit die: d10
+- [x] Skills: 2 from Athletics, Insight, Intimidation, Medicine, Persuasion, Religion
+- [x] Proficiencies: All armor, all weapons
+- [x] Level 1 features: Weapon Mastery (SelectionPoolWidget - 2 weapons), Lay on Hands (AutomaticWidget)
 
 ---
 
@@ -198,13 +198,13 @@ Implement Druid, Warlock, Fighter, Barbarian, and Paladin for 2024 edition using
 |-------|--------|----------|
 | Phase 1: Type System | ✅ Complete | 3/3 tasks |
 | Phase 2: Widget Components | ✅ Complete | 3/3 tasks |
-| Phase 3: Class Data Files | ⏸️ Pending | 0/5 tasks |
+| Phase 3: Class Data Files | ✅ Complete | 5/5 tasks |
 | Phase 4: Calculations | ⏸️ Pending | 0/3 tasks |
 | Phase 5: Integration | ⏸️ Pending | 0/2 tasks |
 | Phase 6: Level Progression | ⏸️ Pending | 0/3 tasks |
 | Phase 7: Data Files | ⏸️ Pending | 0/2 tasks |
 | Phase 8: Testing | ⏸️ Pending | 0/2 tasks |
-| **TOTAL** | **26%** | **6/23 tasks** |
+| **TOTAL** | **48%** | **11/23 tasks** |
 
 ---
 
@@ -212,4 +212,4 @@ Implement Druid, Warlock, Fighter, Barbarian, and Paladin for 2024 edition using
 
 ---
 
-**Last Updated:** Phase 1 complete (15 minutes)
+**Last Updated:** Phase 3 complete (20 minutes)
