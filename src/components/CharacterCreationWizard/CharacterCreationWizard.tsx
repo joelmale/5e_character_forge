@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { WizardProps } from './types/wizard.types';
 import { useWizardState, useWizardNavigation } from './hooks';
 import { WizardHeader, WizardProgressBar, WizardStepContainer } from './components';
@@ -116,7 +117,7 @@ export const CharacterCreationWizard: React.FC<WizardProps> = ({
     }
   };
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 bg-theme-primary bg-opacity-90 flex items-center justify-center z-50 p-4 overflow-y-auto" onClick={onClose}>
       <div
         className="bg-theme-secondary rounded-2xl shadow-2xl w-full max-w-5xl transition-all transform duration-300 scale-100 my-8 flex flex-col max-h-[calc(100vh-4rem)]"
@@ -179,6 +180,7 @@ export const CharacterCreationWizard: React.FC<WizardProps> = ({
           position={modalPosition}
         />
       )}
-    </div>
+    </div>,
+    document.body
   );
 };
