@@ -117,7 +117,7 @@ export const QuickStartEquipment: React.FC<QuickStartEquipmentProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {unequippedItems.map((item, idx) => (
               <div key={idx} className="bg-theme-tertiary/50 border border-theme-primary rounded-lg p-3">
-                <div className="font-medium text-white">
+                <div className="font-medium text-theme-primary">
                   {getItemDisplayName(item)}
                   {item.quantity > 1 && (
                     <span className="text-sm text-theme-muted ml-1">x{item.quantity}</span>

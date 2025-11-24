@@ -161,7 +161,7 @@ export const EquipmentShop: React.FC<EquipmentShopProps> = ({
             {cartItems.map(item => (
               <div key={item.id} className="flex items-center justify-between py-2 border-b border-theme-primary/30">
                 <div className="flex-1">
-                  <div className="font-medium text-white text-sm">{item.name}</div>
+                  <div className="font-medium text-theme-primary text-sm">{item.name}</div>
                   <div className="text-xs text-theme-muted">{item.cost_gp} gp each</div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -207,7 +207,7 @@ export const EquipmentShop: React.FC<EquipmentShopProps> = ({
                   } ${!canAffordThis ? 'opacity-50' : ''}`}
                 >
                   <div className="flex justify-between items-start mb-2">
-                    <h5 className="font-medium text-white text-sm">{item.name}</h5>
+                    <h5 className="font-medium text-theme-primary text-sm">{item.name}</h5>
                     <span className="text-accent-yellow-light font-bold text-sm">
                       {item.cost_gp} gp
                     </span>
