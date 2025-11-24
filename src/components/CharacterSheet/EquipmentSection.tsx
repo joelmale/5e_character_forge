@@ -1,5 +1,5 @@
 import React from 'react';
-import { Plus, Box } from 'lucide-react';
+import { Box } from 'lucide-react';
 import { Character, Equipment } from '../../types/dnd';
 import { loadEquipment } from '../../services/dataService';
 
@@ -30,31 +30,20 @@ export const EquipmentSection: React.FC<EquipmentSectionProps> = ({
 
       {/* Inventory List - Full Width */}
       <div className="p-4 bg-theme-secondary rounded-xl shadow-lg border-l-4 border-yellow-500">
-        <div className="flex justify-between items-center mb-3">
+        <div className="mb-3">
           <h3 className="text-lg font-bold text-accent-yellow-light">
             Inventory ({character.inventory?.length || 0} items)
           </h3>
-          <button
-            onClick={() => {
-              // Show equipment browser modal
-              onAddItem(character.id, 'random-item', 1);
-            }}
-            className="px-3 py-1 bg-accent-yellow-dark hover:bg-accent-yellow rounded text-xs transition-colors flex items-center gap-1"
-            title="Add item from equipment database"
-          >
-            <Plus className="w-3 h-3" />
-            Add Item
-          </button>
         </div>
 
         {(!character.inventory || character.inventory.length === 0) ? (
           <div className="text-center py-8 text-theme-disabled">
             <Box className="w-12 h-12 mx-auto mb-4 opacity-50" />
             <p className="text-lg font-medium mb-2">No items in inventory</p>
-            <p className="text-sm">Use the "Add Item" button to get started</p>
+            <p className="text-sm">Equipment is assigned during character creation</p>
           </div>
         ) : (
-          <div className="space-y-2 max-h-[400px] overflow-y-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-[400px] overflow-y-auto">
             {character.inventory.map((item, idx) => {
               const equipment = loadEquipment().find(eq => eq.slug === item.equipmentSlug);
               const isWeapon = equipment?.weapon_category !== undefined;
@@ -72,16 +61,16 @@ export const EquipmentSection: React.FC<EquipmentSectionProps> = ({
                           }}
                           className="font-semibold text-theme-primary hover:text-orange-300 transition-colors text-left"
                         >
-                          {item.equipmentSlug}
+                          {equipment?.name || item.equipmentSlug}
                         </button>
                         {item.equipped && <span className="text-xs bg-accent-green px-2 py-0.5 rounded">Equipped</span>}
                         {/* Weapon Mastery Indicator */}
                         {isWeapon && isMastered && masteryProperty && (
                           <span
                             className="text-xs bg-amber-900/50 border border-amber-500/50 text-amber-300 px-2 py-0.5 rounded flex items-center gap-1"
-                            title={`Mastery: ${masteryProperty.name} - ${masteryProperty.description || 'Special weapon technique'}`}
+                            title={`Mastery: ${masteryProperty}`}
                           >
-                            ⚔️ {masteryProperty.name}
+                            ⚔️ {masteryProperty}
                           </span>
                         )}
                       </div>
