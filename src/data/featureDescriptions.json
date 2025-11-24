@@ -3,6 +3,14 @@
     "description": "Accustomed to life underground, you have superior vision in dark and dim conditions. You can see in dim light within 60 feet of you as if it were bright light, and in darkness as if it were dim light. You can't discern color in darkness, only shades of gray.",
     "source": "Player's Handbook"
   },
+  "Grovel, Cower, and Beg": {
+    "description": "As an action on your turn, you can cower to distract nearby foes. Until the end of your next turn, your allies gain advantage on attack rolls against enemies within 5 feet of you that can see you. Once you use this trait, you can't use it again until you finish a short or long rest.",
+    "source": "Player's Handbook"
+  },
+  "Pack Tactics": {
+    "description": "You have advantage on an attack roll against a creature if at least one of your allies is within 5 feet of the creature and the ally isn't incapacitated.",
+    "source": "Player's Handbook"
+  },
   "Superior Darkvision": {
     "description": "Your darkvision has a radius of 120 feet.",
     "source": "Player's Handbook"

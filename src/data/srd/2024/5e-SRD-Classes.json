@@ -865,11 +865,11 @@
         "desc": "Choose your connection to the primal forces of nature.",
         "widget_type": "branch_choice",
         "widget_config": {
-          "branches": [
+          "options": [
             {
               "id": "magician",
-              "name": "Magician",
-              "desc": "You have dedicated yourself to studying the mystical arts of druidic spellcasting.",
+              "label": "Magician",
+              "description": "You have dedicated yourself to studying the mystical arts of druidic spellcasting.",
               "grants": [
                 {
                   "type": "cantrip_bonus",
@@ -884,8 +884,8 @@
             },
             {
               "id": "warden",
-              "name": "Warden",
-              "desc": "You have devoted yourself to protecting the natural world through martial prowess.",
+              "label": "Warden",
+              "description": "You have devoted yourself to protecting the natural world through martial prowess.",
               "grants": [
                 {
                   "type": "proficiency",
