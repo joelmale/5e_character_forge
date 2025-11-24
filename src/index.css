@@ -307,6 +307,10 @@
 .text-theme-disabled { color: rgb(var(--color-text-disabled)); }
 .text-white { color: 255 255 255; }
 
+/* Theme-specific overrides for text-white */
+[data-theme="paper"] .text-white { color: 0 0 0; }
+[data-theme="light"] .text-white { color: 0 0 0; }
+
 /* Border utilities */
 .border-theme-primary { border-color: rgb(var(--color-border-primary)); }
 .border-theme-secondary { border-color: rgb(var(--color-border-secondary)); }
