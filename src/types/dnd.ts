@@ -76,6 +76,8 @@ export interface Character {
   expertiseSkills?: string[]; // Rogue, Ranger, Bard: Skills/tools with double proficiency
   weaponMastery?: string[]; // Rogue, Fighter, Barbarian, Paladin: Mastered weapon slugs
   fightingStyle?: string; // Fighter, Paladin, Ranger: Fighting Style slug
+  eldritchInvocations?: string[]; // Warlock: Eldritch Invocation slugs
+  secondWindUses?: number; // Fighter: Second Wind uses remaining
 
   // Background data (2024)
   backgroundFeat?: string; // Origin Feat from background
@@ -356,6 +358,7 @@ export interface CharacterCreationData {
   expertiseSkills?: string[]; // Rogue, Ranger, Bard: 2 skills/tools
   weaponMastery?: string[]; // Rogue, Fighter, Barbarian, Paladin: 2-3 weapons
   fightingStyle?: string; // Fighter, Paladin, Ranger
+  eldritchInvocations?: string[]; // Warlock: Eldritch Invocation slugs
 
   // Sprint 2: Spell selection
   spellSelection: SpellSelectionData;

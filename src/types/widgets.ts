@@ -39,7 +39,7 @@ export type WidgetEffect =
 export interface SelectionPoolConfig {
   source: WidgetSource;
   count: number;                          // Number of selections required
-  filter: 'current_proficiencies' | 'proficient_weapons' | 'all';
+  filter: 'current_proficiencies' | 'proficient_weapons' | 'proficient_melee_weapons' | 'all';
   effect: WidgetEffect;
   include_tools?: string[];               // Specific tools to include (e.g., ['thieves_tools'])
   show_mastery_property?: boolean;        // Show weapon mastery properties
@@ -63,12 +63,12 @@ export interface BranchOption {
 
 /**
  * List Selection Widget Config
- * Used for: Fighting Styles, simple feat selection
+ * Used for: Fighting Styles, Eldritch Invocations, simple feat selection
  */
 export interface ListSelectionConfig {
-  type: 'fighting_style' | 'feat';
+  type: 'fighting_style' | 'invocation' | 'feat';
   count: number;
-  filter?: string;                        // Optional filter tag
+  filter?: string;                        // Optional filter tag (e.g., 'level_1_compatible')
 }
 
 /**
