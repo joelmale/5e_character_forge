@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Character } from '../../types/dnd';
-import { SPELL_DATABASE } from '../../services/dataService';
+import { SPELL_DATABASE, AppSpell } from '../../services/dataService';
+import { SpellDetailModal } from '../SpellDetailModal';
 
 // Helper function to get max prepared spells for a character
 const getMaxPreparedSpells = (character: Character): number => {
@@ -44,6 +45,15 @@ export const SpellcastingSection: React.FC<SpellcastingSectionProps> = ({
   onUpdateCharacter: _onUpdateCharacter,
   onSpellPreparation,
 }) => {
+  const [selectedSpell, setSelectedSpell] = useState<AppSpell | null>(null);
+
+  const handleSpellClick = (spellSlug: string) => {
+    const spell = SPELL_DATABASE.find(s => s.slug === spellSlug);
+    if (spell) {
+      setSelectedSpell(spell);
+    }
+  };
+
   if (!character.spellcasting) {
     return (
       <div className="space-y-4">
@@ -140,17 +150,19 @@ export const SpellcastingSection: React.FC<SpellcastingSectionProps> = ({
                   return (
                     <div key={level} className="flex items-start gap-3">
                       <span className="text-xs text-theme-muted font-mono w-12">Lvl {level}</span>
-                      <div className="flex flex-wrap gap-2 flex-1">
-                        {spellsAtLevel.map(spell => (
-                          <span
-                            key={spell!.slug}
-                            className="px-2 py-1 bg-blue-700 text-theme-primary text-xs rounded flex items-center gap-1"
-                          >
-                            {spell!.name}
-                            {spell!.ritual && <span className="text-yellow-400">(R)</span>}
-                          </span>
-                        ))}
-                      </div>
+                  <div className="flex flex-wrap gap-2 flex-1">
+                    {spellsAtLevel.map(spell => (
+                      <button
+                        key={spell!.slug}
+                        onClick={() => handleSpellClick(spell!.slug)}
+                        className="px-2 py-1 bg-blue-700 hover:bg-blue-600 text-theme-primary text-xs rounded flex items-center gap-1 cursor-pointer transition-colors"
+                        title="Click for spell details"
+                      >
+                        {spell!.name}
+                        {spell!.ritual && <span className="text-yellow-400">(R)</span>}
+                      </button>
+                    ))}
+                  </div>
                     </div>
                   );
                 })}
@@ -178,17 +190,19 @@ export const SpellcastingSection: React.FC<SpellcastingSectionProps> = ({
                   return (
                     <div key={level} className="flex items-start gap-3">
                       <span className="text-xs text-theme-muted font-mono w-12">Lvl {level}</span>
-                      <div className="flex flex-wrap gap-2 flex-1">
-                        {spellsAtLevel.map(spell => (
-                          <span
-                            key={spell!.slug}
-                            className="px-2 py-1 bg-blue-700 text-theme-primary text-xs rounded flex items-center gap-1"
-                          >
-                            {spell!.name}
-                            {spell!.ritual && <span className="text-yellow-400">(R)</span>}
-                          </span>
-                        ))}
-                      </div>
+                  <div className="flex flex-wrap gap-2 flex-1">
+                    {spellsAtLevel.map(spell => (
+                      <button
+                        key={spell!.slug}
+                        onClick={() => handleSpellClick(spell!.slug)}
+                        className="px-2 py-1 bg-blue-700 hover:bg-blue-600 text-theme-primary text-xs rounded flex items-center gap-1 cursor-pointer transition-colors"
+                        title="Click for spell details"
+                      >
+                        {spell!.name}
+                        {spell!.ritual && <span className="text-yellow-400">(R)</span>}
+                      </button>
+                    ))}
+                  </div>
                     </div>
                   );
                 })}
@@ -263,6 +277,13 @@ export const SpellcastingSection: React.FC<SpellcastingSectionProps> = ({
           })}
         </div>
       </div>
+
+      {/* Spell Detail Modal */}
+      <SpellDetailModal
+        spell={selectedSpell}
+        isOpen={selectedSpell !== null}
+        onClose={() => setSelectedSpell(null)}
+      />
     </div>
   );
 };

@@ -204,6 +204,50 @@ export const Step4Spells: React.FC<StepProps> = ({ data, updateData, nextStep, p
     allSelectionsComplete
   });
 
+  // Generate validation feedback messages
+  const getValidationMessages = (): string[] => {
+    const messages: string[] = [];
+
+    // Check cantrips
+    if (!cantripsComplete) {
+      const remaining = cantripsKnownAtLevel - data.spellSelection.selectedCantrips.length;
+      messages.push(`Pick ${remaining} more cantrip${remaining !== 1 ? 's' : ''}`);
+    }
+
+    // Check spells based on type
+    if (spellcastingType === 'known') {
+      if (!spellsComplete) {
+        const current = data.spellSelection.knownSpells?.length || 0;
+        const remaining = maxPreparedSpellsAtLevel - current;
+        messages.push(`Select ${remaining} more known spell${remaining !== 1 ? 's' : ''}`);
+      }
+    } else if (spellcastingType === 'prepared') {
+      if (!spellsComplete) {
+        const current = data.spellSelection.preparedSpells?.length || 0;
+        const remaining = maxPreparedSpellsAtLevel - current;
+        messages.push(`Select ${remaining} more prepared spell${remaining !== 1 ? 's' : ''}`);
+      }
+    } else if (spellcastingType === 'wizard') {
+      const spellbookCurrent = data.spellSelection.spellbook?.length || 0;
+      const spellbookRequired = 6;
+      if (spellbookCurrent < spellbookRequired) {
+        const remaining = spellbookRequired - spellbookCurrent;
+        messages.push(`Add ${remaining} more spell${remaining !== 1 ? 's' : ''} to spellbook`);
+      }
+
+      const dailyPreparedMax = getMaxPreparedSpells(data.abilities, 'INT', data.level);
+      const dailyPreparedCurrent = data.spellSelection.dailyPrepared?.length || 0;
+      if (dailyPreparedCurrent < dailyPreparedMax) {
+        const remaining = dailyPreparedMax - dailyPreparedCurrent;
+        messages.push(`Prepare ${remaining} more daily spell${remaining !== 1 ? 's' : ''}`);
+      }
+    }
+
+    return messages;
+  };
+
+  const validationMessages = getValidationMessages();
+
   // Spell mode description
   const modeDescription = spellcastingType === 'wizard'
     ? 'Choose spells for your spellbook. You can prepare a subset of these each day.'
@@ -509,29 +553,42 @@ export const Step4Spells: React.FC<StepProps> = ({ data, updateData, nextStep, p
       )}
 
       {/* Navigation */}
-      <div className='flex justify-between'>
-        <button
-          onClick={() => {
-            console.log('🔙 [Step4Spells] Back button clicked from step 8');
-            prevStep();
-          }}
-          className='px-4 py-2 bg-theme-quaternary text-white rounded-lg hover:bg-theme-hover flex items-center gap-2'
-        >
-          <ArrowLeft className='w-4 h-4' />
-          Back
-        </button>
-        <button
-          onClick={nextStep}
-          disabled={!allSelectionsComplete}
-          className={`px-4 py-2 rounded-lg flex items-center gap-2 ${
-            allSelectionsComplete
-              ? 'bg-accent-red-dark text-white hover:bg-accent-red'
-              : 'bg-theme-tertiary text-theme-disabled cursor-not-allowed'
-          }`}
-        >
-          Next: {getNextStepLabel?.() || 'Continue'}
-          <ArrowRight className='w-4 h-4' />
-        </button>
+      <div className='space-y-2'>
+        <div className='flex justify-between'>
+          <button
+            onClick={() => {
+              console.log('🔙 [Step4Spells] Back button clicked from step 8');
+              prevStep();
+            }}
+            className='px-4 py-2 bg-theme-quaternary text-white rounded-lg hover:bg-theme-hover flex items-center gap-2'
+          >
+            <ArrowLeft className='w-4 h-4' />
+            Back
+          </button>
+          <button
+            onClick={nextStep}
+            disabled={!allSelectionsComplete}
+            className={`px-4 py-2 rounded-lg flex items-center gap-2 ${
+              allSelectionsComplete
+                ? 'bg-accent-red-dark text-white hover:bg-accent-red'
+                : 'bg-theme-tertiary text-theme-disabled cursor-not-allowed'
+            }`}
+          >
+            Next: {getNextStepLabel?.() || 'Continue'}
+            <ArrowRight className='w-4 h-4' />
+          </button>
+        </div>
+
+        {/* Validation Feedback */}
+        {!allSelectionsComplete && validationMessages.length > 0 && (
+          <div className='flex justify-end'>
+            <div className='text-sm text-orange-400 space-y-1'>
+              {validationMessages.map((message, index) => (
+                <div key={index}>• {message}</div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
