@@ -114,9 +114,14 @@ export const SpellcastingSection: React.FC<SpellcastingSectionProps> = ({
                 {character.spellcasting.cantripsKnown.map((spellSlug) => {
                   const spell = SPELL_DATABASE.find(s => s.slug === spellSlug);
                   return (
-                    <span key={spellSlug} className="px-2 py-1 bg-purple-700 text-theme-primary text-xs rounded">
+                    <button
+                      key={spellSlug}
+                      onClick={() => handleSpellClick(spellSlug)}
+                      className="px-2 py-1 bg-purple-700 hover:bg-purple-600 text-theme-primary text-xs rounded cursor-pointer transition-colors"
+                      title="Click for spell details"
+                    >
                       {spell?.name || spellSlug}
-                    </span>
+                    </button>
                   );
                 })}
               </div>
