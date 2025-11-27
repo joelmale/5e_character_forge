@@ -16,7 +16,14 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
 
   // 1. Calculate Abilities with Racial Bonuses
   (Object.keys(data.abilities) as AbilityName[]).forEach((ability) => {
-    const rawScore = data.abilities[ability] + (raceData.ability_bonuses[ability] || 0);
+    let racialBonus = raceData.ability_bonuses[ability] || 0;
+
+    // Handle variant human ability bonuses
+    if (raceData.slug === 'human' && data.selectedRaceVariant === 'variant' && data.variantAbilityBonuses) {
+      racialBonus = data.variantAbilityBonuses[ability] || 0;
+    }
+
+    const rawScore = data.abilities[ability] + racialBonus;
     const modifier = getModifier(rawScore);
     finalAbilities[ability] = { score: rawScore, modifier };
   });
@@ -34,10 +41,20 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
   }
   const maxHitPoints = hitDieValue + finalAbilities.CON.modifier + (raceData.slug === 'dwarf' ? level : 0);
 
-  // 3. Calculate Skills (from selected skills + background skills)
-   const backgroundData = BACKGROUNDS.find(bg => bg.name === data.background);
-   const backgroundSkills = backgroundData?.skill_proficiencies || [];
-  const allProficientSkills = [...data.selectedSkills, ...backgroundSkills.map(s => s as SkillName)];
+  // 3. Calculate Skills (from selected skills + background skills + variant skills)
+    const backgroundData = BACKGROUNDS.find(bg => bg.name === data.background);
+    const backgroundSkills = backgroundData?.skill_proficiencies || [];
+
+    // Add variant human skill proficiency
+    const variantSkills = data.selectedRaceVariant === 'variant' && data.variantSkillProficiency
+      ? [data.variantSkillProficiency]
+      : [];
+
+    const allProficientSkills = [
+      ...data.selectedSkills,
+      ...backgroundSkills.map(s => s as SkillName),
+      ...variantSkills
+    ];
 
   const finalSkills: Character['skills'] = {} as Character['skills'];
   ALL_SKILLS.forEach((skillName) => {
@@ -156,6 +173,20 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
           quantity: item.quantity,
           equipped: item.equipped || false,
         });
+      }
+    });
+
+    // Process equipped items from startingInventory to update equippedArmor/equippedWeapons
+    data.startingInventory.forEach(item => {
+      if (item.equipped) {
+        const equipment = loadEquipment().find(eq => eq.slug === item.equipmentSlug);
+        if (equipment) {
+          if (equipment.armor_category) {
+            equippedArmor = item.equipmentSlug;
+          } else if (equipment.weapon_category) {
+            equippedWeapons.push(item.equipmentSlug);
+          }
+        }
       }
     });
   }
@@ -278,7 +309,12 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
       classFeatures: classFeatures.map(f => ({ name: f.name, slug: f.slug, level: f.level, source: 'class' as const })),
       subclassFeatures: subclassFeatures.map(f => ({ name: f.name, slug: f.slug, level: f.level, source: 'subclass' as const })),
     },
-    selectedFeats: data.selectedFeats || [],
+    selectedFeats: [
+      ...(data.selectedFeats || []),
+      ...(data.selectedRaceVariant === 'variant' && data.variantFeat ? [data.variantFeat] : [])
+    ],
+    // Race variant information
+    selectedRaceVariant: data.selectedRaceVariant,
     // 2024 Level 1 Feature Choices
     divineOrder: data.divineOrder, // 2024 Cleric Divine Order choice
     primalOrder: data.primalOrder, // 2024 Druid Primal Order choice

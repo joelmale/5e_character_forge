@@ -43,10 +43,32 @@ export function useDiceRolling() {
     setRollHistory(prevHistory => {
       const updatedHistory = prevHistory.map(roll => {
         if (roll.id === rollId) {
+          // Calculate critical status based on REAL dice results
+          let critical: 'success' | 'failure' | undefined;
+
+          // Only d20 rolls can be critical
+          if (roll.notation.includes('d20') && realDiceResults.length === 1) {
+            if (realDiceResults[0] === 20) {
+              critical = 'success';
+            } else if (realDiceResults[0] === 1) {
+              critical = 'failure';
+            }
+          }
+
+          // Trigger fanfare if critical detected
+          if (critical === 'success') {
+            console.log('🎲 [CRITICAL] Natural 20 detected! Playing success fanfare');
+            setTimeout(() => diceSounds.playCritSuccessSound(), 300);
+          } else if (critical === 'failure') {
+            console.log('🎲 [CRITICAL] Natural 1 detected! Playing failure fanfare');
+            setTimeout(() => diceSounds.playCritFailureSound(), 300);
+          }
+
           const updatedRoll = {
             ...roll,
             diceResults: realDiceResults,
-            total: realTotal !== undefined ? realTotal : realDiceResults.reduce((sum, val) => sum + val, 0) + roll.modifier
+            total: realTotal !== undefined ? realTotal : realDiceResults.reduce((sum, val) => sum + val, 0) + roll.modifier,
+            critical // ✓ NOW SET WITH REAL VALUES
           };
           console.log('🎲 [ROLL UPDATE] Updated roll with real results:', updatedRoll);
           return updatedRoll;
@@ -63,10 +85,23 @@ export function useDiceRolling() {
     // Also update latestRoll if it matches
     setLatestRoll(prevLatest => {
       if (prevLatest && prevLatest.id === rollId) {
+        // Calculate critical status based on REAL dice results
+        let critical: 'success' | 'failure' | undefined;
+
+        // Only d20 rolls can be critical
+        if (prevLatest.notation.includes('d20') && realDiceResults.length === 1) {
+          if (realDiceResults[0] === 20) {
+            critical = 'success';
+          } else if (realDiceResults[0] === 1) {
+            critical = 'failure';
+          }
+        }
+
         const updatedRoll = {
           ...prevLatest,
           diceResults: realDiceResults,
-          total: realTotal !== undefined ? realTotal : realDiceResults.reduce((sum, val) => sum + val, 0) + prevLatest.modifier
+          total: realTotal !== undefined ? realTotal : realDiceResults.reduce((sum, val) => sum + val, 0) + prevLatest.modifier,
+          critical // ✓ NOW SET WITH REAL VALUES
         };
         console.log('🎲 [ROLL UPDATE] Updated latestRoll with real results:', updatedRoll);
         return updatedRoll;

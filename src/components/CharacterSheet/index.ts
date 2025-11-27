@@ -27,3 +27,5 @@ export { LanguagesPanel } from './LanguagesPanel';
 export { OfficialAbilityBox } from './OfficialAbilityBox';
 export { OfficialSkillsList } from './OfficialSkillsList';
 export { PaperAbilityScoresPanel } from './PaperAbilityScoresPanel';
+export { TacticalCard } from './TacticalCard';
+export { TacticalSection } from './TacticalSection';

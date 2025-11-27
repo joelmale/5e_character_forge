@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ChevronUp, ChevronDown, XCircle, Shuffle, ArrowLeft, ArrowRight } from 'lucide-react';
 import { StepProps } from '../types/wizard.types';
 import { getAllRaces, RACE_CATEGORIES, randomizeRace } from '../../../services/dataService';
+import { HumanVariantSelector } from '../components/HumanVariantSelector';
 
 interface RandomizeButtonProps {
   onClick: () => void;
@@ -23,6 +24,25 @@ export const Step2Race: React.FC<StepProps> = ({ data, updateData, nextStep, pre
   const [showRaceInfo, setShowRaceInfo] = useState(true);
 
   const selectedRace = getAllRaces().find(r => r.slug === data.raceSlug);
+
+  const isStepComplete = () => {
+    if (!data.raceSlug) return false;
+
+    // If race has variants, check if variant is selected and complete
+    if (selectedRace?.variants) {
+      if (!data.selectedRaceVariant) return false;
+
+      // Variant-specific validation
+      if (data.selectedRaceVariant === 'variant') {
+        const totalBonuses = data.variantAbilityBonuses
+          ? Object.values(data.variantAbilityBonuses).reduce((sum, val) => sum + val, 0)
+          : 0;
+        return totalBonuses === 2 && !!data.variantSkillProficiency && !!data.variantFeat;
+      }
+    }
+
+    return true;
+  };
 
   const toggleCategory = (categoryName: string) => {
     setExpandedCategories(prev => {
@@ -155,13 +175,21 @@ export const Step2Race: React.FC<StepProps> = ({ data, updateData, nextStep, pre
         </div>
       )}
 
+      {/* Human Variant Selection */}
+      {selectedRace?.slug === 'human' && (
+        <HumanVariantSelector
+          data={data}
+          updateData={updateData}
+        />
+      )}
+
       <div className='flex justify-between'>
         <button onClick={prevStep} className="px-4 py-2 bg-theme-quaternary hover:bg-theme-hover rounded-lg text-white flex items-center">
           <ArrowLeft className="w-4 h-4 mr-2" /> Back
         </button>
         <button
           onClick={nextStep}
-          disabled={!data.raceSlug}
+          disabled={!isStepComplete()}
           className="px-4 py-2 bg-accent-red hover:bg-accent-red-light rounded-lg text-white flex items-center disabled:bg-theme-quaternary"
         >
           Next: {getNextStepLabel?.() || 'Continue'} <ArrowRight className="w-4 h-4 ml-2" />

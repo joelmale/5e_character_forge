@@ -55,9 +55,24 @@ export const RollHistoryTicker: React.FC<RollHistoryTickerProps> = ({ rolls, lay
               <span className="text-theme-tertiary">{roll.label}:</span>
               <span className="font-mono text-accent-yellow-light">{roll.notation}</span>
               <span className="text-theme-disabled">→</span>
+              {/* Dice Results */}
+              {roll.diceResults.length > 0 && (
+                <span className="text-accent-blue">
+                  [{roll.diceResults.join(', ')}]
+                </span>
+              )}
+              {/* Show modifier breakdown if present */}
+              {roll.modifier !== 0 && (
+                <span className="text-accent-green">
+                  {roll.modifier >= 0 ? '+' : ''}{roll.modifier}
+                </span>
+              )}
+              {/* Equals sign before total */}
+              <span className="text-theme-disabled">=</span>
+              {/* Pools results for complex rolls */}
               {roll.pools?.length ? (
                 <span className="text-xs text-theme-muted">
-                  [{roll.pools[0].results.join(',')}] →
+                  [{roll.pools[0].results.join(',')}]
                 </span>
               ) : null}
               <span

@@ -15,6 +15,8 @@ import { EncounterView } from './components/EncounterView';
 
 import { DiceBox3D } from './components/DiceSystem/DiceBox3D';
 import { RollHistoryModal, RollHistoryTicker } from './components/RollHistory';
+import { RollResultOverlay } from './components/RollResultOverlay';
+import { ScreenFlash } from './components/ScreenFlash';
 import { FeatureModal } from './components/FeatureModal';
 import { EquipmentDetailModal } from './components/EquipmentDetailModal';
 import { ChooseCantripModal } from './components/ChooseCantripModal';
@@ -188,6 +190,13 @@ const App: React.FC = () => {
     resourcesReset: string[];
   } | null>(null);
 
+  // Roll result overlay state
+  const [showRollOverlay, setShowRollOverlay] = useState(false);
+  const [overlayRoll, setOverlayRoll] = useState<DiceRoll | null>(null);
+
+  // Screen flash state for critical rolls
+  const [screenFlashType, setScreenFlashType] = useState<'success' | 'failure' | null>(null);
+
   // Debug logging for dice tray modal state
   useEffect(() => {
     console.log('🎲 [App] isDiceTrayModalOpen state changed:', isDiceTrayModalOpen);
@@ -229,7 +238,33 @@ const App: React.FC = () => {
     console.log('🎲 [App] handleDiceRoll called with:', roll.label, roll.notation);
     console.log('🎲 [App] Call stack:', new Error().stack);
     rollDice(roll);
+    // Overlay is now triggered by useEffect watching latestRoll
   }, [rollDice]);
+
+  // Show overlay when latestRoll has completed results
+  useEffect(() => {
+    // Only show overlay when:
+    // 1. latestRoll exists
+    // 2. diceResults has been populated (length > 0)
+    // 3. We're not already showing the overlay for this roll
+    if (latestRoll &&
+        latestRoll.diceResults.length > 0 &&
+        overlayRoll?.id !== latestRoll.id) {
+
+      console.log('🎲 [App] Showing overlay with complete data:', latestRoll);
+      setOverlayRoll(latestRoll);
+      setShowRollOverlay(true);
+
+      // Trigger screen flash for critical rolls
+      if (latestRoll.critical === 'success') {
+        console.log('🎲 [App] Triggering success screen flash');
+        setScreenFlashType('success');
+      } else if (latestRoll.critical === 'failure') {
+        console.log('🎲 [App] Triggering failure screen flash');
+        setScreenFlashType('failure');
+      }
+    }
+  }, [latestRoll, overlayRoll?.id]);
 
   // Load characters from IndexedDB
   const loadCharacters = useCallback(async () => {
@@ -1005,6 +1040,15 @@ const App: React.FC = () => {
           }}
         />
         <RollHistoryModal rolls={rollHistory} onClear={clearHistory} />
+        <RollResultOverlay
+          roll={overlayRoll}
+          isVisible={showRollOverlay}
+          onDismiss={() => setShowRollOverlay(false)}
+        />
+        <ScreenFlash
+          type={screenFlashType}
+          onComplete={() => setScreenFlashType(null)}
+        />
         <FeatureModal feature={featureModal} onClose={() => setFeatureModal(null)} />
         <EquipmentDetailModal equipment={equipmentModal} onClose={() => setEquipmentModal(null)} />
 

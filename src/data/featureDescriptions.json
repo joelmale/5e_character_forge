@@ -215,6 +215,14 @@
     "description": "You gain proficiency in one skill of your choice.",
     "source": "Player's Handbook"
   },
+  "Variant Skills": {
+    "description": "You gain proficiency in one skill of your choice.",
+    "source": "Player's Handbook (Variant Human)"
+  },
+  "Variant Feat": {
+    "description": "You gain one feat of your choice.",
+    "source": "Player's Handbook (Variant Human)"
+  },
   "Firbolg Magic": {
     "description": "You can cast detect magic and disguise self with this trait, using Wisdom as your spellcasting ability for them. Once you cast either spell with this trait, you can't cast that spell with it again until you finish a long rest.",
     "source": "Player's Handbook"

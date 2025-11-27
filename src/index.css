@@ -431,3 +431,101 @@ code {
 .font-handwriting {
   font-family: var(--font-family-handwriting);
 }
+
+/* ========================================
+   ANIMATIONS
+   ======================================== */
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out;
+}
+
+/* ========================================
+   CRITICAL ROLL ANIMATIONS
+   ======================================== */
+
+/* Critical Success - Scale Pulse */
+@keyframes critical-success-pulse {
+  0% { transform: scale(1); }
+  25% { transform: scale(1.15); }
+  50% { transform: scale(1.05); }
+  75% { transform: scale(1.12); }
+  100% { transform: scale(1); }
+}
+
+/* Critical Success - Glow */
+@keyframes critical-success-glow {
+  0%, 100% {
+    filter: drop-shadow(0 0 5px rgba(134, 239, 172, 0.5));
+  }
+  50% {
+    filter: drop-shadow(0 0 20px rgba(134, 239, 172, 0.9));
+  }
+}
+
+/* Critical Failure - Shake */
+@keyframes critical-failure-shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+  20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+/* Critical Failure - Red Glow */
+@keyframes critical-failure-glow {
+  0%, 100% {
+    filter: drop-shadow(0 0 5px rgba(248, 113, 113, 0.5));
+  }
+  50% {
+    filter: drop-shadow(0 0 20px rgba(248, 113, 113, 0.9));
+  }
+}
+
+/* Screen Flash - Success (Gold) */
+@keyframes screen-flash-success {
+  0% { opacity: 0; }
+  10% { opacity: 0.4; }
+  100% { opacity: 0; }
+}
+
+/* Screen Flash - Failure (Red) */
+@keyframes screen-flash-failure {
+  0% { opacity: 0; }
+  10% { opacity: 0.3; }
+  100% { opacity: 0; }
+}
+
+/* Utility Classes */
+.animate-critical-success-pulse {
+  animation: critical-success-pulse 0.8s ease-out;
+}
+
+.animate-critical-success-glow {
+  animation: critical-success-glow 1s ease-in-out;
+}
+
+.animate-critical-failure-shake {
+  animation: critical-failure-shake 0.6s ease-in-out;
+}
+
+.animate-critical-failure-glow {
+  animation: critical-failure-glow 1s ease-in-out;
+}
+
+.animate-screen-flash-success {
+  animation: screen-flash-success 0.6s ease-out;
+}
+
+.animate-screen-flash-failure {
+  animation: screen-flash-failure 0.6s ease-out;
+}

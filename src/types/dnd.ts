@@ -65,6 +65,7 @@ export interface Character {
   id: string;
   name: string;
   race: string;
+  selectedRaceVariant?: string; // For human variants
   class: string;
   level: number;
   alignment: string;
@@ -357,6 +358,13 @@ export interface CharacterCreationData {
   level: number;
   edition: Edition; // D&D edition (2014 or 2024 rules)
   raceSlug: string;
+  selectedRaceVariant?: string; // e.g., "standard", "variant"
+
+  // Variant Human Choices
+  variantAbilityBonuses?: Record<AbilityName, number>; // +1 to two abilities
+  variantSkillProficiency?: SkillName; // One skill proficiency
+  variantFeat?: string; // One feat choice
+
   classSlug: string;
   abilities: Record<AbilityName, number>; // Raw scores only during creation
   abilityScoreMethod: 'standard-array' | 'standard-roll' | 'classic-roll' | '5d6-drop-2' | 'point-buy' | 'custom';
@@ -381,10 +389,11 @@ export interface CharacterCreationData {
   pactBoon?: 'blade' | 'chain' | 'tome'; // 2024 Warlock
   expertiseSkills?: string[]; // Rogue, Ranger, Bard: 2 skills/tools
   weaponMastery?: string[]; // Rogue, Fighter, Barbarian, Paladin: 2-3 weapons
-  fightingStyle?: string; // Fighter, Paladin, Ranger
-  eldritchInvocations?: string[]; // Warlock: Eldritch Invocation slugs
+   fightingStyle?: string; // Fighter, Paladin, Ranger
+   eldritchInvocations?: string[]; // Warlock: Eldritch Invocation slugs
+   secondWindUses?: number; // 2024 Fighter: Second Wind uses remaining
 
-  // Sprint 2: Spell selection
+   // Sprint 2: Spell selection
   spellSelection: SpellSelectionData;
 
   // Sprint 4: Custom equipment additions
@@ -421,16 +430,26 @@ export interface CharacterCreationData {
   }>;
 }
 
+export interface RaceVariant {
+  slug: string;
+  name: string;
+  description: string;
+  ability_bonuses: Partial<Record<AbilityName, number>>;
+  racial_traits: string[];
+  features: string[];
+}
+
 export interface Race {
   slug: string;
   name: string;
   source: string;
-  edition?: Edition; // D&D edition (2014 or 2024 rules)
-  speed?: number;
+  speed: number;
   ability_bonuses: Partial<Record<AbilityName, number>>;
   racial_traits: string[];
   description: string;
   typicalRoles: string[];
+  variants?: RaceVariant[];
+  defaultVariant?: string;
 }
 
 export interface RaceCategory {

@@ -3,12 +3,29 @@ import { Character, Equipment } from '../../types/dnd';
 import { loadEquipment, COMBAT_ACTIONS } from '../../services/dataService';
 import { DiceRoll } from '../../services/diceService';
 import { consumeResource, getResourceUses } from '../../utils/resourceUtils';
+import { TacticalSection } from './TacticalSection';
 
 type CustomRoll = DiceRoll & {
   description: string;
   damageNotation?: string;
   damageType?: string;
 };
+
+// Tactical Action Interface for restructured combat options
+interface TacticalAction {
+  id: string;
+  name: string;
+  type: 'weapon-attack' | 'spell-attack' | 'unarmed-attack' | 'special-attack' | 'defensive' | 'movement' | 'support' | 'stealth' | 'healing' | 'action-surge' | 'reaction-setup';
+  description: string;
+  actionCost: 'Action' | 'Bonus Action' | 'Free' | 'Reaction';
+  hasButton: boolean;
+  buttonText?: string;
+  category: 'offense' | 'defense' | 'mobility' | 'burst';
+  isLimited?: boolean;
+  usesRemaining?: number;
+  maxUses?: number;
+  specialUI?: 'bubble-display';
+}
 
 interface AttacksAndActionsProps {
   character: Character;
@@ -24,7 +41,7 @@ interface AttacksAndActionsProps {
 
 // Helper function to calculate attack bonus for a weapon
 const calculateAttackBonus = (character: Character, weapon: Equipment): number => {
-  const isFinesse = weapon.properties?.includes('Finesse');
+  const isFinesse = weapon.properties?.some(prop => prop.name === 'Finesse');
   const isRanged = weapon.weapon_range === 'Ranged';
 
   // Determine ability modifier
@@ -48,7 +65,7 @@ const calculateAttackBonus = (character: Character, weapon: Equipment): number =
 const getWeaponDamage = (weapon: Equipment, character: Character): string => {
   if (!weapon.damage) return '0';
 
-  const isFinesse = weapon.properties?.includes('Finesse');
+  const isFinesse = weapon.properties?.some(prop => prop.name === 'Finesse');
   const isRanged = weapon.weapon_range === 'Ranged';
 
   // Determine ability modifier for damage
@@ -117,9 +134,9 @@ export const AttacksAndActions: React.FC<AttacksAndActionsProps> = ({
       damageType: weapon.damage?.damage_type || 'slashing',
       label: rollText,
       diceResults: [],
-      modifier: 0,
-      total: 0,
-      timestamp: 0
+      modifier: attackBonus,
+      total: attackBonus,
+      timestamp: Date.now()
     };
 
     onDiceRoll(roll);
@@ -138,9 +155,9 @@ export const AttacksAndActions: React.FC<AttacksAndActionsProps> = ({
       description: 'Spell Attack',
       label: 'Spell Attack',
       diceResults: [],
-      modifier: 0,
-      total: 0,
-      timestamp: 0
+      modifier: attackBonus,
+      total: attackBonus,
+      timestamp: Date.now()
     };
 
     onDiceRoll(roll);
@@ -159,9 +176,9 @@ export const AttacksAndActions: React.FC<AttacksAndActionsProps> = ({
       description: `${cantripSlug} Attack`,
       label: `${cantripSlug} Attack`,
       diceResults: [],
-      modifier: 0,
-      total: 0,
-      timestamp: 0
+      modifier: attackBonus,
+      total: attackBonus,
+      timestamp: Date.now()
     };
 
     onDiceRoll(roll);
@@ -181,9 +198,9 @@ export const AttacksAndActions: React.FC<AttacksAndActionsProps> = ({
       description: `${ability} Saving Throw`,
       label: `${ability} Saving Throw`,
       diceResults: [],
-      modifier: 0,
-      total: 0,
-      timestamp: 0
+      modifier: saveBonus,
+      total: saveBonus,
+      timestamp: Date.now()
     };
 
     onDiceRoll(roll);
@@ -199,9 +216,9 @@ export const AttacksAndActions: React.FC<AttacksAndActionsProps> = ({
       description: 'Initiative',
       label: 'Initiative',
       diceResults: [],
-      modifier: 0,
-      total: 0,
-      timestamp: 0
+      modifier: character.initiative,
+      total: character.initiative,
+      timestamp: Date.now()
     };
 
     onDiceRoll(roll);
@@ -219,9 +236,9 @@ export const AttacksAndActions: React.FC<AttacksAndActionsProps> = ({
       description: `${skillName} (${ability}) Check`,
       label: `${skillName} (${ability}) Check`,
       diceResults: [],
-      modifier: 0,
-      total: 0,
-      timestamp: 0
+      modifier: skillBonus,
+      total: skillBonus,
+      timestamp: Date.now()
     };
 
     onDiceRoll(roll);
@@ -242,9 +259,9 @@ export const AttacksAndActions: React.FC<AttacksAndActionsProps> = ({
       damageType: 'bludgeoning',
       label: 'Unarmed Strike',
       diceResults: [],
-      modifier: 0,
-      total: 0,
-      timestamp: 0
+      modifier: attackBonus,
+      total: attackBonus,
+      timestamp: Date.now()
     };
 
     onDiceRoll(roll);
@@ -290,9 +307,9 @@ export const AttacksAndActions: React.FC<AttacksAndActionsProps> = ({
         description: action.name,
         label: action.name,
         diceResults: [],
-        modifier: 0,
-        total: 0,
-        timestamp: 0
+        modifier: levelBonus,
+        total: levelBonus,
+        timestamp: Date.now()
       };
 
       onDiceRoll(roll);
@@ -312,6 +329,192 @@ export const AttacksAndActions: React.FC<AttacksAndActionsProps> = ({
 
   const classActions = getClassActions();
 
+  // Transform disparate action data into tactical groups
+  const organizeTacticalActions = () => {
+    const actions = {
+      offense: [] as TacticalAction[],
+      defense: [] as TacticalAction[],
+      mobility: [] as TacticalAction[],
+      burst: [] as TacticalAction[]
+    };
+
+    // 1. OFFENSE & CONTROL
+    // Add weapon attacks
+    equippedWeapons.forEach(weapon => {
+      actions.offense.push({
+        id: `weapon-${weapon.slug}`,
+        name: weapon.name,
+        type: 'weapon-attack',
+        description: `${weapon.damage?.damage_dice || '1d4'} ${weapon.damage?.damage_type || 'damage'}`,
+        actionCost: 'Action',
+        hasButton: true,
+        buttonText: 'Attack',
+        category: 'offense'
+      });
+    });
+
+    // Add unarmed strike
+    actions.offense.push({
+      id: 'unarmed-strike',
+      name: 'Unarmed Strike',
+      type: 'unarmed-attack',
+      description: `+${character.abilities.STR.modifier + character.proficiencyBonus} to hit • 1${character.abilities.STR.modifier >= 0 ? '+' : ''}${character.abilities.STR.modifier} bludgeoning`,
+      actionCost: 'Action',
+      hasButton: true,
+      buttonText: 'Attack',
+      category: 'offense'
+    });
+
+    // Add grapple and shove
+    const grappleAction = COMBAT_ACTIONS.standardActions.find(a => a.slug === 'grapple');
+    const shoveAction = COMBAT_ACTIONS.standardActions.find(a => a.slug === 'shove');
+
+    if (grappleAction) actions.offense.push({
+      id: grappleAction.slug,
+      name: grappleAction.name,
+      type: 'special-attack',
+      description: `+${character.skills.Athletics.value} Athletics vs target's Athletics/Acrobatics`,
+      actionCost: 'Action',
+      hasButton: true,
+      buttonText: 'Contest',
+      category: 'offense'
+    });
+
+    if (shoveAction) actions.offense.push({
+      id: shoveAction.slug,
+      name: shoveAction.name,
+      type: 'special-attack',
+      description: `+${character.skills.Athletics.value} Athletics vs target's Athletics/Acrobatics`,
+      actionCost: 'Action',
+      hasButton: true,
+      buttonText: 'Contest',
+      category: 'offense'
+    });
+
+    // 2. SURVIVAL & DEFENSE
+    const dodgeAction = COMBAT_ACTIONS.standardActions.find(a => a.slug === 'dodge');
+    const disengageAction = COMBAT_ACTIONS.standardActions.find(a => a.slug === 'disengage');
+
+    if (dodgeAction) actions.defense.push({
+      id: dodgeAction.slug,
+      name: dodgeAction.name,
+      type: 'defensive',
+      description: 'Attack rolls against you have disadvantage',
+      actionCost: 'Action',
+      hasButton: false,
+      category: 'defense'
+    });
+
+    if (disengageAction) actions.defense.push({
+      id: disengageAction.slug,
+      name: disengageAction.name,
+      type: 'defensive',
+      description: 'Movement doesn\'t provoke opportunity attacks',
+      actionCost: 'Action',
+      hasButton: false,
+      category: 'defense'
+    });
+
+    // Add Second Wind for fighters
+    const secondWind = classActions.find(a => a.slug === 'second-wind');
+    if (secondWind) actions.defense.push({
+      id: secondWind.slug,
+      name: secondWind.name,
+      type: 'healing',
+      description: `Regain 1d10 + ${character.level} HP`,
+      actionCost: 'Bonus Action',
+      hasButton: true,
+      buttonText: 'Heal',
+      category: 'defense',
+      isLimited: true,
+      usesRemaining: getResourceUses(character, 'second-wind').current,
+      maxUses: getResourceUses(character, 'second-wind').max
+    });
+
+    // 3. MOBILITY & SUPPORT
+    const dashAction = COMBAT_ACTIONS.standardActions.find(a => a.slug === 'dash');
+    const helpAction = COMBAT_ACTIONS.standardActions.find(a => a.slug === 'help');
+    const hideAction = COMBAT_ACTIONS.standardActions.find(a => a.slug === 'hide');
+
+    if (dashAction) actions.mobility.push({
+      id: dashAction.slug,
+      name: dashAction.name,
+      type: 'movement',
+      description: `Double movement speed (${character.speed * 2}ft total)`,
+      actionCost: 'Action',
+      hasButton: false,
+      category: 'mobility'
+    });
+
+    if (helpAction) actions.mobility.push({
+      id: helpAction.slug,
+      name: helpAction.name,
+      type: 'support',
+      description: 'Grant advantage on ally\'s next check or attack',
+      actionCost: 'Action',
+      hasButton: false,
+      category: 'mobility'
+    });
+
+    if (hideAction) actions.mobility.push({
+      id: hideAction.slug,
+      name: hideAction.name,
+      type: 'stealth',
+      description: `+${character.skills.Stealth.value} Stealth check`,
+      actionCost: 'Action',
+      hasButton: false,
+      category: 'mobility'
+    });
+
+    // Add Bardic Inspiration for bards
+    const bardicInspiration = classActions.find(a => a.slug === 'bardic-inspiration');
+    if (bardicInspiration) actions.mobility.push({
+      id: bardicInspiration.slug,
+      name: bardicInspiration.name,
+      type: 'support',
+      description: 'Give ally d6 inspiration die for checks/attacks/saves',
+      actionCost: 'Bonus Action',
+      hasButton: false,
+      category: 'mobility',
+      isLimited: true,
+      usesRemaining: getResourceUses(character, 'bardic-inspiration').current,
+      maxUses: getResourceUses(character, 'bardic-inspiration').max
+    });
+
+    // 4. BURST / SPECIAL
+    const readyAction = COMBAT_ACTIONS.standardActions.find(a => a.slug === 'ready');
+
+    // Add Action Surge for fighters
+    const actionSurge = classActions.find(a => a.slug === 'action-surge');
+    if (actionSurge) actions.burst.push({
+      id: actionSurge.slug,
+      name: actionSurge.name,
+      type: 'action-surge',
+      description: 'Take one additional action this turn',
+      actionCost: 'Free',
+      hasButton: false,
+      category: 'burst',
+      isLimited: true,
+      usesRemaining: getActionSurgeInfo().current,
+      maxUses: getActionSurgeInfo().max,
+      specialUI: 'bubble-display' // Special handling for bubble UI
+    });
+
+    if (readyAction) actions.burst.push({
+      id: readyAction.slug,
+      name: readyAction.name,
+      type: 'reaction-setup',
+      description: 'Prepare action for specific trigger',
+      actionCost: 'Action',
+      hasButton: false,
+      category: 'burst'
+    });
+
+    return actions;
+  };
+
+  const organizedActions = organizeTacticalActions();
+
   // Determine color scheme based on layout mode
   const isPaperSheet = layoutMode === 'paper-sheet';
   const bgSecondaryClass = isPaperSheet ? 'bg-[#fcf6e3]' : 'bg-theme-secondary';
@@ -321,256 +524,113 @@ export const AttacksAndActions: React.FC<AttacksAndActionsProps> = ({
   const textTertiaryClass = isPaperSheet ? 'text-[#3d2817]' : 'text-theme-tertiary';
   const borderClass = isPaperSheet ? 'border-[#1e140a]/20' : 'border-red-800';
 
+  // Handle tactical action clicks
+  const handleTacticalAction = (actionId: string) => {
+    if (actionId.startsWith('weapon-')) {
+      const weaponSlug = actionId.replace('weapon-', '');
+      const weapon = equippedWeapons.find(w => w.slug === weaponSlug);
+      if (weapon) handleWeaponAttack(weapon);
+    } else if (actionId === 'unarmed-strike') {
+      handleUnarmedStrike();
+    } else if (actionId === 'second-wind') {
+      // Handle Second Wind healing
+      const healingRoll = `1d10+${character.level}`;
+      // Create the roll object for the dice system
+      const roll: CustomRoll = {
+        id: `second-wind-${crypto.randomUUID()}`,
+        notation: healingRoll,
+        type: 'complex' as const,
+        description: 'Second Wind Healing',
+        label: 'Second Wind',
+        diceResults: [],
+        modifier: character.level,
+        total: character.level,
+        timestamp: Date.now()
+      };
+      onDiceRoll(roll);
+    } else {
+      // Handle other tactical actions
+      handleCombatAction(actionId);
+    }
+  };
+
   return (
-    <div className="space-y-4">
-      <h2 className="text-xl font-bold text-red-500 border-b border-red-800 pb-1">⚔️ Attacks & Actions</h2>
+    <div className="space-y-6">
+      {/* Main Header */}
+      <h2 className="text-2xl font-bold text-theme-primary border-b-2 border-theme-primary pb-2">
+        ⚔️ COMBAT OPTIONS
+      </h2>
 
-      {/* Weapon Attacks */}
-      {equippedWeapons.length > 0 && (
-        <div className={`p-4 ${bgSecondaryClass} rounded-xl shadow-lg border-l-4 border-red-500`}>
-          <h3 className="text-lg font-bold text-accent-red-light mb-3">Weapon Attacks</h3>
-          <div className="space-y-3">
-            {equippedWeapons.map((weapon, index) => (
-              <div key={weapon.slug} className={`flex items-center justify-between p-3 ${bgTertiaryClass} rounded-lg`}>
-                <div className="flex-1">
-                  <div className={`font-semibold ${textPrimaryClass}`}>{weapon.name}</div>
-                  <div className={`text-sm ${textMutedClass}`}>
-                    +{calculateAttackBonus(character, weapon)} to hit • {getWeaponDamage(weapon, character)} {weapon.damage?.damage_type}
-                    {weapon.properties && weapon.properties.length > 0 && (
-                      <span className="ml-2 text-xs">({weapon.properties.join(', ')})</span>
-                    )}
-                  </div>
-                </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => handleWeaponAttack(weapon)}
-                    className="px-3 py-2 bg-accent-red hover:bg-accent-red-light rounded text-sm font-medium transition-colors"
-                  >
-                    Attack
-                  </button>
-                  {hasExtraAttack && (
-                    <button
-                      onClick={() => handleWeaponAttack(weapon, true)}
-                      className="px-3 py-2 bg-orange-600 hover:bg-orange-500 rounded text-sm font-medium transition-colors"
-                    >
-                      Extra
-                    </button>
-                  )}
-                  {hasTwoWeaponFighting && weapon.properties?.includes('Light') && index === 0 && (
-                    <button
-                      onClick={() => handleWeaponAttack(weapon, false, true)}
-                      className="px-3 py-2 bg-accent-yellow-dark hover:bg-accent-yellow rounded text-sm font-medium transition-colors"
-                    >
-                      Off-hand
-                    </button>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Spell Attacks */}
+      {/* Spell Attacks Section (if applicable) */}
       {character.spellcasting && (
-        <div className={`p-4 ${bgSecondaryClass} rounded-xl shadow-lg border-l-4 border-accent-purple`}>
-          <h3 className="text-lg font-bold text-accent-purple-light mb-3">Spell Attacks</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            <div className={`p-3 ${bgTertiaryClass} rounded-lg`}>
-              <div className={`text-sm ${textMutedClass}`}>Spell Attack</div>
-              <div className={`font-bold ${textPrimaryClass}`}>+{character.spellcasting.spellAttackBonus}</div>
-              <button
-                onClick={handleSpellAttack}
-                className="mt-2 px-3 py-2 bg-accent-purple hover:bg-accent-purple-light rounded text-sm font-medium transition-colors w-full"
-              >
-                Roll Spell Attack
-              </button>
-            </div>
-            <div className={`p-3 ${bgTertiaryClass} rounded-lg`}>
-              <div className={`text-sm ${textMutedClass}`}>Spell Save DC</div>
-              <div className={`font-bold ${textPrimaryClass}`}>{character.spellcasting.spellSaveDC}</div>
-              <div className="text-xs text-theme-disabled mt-1">Enemies roll against this DC</div>
-            </div>
-          </div>
-
-          {/* Cantrips that make attacks */}
-          {character.spellcasting.cantripsKnown.length > 0 && (
-            <div>
-              <h4 className={`text-sm font-semibold ${textTertiaryClass} mb-2`}>Attack Cantrips</h4>
-              <div className="grid grid-cols-2 gap-2">
-                {character.spellcasting.cantripsKnown
-                  .filter(cantrip => ['fire-bolt', 'shocking-grasp', 'ray-of-frost', 'magic-missile'].includes(cantrip))
-                  .map(cantripSlug => (
-                    <button
-                      key={cantripSlug}
-                      onClick={() => handleCantripAttack(cantripSlug)}
-                      className="p-2 bg-purple-700 hover:bg-accent-purple rounded text-sm transition-colors text-left"
-                    >
-                      <div className={`font-medium ${textPrimaryClass}`}>{cantripSlug.replace('-', ' ')}</div>
-                      <div className={`text-xs ${textMutedClass}`}>+{character.spellcasting?.spellAttackBonus || 0} to hit</div>
-                    </button>
-                  ))}
-              </div>
-            </div>
-          )}
-        </div>
+        <TacticalSection
+          icon="🔮"
+          title="Spellcasting"
+          theme="purple"
+          actions={[
+            {
+              id: 'spell-attack',
+              name: 'Spell Attack',
+              type: 'spell-attack',
+              description: `+${character.spellcasting.spellAttackBonus} to hit`,
+              actionCost: 'Action',
+              hasButton: true,
+              buttonText: 'Roll Attack',
+              category: 'offense'
+            },
+            {
+              id: 'spell-save-dc',
+              name: 'Spell Save DC',
+              type: 'spell-attack',
+              description: `DC ${character.spellcasting.spellSaveDC} for enemy saves`,
+              actionCost: 'Action',
+              hasButton: false,
+              category: 'offense'
+            }
+          ]}
+          onAction={(actionId) => {
+            if (actionId === 'spell-attack') handleSpellAttack();
+          }}
+          layoutMode={layoutMode}
+        />
       )}
 
-      {/* Combat Actions */}
-      <div className={`p-4 ${bgSecondaryClass} rounded-xl shadow-lg border-l-4 border-orange-500`}>
-        <h3 className="text-lg font-bold text-orange-400 mb-3">Combat Actions</h3>
+      {/* Main Tactical Sections */}
+      <TacticalSection
+        icon="⚔️"
+        title="Offense & Control"
+        theme="red"
+        actions={organizedActions.offense}
+        onAction={handleTacticalAction}
+        layoutMode={layoutMode}
+      />
 
-        {/* Unarmed Strike */}
-        <div className="mb-4">
-          <div className={`flex items-center justify-between p-3 ${bgTertiaryClass} rounded-lg`}>
-            <div className="flex-1">
-              <div className={`font-semibold ${textPrimaryClass}`}>Unarmed Strike</div>
-              <div className={`text-sm ${textMutedClass}`}>
-                +{character.abilities.STR.modifier + character.proficiencyBonus} to hit • 1{character.abilities.STR.modifier >= 0 ? '+' : ''}{character.abilities.STR.modifier} bludgeoning
-              </div>
-            </div>
-            <button
-              onClick={handleUnarmedStrike}
-              className="px-3 py-2 bg-orange-600 hover:bg-orange-500 rounded text-sm font-medium transition-colors"
-            >
-              Attack
-            </button>
-          </div>
-        </div>
+      <TacticalSection
+        icon="🛡️"
+        title="Survival & Defense"
+        theme="blue"
+        actions={organizedActions.defense}
+        onAction={handleTacticalAction}
+        layoutMode={layoutMode}
+      />
 
-        {/* Special Attacks */}
-        <div className="mb-4">
-          <h4 className={`text-sm font-semibold ${textTertiaryClass} mb-2`}>Special Attacks</h4>
-          <div className="grid grid-cols-2 gap-2">
-            {COMBAT_ACTIONS.standardActions
-              .filter(action => action.category === 'special-attack')
-              .map(action => (
-                <button
-                  key={action.slug}
-                  onClick={() => handleCombatAction(action.slug)}
-                  className="p-2 bg-orange-700 hover:bg-orange-600 rounded text-sm transition-colors text-left"
-                  title={action.summary}
-                >
-                  <div className={`font-medium ${textPrimaryClass}`}>{action.name}</div>
-                  <div className={`text-xs ${textMutedClass} truncate`} title={action.description}>
-                    {action.rollType === 'skill' && action.ability && action.skill && (
-                      <>+{character.skills[action.skill as keyof Character['skills']].value} {action.skill}</>
-                    )}
-                  </div>
-                </button>
-              ))}
-          </div>
-        </div>
+      <TacticalSection
+        icon="🏃"
+        title="Mobility & Support"
+        theme="green"
+        actions={organizedActions.mobility}
+        onAction={handleTacticalAction}
+        layoutMode={layoutMode}
+      />
 
-        {/* Class Features */}
-        {classActions.length > 0 && (
-          <div className="mb-4">
-            <h4 className={`text-sm font-semibold ${textTertiaryClass} mb-2`}>Class Features</h4>
-            <div className="space-y-2">
-              {classActions.map(action => (
-                 action.slug === 'action-surge' ? (
-                   // Special handling for Action Surge with spell slot-style bubbles
-                   <div key={action.slug} className="w-full p-3 bg-orange-700 hover:bg-orange-600 rounded text-sm transition-colors">
-                     <div className="flex items-center justify-between mb-2">
-                       <span className={`${textMutedClass} text-xs`}>Action Surge</span>
-                       <span className={`font-bold ${textPrimaryClass} text-xs`}>
-                         {getActionSurgeInfo().current}/{getActionSurgeInfo().max} uses
-                       </span>
-                     </div>
-                     <div className="flex items-center gap-1 justify-center flex-wrap mb-2">
-                       {Array.from({ length: getActionSurgeInfo().max }, (_, surgeIndex) => (
-                         <button
-                           key={surgeIndex}
-                           onClick={() => {
-                             const current = getActionSurgeInfo().current;
-                             if (surgeIndex < current) {
-                               // Reset this use (mark as unused) - add back the use
-                               const updatedCharacter = { ...character };
-                               if (updatedCharacter.resources) {
-                                 updatedCharacter.resources = updatedCharacter.resources.map(resource => {
-                                   if (resource.id === 'action-surge') {
-                                     return { ...resource, currentUses: (resource.currentUses || 0) + (current - surgeIndex) };
-                                   }
-                                   return resource;
-                                 });
-                               }
-                               onUpdateCharacter(updatedCharacter);
-                             } else if (surgeIndex === current && canUseActionSurge()) {
-                               // Use Action Surge
-                               useActionSurge();
-                             }
-                           }}
-                           className={`w-4 h-4 rounded-full border-2 transition-colors ${
-                             surgeIndex < getActionSurgeInfo().current
-                               ? 'bg-accent-red-light border-red-400 cursor-pointer hover:bg-red-400'
-                               : surgeIndex === getActionSurgeInfo().current && canUseActionSurge()
-                               ? 'bg-orange-400 border-orange-300 cursor-pointer hover:bg-orange-300'
-                               : 'bg-gray-700 border-gray-600'
-                           }`}
-                           title={
-                             surgeIndex < getActionSurgeInfo().current
-                               ? 'Click to reset this use'
-                               : surgeIndex === getActionSurgeInfo().current && canUseActionSurge()
-                               ? 'Click to use Action Surge'
-                               : 'Unavailable'
-                           }
-                         />
-                       ))}
-                     </div>
-                     <div className={`text-xs ${textMutedClass} line-clamp-2`}>{action.description}</div>
-                   </div>
-                ) : (
-                  <button
-                    key={action.slug}
-                    onClick={() => handleCombatAction(action.slug)}
-                    className="w-full p-3 bg-orange-700 hover:bg-orange-600 rounded text-sm transition-colors text-left"
-                  >
-                  <div className="flex items-center justify-between">
-                    <div className={`font-medium ${textPrimaryClass}`}>{action.name}</div>
-                    {action.usageType === 'limited' && (
-                      <div className="text-xs text-orange-300">
-                        {(() => {
-                          const resourceInfo = getResourceUses(character, action.slug);
-                          return resourceInfo.max > 0
-                            ? `${resourceInfo.current}/${resourceInfo.max} ${action.rechargeType === 'short' ? 'short rest' : 'long rest'}`
-                            : '';
-                        })()}
-                      </div>
-                    )}
-                  </div>
-                    <div className={`text-xs ${textMutedClass} mt-1 line-clamp-2`}>{action.description}</div>
-                  </button>
-                )
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Tactical Actions */}
-        <div>
-          <h4 className={`text-sm font-semibold ${textTertiaryClass} mb-2`}>Tactical Actions</h4>
-          <div className="grid grid-cols-2 gap-2">
-            {COMBAT_ACTIONS.standardActions
-              .filter(action => action.category === 'tactical')
-              .map(action => (
-                <button
-                  key={action.slug}
-                  onClick={() => handleCombatAction(action.slug)}
-                  className={`p-2 ${bgTertiaryClass} hover:bg-theme-quaternary rounded text-sm transition-colors text-left`}
-                  title={action.summary}
-                >
-                  <div className={`font-medium ${textPrimaryClass}`}>{action.name}</div>
-                  <div className={`text-xs ${textMutedClass}`}>
-                    {action.rollType === 'skill' && action.ability && action.skill && (
-                      <>+{character.skills[action.skill as keyof Character['skills']].value} {action.skill}</>
-                    )}
-                    {action.rollType === 'none' && <span className="text-orange-300">No roll</span>}
-                  </div>
-                </button>
-              ))}
-          </div>
-        </div>
-      </div>
+      <TacticalSection
+        icon="⚡"
+        title="Burst / Special"
+        theme="orange"
+        actions={organizedActions.burst}
+        onAction={handleTacticalAction}
+        layoutMode={layoutMode}
+      />
     </div>
   );
 };

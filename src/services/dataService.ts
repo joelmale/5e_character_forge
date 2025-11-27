@@ -379,16 +379,51 @@ export function transformRace(srdRace: SRDRace, year: number = 2014): Race {
     abilityBonuses[ability] = bonus.bonus;
   });
 
-  return {
-    slug: srdRace.index,
-    name: srdRace.name,
-    source: `SRD ${year}`,
-    speed: srdRace.speed,
-    ability_bonuses: abilityBonuses,
-    racial_traits: srdRace.traits.map(t => t.name),
-    description: `${srdRace.name} from the System Reference Document.`,
-    typicalRoles: [], // SRD doesn't include this, would need to be added manually
-  };
+   // Handle human variants specially
+   let variants = undefined;
+   let defaultVariant = undefined;
+   let finalAbilityBonuses = abilityBonuses;
+   let finalRacialTraits = srdRace.traits.map(t => t.name);
+
+   if (srdRace.index === 'human') {
+     // Define human variants
+     variants = [
+       {
+         slug: 'standard',
+         name: 'Standard Human',
+         description: 'The classic human from the Basic Rules - +1 to all ability scores for broad versatility.',
+         ability_bonuses: { STR: 1, DEX: 1, CON: 1, INT: 1, WIS: 1, CHA: 1 },
+         racial_traits: [],
+         features: []
+       },
+       {
+         slug: 'variant',
+         name: 'Variant Human',
+         description: 'The specialist human - +1 to two abilities, one skill proficiency, and one feat for focused power.',
+         ability_bonuses: {},
+         racial_traits: ['Variant Skills', 'Variant Feat'],
+         features: []
+       }
+     ];
+     defaultVariant = 'variant';
+
+     // Clear base ability bonuses and traits for human (handled by variants)
+     finalAbilityBonuses = {};
+     finalRacialTraits = [];
+   }
+
+   return {
+     slug: srdRace.index,
+     name: srdRace.name,
+     source: `SRD ${year}`,
+     speed: srdRace.speed,
+     ability_bonuses: finalAbilityBonuses,
+     racial_traits: finalRacialTraits,
+     description: `${srdRace.name} from the System Reference Document.`,
+     typicalRoles: [], // SRD doesn't include this, would need to be added manually
+     variants,
+     defaultVariant
+   };
 }
 
 export function transformClass(srdClass: SRDClass, year: number = 2014): Class {
