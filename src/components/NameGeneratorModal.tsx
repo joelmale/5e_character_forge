@@ -42,14 +42,18 @@ const NameGeneratorModal: React.FC<NameGeneratorModalProps> = ({
   }, [isOpen, selectedRace, selectedGender]);
 
   const loadSavedData = () => {
-    const savedHistory = localStorage.getItem('nameGenerator_history');
-    const savedFavorites = localStorage.getItem('nameGenerator_favorites');
+    try {
+      const savedHistory = localStorage.getItem('nameGenerator_history');
+      const savedFavorites = localStorage.getItem('nameGenerator_favorites');
 
-    if (savedHistory) {
-      setNameHistory(JSON.parse(savedHistory));
-    }
-    if (savedFavorites) {
-      setFavorites(JSON.parse(savedFavorites));
+      if (savedHistory) {
+        setNameHistory(JSON.parse(savedHistory));
+      }
+      if (savedFavorites) {
+        setFavorites(JSON.parse(savedFavorites));
+      }
+    } catch {
+      // Ignore errors loading saved data - will use defaults
     }
   };
 

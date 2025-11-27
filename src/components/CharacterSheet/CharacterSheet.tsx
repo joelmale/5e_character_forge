@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { CharacterSheetProps } from '../../types/components';
 import { useLayout } from '../../context';
-import { ModernStackedLayout, ClassicDndLayout, MobileLayout } from './layouts';
+import { ModernStackedLayout, ClassicDndLayout, MobileLayout, PaperSheetLayout } from './layouts';
 
 /**
  * CharacterSheet Wrapper
@@ -35,6 +35,9 @@ export const CharacterSheet: React.FC<CharacterSheetProps> = (props) => {
   switch (layoutMode) {
     case 'classic-dnd':
       return <ClassicDndLayout {...props} />;
+
+    case 'paper-sheet':
+      return <PaperSheetLayout {...props} />;
 
     case 'mobile':
       return <MobileLayout {...props} />;

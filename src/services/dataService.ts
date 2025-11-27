@@ -37,6 +37,7 @@ import backgroundDefaultsData from '../data/backgroundDefaults.json';
 import combatActionsData from '../data/combatActions.json';
 import { generateName } from '../utils/nameGenerator';
 import { AbilityName, Race, Class, Equipment, Feature, Subclass, Feat, RaceCategory, ClassCategory, EquipmentPackage, EquipmentChoice, EquipmentItem, EquippedItem, SpellcastingType, SkillName, Monster, MonsterType, Edition } from '../types/dnd';
+import { Level1Feature } from '../types/widgets';
 
 // Local type definitions for dataService
 interface Alignment {
@@ -553,12 +554,13 @@ export function transformClass(srdClass: SRDClass, year: number = 2014): Class {
     themeColor: '#666666',
 
     // Preserve level_1_features for 2024 widget system
-    ...(srdClass.level_1_features && { level_1_features: srdClass.level_1_features as any })
+    ...(srdClass.level_1_features && { level_1_features: srdClass.level_1_features as Array<Level1Feature> })
   };
 }
 
 export function transformEquipment2014(srdEquip: SRDEquipment2014): Equipment {
   return {
+    index: srdEquip.index, // Add missing index field
     slug: srdEquip.index,
     name: srdEquip.name,
     year: 2014,
@@ -581,11 +583,12 @@ export function transformEquipment2014(srdEquip: SRDEquipment2014): Equipment {
       normal: srdEquip.throw_range?.normal || srdEquip.range?.normal || 5,
       long: srdEquip.throw_range?.long || srdEquip.range?.long,
     } : undefined,
-    properties: srdEquip.properties?.map(p => p.name),
+    properties: srdEquip.properties, // Keep as object array, not just names
     two_handed_damage: srdEquip.two_handed_damage ? {
       damage_dice: srdEquip.two_handed_damage.damage_dice,
       damage_type: srdEquip.two_handed_damage.damage_type.name,
     } : undefined,
+    mastery: undefined, // 2014 doesn't have mastery property
 
     // Armor fields
     armor_category: srdEquip.armor_category as 'Light' | 'Medium' | 'Heavy' | 'Shield' | undefined,
@@ -609,7 +612,15 @@ export function transformEquipment2014(srdEquip: SRDEquipment2014): Equipment {
 
 export function transformEquipment2024(srdEquip: SRDEquipment2024): Equipment {
   // For 2024, determine category from equipment_categories array
-  const primaryCategory = srdEquip.equipment_categories[0]?.name || 'Adventuring Gear';
+  let primaryCategory = 'Adventuring Gear';
+  const hasWeaponCategory = srdEquip.equipment_categories.some(cat =>
+    cat.name.toLowerCase().includes('weapon')
+  );
+  if (hasWeaponCategory) {
+    primaryCategory = 'Weapon';
+  } else {
+    primaryCategory = srdEquip.equipment_categories[0]?.name || 'Adventuring Gear';
+  }
 
   // Determine weapon category from equipment_categories
   let weaponCategory: 'Simple' | 'Martial' | undefined;
@@ -623,6 +634,7 @@ export function transformEquipment2024(srdEquip: SRDEquipment2024): Equipment {
   });
 
   return {
+    index: srdEquip.index, // Add missing index field
     slug: srdEquip.index,
     name: srdEquip.name,
     year: 2024,
@@ -642,12 +654,12 @@ export function transformEquipment2024(srdEquip: SRDEquipment2024): Equipment {
       damage_type: srdEquip.damage.damage_type.name,
     } : undefined,
     range: srdEquip.range,
-    properties: srdEquip.properties?.map(p => p.name),
+    properties: srdEquip.properties, // Keep as object array, not just names
     two_handed_damage: srdEquip.two_handed_damage ? {
       damage_dice: srdEquip.two_handed_damage.damage_dice,
       damage_type: srdEquip.two_handed_damage.damage_type.name,
     } : undefined,
-    mastery: srdEquip.mastery?.name,
+    mastery: srdEquip.mastery, // Keep as object, not just name
 
     // Armor fields
     armor_category: srdEquip.armor_category as 'Light' | 'Medium' | 'Heavy' | 'Shield' | undefined,

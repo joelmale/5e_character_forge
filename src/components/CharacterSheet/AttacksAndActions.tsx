@@ -2,6 +2,7 @@ import React from 'react';
 import { Character, Equipment } from '../../types/dnd';
 import { loadEquipment, COMBAT_ACTIONS } from '../../services/dataService';
 import { DiceRoll } from '../../services/diceService';
+import { consumeResource, getResourceUses } from '../../utils/resourceUtils';
 
 type CustomRoll = DiceRoll & {
   description: string;
@@ -17,6 +18,8 @@ interface AttacksAndActionsProps {
     details?: Array<{ value: number; kept: boolean; critical?: 'success' | 'failure' }>
   }) => void;
   onDiceRoll: (roll: CustomRoll) => void;
+  onUpdateCharacter: (character: Character) => void;
+  layoutMode?: 'paper-sheet' | 'classic-dnd' | 'modern';
 }
 
 // Helper function to calculate attack bonus for a weapon
@@ -64,6 +67,8 @@ export const AttacksAndActions: React.FC<AttacksAndActionsProps> = ({
   character,
   setRollResult: _setRollResult,
   onDiceRoll,
+  onUpdateCharacter,
+  layoutMode = 'modern',
 }) => {
   const allEquipment = loadEquipment();
 
@@ -77,6 +82,23 @@ export const AttacksAndActions: React.FC<AttacksAndActionsProps> = ({
 
   // Check for Two-Weapon Fighting style
   const hasTwoWeaponFighting = character.selectedFightingStyle === 'Two-Weapon Fighting';
+
+  // Action Surge usage tracking (now uses resource system)
+  const getActionSurgeInfo = () => {
+    return getResourceUses(character, 'action-surge');
+  };
+
+  const canUseActionSurge = () => {
+    const info = getActionSurgeInfo();
+    return info.current > 0;
+  };
+
+  const useActionSurge = () => {
+    if (canUseActionSurge()) {
+      const updatedCharacter = consumeResource(character, 'action-surge');
+      onUpdateCharacter(updatedCharacter);
+    }
+  };
 
   const handleWeaponAttack = (weapon: Equipment, isExtraAttack = false, isOffHand = false) => {
     const attackBonus = calculateAttackBonus(character, weapon);
@@ -229,6 +251,14 @@ export const AttacksAndActions: React.FC<AttacksAndActionsProps> = ({
   };
 
   const handleCombatAction = (actionSlug: string) => {
+    // Special handling for Action Surge
+    if (actionSlug === 'action-surge') {
+      if (canUseActionSurge()) {
+        useActionSurge();
+      }
+      return;
+    }
+
     const allActions = [
       ...COMBAT_ACTIONS.standardActions,
       ...COMBAT_ACTIONS.bonusActions,
@@ -237,6 +267,12 @@ export const AttacksAndActions: React.FC<AttacksAndActionsProps> = ({
       ...COMBAT_ACTIONS.classFeatureActions
     ];
     const action = allActions.find(a => a.slug === actionSlug);
+
+    // Consume resource if this action has limited uses
+    if (action?.usageType === 'limited') {
+      const updatedCharacter = consumeResource(character, actionSlug);
+      onUpdateCharacter(updatedCharacter);
+    }
     if (!action) return;
 
     // Handle rollable actions
@@ -244,7 +280,7 @@ export const AttacksAndActions: React.FC<AttacksAndActionsProps> = ({
       handleSkillCheck(action.skill, action.ability);
     } else if (action.rollType === 'healing' && action.notation) {
       const healingRoll = action.notation;
-      const levelBonus = action.slug === 'second-wind' ? character.level : 0;
+      const levelBonus = action.slug === 'second-wind' && character.class.toLowerCase() === 'fighter' ? character.level : 0;
       const totalNotation = levelBonus > 0 ? `${healingRoll}+${levelBonus}` : healingRoll;
 
       const roll: CustomRoll = {
@@ -276,20 +312,29 @@ export const AttacksAndActions: React.FC<AttacksAndActionsProps> = ({
 
   const classActions = getClassActions();
 
+  // Determine color scheme based on layout mode
+  const isPaperSheet = layoutMode === 'paper-sheet';
+  const bgSecondaryClass = isPaperSheet ? 'bg-[#fcf6e3]' : 'bg-theme-secondary';
+  const bgTertiaryClass = isPaperSheet ? 'bg-[#f5ebd2]' : 'bg-theme-tertiary/50';
+  const textPrimaryClass = isPaperSheet ? 'text-[#1e140a]' : 'text-theme-primary';
+  const textMutedClass = isPaperSheet ? 'text-[#3d2817]' : 'text-theme-muted';
+  const textTertiaryClass = isPaperSheet ? 'text-[#3d2817]' : 'text-theme-tertiary';
+  const borderClass = isPaperSheet ? 'border-[#1e140a]/20' : 'border-red-800';
+
   return (
     <div className="space-y-4">
       <h2 className="text-xl font-bold text-red-500 border-b border-red-800 pb-1">⚔️ Attacks & Actions</h2>
 
       {/* Weapon Attacks */}
       {equippedWeapons.length > 0 && (
-        <div className="p-4 bg-theme-secondary rounded-xl shadow-lg border-l-4 border-red-500">
+        <div className={`p-4 ${bgSecondaryClass} rounded-xl shadow-lg border-l-4 border-red-500`}>
           <h3 className="text-lg font-bold text-accent-red-light mb-3">Weapon Attacks</h3>
           <div className="space-y-3">
             {equippedWeapons.map((weapon, index) => (
-              <div key={weapon.slug} className="flex items-center justify-between p-3 bg-theme-tertiary/50 rounded-lg">
+              <div key={weapon.slug} className={`flex items-center justify-between p-3 ${bgTertiaryClass} rounded-lg`}>
                 <div className="flex-1">
-                  <div className="font-semibold text-theme-primary">{weapon.name}</div>
-                  <div className="text-sm text-theme-muted">
+                  <div className={`font-semibold ${textPrimaryClass}`}>{weapon.name}</div>
+                  <div className={`text-sm ${textMutedClass}`}>
                     +{calculateAttackBonus(character, weapon)} to hit • {getWeaponDamage(weapon, character)} {weapon.damage?.damage_type}
                     {weapon.properties && weapon.properties.length > 0 && (
                       <span className="ml-2 text-xs">({weapon.properties.join(', ')})</span>
@@ -328,12 +373,12 @@ export const AttacksAndActions: React.FC<AttacksAndActionsProps> = ({
 
       {/* Spell Attacks */}
       {character.spellcasting && (
-        <div className="p-4 bg-theme-secondary rounded-xl shadow-lg border-l-4 border-accent-purple">
+        <div className={`p-4 ${bgSecondaryClass} rounded-xl shadow-lg border-l-4 border-accent-purple`}>
           <h3 className="text-lg font-bold text-accent-purple-light mb-3">Spell Attacks</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            <div className="p-3 bg-theme-tertiary/50 rounded-lg">
-              <div className="text-sm text-theme-muted">Spell Attack</div>
-              <div className="font-bold text-theme-primary">+{character.spellcasting.spellAttackBonus}</div>
+            <div className={`p-3 ${bgTertiaryClass} rounded-lg`}>
+              <div className={`text-sm ${textMutedClass}`}>Spell Attack</div>
+              <div className={`font-bold ${textPrimaryClass}`}>+{character.spellcasting.spellAttackBonus}</div>
               <button
                 onClick={handleSpellAttack}
                 className="mt-2 px-3 py-2 bg-accent-purple hover:bg-accent-purple-light rounded text-sm font-medium transition-colors w-full"
@@ -341,9 +386,9 @@ export const AttacksAndActions: React.FC<AttacksAndActionsProps> = ({
                 Roll Spell Attack
               </button>
             </div>
-            <div className="p-3 bg-theme-tertiary/50 rounded-lg">
-              <div className="text-sm text-theme-muted">Spell Save DC</div>
-              <div className="font-bold text-theme-primary">{character.spellcasting.spellSaveDC}</div>
+            <div className={`p-3 ${bgTertiaryClass} rounded-lg`}>
+              <div className={`text-sm ${textMutedClass}`}>Spell Save DC</div>
+              <div className={`font-bold ${textPrimaryClass}`}>{character.spellcasting.spellSaveDC}</div>
               <div className="text-xs text-theme-disabled mt-1">Enemies roll against this DC</div>
             </div>
           </div>
@@ -351,7 +396,7 @@ export const AttacksAndActions: React.FC<AttacksAndActionsProps> = ({
           {/* Cantrips that make attacks */}
           {character.spellcasting.cantripsKnown.length > 0 && (
             <div>
-              <h4 className="text-sm font-semibold text-theme-tertiary mb-2">Attack Cantrips</h4>
+              <h4 className={`text-sm font-semibold ${textTertiaryClass} mb-2`}>Attack Cantrips</h4>
               <div className="grid grid-cols-2 gap-2">
                 {character.spellcasting.cantripsKnown
                   .filter(cantrip => ['fire-bolt', 'shocking-grasp', 'ray-of-frost', 'magic-missile'].includes(cantrip))
@@ -361,8 +406,8 @@ export const AttacksAndActions: React.FC<AttacksAndActionsProps> = ({
                       onClick={() => handleCantripAttack(cantripSlug)}
                       className="p-2 bg-purple-700 hover:bg-accent-purple rounded text-sm transition-colors text-left"
                     >
-                      <div className="font-medium text-theme-primary">{cantripSlug.replace('-', ' ')}</div>
-                      <div className="text-xs text-theme-muted">+{character.spellcasting?.spellAttackBonus || 0} to hit</div>
+                      <div className={`font-medium ${textPrimaryClass}`}>{cantripSlug.replace('-', ' ')}</div>
+                      <div className={`text-xs ${textMutedClass}`}>+{character.spellcasting?.spellAttackBonus || 0} to hit</div>
                     </button>
                   ))}
               </div>
@@ -372,15 +417,15 @@ export const AttacksAndActions: React.FC<AttacksAndActionsProps> = ({
       )}
 
       {/* Combat Actions */}
-      <div className="p-4 bg-theme-secondary rounded-xl shadow-lg border-l-4 border-orange-500">
+      <div className={`p-4 ${bgSecondaryClass} rounded-xl shadow-lg border-l-4 border-orange-500`}>
         <h3 className="text-lg font-bold text-orange-400 mb-3">Combat Actions</h3>
 
         {/* Unarmed Strike */}
         <div className="mb-4">
-          <div className="flex items-center justify-between p-3 bg-theme-tertiary/50 rounded-lg">
+          <div className={`flex items-center justify-between p-3 ${bgTertiaryClass} rounded-lg`}>
             <div className="flex-1">
-              <div className="font-semibold text-theme-primary">Unarmed Strike</div>
-              <div className="text-sm text-theme-muted">
+              <div className={`font-semibold ${textPrimaryClass}`}>Unarmed Strike</div>
+              <div className={`text-sm ${textMutedClass}`}>
                 +{character.abilities.STR.modifier + character.proficiencyBonus} to hit • 1{character.abilities.STR.modifier >= 0 ? '+' : ''}{character.abilities.STR.modifier} bludgeoning
               </div>
             </div>
@@ -395,7 +440,7 @@ export const AttacksAndActions: React.FC<AttacksAndActionsProps> = ({
 
         {/* Special Attacks */}
         <div className="mb-4">
-          <h4 className="text-sm font-semibold text-theme-tertiary mb-2">Special Attacks</h4>
+          <h4 className={`text-sm font-semibold ${textTertiaryClass} mb-2`}>Special Attacks</h4>
           <div className="grid grid-cols-2 gap-2">
             {COMBAT_ACTIONS.standardActions
               .filter(action => action.category === 'special-attack')
@@ -406,8 +451,8 @@ export const AttacksAndActions: React.FC<AttacksAndActionsProps> = ({
                   className="p-2 bg-orange-700 hover:bg-orange-600 rounded text-sm transition-colors text-left"
                   title={action.summary}
                 >
-                  <div className="font-medium text-theme-primary">{action.name}</div>
-                  <div className="text-xs text-theme-muted truncate" title={action.description}>
+                  <div className={`font-medium ${textPrimaryClass}`}>{action.name}</div>
+                  <div className={`text-xs ${textMutedClass} truncate`} title={action.description}>
                     {action.rollType === 'skill' && action.ability && action.skill && (
                       <>+{character.skills[action.skill as keyof Character['skills']].value} {action.skill}</>
                     )}
@@ -420,28 +465,82 @@ export const AttacksAndActions: React.FC<AttacksAndActionsProps> = ({
         {/* Class Features */}
         {classActions.length > 0 && (
           <div className="mb-4">
-            <h4 className="text-sm font-semibold text-theme-tertiary mb-2">Class Features</h4>
+            <h4 className={`text-sm font-semibold ${textTertiaryClass} mb-2`}>Class Features</h4>
             <div className="space-y-2">
               {classActions.map(action => (
-                <button
-                  key={action.slug}
-                  onClick={() => handleCombatAction(action.slug)}
-                  className="w-full p-3 bg-orange-700 hover:bg-orange-600 rounded text-sm transition-colors text-left"
-                >
+                 action.slug === 'action-surge' ? (
+                   // Special handling for Action Surge with spell slot-style bubbles
+                   <div key={action.slug} className="w-full p-3 bg-orange-700 hover:bg-orange-600 rounded text-sm transition-colors">
+                     <div className="flex items-center justify-between mb-2">
+                       <span className={`${textMutedClass} text-xs`}>Action Surge</span>
+                       <span className={`font-bold ${textPrimaryClass} text-xs`}>
+                         {getActionSurgeInfo().current}/{getActionSurgeInfo().max} uses
+                       </span>
+                     </div>
+                     <div className="flex items-center gap-1 justify-center flex-wrap mb-2">
+                       {Array.from({ length: getActionSurgeInfo().max }, (_, surgeIndex) => (
+                         <button
+                           key={surgeIndex}
+                           onClick={() => {
+                             const current = getActionSurgeInfo().current;
+                             if (surgeIndex < current) {
+                               // Reset this use (mark as unused) - add back the use
+                               const updatedCharacter = { ...character };
+                               if (updatedCharacter.resources) {
+                                 updatedCharacter.resources = updatedCharacter.resources.map(resource => {
+                                   if (resource.id === 'action-surge') {
+                                     return { ...resource, currentUses: (resource.currentUses || 0) + (current - surgeIndex) };
+                                   }
+                                   return resource;
+                                 });
+                               }
+                               onUpdateCharacter(updatedCharacter);
+                             } else if (surgeIndex === current && canUseActionSurge()) {
+                               // Use Action Surge
+                               useActionSurge();
+                             }
+                           }}
+                           className={`w-4 h-4 rounded-full border-2 transition-colors ${
+                             surgeIndex < getActionSurgeInfo().current
+                               ? 'bg-accent-red-light border-red-400 cursor-pointer hover:bg-red-400'
+                               : surgeIndex === getActionSurgeInfo().current && canUseActionSurge()
+                               ? 'bg-orange-400 border-orange-300 cursor-pointer hover:bg-orange-300'
+                               : 'bg-gray-700 border-gray-600'
+                           }`}
+                           title={
+                             surgeIndex < getActionSurgeInfo().current
+                               ? 'Click to reset this use'
+                               : surgeIndex === getActionSurgeInfo().current && canUseActionSurge()
+                               ? 'Click to use Action Surge'
+                               : 'Unavailable'
+                           }
+                         />
+                       ))}
+                     </div>
+                     <div className={`text-xs ${textMutedClass} line-clamp-2`}>{action.description}</div>
+                   </div>
+                ) : (
+                  <button
+                    key={action.slug}
+                    onClick={() => handleCombatAction(action.slug)}
+                    className="w-full p-3 bg-orange-700 hover:bg-orange-600 rounded text-sm transition-colors text-left"
+                  >
                   <div className="flex items-center justify-between">
-                    <div className="font-medium text-theme-primary">{action.name}</div>
-                    {action.usageType === 'limited' && action.usesPerLevel && (
+                    <div className={`font-medium ${textPrimaryClass}`}>{action.name}</div>
+                    {action.usageType === 'limited' && (
                       <div className="text-xs text-orange-300">
-                        {typeof action.usesPerLevel[character.level] === 'number'
-                          ? `${action.usesPerLevel[character.level]}/${action.rechargeType === 'short' ? 'short rest' : 'long rest'}`
-                          : action.usesPerLevel[character.level] === 'CHA'
-                            ? `${character.abilities.CHA.modifier}/${action.rechargeType === 'short' ? 'short rest' : 'long rest'}`
-                            : ''}
+                        {(() => {
+                          const resourceInfo = getResourceUses(character, action.slug);
+                          return resourceInfo.max > 0
+                            ? `${resourceInfo.current}/${resourceInfo.max} ${action.rechargeType === 'short' ? 'short rest' : 'long rest'}`
+                            : '';
+                        })()}
                       </div>
                     )}
                   </div>
-                  <div className="text-xs text-theme-muted mt-1 line-clamp-2">{action.description}</div>
-                </button>
+                    <div className={`text-xs ${textMutedClass} mt-1 line-clamp-2`}>{action.description}</div>
+                  </button>
+                )
               ))}
             </div>
           </div>
@@ -449,7 +548,7 @@ export const AttacksAndActions: React.FC<AttacksAndActionsProps> = ({
 
         {/* Tactical Actions */}
         <div>
-          <h4 className="text-sm font-semibold text-theme-tertiary mb-2">Tactical Actions</h4>
+          <h4 className={`text-sm font-semibold ${textTertiaryClass} mb-2`}>Tactical Actions</h4>
           <div className="grid grid-cols-2 gap-2">
             {COMBAT_ACTIONS.standardActions
               .filter(action => action.category === 'tactical')
@@ -457,11 +556,11 @@ export const AttacksAndActions: React.FC<AttacksAndActionsProps> = ({
                 <button
                   key={action.slug}
                   onClick={() => handleCombatAction(action.slug)}
-                  className="p-2 bg-theme-tertiary hover:bg-theme-quaternary rounded text-sm transition-colors text-left"
+                  className={`p-2 ${bgTertiaryClass} hover:bg-theme-quaternary rounded text-sm transition-colors text-left`}
                   title={action.summary}
                 >
-                  <div className="font-medium text-theme-primary">{action.name}</div>
-                  <div className="text-xs text-theme-muted">
+                  <div className={`font-medium ${textPrimaryClass}`}>{action.name}</div>
+                  <div className={`text-xs ${textMutedClass}`}>
                     {action.rollType === 'skill' && action.ability && action.skill && (
                       <>+{character.skills[action.skill as keyof Character['skills']].value} {action.skill}</>
                     )}

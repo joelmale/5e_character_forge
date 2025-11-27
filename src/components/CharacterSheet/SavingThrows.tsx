@@ -91,6 +91,92 @@ export const SavingThrows: React.FC<SavingThrowsProps> = ({
     }
   };
 
+  // Paper Sheet layout: Badge-style 2x3 grid
+  if (layoutMode === 'paper-sheet') {
+    return (
+      <div className="grid grid-cols-2 gap-2">
+        {abilities.map((abilityName) => {
+          const ability = character.abilities[abilityName];
+          const isProficient = savingThrowProficiencies.includes(abilityName);
+          const saveModifier = ability.modifier + (isProficient ? character.proficiencyBonus : 0);
+          const isMenuOpen = activeMenuAbility === abilityName;
+
+          return (
+            <div key={abilityName} className="relative">
+              <button
+                onClick={() => handleRoll(abilityName)}
+                onContextMenu={(e) => {
+                  e.preventDefault();
+                  setActiveMenuAbility(isMenuOpen ? null : abilityName);
+                }}
+                className="flex items-center justify-between p-2 bg-[#f5ebd2] hover:bg-[#ebe1c8] rounded-sm border border-[#1e140a]/20 transition-colors cursor-pointer w-full group relative"
+                title={`Roll ${abilityName} saving throw (${rollTypes[abilityName]}) - Right-click for options`}
+              >
+                <div className="flex items-center gap-2">
+                  {/* Proficiency indicator dot */}
+                  {isProficient && (
+                    <div className="w-2 h-2 rounded-full bg-[#8b4513]" />
+                  )}
+                  {/* Roll indicator */}
+                  {getRollIcon(abilityName) && (
+                    <span className="text-xs font-bold text-[#228b22]">{getRollIcon(abilityName)}</span>
+                  )}
+                  {/* Ability name */}
+                  <span className="text-sm font-cinzel font-semibold text-[#3d2817]">
+                    {abilityName}
+                  </span>
+                </div>
+                {/* Save bonus */}
+                <span className="text-lg font-cinzel font-bold text-[#1e140a] tabular-nums">
+                  {formatModifier(saveModifier)}
+                </span>
+              </button>
+
+              {/* Roll type menu */}
+              {isMenuOpen && (
+                <>
+                  <div className="absolute top-full left-0 mt-1 bg-[#f5ebd2] border-2 border-[#1e140a] rounded-sm shadow-lg z-50 min-w-32">
+                    <button
+                      onClick={() => {
+                        setRollTypes({ ...rollTypes, [abilityName]: 'normal' });
+                        handleRoll(abilityName, 'normal');
+                      }}
+                      className="w-full text-left px-3 py-2 text-sm hover:bg-[#8b4513] hover:text-[#fcf6e3] first:rounded-t-sm font-eb-garamond text-[#3d2817]"
+                    >
+                      Normal
+                    </button>
+                    <button
+                      onClick={() => {
+                        setRollTypes({ ...rollTypes, [abilityName]: 'advantage' });
+                        handleRoll(abilityName, 'advantage');
+                      }}
+                      className="w-full text-left px-3 py-2 text-sm hover:bg-[#8b4513] hover:text-[#fcf6e3] text-[#228b22] font-eb-garamond font-semibold"
+                    >
+                      Advantage
+                    </button>
+                    <button
+                      onClick={() => {
+                        setRollTypes({ ...rollTypes, [abilityName]: 'disadvantage' });
+                        handleRoll(abilityName, 'disadvantage');
+                      }}
+                      className="w-full text-left px-3 py-2 text-sm hover:bg-[#8b4513] hover:text-[#fcf6e3] text-[#8b0000] font-eb-garamond font-semibold last:rounded-b-sm"
+                    >
+                      Disadvantage
+                    </button>
+                  </div>
+                  <div
+                    className="fixed inset-0 z-40"
+                    onClick={() => setActiveMenuAbility(null)}
+                  />
+                </>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
+
   // Classic layout: Compact list similar to skills
   if (layoutMode === 'classic') {
     return (

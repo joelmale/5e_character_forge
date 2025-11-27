@@ -40,5 +40,9 @@
     "additionalDirectories": [
       "/Users/JoelN/Coding/5e-SRD-database/"
     ]
-  }
+  },
+  "enabledMcpjsonServers": [
+    "docker-toolkit"
+  ],
+  "enableAllProjectMcpServers": true
 }

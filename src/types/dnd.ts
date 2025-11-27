@@ -1,5 +1,6 @@
 import gameConstantsData from '../data/gameConstants.json';
 import type { Level1Feature } from './widgets';
+import type { ResourceTracker, LevelUpRecord } from '../data/classProgression';
 
 export const ABILITY_SCORES = gameConstantsData.ABILITY_SCORES as readonly string[];
 export type Ability = typeof ABILITY_SCORES[number];
@@ -159,6 +160,7 @@ export interface Character {
   currency?: {
     cp: number;
     sp: number;
+    ep?: number; // Electrum pieces (optional, less common)
     gp: number;
     pp: number;
   };
@@ -168,11 +170,16 @@ export interface Character {
 
   // Combat state
   temporaryHitPoints?: number;
+  actionSurgeUsed?: number; // Number of Action Surge uses this rest period
   deathSaves?: {
     successes: number;
     failures: number;
   };
   conditions?: string[];
+
+  // Level progression and resource tracking
+  resources?: ResourceTracker[]; // Trackable class resources (Second Wind, Action Surge, etc.)
+  levelHistory?: LevelUpRecord[]; // Record of all level-ups and choices made
 
   // Metadata
   createdAt?: string;
@@ -224,6 +231,7 @@ export interface SpellSelectionData {
 
 // Sprint 4: Equipment system
 export interface Equipment {
+  index: string; // SRD index (e.g., 'club', 'dagger')
   slug: string;
   name: string;
   year: number; // 2014 or 2024
@@ -246,12 +254,20 @@ export interface Equipment {
     normal: number;
     long?: number;
   };
-  properties?: string[]; // 'Light', 'Finesse', 'Thrown', 'Versatile', etc.
+  properties?: Array<{
+    index: string;
+    name: string;
+    url?: string;
+  }>;
   two_handed_damage?: {
     damage_dice: string;
     damage_type: string;
   };
-  mastery?: string; // 2024 only: weapon mastery property
+  mastery?: {
+    index: string; // e.g., 'graze', 'cleave', 'topple'
+    name: string;  // e.g., 'Graze', 'Cleave', 'Topple'
+    url?: string;
+  };
 
   // Armor-specific fields
   armor_category?: 'Light' | 'Medium' | 'Heavy' | 'Shield';
@@ -319,7 +335,14 @@ export interface Feat {
   name: string;
   source: string; // 'PHB', 'XGtE', 'TCoE', 'FToD', 'SRD'
   year: number; // 2014 or 2024
+  category: 'origin' | 'fighting_style' | 'general' | 'epic_boon'; // 2024 feat categories
   prerequisite: string | null;
+  prerequisites?: { // Enhanced prerequisite structure for 2024
+    level?: number;
+    stats?: Record<AbilityName, number>;
+    features?: string[];
+    spellcasting?: boolean;
+  };
   abilityScoreIncrease?: {
     choices: number;
     options: AbilityName[];
@@ -383,6 +406,19 @@ export interface CharacterCreationData {
   ideals: string;
   bonds: string;
   flaws: string;
+
+  // High-Level Character Creation (Level 2+)
+  highLevelSetup?: {
+    hpRolls?: number[]; // HP rolls for levels 2+ (if not using average)
+    totalHP: number; // Calculated total HP
+    useAverage: boolean; // Whether to use average HP or rolls
+  };
+  cumulativeASI?: Array<{
+    level: number; // Level where ASI was gained
+    type: 'asi' | 'feat'; // Whether ASI or Feat was chosen
+    asiAllocations?: Record<AbilityName, number>; // Ability score increases
+    featSlug?: string; // Feat slug if feat was chosen
+  }>;
 }
 
 export interface Race {
@@ -711,4 +747,45 @@ export interface Encounter {
   monsterIds: string[];
   createdAt: number;
   updatedAt: number;
+}
+
+// ==================== Level Up System ====================
+
+/**
+ * Choices made during the level-up wizard flow.
+ * Tracks all player decisions during character leveling.
+ */
+export interface LevelUpChoices {
+  /** Hit points rolled (if not using average) */
+  hpRoll?: number;
+
+  /** Fighting style chosen (Fighter, Paladin, Ranger) */
+  fightingStyleChosen?: string;
+
+  /** Ability score increases selected */
+  asiChoices?: Array<{
+    ability: AbilityName;
+    increase: number;
+  }>;
+
+  /** Feat chosen (if taking feat instead of ASI) */
+  featChosen?: string;
+
+  /** Subclass chosen */
+  subclassChosen?: string;
+
+  /** Spells learned at this level */
+  spellsLearned?: string[];
+
+  /** Cantrips learned at this level */
+  cantripsLearned?: string[];
+
+  /** Expertise skills chosen (Bard, Rogue) */
+  expertiseChosen?: string[];
+
+  /** Weapon masteries chosen */
+  weaponMasteriesChosen?: string[];
+
+  /** Eldritch invocations chosen (Warlock) */
+  eldritchInvocationsChosen?: string[];
 }

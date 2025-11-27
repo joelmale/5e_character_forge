@@ -24,8 +24,8 @@ const RandomizeButton: React.FC<{ onClick: () => void; title?: string; className
 export const Step7EquipmentBrowser: React.FC<EquipmentBrowserProps> = ({
   data,
   updateData,
+  nextStep,
   prevStep,
-  skipToStep,
   getNextStepLabel
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -196,7 +196,7 @@ export const Step7EquipmentBrowser: React.FC<EquipmentBrowserProps> = ({
           <ArrowLeft className="w-4 h-4 mr-2" /> Back
         </button>
         <button
-          onClick={() => skipToStep?.(11)}
+          onClick={nextStep}
           className="px-4 py-2 bg-accent-red hover:bg-accent-red-light rounded-lg text-white flex items-center"
         >
           Next: {getNextStepLabel?.() || 'Continue'} <ArrowRight className="w-4 h-4 ml-2" />

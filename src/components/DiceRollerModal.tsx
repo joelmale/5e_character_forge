@@ -4,12 +4,6 @@ import './DiceRollerModal.css';
 import { diceSounds } from '../utils/diceSounds';
 import { rollDice as rollDiceUtil } from '../services/diceService';
 
-interface DiceRollerModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onRollComplete?: (results: any[]) => void;
-}
-
 interface DiceRollResult {
   qty: number;
   sides: number;
@@ -17,6 +11,12 @@ interface DiceRollResult {
   groupId: number;
   rollId: string;
   theme: string;
+}
+
+interface DiceRollerModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onRollComplete?: (results: DiceRollResult[]) => void;
 }
 
 interface DiceConfig {

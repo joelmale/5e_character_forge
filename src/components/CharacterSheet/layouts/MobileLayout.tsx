@@ -38,6 +38,14 @@ export const MobileLayout: React.FC<CharacterSheetProps> = ({
   ]);
   const [draggedPanel, setDraggedPanel] = useState<string | null>(null);
 
+  const handleBulkAddItems = (items: { equipmentSlug: string; quantity: number }[]) => {
+    items.forEach(item => {
+      for (let i = 0; i < item.quantity; i++) {
+        onAddItem(character.id, item.equipmentSlug, 1);
+      }
+    });
+  };
+
   // Collapse state management
   const getDefaultCollapsedState = (character: Character) => ({
     'coreStats': false,      // Always expanded - AC, HP, Initiative, etc.
@@ -196,6 +204,7 @@ export const MobileLayout: React.FC<CharacterSheetProps> = ({
             character={character}
             setRollResult={setRollResult}
             onDiceRoll={onDiceRoll as (roll: DiceRoll & { description: string; damageNotation?: string; damageType?: string }) => void}
+            onUpdateCharacter={onUpdateCharacter}
           />
         )
       },
@@ -345,6 +354,7 @@ export const MobileLayout: React.FC<CharacterSheetProps> = ({
           onLevelUp={onLevelUp}
           onLevelDown={onLevelDown}
           onOpenDiceTray={onOpenDiceTray}
+          onAddItems={handleBulkAddItems}
         />
 
         {/* Global Section Controls */}

@@ -1,10 +1,20 @@
-/* eslint-disable no-empty */
 import { useCallback } from 'react';
 import { Character, EquippedItem, Equipment } from '../types/dnd';
 import { updateCharacter } from '../services/dbService';
 import { loadEquipment } from '../services/dataService';
 
-const EQUIPMENT_DATABASE: Equipment[] = loadEquipment();
+// Lazy-loaded equipment database cache
+let equipmentCache: Equipment[] | null = null;
+
+/**
+ * Get equipment database with lazy loading and caching
+ */
+function getEquipmentDatabase(): Equipment[] {
+  if (!equipmentCache) {
+    equipmentCache = loadEquipment();
+  }
+  return equipmentCache;
+}
 
 interface UseEquipmentProps {
   characters: Character[];
@@ -17,7 +27,7 @@ export function useEquipment({ characters, setCharacters, recalculateAC }: UseEq
     const character = characters.find(c => c.id === characterId);
     if (!character) return;
 
-    const armor = EQUIPMENT_DATABASE.find(eq => eq.slug === armorSlug);
+    const armor = getEquipmentDatabase().find(eq => eq.slug === armorSlug);
     if (!armor?.armor_category) return;
 
     // Update character with new equipped armor
@@ -27,7 +37,7 @@ export function useEquipment({ characters, setCharacters, recalculateAC }: UseEq
       inventory: character.inventory?.map(item =>
         item.equipmentSlug === armorSlug
           ? { ...item, equipped: true }
-          : { ...item, equipped: item.equipped && EQUIPMENT_DATABASE.find(eq => eq.slug === item.equipmentSlug)?.armor_category !== armor.armor_category ? item.equipped : false }
+          : { ...item, equipped: item.equipped && getEquipmentDatabase().find(eq => eq.slug === item.equipmentSlug)?.armor_category !== armor.armor_category ? item.equipped : false }
       ),
     };
 
@@ -37,9 +47,10 @@ export function useEquipment({ characters, setCharacters, recalculateAC }: UseEq
     try {
       await updateCharacter(updatedCharacter);
       setCharacters(prev => prev.map(c => c.id === characterId ? updatedCharacter : c));
-
-    } catch {} {
-      // Error equipping armor
+    } catch (error) {
+      console.error('Error equipping armor:', error);
+      // TODO: Show user-friendly error notification
+      // Consider adding: showError('Failed to equip armor. Please try again.');
     }
   }, [characters, setCharacters, recalculateAC]);
 
@@ -47,7 +58,7 @@ export function useEquipment({ characters, setCharacters, recalculateAC }: UseEq
     const character = characters.find(c => c.id === characterId);
     if (!character) return;
 
-    const weapon = EQUIPMENT_DATABASE.find(eq => eq.slug === weaponSlug);
+    const weapon = getEquipmentDatabase().find(eq => eq.slug === weaponSlug);
     if (!weapon?.weapon_category) return;
 
     // Add weapon to equipped weapons (max 2)
@@ -66,9 +77,10 @@ export function useEquipment({ characters, setCharacters, recalculateAC }: UseEq
       try {
         await updateCharacter(updatedCharacter);
         setCharacters(prev => prev.map(c => c.id === characterId ? updatedCharacter : c));
-
-      } catch {} {
-        // Error equipping weapon
+      } catch (error) {
+        console.error('Error equipping weapon:', error);
+        // TODO: Show user-friendly error notification
+        // Consider adding: showError('Failed to equip weapon. Please try again.');
       }
     }
   }, [characters, setCharacters]);
@@ -98,9 +110,10 @@ export function useEquipment({ characters, setCharacters, recalculateAC }: UseEq
     try {
       await updateCharacter(updatedCharacter);
       setCharacters(prev => prev.map(c => c.id === characterId ? updatedCharacter : c));
-
-    } catch {} {
-      // Error unequipping item
+    } catch (error) {
+      console.error('Error unequipping item:', error);
+      // TODO: Show user-friendly error notification
+      // Consider adding: showError('Failed to unequip item. Please try again.');
     }
   }, [characters, setCharacters, recalculateAC]);
 
@@ -108,7 +121,7 @@ export function useEquipment({ characters, setCharacters, recalculateAC }: UseEq
     const character = characters.find(c => c.id === characterId);
     if (!character) return;
 
-    const equipment = EQUIPMENT_DATABASE.find(eq => eq.slug === equipmentSlug);
+    const equipment = getEquipmentDatabase().find(eq => eq.slug === equipmentSlug);
     if (!equipment) return;
 
     // Check if item already in inventory
@@ -130,9 +143,10 @@ export function useEquipment({ characters, setCharacters, recalculateAC }: UseEq
     try {
       await updateCharacter(updatedCharacter);
       setCharacters(prev => prev.map(c => c.id === characterId ? updatedCharacter : c));
-
-    } catch {} {
-      // Error adding item
+    } catch (error) {
+      console.error('Error adding item:', error);
+      // TODO: Show user-friendly error notification
+      // Consider adding: showError('Failed to add item. Please try again.');
     }
   }, [characters, setCharacters]);
 
@@ -168,11 +182,37 @@ export function useEquipment({ characters, setCharacters, recalculateAC }: UseEq
     try {
       await updateCharacter(updatedCharacter);
       setCharacters(prev => prev.map(c => c.id === characterId ? updatedCharacter : c));
-
-    } catch {} {
-      // Error removing item
+    } catch (error) {
+      console.error('Error removing item:', error);
+      // TODO: Show user-friendly error notification
+      // Consider adding: showError('Failed to remove item. Please try again.');
     }
   }, [characters, setCharacters, recalculateAC]);
+
+  const bulkAddItems = useCallback(async (characterId: string, items: { equipmentSlug: string; quantity: number }[]) => {
+    const character = characters.find(c => c.id === characterId);
+    if (!character) return;
+
+    let updatedInventory = [...(character.inventory || [])];
+
+    items.forEach(({ equipmentSlug, quantity }) => {
+      const existingItem = updatedInventory.find(item => item.equipmentSlug === equipmentSlug);
+      if (existingItem) {
+        existingItem.quantity += quantity;
+      } else {
+        updatedInventory.push({ equipmentSlug, quantity, equipped: false });
+      }
+    });
+
+    const updatedCharacter = { ...character, inventory: updatedInventory };
+
+    try {
+      await updateCharacter(updatedCharacter);
+      setCharacters(prev => prev.map(c => c.id === characterId ? updatedCharacter : c));
+    } catch (e) {
+      console.error('Error adding bulk items:', e);
+    }
+  }, [characters, setCharacters]);
 
   return {
     equipArmor,
@@ -180,5 +220,6 @@ export function useEquipment({ characters, setCharacters, recalculateAC }: UseEq
     unequipItem,
     addItem,
     removeItem,
+    bulkAddItems,
   };
 }

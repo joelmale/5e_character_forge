@@ -3,6 +3,7 @@ import { Shield, Zap, Dice6, BookOpen, UserIcon, Footprints } from 'lucide-react
 import { Character } from '../../types/dnd';
 import { createInitiativeRoll, createAdvantageRoll, createDisadvantageRoll, DiceRoll } from '../../services/diceService';
 import { formatModifier } from '../../utils/formatters';
+import { calculateEquipmentBonuses } from '../../utils/equipmentUtils';
 import type { LayoutMode } from './AbilityScores';
 
 interface CharacterStatsProps {
@@ -94,6 +95,27 @@ export const CharacterStats: React.FC<CharacterStatsProps> = ({
     });
   };
 
+  const handleCurrentHpChange = (delta: number) => {
+    if (!onUpdateCharacter) return;
+
+    const newHp = Math.max(0, Math.min(character.maxHitPoints, character.hitPoints + delta));
+    onUpdateCharacter({
+      ...character,
+      hitPoints: newHp
+    });
+  };
+
+  const handleTempHpChange = (delta: number) => {
+    if (!onUpdateCharacter) return;
+
+    const currentTempHp = character.temporaryHitPoints || 0;
+    const newTempHp = Math.max(0, currentTempHp + delta);
+    onUpdateCharacter({
+      ...character,
+      temporaryHitPoints: newTempHp
+    });
+  };
+
   // Classic layout: 3x2 grid, more compact and boxed
   if (layoutMode === 'classic') {
     return (
@@ -107,21 +129,59 @@ export const CharacterStats: React.FC<CharacterStatsProps> = ({
           <Zap className="w-5 h-5 text-red-500 mb-1" />
           <span className="text-xs font-semibold text-theme-muted uppercase">HP</span>
           <div className="text-center">
-            <div className="text-xl font-extrabold text-accent-green-light">
-              {character.hitPoints}
-              <span className="text-theme-muted text-sm">/{character.maxHitPoints}</span>
+            <div className="flex items-center gap-1 justify-center">
+              {onUpdateCharacter && (
+                <button
+                  onClick={() => handleCurrentHpChange(-1)}
+                  className="w-5 h-5 bg-red-600 hover:bg-red-700 text-white rounded flex items-center justify-center text-xs font-bold"
+                  title="Reduce HP by 1"
+                >
+                  −
+                </button>
+              )}
+              <div className="text-xl font-extrabold text-accent-green-light">
+                {character.hitPoints}
+                <span className="text-theme-muted text-sm">/{character.maxHitPoints}</span>
+              </div>
+              {onUpdateCharacter && (
+                <button
+                  onClick={() => handleCurrentHpChange(1)}
+                  className="w-5 h-5 bg-green-600 hover:bg-green-700 text-white rounded flex items-center justify-center text-xs font-bold"
+                  title="Increase HP by 1"
+                >
+                  +
+                </button>
+              )}
             </div>
             {character.temporaryHitPoints && character.temporaryHitPoints > 0 && (
               <div className="text-xs font-bold text-accent-blue-light flex items-center justify-center gap-1">
-                +{character.temporaryHitPoints} temp
                 {onUpdateCharacter && (
                   <button
-                    onClick={handleRemoveTempHp}
-                    className="text-xs text-accent-red-light hover:text-red-300 ml-1"
-                    title="Remove temporary HP"
+                    onClick={() => handleTempHpChange(-1)}
+                    className="w-3 h-3 bg-red-600 hover:bg-red-700 text-white rounded flex items-center justify-center text-xs"
+                    title="Reduce temp HP by 1"
                   >
-                    ×
+                    −
                   </button>
+                )}
+                +{character.temporaryHitPoints} temp
+                {onUpdateCharacter && (
+                  <>
+                    <button
+                      onClick={() => handleTempHpChange(1)}
+                      className="w-3 h-3 bg-blue-600 hover:bg-blue-700 text-white rounded flex items-center justify-center text-xs"
+                      title="Increase temp HP by 1"
+                    >
+                      +
+                    </button>
+                    <button
+                      onClick={handleRemoveTempHp}
+                      className="text-xs text-accent-red-light hover:text-red-300 ml-1"
+                      title="Remove all temporary HP"
+                    >
+                      ×
+                    </button>
+                  </>
                 )}
               </div>
             )}

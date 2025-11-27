@@ -183,6 +183,8 @@ export interface WeaponOption {
   properties: string[];                   // e.g., ['finesse', 'light']
   mastery: string | undefined;            // Mastery property (e.g., 'nick', 'vex')
   category: 'simple' | 'martial';
+  isTwoHanded: boolean;                   // Is weapon two-handed
+  weaponRange: string;                    // 'Melee' or 'Ranged'
 }
 
 /**

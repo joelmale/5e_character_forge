@@ -162,7 +162,7 @@ export function getRollHistory(): DiceRoll[] {
     const stored = localStorage.getItem('5e-forge-rolls');
     if (!stored) return [];
     return JSON.parse(stored);
-   } catch {} {
+   } catch {
      return [];
    }
 }
@@ -176,7 +176,7 @@ export function saveRollHistory(rolls: DiceRoll[]): void {
     // Keep only last 10 rolls
     const trimmed = rolls.slice(-10);
     localStorage.setItem('5e-forge-rolls', JSON.stringify(trimmed));
-   } catch {} {
+   } catch {
      // Error saving roll history
    }
 }

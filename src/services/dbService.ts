@@ -2,11 +2,13 @@ import { Character, UserMonster, Encounter } from '../types/dnd';
 
 // --- IndexedDB Configuration ---
 const DB_NAME = '5e_character_forge';
-const DB_VERSION = 3; // Version 3: Add edition field migration
+const DB_VERSION = 4; // Version 4: Add resources migration for existing characters
 const STORE_NAME = 'characters';
 const CUSTOM_MONSTERS_STORE = 'customMonsters';
 const FAVORITES_STORE = 'favoriteMonsters';
 const ENCOUNTERS_STORE = 'encounters';
+
+import { initializeCharacterResources } from '../utils/resourceUtils';
 
 // --- IndexedDB Helper Functions ---
 const openDB = (): Promise<IDBDatabase> => {
@@ -79,6 +81,34 @@ const openDB = (): Promise<IDBDatabase> => {
           });
 
           console.log('✅ [DB Migration] Edition field migration complete');
+        };
+
+        getAllRequest.onerror = () => {
+          console.error('❌ [DB Migration] Failed to migrate characters:', getAllRequest.error);
+        };
+      }
+
+      // Version 4: Migrate existing characters to include resources
+      if (oldVersion < 4 && oldVersion > 0) {
+        const transaction = (event.target as IDBOpenDBRequest).transaction!;
+        const characterStore = transaction.objectStore(STORE_NAME);
+
+        const getAllRequest = characterStore.getAll();
+        getAllRequest.onsuccess = () => {
+          const characters = getAllRequest.result as Character[];
+
+          console.log(`🔄 [DB Migration] Migrating ${characters.length} characters to version 4 (resources)`);
+
+          characters.forEach((character) => {
+            // Initialize or update resources for existing characters
+            if (!character.resources || character.resources.length === 0) {
+              console.log(`  ✏️ Adding resources to character: ${character.name}`);
+              character.resources = initializeCharacterResources(character);
+              characterStore.put(character);
+            }
+          });
+
+          console.log('✅ [DB Migration] Resources migration complete');
         };
 
         getAllRequest.onerror = () => {

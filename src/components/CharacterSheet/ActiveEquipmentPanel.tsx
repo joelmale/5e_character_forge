@@ -5,10 +5,12 @@ import { loadEquipment } from '../../services/dataService';
 
 interface ActiveEquipmentPanelProps {
   character: Character;
+  onUnequipItem?: (itemSlug: string) => void;
 }
 
 export const ActiveEquipmentPanel: React.FC<ActiveEquipmentPanelProps> = ({
   character,
+  onUnequipItem,
 }) => {
   // Get equipped armor details
   const equippedArmor = character.equippedArmor
@@ -63,9 +65,27 @@ export const ActiveEquipmentPanel: React.FC<ActiveEquipmentPanelProps> = ({
         </div>
         {equippedArmor ? (
           <div className="bg-theme-tertiary/50 p-3 rounded-lg">
-            <div className="font-semibold text-theme-primary">{equippedArmor.name}</div>
-            <div className="text-sm text-theme-tertiary">
-              AC Contribution: {getACBreakdown().slice(1).join(' + ')}
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <div className="font-semibold text-theme-primary">{equippedArmor.name}</div>
+                <div className="text-sm text-theme-tertiary">
+                  AC: {getACBreakdown().slice(1).join(' + ')}
+                </div>
+                {equippedArmor.weight && (
+                  <div className="text-xs text-theme-muted">
+                    Weight: {equippedArmor.weight} lbs
+                  </div>
+                )}
+              </div>
+              {onUnequipItem && (
+                <button
+                  onClick={() => onUnequipItem(equippedArmor.slug)}
+                  className="px-2 py-1 bg-red-600 hover:bg-red-700 text-white text-xs rounded ml-2 flex-shrink-0"
+                  title="Unequip armor"
+                >
+                  Unequip
+                </button>
+              )}
             </div>
           </div>
         ) : (
@@ -87,9 +107,33 @@ export const ActiveEquipmentPanel: React.FC<ActiveEquipmentPanelProps> = ({
 
               return (
                 <div key={index} className="bg-theme-tertiary/50 p-3 rounded-lg">
-                  <div className="font-semibold text-theme-primary">{weapon.name}</div>
-                  <div className="text-sm text-theme-tertiary">
-                    {weapon.weapon_range || 'Melee'} • {weapon.damage?.damage_dice || 'Special'}
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="font-semibold text-theme-primary">{weapon.name}</div>
+                      <div className="text-sm text-theme-tertiary">
+                        {weapon.weapon_range || 'Melee'} • {weapon.damage?.damage_dice || 'Special'}
+                        {weapon.damage?.damage_type && ` ${weapon.damage.damage_type}`}
+                      </div>
+                      {weapon.weight && (
+                        <div className="text-xs text-theme-muted">
+                          Weight: {weapon.weight} lbs
+                        </div>
+                      )}
+                      {character.weaponMastery?.includes(weapon.slug) && (
+                        <div className="text-xs text-amber-400 mt-1">
+                          ⚔️ Mastered
+                        </div>
+                      )}
+                    </div>
+                    {onUnequipItem && (
+                      <button
+                        onClick={() => onUnequipItem(weapon.slug)}
+                        className="px-2 py-1 bg-red-600 hover:bg-red-700 text-white text-xs rounded ml-2 flex-shrink-0"
+                        title="Unequip weapon"
+                      >
+                        Unequip
+                      </button>
+                    )}
                   </div>
                 </div>
               );
@@ -99,6 +143,42 @@ export const ActiveEquipmentPanel: React.FC<ActiveEquipmentPanelProps> = ({
           <div className="text-sm text-theme-muted italic">No weapons equipped</div>
         )}
       </div>
+
+      {/* Equipped Shield Section */}
+      {equippedShield && (
+        <div>
+          <div className="flex items-center gap-2 text-emerald-300 mb-2">
+            <Shield className="w-4 h-4" />
+            <span className="text-sm font-semibold">Shield</span>
+          </div>
+          <div className="bg-theme-tertiary/50 p-3 rounded-lg">
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <div className="font-semibold text-theme-primary">
+                  {loadEquipment().find(eq => eq.slug === equippedShield)?.name || 'Unknown Shield'}
+                </div>
+                <div className="text-sm text-theme-tertiary">
+                  AC: +2
+                </div>
+                {loadEquipment().find(eq => eq.slug === equippedShield)?.weight && (
+                  <div className="text-xs text-theme-muted">
+                    Weight: {loadEquipment().find(eq => eq.slug === equippedShield)?.weight} lbs
+                  </div>
+                )}
+              </div>
+              {onUnequipItem && (
+                <button
+                  onClick={() => onUnequipItem(equippedShield)}
+                  className="px-2 py-1 bg-red-600 hover:bg-red-700 text-white text-xs rounded ml-2 flex-shrink-0"
+                  title="Unequip shield"
+                >
+                  Unequip
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Active Items Section */}
       <div>

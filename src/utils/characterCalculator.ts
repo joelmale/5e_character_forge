@@ -16,6 +16,7 @@ import {
   getFeaturesBySubclass,
   getHitDieForClass,
 } from '../services/dataService';
+import { BASE_ARMOR_CLASS, SHIELD_AC_BONUS, MAX_DEX_BONUS_MEDIUM_ARMOR } from '../constants/combat';
 
 export const calculateCharacterStats = (data: CharacterCreationData): Character => {
   const raceData = getAllRaces().find(r => r.slug === data.raceSlug);
@@ -149,7 +150,7 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
   }
 
   // 6. Calculate AC based on equipped armor
-  let armorClass = 10 + finalAbilities.DEX.modifier; // Default unarmored
+  let armorClass = BASE_ARMOR_CLASS + finalAbilities.DEX.modifier; // Default unarmored
   if (equippedArmor) {
     const armor = loadEquipment().find(eq => eq.slug === equippedArmor);
     if (armor?.armor_class) {
@@ -158,14 +159,14 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
         armorClass = armor.armor_class.base + finalAbilities.DEX.modifier;
       } else if (armor.armor_category === 'Medium') {
         // Medium armor: base + DEX (max +2)
-        const dexBonus = Math.min(finalAbilities.DEX.modifier, armor.armor_class.max_bonus || 2);
+        const dexBonus = Math.min(finalAbilities.DEX.modifier, armor.armor_class.max_bonus || MAX_DEX_BONUS_MEDIUM_ARMOR);
         armorClass = armor.armor_class.base + dexBonus;
       } else if (armor.armor_category === 'Heavy') {
         // Heavy armor: base only
         armorClass = armor.armor_class.base;
       } else if (armor.armor_category === 'Shield') {
-        // Shield adds +2 to current AC
-        armorClass += 2;
+        // Shield adds bonus to current AC
+        armorClass += SHIELD_AC_BONUS;
       }
     }
   }

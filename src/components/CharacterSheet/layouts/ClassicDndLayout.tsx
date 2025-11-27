@@ -36,6 +36,14 @@ export const ClassicDndLayout: React.FC<CharacterSheetProps> = ({
 }) => {
   const [showSpellPreparationModal, setShowSpellPreparationModal] = useState(false);
 
+  const handleBulkAddItems = (items: { equipmentSlug: string; quantity: number }[]) => {
+    items.forEach(item => {
+      for (let i = 0; i < item.quantity; i++) {
+        onAddItem(character.id, item.equipmentSlug, 1);
+      }
+    });
+  };
+
   const handleSpellPreparationSave = (preparedSpells: string[]) => {
     onUpdateCharacter({
       ...character,
@@ -58,6 +66,7 @@ export const ClassicDndLayout: React.FC<CharacterSheetProps> = ({
           onLevelUp={onLevelUp}
           onLevelDown={onLevelDown}
           onOpenDiceTray={onOpenDiceTray}
+          onAddItems={handleBulkAddItems}
         />
 
         {/* 3-Column Traditional Layout */}
@@ -188,6 +197,7 @@ export const ClassicDndLayout: React.FC<CharacterSheetProps> = ({
                  setRollResult={setRollResult}
                  onDiceRoll={onDiceRoll}
                  onUpdateCharacter={onUpdateCharacter}
+                 layoutMode="classic-dnd"
                />
              </div>
 
@@ -198,11 +208,12 @@ export const ClassicDndLayout: React.FC<CharacterSheetProps> = ({
                <h2 className="text-sm font-bold mb-3 text-theme-muted uppercase tracking-wider font-cinzel">
                  Attacks & Spellcasting
                </h2>
-              <AttacksAndActions
-                character={character}
-                setRollResult={setRollResult}
-                onDiceRoll={onDiceRoll}
-              />
+               <AttacksAndActions
+                 character={character}
+                 setRollResult={setRollResult}
+                 onDiceRoll={onDiceRoll}
+                 onUpdateCharacter={onUpdateCharacter}
+               />
              </div>
 
              {/* Spellcasting (if applicable) */}
@@ -246,9 +257,10 @@ export const ClassicDndLayout: React.FC<CharacterSheetProps> = ({
                 <h2 className="text-sm font-bold mb-3 text-theme-muted uppercase tracking-wider font-cinzel">
                   Active Equipment
                 </h2>
-               <ActiveEquipmentPanel
-                 character={character}
-               />
+                <ActiveEquipmentPanel
+                  character={character}
+                  onUnequipItem={(itemSlug) => onUnequipItem(character.id, itemSlug)}
+                />
               </div>
 
              {/* Conditions */}

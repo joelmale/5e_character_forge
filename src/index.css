@@ -4,6 +4,7 @@
   --font-family-cinzel: 'Cinzel', serif;
   --font-family-eb-garamond: 'EB Garamond', serif;
   --font-family-handwriting: 'Caveat', cursive;
+  --font-family-homemade-apple: 'Homemade Apple', cursive;
 
   /* Parchment texture for paper theme */
   --parchment-texture: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='5' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.15'/%3E%3C/svg%3E");
@@ -410,4 +411,23 @@ body {
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
+}
+
+/* Custom Font Classes */
+.homemade-apple-regular {
+  font-family: var(--font-family-homemade-apple);
+  font-weight: 400;
+  font-style: normal;
+}
+
+.font-cinzel {
+  font-family: var(--font-family-cinzel);
+}
+
+.font-eb-garamond {
+  font-family: var(--font-family-eb-garamond);
+}
+
+.font-handwriting {
+  font-family: var(--font-family-handwriting);
 }

@@ -8,6 +8,7 @@ import type { LayoutMode } from './AbilityScores';
 interface AbilityScoreBlockProps {
   name: AbilityName;
   ability: { score: number; modifier: number };
+  equipmentBonus?: number;
   setRollResult: (result: {
     text: string;
     value: number | null;
@@ -22,6 +23,7 @@ type RollType = 'normal' | 'advantage' | 'disadvantage';
 export const AbilityScoreBlock: React.FC<AbilityScoreBlockProps> = ({
   name,
   ability,
+  equipmentBonus = 0,
   setRollResult,
   onDiceRoll,
   layoutMode = 'modern',
@@ -91,10 +93,15 @@ export const AbilityScoreBlock: React.FC<AbilityScoreBlockProps> = ({
            <div className="relative w-16 h-16">
              {/* Outer circle */}
               <div className="absolute inset-0 rounded-full border-[3px] border-gray-800 flex items-center justify-center bg-[#fcf6e3] group-hover:border-red-500 transition-all" />
-           {/* Score */}
-           <div className="absolute inset-0 flex items-center justify-center">
-              <span className="font-eb-garamond text-2xl font-bold text-gray-900">{ability.score}</span>
-           </div>
+            {/* Score */}
+            <div className="absolute inset-0 flex items-center justify-center">
+               <span className="font-eb-garamond text-2xl font-bold text-gray-900">
+                 {ability.score}
+                 {equipmentBonus > 0 && (
+                   <span className="text-xs text-green-600 ml-1">+{equipmentBonus}</span>
+                 )}
+               </span>
+            </div>
             {/* Roll indicator */}
             {getRollIcon() && (
               <div className="absolute -top-1 -right-1 w-5 h-5 bg-accent-green rounded-full flex items-center justify-center shadow-sm">

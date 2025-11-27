@@ -75,6 +75,83 @@ export const canSelectMoreFeats = (currentFeats: string[], level: number): boole
 };
 
 /**
+ * Get available feats for a character based on 2024 category rules
+ */
+export const getAvailableFeatsForCharacter = (
+  allFeats: Feat[],
+  character: Partial<CharacterCreationData>,
+  context: 'asi' | 'fighting_style' | 'background' = 'asi'
+): Feat[] => {
+  const level = character.level || 1;
+  const classSlug = character.classSlug || '';
+
+  return allFeats.filter(feat => {
+    // Check category availability based on context and level
+    switch (context) {
+      case 'background':
+        return feat.category === 'origin';
+
+      case 'fighting_style':
+        // Only available to classes with Fighting Style feature
+        if (!['fighter', 'paladin', 'ranger'].includes(classSlug)) return false;
+        return feat.category === 'fighting_style';
+
+      case 'asi':
+      default:
+        // General feats available at level 4+
+        if (level < 4) return false;
+
+        // Epic boons only at level 19+
+        if (feat.category === 'epic_boon' && level < 19) return false;
+
+        // Fighting styles not available in ASI (except via Fighting Initiate)
+        if (feat.category === 'fighting_style') return false;
+
+        // Origin feats are allowed but generally players pick general feats
+        return ['general', 'origin'].includes(feat.category);
+    }
+  }).filter(feat => checkFeatPrerequisites2024(feat, character));
+};
+
+/**
+ * Enhanced prerequisite checking for 2024 system
+ */
+export const checkFeatPrerequisites2024 = (feat: Feat, character: Partial<CharacterCreationData>): boolean => {
+  // Check new structured prerequisites first
+  if (feat.prerequisites) {
+    const prereqs = feat.prerequisites;
+
+    // Level check
+    if (prereqs.level && (character.level || 1) < prereqs.level) return false;
+
+    // Ability score checks
+    if (prereqs.stats && character.abilities) {
+      for (const [ability, required] of Object.entries(prereqs.stats)) {
+        const abilityKey = ability as keyof typeof character.abilities;
+        if ((character.abilities[abilityKey] || 10) < required) return false;
+      }
+    }
+
+    // Spellcasting requirement
+    if (prereqs.spellcasting) {
+      // Check if character has spellcasting ability
+      const spellcastingClasses = ['wizard', 'sorcerer', 'druid', 'cleric', 'bard', 'paladin', 'ranger', 'warlock'];
+      if (!spellcastingClasses.includes(character.classSlug || '')) return false;
+    }
+
+    // Feature checks would go here if implemented
+    if (prereqs.features) {
+      // For now, skip feature checks as they're not implemented yet
+    }
+
+    return true;
+  }
+
+  // Fall back to old prerequisite checking
+  return checkFeatPrerequisites(feat, character);
+};
+
+/**
  * Validate feat selection for a character
  */
 export const validateFeatSelection = (selectedFeats: string[], allFeats: Feat[], character: Partial<CharacterCreationData>): {
@@ -94,10 +171,10 @@ export const validateFeatSelection = (selectedFeats: string[], allFeats: Feat[],
     errors.push('Duplicate feats selected.');
   }
 
-  // Check prerequisites for selected feats
+  // Check prerequisites for selected feats using 2024 system
   selectedFeats.forEach(featSlug => {
     const feat = allFeats.find(f => f.slug === featSlug);
-    if (feat && !checkFeatPrerequisites(feat, character)) {
+    if (feat && !checkFeatPrerequisites2024(feat, character)) {
       errors.push(`Prerequisites not met for feat: ${feat.name}`);
     }
   });

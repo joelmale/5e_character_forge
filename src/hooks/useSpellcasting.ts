@@ -1,4 +1,3 @@
-/* eslint-disable no-empty */
 import { useCallback } from 'react';
 import { Character, Ability } from '../types/dnd';
 import { updateCharacter } from '../services/dbService';
@@ -48,8 +47,10 @@ export function useSpellcasting({
       await updateCharacter(updatedCharacter);
       setCharacters(prev => prev.map(c => c.id === characterId ? updatedCharacter : c));
       setCantripModalState({ isOpen: false, characterId: null, characterClass: null });
-    } catch {} {
-      // Error selecting cantrip
+    } catch (error) {
+      console.error('Error selecting cantrip:', error);
+      // TODO: Show user-friendly error notification
+      // Consider adding: showError('Failed to select cantrip. Please try again.');
     }
   }, [characters, setCharacters, cantripModalState, setCantripModalState]);
 
@@ -69,8 +70,10 @@ export function useSpellcasting({
       await updateCharacter(updatedCharacter);
       setCharacters(prev => prev.map(c => c.id === characterId ? updatedCharacter : c));
       setSubclassModalState({ isOpen: false, characterId: null, characterClass: null });
-    } catch {} {
-      // Error selecting subclass
+    } catch (error) {
+      console.error('Error selecting subclass:', error);
+      // TODO: Show user-friendly error notification
+      // Consider adding: showError('Failed to select subclass. Please try again.');
     }
   }, [characters, setCharacters, subclassModalState, setSubclassModalState]);
 
@@ -97,8 +100,10 @@ export function useSpellcasting({
       await updateCharacter(updatedCharacter);
       setCharacters(prev => prev.map(c => c.id === characterId ? updatedCharacter : c));
       setAsiModalState({ isOpen: false, characterId: null });
-    } catch {} {
-      // Error applying ASI
+    } catch (error) {
+      console.error('Error applying ability score increase:', error);
+      // TODO: Show user-friendly error notification
+      // Consider adding: showError('Failed to apply ability score increase. Please try again.');
     }
   }, [characters, setCharacters, asiModalState, setAsiModalState]);
 

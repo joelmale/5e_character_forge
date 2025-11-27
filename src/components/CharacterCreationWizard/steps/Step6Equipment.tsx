@@ -1,11 +1,12 @@
 import React from 'react';
-import { ArrowLeft, ArrowRight, Shuffle, ChevronDown, Dice6, Info } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Shuffle, ChevronDown } from 'lucide-react';
 import { StepProps } from '../types/wizard.types';
 import { EquipmentPackage, TrinketData } from '../../../types/dnd';
 import { loadClasses, BACKGROUNDS, EQUIPMENT_PACKAGES } from '../../../services/dataService';
-import { validateEquipmentChoices } from '../../../utils/equipmentSelectionUtils';
+import { validateEquipmentChoices, getMissingEquipmentChoices } from '../../../utils/equipmentSelectionUtils';
 import trinketTable from '../../../data/trinketTable.json';
 import { QuickStartEquipment } from '../components/QuickStartEquipment';
+import { generateQuickStartEquipment } from '../../../services/equipmentService';
 import { EquipmentShop } from '../components/EquipmentShop';
 import { TrinketRoller } from '../components/TrinketRoller';
 import { rollStartingWealth } from '../../../services/equipmentService';
@@ -128,6 +129,13 @@ export const Step6Equipment: React.FC<StepProps & { skipToStep?: (step: number) 
   const [useExtendedTrinkets, setUseExtendedTrinkets] = React.useState(false);
   const [rolledTrinket, setRolledTrinket] = React.useState<TrinketData | null>(data.selectedTrinket || null);
 
+  // Fighter build selection state
+  const [selectedFighterBuild, setSelectedFighterBuild] = React.useState<string | null>(null);
+
+  // Missing choices modal state
+  const [showMissingChoicesModal, setShowMissingChoicesModal] = React.useState(false);
+  const [missingChoices, setMissingChoices] = React.useState<number[]>([]);
+
   if (!selectedClass) {
     return <div>Loading...</div>;
   }
@@ -144,6 +152,44 @@ export const Step6Equipment: React.FC<StepProps & { skipToStep?: (step: number) 
       choice.choiceId === choiceId ? { ...choice, selected: optionIndex } : choice
     );
     updateData({ equipmentChoices: updatedChoices });
+    // Clear selected build when manual choice is made
+    setSelectedFighterBuild(null);
+  };
+
+  // Fighter build mappings to equipment choice indices
+  const fighterBuilds = {
+    defender: {
+      name: 'The Defender (Tank)',
+      description: 'Highest possible Armor Class from level 1. You are the party\'s protector.',
+      choices: [0, 0, 1, 0], // Choice indices: [choice1, choice2, choice3, choice4]
+      color: 'accent-green'
+    },
+    striker: {
+      name: 'The Striker (Two-Handed Damage)',
+      description: 'Maximum damage output, sacrificing some AC for power.',
+      choices: [0, 1, 1, 0],
+      color: 'accent-red'
+    },
+    archer: {
+      name: 'The Archer (Dexterity-Based)',
+      description: 'Ranged combat specialist using high Dexterity.',
+      choices: [1, 0, 0, 0],
+      color: 'accent-blue'
+    }
+  };
+
+  const handleFighterBuildSelect = (buildKey: string) => {
+    const build = fighterBuilds[buildKey as keyof typeof fighterBuilds];
+    if (!build) return;
+
+    const currentChoices = data.equipmentChoices || [];
+    const updatedChoices = currentChoices.map((choice, index) => ({
+      ...choice,
+      selected: build.choices[index] || 0
+    }));
+
+    updateData({ equipmentChoices: updatedChoices });
+    setSelectedFighterBuild(buildKey);
   };
 
   const allChoicesMade = equipmentMode === 'choices'
@@ -238,8 +284,22 @@ export const Step6Equipment: React.FC<StepProps & { skipToStep?: (step: number) 
           classSlug={data.classSlug}
           backgroundName={data.background}
           onAccept={() => {
-            // Mark equipment as complete and move to trinket
-            // The actual equipment assignment happens in character creation
+            // Generate and save QuickStart equipment to startingInventory
+            const quickStartEquipment = generateQuickStartEquipment(data.classSlug, data.background);
+            const startingInventory = quickStartEquipment.items.map(item => ({
+              equipmentSlug: item.equipmentSlug,
+              quantity: item.quantity,
+              equipped: item.equipped || false
+            }));
+
+            updateData({ startingInventory });
+
+            // Skip to traits/finalize step
+            if (skipToStep) {
+              skipToStep(13);
+            } else {
+              nextStep();
+            }
           }}
           onBuyInstead={() => setEquipmentMode('buy')}
         />
@@ -391,66 +451,83 @@ export const Step6Equipment: React.FC<StepProps & { skipToStep?: (step: number) 
          </div>
        )}
 
-       {/* Fighter Build Recommendations */}
-       {selectedClass?.slug === 'fighter' && (
-         <div className="bg-theme-tertiary/50 border border-theme-primary rounded-lg p-4 space-y-4">
-           <h4 className="text-lg font-bold text-accent-yellow-light">Fighter Build Recommendations</h4>
-           <p className="text-xs text-theme-muted">
-             Choose your starting equipment based on your preferred playstyle. Each build optimizes for different combat roles.
-           </p>
+        {/* Fighter Build Recommendations */}
+        {selectedClass?.slug === 'fighter' && (
+          <div className="bg-theme-tertiary/50 border border-theme-primary rounded-lg p-4 space-y-4">
+            <h4 className="text-lg font-bold text-accent-yellow-light">Fighter Build Recommendations</h4>
+            <p className="text-xs text-theme-muted">
+              Choose your starting equipment based on your preferred playstyle. Each build optimizes for different combat roles.
+            </p>
 
-           {/* Build 1: The Defender (Tank) */}
-           <div className="border border-accent-green rounded-lg p-3 bg-green-900/10">
-             <h5 className="font-semibold text-accent-green-light text-sm">Build 1: The Defender (Tank)</h5>
-             <p className="text-xs text-theme-tertiary mt-1">Highest possible Armor Class from level 1. You are the party's protector.</p>
-             <div className="text-xs text-theme-muted mt-2 space-y-1">
-               <p><strong>Choice 1:</strong> (a) Chain Mail → Gives you 16 AC right away</p>
-               <p><strong>Choice 2:</strong> (a) Martial weapon + shield → Shield gives +2 AC bonus</p>
-               <p><strong>Choice 3:</strong> (b) Two handaxes → Strength-based ranged backup</p>
-               <p><strong>Choice 4:</strong> (a) Dungeoneer's pack → Crowbar and utility items</p>
-               <p className="text-accent-yellow-light font-medium mt-2">Result: 18 AC, solid melee weapon, ranged backup</p>
-             </div>
-           </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              {/* Build 1: The Defender (Tank) */}
+              <button
+                onClick={() => handleFighterBuildSelect('defender')}
+                className={`border-2 rounded-lg p-3 text-left transition-all ${
+                  selectedFighterBuild === 'defender'
+                    ? 'bg-accent-green-darker border-accent-green'
+                    : 'bg-green-900/10 border-accent-green hover:bg-green-900/20'
+                }`}
+              >
+                <h5 className="font-semibold text-accent-green-light text-sm">The Defender (Tank)</h5>
+                <p className="text-xs text-theme-tertiary mt-1">Highest possible Armor Class from level 1. You are the party's protector.</p>
+                <div className="text-xs text-theme-muted mt-2">
+                  <p className="text-accent-yellow-light font-medium">Result: 18 AC, solid melee weapon, ranged backup</p>
+                </div>
+              </button>
 
-           {/* Build 2: The Striker (Two-Handed Damage) */}
-           <div className="border border-accent-red rounded-lg p-3 bg-red-900/10">
-             <h5 className="font-semibold text-accent-red-light text-sm">Build 2: The Striker (Two-Handed Damage)</h5>
-             <p className="text-xs text-theme-tertiary mt-1">Maximum damage output, sacrificing some AC for power.</p>
-             <div className="text-xs text-theme-muted mt-2 space-y-1">
-               <p><strong>Choice 1:</strong> (a) Chain Mail → Best armor available (16 AC)</p>
-               <p><strong>Choice 2:</strong> (b) Two martial weapons → Greatsword/Maul (2d6 damage)</p>
-               <p><strong>Choice 3:</strong> (b) Two handaxes → Strength-based ranged backup</p>
-               <p><strong>Choice 4:</strong> (a) Dungeoneer's pack → Utility items</p>
-               <p className="text-accent-yellow-light font-medium mt-2">Result: 16 AC, highest damage dice, ranged backups</p>
-             </div>
-           </div>
+              {/* Build 2: The Striker (Two-Handed Damage) */}
+              <button
+                onClick={() => handleFighterBuildSelect('striker')}
+                className={`border-2 rounded-lg p-3 text-left transition-all ${
+                  selectedFighterBuild === 'striker'
+                    ? 'bg-accent-red-darker border-accent-red'
+                    : 'bg-red-900/10 border-accent-red hover:bg-red-900/20'
+                }`}
+              >
+                <h5 className="font-semibold text-accent-red-light text-sm">The Striker (Two-Handed Damage)</h5>
+                <p className="text-xs text-theme-tertiary mt-1">Maximum damage output, sacrificing some AC for power.</p>
+                <div className="text-xs text-theme-muted mt-2">
+                  <p className="text-accent-yellow-light font-medium">Result: 16 AC, highest damage dice, ranged backups</p>
+                </div>
+              </button>
 
-           {/* Build 3: The Archer (Dexterity-Based) */}
-           <div className="border border-accent-blue rounded-lg p-3 bg-blue-900/10">
-             <h5 className="font-semibold text-accent-blue-light text-sm">Build 3: The Archer (Dexterity-Based)</h5>
-             <p className="text-xs text-theme-tertiary mt-1">Ranged combat specialist using high Dexterity.</p>
-             <div className="text-xs text-theme-muted mt-2 space-y-1">
-               <p><strong>Choice 1:</strong> (b) Leather armor + longbow + 20 arrows</p>
-               <p><strong>Choice 2:</strong> (a) Rapier + shield → Finesse melee backup</p>
-               <p><strong>Choice 3:</strong> (a) Light crossbow → Sell for 25 gp</p>
-               <p><strong>Choice 4:</strong> (a) Dungeoneer's pack → Rope/pitons for positioning</p>
-               <p className="text-accent-yellow-light font-medium mt-2">Result: 14 AC, best bow, finesse melee option</p>
-             </div>
-           </div>
+              {/* Build 3: The Archer (Dexterity-Based) */}
+              <button
+                onClick={() => handleFighterBuildSelect('archer')}
+                className={`border-2 rounded-lg p-3 text-left transition-all ${
+                  selectedFighterBuild === 'archer'
+                    ? 'bg-accent-blue-darker border-accent-blue'
+                    : 'bg-blue-900/10 border-accent-blue hover:bg-blue-900/20'
+                }`}
+              >
+                <h5 className="font-semibold text-accent-blue-light text-sm">The Archer (Dexterity-Based)</h5>
+                <p className="text-xs text-theme-tertiary mt-1">Ranged combat specialist using high Dexterity.</p>
+                <div className="text-xs text-theme-muted mt-2">
+                  <p className="text-accent-yellow-light font-medium">Result: 14 AC, best bow, finesse melee option</p>
+                </div>
+              </button>
+            </div>
 
-           {/* Build 4: Gold Option */}
-           <div className="border border-accent-yellow rounded-lg p-3 bg-yellow-900/10">
-             <h5 className="font-semibold text-accent-yellow-light text-sm">Pro-Tip: The Gold Option</h5>
-             <p className="text-xs text-theme-tertiary mt-1">Take starting gold instead of equipment for maximum flexibility.</p>
-             <div className="text-xs text-theme-muted mt-2 space-y-1">
-               <p><strong>Average Gold:</strong> 175 gp (5d4 × 10)</p>
-               <p><strong>Can Buy:</strong> Chain Mail (50 gp) + Greatsword (50 gp) + 2 Handaxes (10 gp) + Dungeoneer's Pack (12 gp)</p>
-               <p><strong>Remaining:</strong> 53 gp for javelins, potions, etc.</p>
-               <p className="text-accent-yellow-light font-medium mt-2">Advantage: More flexibility, potentially better gear</p>
-             </div>
-           </div>
-         </div>
-       )}
+            {/* Build 4: Gold Option - Info only */}
+            <div className="border border-accent-yellow rounded-lg p-3 bg-yellow-900/10">
+              <h5 className="font-semibold text-accent-yellow-light text-sm">💡 Pro-Tip: The Gold Option</h5>
+              <p className="text-xs text-theme-tertiary mt-1">Take starting gold instead of equipment for maximum flexibility.</p>
+              <div className="text-xs text-theme-muted mt-2 space-y-1">
+                <p><strong>Average Gold:</strong> 175 gp (5d4 × 10)</p>
+                <p><strong>Can Buy:</strong> Chain Mail (50 gp) + Greatsword (50 gp) + 2 Handaxes (10 gp) + Dungeoneer's Pack (12 gp)</p>
+                <p><strong>Remaining:</strong> 53 gp for javelins, potions, etc.</p>
+                <p className="text-accent-yellow-light font-medium mt-2">Advantage: More flexibility, potentially better gear</p>
+              </div>
+            </div>
+
+            {selectedFighterBuild && (
+              <div className="text-xs text-accent-green-light text-center">
+                ✅ {fighterBuilds[selectedFighterBuild as keyof typeof fighterBuilds].name} build selected - equipment choices have been automatically set above
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Trinket Roller */}
         <TrinketRoller
@@ -466,25 +543,64 @@ export const Step6Equipment: React.FC<StepProps & { skipToStep?: (step: number) 
           <ArrowLeft className="w-4 h-4 mr-2" /> Back
         </button>
         <button
-          onClick={nextStep}
-          disabled={!allChoicesMade}
-          className="px-4 py-2 bg-accent-yellow-dark hover:bg-accent-yellow rounded-lg text-white flex items-center disabled:bg-theme-quaternary disabled:cursor-not-allowed"
+          onClick={() => {
+            if (!allChoicesMade) {
+              const missing = getMissingEquipmentChoices(data.equipmentChoices || []);
+              setMissingChoices(missing);
+              setShowMissingChoicesModal(true);
+            } else {
+              nextStep();
+            }
+          }}
+          className="px-4 py-2 bg-accent-yellow-dark hover:bg-accent-yellow rounded-lg text-white flex items-center"
         >
           {getNextStepLabel?.() || 'Continue'} <ArrowRight className="w-4 h-4 ml-2" />
         </button>
         <button
           onClick={() => {
-            // Skip custom equipment step, go directly to traits (step 11)
-            if (allChoicesMade && skipToStep) {
-              skipToStep(11); // Skip to Traits/Final details step
+            if (!allChoicesMade) {
+              const missing = getMissingEquipmentChoices(data.equipmentChoices || []);
+              setMissingChoices(missing);
+              setShowMissingChoicesModal(true);
+            } else if (skipToStep) {
+              skipToStep(13); // Skip to Traits/Final details step
             }
           }}
-          disabled={!allChoicesMade}
-          className="px-4 py-2 bg-accent-red hover:bg-accent-red-light rounded-lg text-white flex items-center disabled:bg-theme-quaternary disabled:cursor-not-allowed"
+          className="px-4 py-2 bg-accent-red hover:bg-accent-red-light rounded-lg text-white flex items-center"
         >
           Skip to Traits <ArrowRight className="w-4 h-4 ml-2" />
         </button>
       </div>
+
+      {/* Missing Choices Modal */}
+      {showMissingChoicesModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-theme-secondary border border-theme-primary rounded-lg p-6 max-w-md w-full mx-4">
+            <h3 className="text-lg font-bold text-accent-yellow-light mb-4">
+              Equipment Choices Incomplete
+            </h3>
+            <p className="text-sm text-theme-tertiary mb-4">
+              You still need to make the following equipment choice{missingChoices.length > 1 ? 's' : ''}:
+            </p>
+            <ul className="text-sm text-theme-muted mb-6 space-y-1">
+              {missingChoices.map(choiceNum => (
+                <li key={choiceNum} className="flex items-center">
+                  <span className="text-accent-yellow-light mr-2">•</span>
+                  Choice {choiceNum}
+                </li>
+              ))}
+            </ul>
+            <div className="flex justify-end">
+              <button
+                onClick={() => setShowMissingChoicesModal(false)}
+                className="px-4 py-2 bg-accent-blue hover:bg-accent-blue-dark rounded-lg text-white font-medium"
+              >
+                Got it
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -4,7 +4,7 @@ import { generateCharacterProfile, CharacterProfile } from '../data/characterPro
 import PersonalitySummary from './PersonalitySummary';
 import CharacterFinalization from './CharacterFinalization';
 import { loadClasses, getAllRaces, BACKGROUNDS, getCantripsByClass, getLeveledSpellsByClass } from '../services/dataService';
-import { CharacterCreationData, SpellSelectionData } from '../types/dnd';
+import { CharacterCreationData, SpellSelectionData, SkillName } from '../types/dnd';
 import { getSpellcastingType } from '../utils/spellUtils';
 import { SPELL_LEARNING_RULES } from '../data/spellLearning';
 import { assignAbilityScoresByClass } from '../utils/abilityScoreUtils';
@@ -12,10 +12,12 @@ import cantripsData from '../data/cantrips.json';
 import { generateQuickStartEquipment } from '../services/equipmentService';
 import { rollRandomTrinket } from '../utils/trinketUtils';
 
+type CantripsKnownData = Record<string, Record<string, number>>;
+
 interface PersonalityWizardProps {
   isOpen: boolean;
   onClose: () => void;
-  onComplete: (characterData: any) => void;
+  onComplete: (characterData: CharacterCreationData) => void;
   onBack: () => void;
 }
 
@@ -102,7 +104,8 @@ const PersonalityWizard: React.FC<PersonalityWizardProps> = ({ isOpen, onClose: 
 
     const availableCantrips = getCantripsByClass(selectedClassData.slug);
     const availableSpells = getLeveledSpellsByClass(selectedClassData.slug, 1);
-    const numCantrips = (cantripsData as any)[selectedClassData.slug]?.['1'] || 0;
+    const cantripsByClass = cantripsData as CantripsKnownData;
+    const numCantrips = cantripsByClass[selectedClassData.slug]?.['1'] || 0;
     const learningRules = SPELL_LEARNING_RULES[selectedClassData.slug];
 
     let autoSpellSelection: SpellSelectionData = {
@@ -304,7 +307,7 @@ const PersonalityWizard: React.FC<PersonalityWizardProps> = ({ isOpen, onClose: 
       background: selectedBackground || '',
       alignment: finalizationData.alignment,
 
-      selectedSkills: selectedSkills as any[],
+      selectedSkills: selectedSkills as SkillName[],
       equipmentChoices: [], // Keep empty since we're using startingInventory
       hpCalculationMethod: 'max' as const,
 

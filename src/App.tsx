@@ -3,6 +3,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Plus, Trash2, BookOpen, Shield, Download, Upload, Settings } from 'lucide-react';
 // REFACTORED: Loader2 import removed - was unused
 import { CharacterCreationWizard } from './components/CharacterCreationWizard';
+import { LevelUpWizard } from './components/LevelUpWizard/LevelUpWizard';
 import { CharacterSheet } from './components/CharacterSheet';
 import NewCharacterModal from './components/NewCharacterModal';
 import ManualEntryScreen from './components/ManualEntryScreen';
@@ -21,10 +22,12 @@ import ChooseSubclassModal from './components/ChooseSubclassModal';
 import AbilityScoreIncreaseModal from './components/AbilityScoreIncreaseModal';
 import { DiceRollerModal } from './components/DiceRollerModal';
 import SettingsModal from './components/SettingsModal';
+import { RestingScreen } from './components/RestingScreen';
 import { generateUUID, DiceRoll } from './services/diceService';
 import { featureDescriptions } from './utils/featureDescriptions';
 import { loadClasses, loadEquipment, loadFeatures, getSubclassesByClass, PROFICIENCY_BONUSES, getModifier, getHitDieForClass, CANTRIPS_KNOWN_BY_CLASS, SPELL_SLOTS_BY_CLASS, AppSubclass } from './services/dataService';
 import { getAllCharacters, addCharacter, deleteCharacter, updateCharacter } from './services/dbService';
+import { resetResources } from './utils/resourceUtils';
 import { APP_VERSION } from './version';
 // REFACTORED: Language utilities moved to languageUtils.ts for the wizard
 // Still used here in main App for character sheet display - can be removed once main app is refactored
@@ -169,6 +172,7 @@ const App: React.FC = () => {
   const [cantripModalState, setCantripModalState] = useState<{isOpen: boolean, characterId: string | null, characterClass: string | null}>({ isOpen: false, characterId: null, characterClass: null });
   const [subclassModalState, setSubclassModalState] = useState<{isOpen: boolean, characterId: string | null, characterClass: string | null}>({ isOpen: false, characterId: null, characterClass: null });
   const [asiModalState, setAsiModalState] = useState<{isOpen: boolean, characterId: string | null}>({ isOpen: false, characterId: null });
+  const [levelUpWizardState, setLevelUpWizardState] = useState<{isOpen: boolean, characterId: string | null}>({ isOpen: false, characterId: null });
 
   // New character creation modal states
   const [isNewCharacterModalOpen, setIsNewCharacterModalOpen] = useState<boolean>(false);
@@ -176,6 +180,13 @@ const App: React.FC = () => {
 
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState<boolean>(false);
   const [isDiceTrayModalOpen, setIsDiceTrayModalOpen] = useState<boolean>(false);
+  const [isResting, setIsResting] = useState<'short' | 'long' | null>(null);
+  const [restChanges, setRestChanges] = useState<{
+    hpRestored: number;
+    hitDiceRestored: number;
+    spellSlotsRestored: number;
+    resourcesReset: string[];
+  } | null>(null);
 
   // Debug logging for dice tray modal state
   useEffect(() => {
@@ -225,7 +236,7 @@ const App: React.FC = () => {
     try {
       const chars = await getAllCharacters();
       setCharacters(chars);
-    } catch {} {
+    } catch {
       // Error loading characters
     }
   }, []);
@@ -291,7 +302,7 @@ const App: React.FC = () => {
       setSelectedCharacterId(null);
       setRollResult({ text: 'Character deleted successfully.', value: null });
       await loadCharacters();
-    } catch {} {
+    } catch {
       setRollResult({ text: 'Error deleting character.', value: null });
     }
   }, [characters, loadCharacters]);
@@ -342,7 +353,7 @@ const App: React.FC = () => {
 
         await loadCharacters();
         setRollResult({ text: `Imported ${importedData.length} character(s)!`, value: null });
-      } catch {} {
+      } catch {
         setRollResult({ text: 'Error importing data. Check file format.', value: null });
       }
     };
@@ -359,38 +370,92 @@ const App: React.FC = () => {
       await updateCharacter(updatedCharacter);
       // Optimistically update the state
       setCharacters(prev => prev.map(c => c.id === characterId ? updatedCharacter : c));
-    } catch {} {
+    } catch {
       // Optionally revert state if DB update fails
     }
   }, [characters]);
 
-  const handleLongRest = useCallback(async (characterId: string) => {
-    const character = characters.find(c => c.id === characterId);
-    if (!character) return;
+  // Calculate specific rest changes for display
+  const calculateRestChanges = (character: Character) => {
+    const changes = {
+      hpRestored: character.maxHitPoints - character.hitPoints,
+      hitDiceRestored: character.hitDice.max - character.hitDice.current,
+      spellSlotsRestored: 0,
+      resourcesReset: [] as string[]
+    };
 
-    // Long rest: restore HP to max, restore all spell slots, restore all hit dice
-    const updatedCharacter = { ...character };
+    // Calculate spell slots restored
+    if (character.spellcasting?.usedSpellSlots) {
+      changes.spellSlotsRestored = character.spellcasting.usedSpellSlots.reduce((sum, used) => sum + used, 0);
+    }
+
+    // Calculate resources reset
+    if (character.resources) {
+      character.resources.forEach(resource => {
+        if (resource.rechargeType === 'long-rest' || resource.rechargeType === 'short-rest') {
+          if ((resource.currentUses || 0) < resource.maxUses) {
+            changes.resourcesReset.push(resource.name);
+          }
+        }
+      });
+    }
+
+    return changes;
+  };
+
+  const handleLongRest = useCallback(async (characterId: string) => {
+    console.log('🏠 [LONG REST] Starting long rest for character:', characterId);
+
+    const character = characters.find(c => c.id === characterId);
+    if (!character) {
+      console.error('🏠 [LONG REST] Character not found:', characterId);
+      return;
+    }
+
+    console.log('🏠 [LONG REST] Found character:', character.name, 'HP:', character.hitPoints, '/', character.maxHitPoints);
+
+    // Calculate specific changes for display
+    const restChanges = calculateRestChanges(character);
+    console.log('🏠 [LONG REST] Calculated changes:', restChanges);
+
+    // Execute rest logic FIRST
+    let updatedCharacter = { ...character };
     updatedCharacter.hitPoints = character.maxHitPoints;
     updatedCharacter.hitDice = {
       ...updatedCharacter.hitDice,
       current: updatedCharacter.hitDice.max,
     };
+    // Reset Action Surge uses (legacy field)
+    updatedCharacter.actionSurgeUsed = 0;
+
+    // Reset all resources that recharge on long rest
+    updatedCharacter = resetResources(updatedCharacter, 'long-rest');
 
     // Restore spell slots
     if (updatedCharacter.spellcasting) {
       updatedCharacter.spellcasting = {
         ...updatedCharacter.spellcasting,
-        usedSpellSlots: Array(10).fill(0) // Reset all used spell slots to 0
+        usedSpellSlots: Array(updatedCharacter.spellcasting.spellSlots.length).fill(0)
       };
     }
 
+    // Save the rested character
+    console.log('🏠 [LONG REST] Saving updated character:', updatedCharacter.name, 'New HP:', updatedCharacter.hitPoints);
     try {
       await updateCharacter(updatedCharacter);
+      console.log('🏠 [LONG REST] Character saved successfully');
       setCharacters(prev => prev.map(c => c.id === characterId ? updatedCharacter : c));
-
-    } catch {} {
-      // Error taking long rest
+      console.log('🏠 [LONG REST] Character state updated');
+    } catch (e) {
+      console.error('🏠 [LONG REST] Error saving character:', e);
+      return; // Don't show resting screen if save failed
     }
+
+    // NOW show resting screen with specific changes
+    console.log('🏠 [LONG REST] Showing resting screen');
+    setIsResting('long');
+    setRestChanges(restChanges);
+    // RestingScreen will handle completion via onComplete callback
   }, [characters]);
 
   const handleShortRest = useCallback(async (characterId: string) => {
@@ -437,7 +502,7 @@ const App: React.FC = () => {
       setCharacters(prev => prev.map(c => c.id === characterId ? updatedCharacter : c));
       setRollResult({ text: `Recovered ${hpRecovered} HP.`, value: newHP });
 
-    } catch {} {
+    } catch {
       // Error taking short rest
     }
   }, [characters]);
@@ -451,73 +516,20 @@ const App: React.FC = () => {
       return;
     }
 
-    const newLevel = character.level + 1;
-    const newProficiencyBonus = PROFICIENCY_BONUSES[newLevel - 1] || character.proficiencyBonus;
+    // Open the Level-Up Wizard
+    setLevelUpWizardState({ isOpen: true, characterId });
+  }, [characters]);
 
-    const allClasses = loadClasses();
-    const classData = allClasses.find(c => c.name === character.class);
-    if (!classData) {
-      return;
-    }
-
-    const hitDie = getHitDieForClass(classData.slug);
-    const conModifier = character.abilities.CON.modifier;
-    const hpIncrease = Math.max(1, Math.floor(hitDie / 2) + 1 + conModifier);
-
-    const updatedCharacter = {
-      ...character,
-      level: newLevel,
-      proficiencyBonus: newProficiencyBonus,
-      maxHitPoints: character.maxHitPoints + hpIncrease,
-      hitPoints: character.maxHitPoints + hpIncrease, // Also heal to full on level up
-      hitDice: {
-        ...character.hitDice,
-        max: newLevel, // Update max hit dice to new level
-        current: character.hitDice.current, // Keep current hit dice as-is
-        dieType: hitDie, // Update die type to match class hit die
-      },
-    };
-
-    if (updatedCharacter.spellcasting) {
-      const classSpellSlots = SPELL_SLOTS_BY_CLASS[classData.slug]?.[newLevel];
-      if (classSpellSlots) {
-        updatedCharacter.spellcasting = {
-          ...updatedCharacter.spellcasting,
-          spellSlots: classSpellSlots,
-        };
-      }
-    }
-
-    const asiLevels = levelConstantsData.asiLevels;
-    if (asiLevels.includes(newLevel)) {
-      setAsiModalState({ isOpen: true, characterId: characterId });
-    }
-
-    if (classData.slug === 'wizard' && newLevel === 2) {
-      setSubclassModalState({ isOpen: true, characterId: characterId, characterClass: classData.slug });
-    }
-
-    if (updatedCharacter.spellcasting) {
-      const cantripsKnownAtNewLevel = (CANTRIPS_KNOWN_BY_CLASS as Record<string, Record<string, number>>)[classData.slug]?.[newLevel.toString()];
-      if (cantripsKnownAtNewLevel && cantripsKnownAtNewLevel > updatedCharacter.spellcasting.cantripsKnown.length) {
-        // Open modal to choose cantrip instead of adding a placeholder
-        setCantripModalState({
-          isOpen: true,
-          characterId: characterId,
-          characterClass: classData.slug,
-        });
-      }
-    }
-
+  const handleLevelUpComplete = useCallback(async (updatedCharacter: Character) => {
     try {
       await updateCharacter(updatedCharacter);
-      setCharacters(prev => prev.map(c => c.id === characterId ? updatedCharacter : c));
-      setRollResult({ text: `${character.name} is now level ${newLevel}!`, value: null });
-
-    } catch {} {
-      // Error leveling up character
+      setCharacters(prev => prev.map(c => c.id === updatedCharacter.id ? updatedCharacter : c));
+      setRollResult({ text: `${updatedCharacter.name} is now level ${updatedCharacter.level}!`, value: null });
+    } catch {
+      // Error saving level-up
+      setRollResult({ text: 'Error saving level-up', value: null });
     }
-  }, [characters]);
+  }, []);
 
   const handleLevelDown = useCallback(async (characterId: string) => {
     const character = characters.find(c => c.id === characterId);
@@ -573,7 +585,7 @@ const App: React.FC = () => {
       setCharacters(prev => prev.map(c => c.id === characterId ? updatedCharacter : c));
       setRollResult({ text: `${character.name} is now level ${newLevel}.`, value: null });
 
-    } catch {} {
+    } catch {
       // Error leveling down character
     }
   }, [characters]);
@@ -582,7 +594,7 @@ const App: React.FC = () => {
     try {
       await updateCharacter(updatedCharacter);
       setCharacters(prev => prev.map(c => c.id === updatedCharacter.id ? updatedCharacter : c));
-    } catch {} {
+    } catch {
       // Error updating character
     }
   }, []);
@@ -744,7 +756,7 @@ const App: React.FC = () => {
     try {
       await updateCharacter(updatedCharacter);
       setCharacters(prev => prev.map(c => c.id === characterId ? updatedCharacter : c));
-    } catch {} {
+    } catch {
       // Error equipping armor
     }
   }, [characters, recalculateAC]);
@@ -772,7 +784,7 @@ const App: React.FC = () => {
       try {
         await updateCharacter(updatedCharacter);
         setCharacters(prev => prev.map(c => c.id === characterId ? updatedCharacter : c));
-      } catch {} {
+      } catch {
         // Error equipping weapon
       }
     }
@@ -803,7 +815,7 @@ const App: React.FC = () => {
     try {
       await updateCharacter(updatedCharacter);
       setCharacters(prev => prev.map(c => c.id === characterId ? updatedCharacter : c));
-    } catch {} {
+    } catch {
       // Error unequipping item
     }
   }, [characters, recalculateAC]);
@@ -834,7 +846,7 @@ const App: React.FC = () => {
     try {
       await updateCharacter(updatedCharacter);
       setCharacters(prev => prev.map(c => c.id === characterId ? updatedCharacter : c));
-    } catch {} {
+    } catch {
       // Error adding item
     }
   }, [characters]);
@@ -871,7 +883,7 @@ const App: React.FC = () => {
     try {
       await updateCharacter(updatedCharacter);
       setCharacters(prev => prev.map(c => c.id === characterId ? updatedCharacter : c));
-    } catch {} {
+    } catch {
       // Error removing item
     }
   }, [characters, recalculateAC]);
@@ -899,7 +911,7 @@ const App: React.FC = () => {
       await updateCharacter(updatedCharacter);
       setCharacters(prev => prev.map(c => c.id === characterId ? updatedCharacter : c));
       setCantripModalState({ isOpen: false, characterId: null, characterClass: null });
-    } catch {} {
+    } catch {
       // Error selecting cantrip
     }
   }, [characters, cantripModalState]);
@@ -920,7 +932,7 @@ const App: React.FC = () => {
       await updateCharacter(updatedCharacter);
       setCharacters(prev => prev.map(c => c.id === characterId ? updatedCharacter : c));
       setSubclassModalState({ isOpen: false, characterId: null, characterClass: null });
-    } catch {} {
+    } catch {
       // Error selecting subclass
     }
   }, [characters, subclassModalState]);
@@ -948,7 +960,7 @@ const App: React.FC = () => {
       await updateCharacter(updatedCharacter);
       setCharacters(prev => prev.map(c => c.id === characterId ? updatedCharacter : c));
       setAsiModalState({ isOpen: false, characterId: null });
-    } catch {} {
+    } catch {
       // Error applying ASI
     }
   }, [characters, asiModalState]);
@@ -1004,6 +1016,16 @@ const App: React.FC = () => {
             setIsDiceTrayModalOpen(false);
           }}
         />
+
+        {/* Level-Up Wizard - needs to be here when character sheet is open */}
+        {levelUpWizardState.isOpen && levelUpWizardState.characterId === selectedCharacter.id && (
+          <LevelUpWizard
+            isOpen={levelUpWizardState.isOpen}
+            character={selectedCharacter}
+            onClose={() => setLevelUpWizardState({ isOpen: false, characterId: null })}
+            onComplete={handleLevelUpComplete}
+          />
+        )}
       </div>
     );
   }
@@ -1321,6 +1343,18 @@ const App: React.FC = () => {
             setIsDiceTrayModalOpen(false);
           }}
         />
+
+        {/* Resting Screen */}
+        {isResting && (
+          <RestingScreen
+            type={isResting}
+            changes={restChanges || undefined}
+            onComplete={() => {
+              setIsResting(null);
+              setRestChanges(null);
+            }}
+          />
+        )}
 
         {/* Version Display */}
         <div className="fixed bottom-4 right-4 text-theme-muted text-sm opacity-50 hover:opacity-100 transition-opacity">

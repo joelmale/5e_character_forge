@@ -284,14 +284,14 @@ export const Step3Class: React.FC<StepProps> = ({ data, updateData, nextStep, pr
                     key={feature.id}
                     feature={feature}
                     data={data}
-                    currentSelections={
+                    currentSelection={
                       feature.id === 'expertise'
                         ? data.expertiseSkills || []
                         : feature.id === 'weapon_mastery'
                           ? data.weaponMastery || []
                           : []
                     }
-                    onSelectionsChange={(selections) => {
+                    onSelectionChange={(selections) => {
                       if (feature.id === 'expertise') {
                         updateData({ expertiseSkills: selections });
                       } else if (feature.id === 'weapon_mastery') {

@@ -1,4 +1,3 @@
-/* eslint-disable no-empty */
 import { generateUUID } from './diceService';
 import levelConstantsData from '../data/levelConstants.json';
 import {
@@ -15,7 +14,9 @@ import {
   getHitDieForClass,
   SPELL_SLOTS_BY_CLASS,
   CANTRIPS_KNOWN_BY_CLASS
-} from './dataService';
+} from '../services/dataService';
+import { initializeCharacterResources } from '../utils/resourceUtils';
+import { addItemToInventoryByName } from '../utils/equipmentMatching';
 // import { CANTRIPS_KNOWN_BY_CLASS } from '../data/cantrips';
 import {
     CharacterCreationData,
@@ -57,15 +58,23 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
     const level = data.level;
     const pb = PROFICIENCY_BONUSES[level - 1] || 2;
 
-    // 2. Calculate Hit Points (Based on chosen method)
-    let hitDieValue: number;
-    if (data.hpCalculationMethod === 'rolled' && data.rolledHP) {
-        hitDieValue = data.rolledHP;
+    // 2. Calculate Hit Points
+    let maxHitPoints: number;
+
+    // For high-level characters (level 2+), use the HP calculated in highLevelSetup
+    if (data.highLevelSetup && level > 1) {
+        maxHitPoints = data.highLevelSetup.totalHP;
     } else {
-        // Default to max for level 1
-        hitDieValue = classData.hit_die;
+        // For level 1 characters, calculate based on chosen method
+        let hitDieValue: number;
+        if (data.hpCalculationMethod === 'rolled' && data.rolledHP) {
+            hitDieValue = data.rolledHP;
+        } else {
+            // Default to max for level 1
+            hitDieValue = classData.hit_die;
+        }
+        maxHitPoints = hitDieValue + finalAbilities.CON.modifier + (raceData.slug === 'dwarf' ? level : 0);
     }
-    const maxHitPoints = hitDieValue + finalAbilities.CON.modifier + (raceData.slug === 'dwarf' ? level : 0);
 
     // 3. Calculate Skills (from selected skills + background skills)
     const backgroundSkills: string[] = []; // TODO: Implement background skill proficiencies
@@ -114,19 +123,23 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
         if (choice.selected !== null) {
             const selectedBundle = choice.options[choice.selected];
             selectedBundle.forEach(item => {
-                // Try to find matching equipment in database
-                const equipmentSlug = item.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-                const foundEquipment = loadEquipment().find(eq =>
-                    eq.slug === equipmentSlug || eq.name.toLowerCase() === item.name.toLowerCase()
-                );
+                // Use the equipment matching utility to find and add items
+                const results = addItemToInventoryByName(item.name, item.quantity);
 
-                if (foundEquipment) {
-                    inventory.push({
-                        equipmentSlug: foundEquipment.slug,
-                        quantity: item.quantity,
-                        equipped: false, // Will be equipped manually by player
-                    });
-                }
+                // Process each result (can be multiple if pack expanded)
+                results.forEach(result => {
+                    // Check if item already exists in inventory
+                    const existingItem = inventory.find(inv => inv.equipmentSlug === result.equipmentSlug);
+                    if (existingItem) {
+                        existingItem.quantity += result.quantity;
+                    } else {
+                        inventory.push({
+                            equipmentSlug: result.equipmentSlug,
+                            quantity: result.quantity,
+                            equipped: false, // Will be equipped manually by player
+                        });
+                    }
+                });
             });
         }
     });
@@ -184,7 +197,7 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
     const proficiencies = aggregateProficiencies(data.raceSlug, data.classSlug, data.background);
 
     // 11. Construct Final Character Object
-    return {
+    const character: Character = {
         id: generateUUID(), // Generate UUID for IndexedDB
         name: data.name || "Unnamed Hero",
         race: raceData.name,
@@ -235,7 +248,50 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
         },
         selectedFeats: data.selectedFeats || [],
         trinket: data.selectedTrinket,
+        resources: [], // Will be initialized below
+        edition: data.edition || '2024',
     };
+
+    // Initialize limited-use resources
+    character.resources = initializeCharacterResources(character);
+
+    return character;
+
+    // Initialize limited-use resources
+    character.resources = initializeCharacterResources(character);
+
+    return character;
+};
+
+/**
+ * Ensure character resources are up-to-date based on their current class/level.
+ * This is used when loading existing characters to ensure they have the correct resources.
+ */
+export const refreshCharacterResources = (character: Character): Character => {
+  const expectedResources = initializeCharacterResources(character);
+
+  if (!character.resources) {
+    character.resources = expectedResources;
+  } else {
+    // Update existing resources or add missing ones
+    expectedResources.forEach(expectedResource => {
+      const existingIndex = character.resources!.findIndex(r => r.id === expectedResource.id);
+      if (existingIndex >= 0) {
+        // Update max uses if changed (e.g., Action Surge at level 17)
+        character.resources![existingIndex].maxUses = expectedResource.maxUses;
+        // Ensure current uses don't exceed max
+        character.resources![existingIndex].currentUses = Math.min(
+          character.resources![existingIndex].currentUses || 0,
+          expectedResource.maxUses
+        );
+      } else {
+        // Add missing resource
+        character.resources!.push(expectedResource);
+      }
+    });
+  }
+
+  return character;
 };
 
 export const recalculateAC = (character: Character): number => {
@@ -281,8 +337,10 @@ export const toggleInspiration = async (
         await updateCharacter(updatedCharacter);
         // Optimistically update the state
         setCharacters(prev => prev.map(c => c.id === characterId ? updatedCharacter : c));
-    } catch {} {
-        // Optionally revert state if DB update fails
+    } catch (error) {
+        console.error('Error toggling inspiration:', error);
+        // TODO: Revert state and show user-friendly error notification
+        // Consider adding: showError('Failed to toggle inspiration. Please try again.');
     }
 };
 
@@ -334,9 +392,10 @@ export const handleShortRest = async (
         await updateCharacter(updatedCharacter);
         setCharacters(prev => prev.map(c => c.id === characterId ? updatedCharacter : c));
         setRollResult({ text: `Recovered ${hpRecovered} HP.`, value: newHP });
-
-    } catch {} {
-        // Error taking short rest
+    } catch (error) {
+        console.error('Error taking short rest:', error);
+        // TODO: Show user-friendly error notification
+        // Consider adding: showError('Failed to complete short rest. Please try again.');
     }
 };
 
@@ -413,9 +472,10 @@ export const handleLevelUp = async (
         await updateCharacter(updatedCharacter);
         setCharacters(prev => prev.map(c => c.id === characterId ? updatedCharacter : c));
         setRollResult({ text: `${character.name} is now level ${newLevel}!`, value: null });
-
-    } catch {} {
-        // Error leveling up character
+    } catch (error) {
+        console.error('Error leveling up character:', error);
+        // TODO: Show user-friendly error notification
+        // Consider adding: showError('Failed to level up character. Please try again.');
     }
 };
 
@@ -448,9 +508,10 @@ export const handleEquipArmor = async (
     try {
         await updateCharacter(updatedCharacter);
         setCharacters(prev => prev.map(c => c.id === characterId ? updatedCharacter : c));
-
-    } catch {} {
-        // Error equipping armor
+    } catch (error) {
+        console.error('Error equipping armor:', error);
+        // TODO: Show user-friendly error notification
+        // Consider adding: showError('Failed to equip armor. Please try again.');
     }
 };
 
@@ -482,9 +543,10 @@ export const handleEquipWeapon = async (
         try {
             await updateCharacter(updatedCharacter);
             setCharacters(prev => prev.map(c => c.id === characterId ? updatedCharacter : c));
-
-        } catch {} {
-            // Error equipping weapon
+        } catch (error) {
+            console.error('Error equipping weapon:', error);
+            // TODO: Show user-friendly error notification
+            // Consider adding: showError('Failed to equip weapon. Please try again.');
         }
     }
 };
@@ -520,7 +582,7 @@ export const handleUnequipItem = async (
         await updateCharacter(updatedCharacter);
         setCharacters(prev => prev.map(c => c.id === characterId ? updatedCharacter : c));
 
-    } catch {} {
+    } catch {
         // Error unequipping item
     }
 };
@@ -558,7 +620,7 @@ export const handleAddItem = async (
         await updateCharacter(updatedCharacter);
         setCharacters(prev => prev.map(c => c.id === characterId ? updatedCharacter : c));
 
-    } catch {} {
+    } catch {
         // Error adding item
     }
 };
@@ -602,7 +664,7 @@ export const handleRemoveItem = async (
         await updateCharacter(updatedCharacter);
         setCharacters(prev => prev.map(c => c.id === characterId ? updatedCharacter : c));
 
-    } catch {} {
+    } catch {
         // Error removing item
     }
 };
@@ -666,7 +728,7 @@ export const handleLevelDown = async (
         setCharacters(prev => prev.map(c => c.id === characterId ? updatedCharacter : c));
         setRollResult({ text: `${character.name} is now level ${newLevel}.`, value: null });
 
-    } catch {} {
+    } catch {
         // Error leveling down character
     }
 };
@@ -702,7 +764,7 @@ export const handleLongRest = async (
         setCharacters(prev => prev.map(c => c.id === characterId ? updatedCharacter : c));
         setRollResult({ text: `${character.name} took a long rest and recovered!`, value: null });
 
-    } catch {} {
+    } catch {
         setRollResult({ text: 'Error taking long rest.', value: null });
     }
 };

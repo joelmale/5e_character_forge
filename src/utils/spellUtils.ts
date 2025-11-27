@@ -4,6 +4,7 @@ import { getCantripsByClass, getLeveledSpellsByClass, loadClasses, AppSpell } fr
 import { SPELL_SLOT_TABLES } from '../data/spellSlots';
 import { SPELL_LEARNING_RULES } from '../data/spellLearning';
 import spellcastingTypesData from '../data/spellcastingTypes.json';
+import { SPELL_SAVE_DC_BASE, LEVEL_1_PROFICIENCY_BONUS, ABILITY_SCORE_BASE, ABILITY_MODIFIER_DIVISOR } from '../constants/combat';
 
 // Map class slugs to spellcasting types
 const SPELLCASTING_TYPE_MAP: Record<string, SpellcastingType> = spellcastingTypesData.SPELLCASTING_TYPE_MAP as Record<string, SpellcastingType>;
@@ -23,23 +24,122 @@ export function isSpellcaster(classSlug: string): boolean {
 }
 
 /**
- * Calculate spell save DC
+ * Calculate spell save DC (Difficulty Class) for a spellcaster.
+ *
+ * The spell save DC is the target number that creatures must meet or exceed
+ * on their saving throw to resist a spell's effects. This is a core spellcasting
+ * statistic that remains constant for all of a character's spells.
+ *
+ * **Formula**: `8 + spellcasting ability modifier + proficiency bonus`
+ *
+ * **Note**: This function uses LEVEL_1_PROFICIENCY_BONUS (+2) as a constant.
+ * For higher-level characters, the caller should recalculate with the appropriate
+ * proficiency bonus for their level.
+ *
+ * @param abilities - Object mapping ability names to scores (e.g., { INT: 16, WIS: 14, ... })
+ * @param spellcastingAbility - The ability used for spellcasting (e.g., 'INT' for Wizard,
+ *                               'WIS' for Cleric, 'CHA' for Sorcerer)
+ *
+ * @returns The spell save DC value (typically ranges from 10-19 for level 1, higher at higher levels)
+ *
+ * @example
+ * ```typescript
+ * // Level 1 Wizard with INT 16 (+3 modifier)
+ * const wizardDC = calculateSpellSaveDC({ INT: 16, WIS: 10, CHA: 8 }, 'INT');
+ * // Returns: 13  (8 + 3 + 2)
+ *
+ * // Level 1 Cleric with WIS 18 (+4 modifier)
+ * const clericDC = calculateSpellSaveDC({ INT: 10, WIS: 18, CHA: 12 }, 'WIS');
+ * // Returns: 14  (8 + 4 + 2)
+ * ```
  */
 export function calculateSpellSaveDC(abilities: Record<string, number>, spellcastingAbility: string): number {
-  const modifier = Math.floor((abilities[spellcastingAbility] - 10) / 2);
-  return 8 + modifier + 2; // +2 for proficiency bonus at level 1
+  const modifier = Math.floor((abilities[spellcastingAbility] - ABILITY_SCORE_BASE) / ABILITY_MODIFIER_DIVISOR);
+  return SPELL_SAVE_DC_BASE + modifier + LEVEL_1_PROFICIENCY_BONUS;
 }
 
 /**
- * Calculate spell attack bonus
+ * Calculate spell attack bonus for a spellcaster.
+ *
+ * The spell attack bonus is added to d20 rolls when making spell attacks
+ * (spells that require an attack roll to hit, like Fire Bolt or Guiding Bolt).
+ * This bonus applies to all spell attacks made by the character.
+ *
+ * **Formula**: `spellcasting ability modifier + proficiency bonus`
+ *
+ * **Attack Roll**: `d20 + spell attack bonus` vs target's AC
+ *
+ * **Note**: This function uses LEVEL_1_PROFICIENCY_BONUS (+2) as a constant.
+ * For higher-level characters, the caller should recalculate with the appropriate
+ * proficiency bonus for their level.
+ *
+ * @param abilities - Object mapping ability names to scores (e.g., { INT: 16, WIS: 14, ... })
+ * @param spellcastingAbility - The ability used for spellcasting (e.g., 'INT' for Wizard,
+ *                               'WIS' for Cleric, 'CHA' for Sorcerer)
+ *
+ * @returns The spell attack bonus value (typically ranges from +2 to +11 for level 1, higher at higher levels)
+ *
+ * @example
+ * ```typescript
+ * // Level 1 Wizard with INT 16 (+3 modifier)
+ * const wizardAttack = calculateSpellAttackBonus({ INT: 16, WIS: 10, CHA: 8 }, 'INT');
+ * // Returns: +5  (3 + 2)
+ * // When casting Fire Bolt: rolls d20 + 5 to hit
+ *
+ * // Level 1 Warlock with CHA 18 (+4 modifier)
+ * const warlockAttack = calculateSpellAttackBonus({ INT: 10, WIS: 12, CHA: 18 }, 'CHA');
+ * // Returns: +6  (4 + 2)
+ * // When casting Eldritch Blast: rolls d20 + 6 to hit
+ * ```
  */
 export function calculateSpellAttackBonus(abilities: Record<string, number>, spellcastingAbility: string): number {
-  const modifier = Math.floor((abilities[spellcastingAbility] - 10) / 2);
-  return modifier + 2; // +2 for proficiency bonus at level 1
+  const modifier = Math.floor((abilities[spellcastingAbility] - ABILITY_SCORE_BASE) / ABILITY_MODIFIER_DIVISOR);
+  return modifier + LEVEL_1_PROFICIENCY_BONUS;
 }
 
 /**
- * Get the maximum number of spells that can be prepared
+ * Get the maximum number of spells that can be prepared for prepared casters.
+ *
+ * Prepared casters (Cleric, Druid, Paladin, Artificer, and Wizard) can change
+ * which spells they have prepared after a long rest. This function calculates
+ * how many spells they can have prepared at any given time.
+ *
+ * **Formula**: `spellcasting ability modifier + character level` (minimum 1)
+ *
+ * **Applies to**:
+ * - Clerics (WIS-based)
+ * - Druids (WIS-based)
+ * - Paladins (CHA-based)
+ * - Artificers (INT-based)
+ * - Wizards (INT-based) - prepare from their spellbook
+ *
+ * **Does NOT apply to**:
+ * - Known casters (Bard, Sorcerer, Ranger, Warlock) - they have a fixed spell list
+ *
+ * @param abilities - Object mapping ability names to scores (e.g., { INT: 16, WIS: 14, ... })
+ * @param spellcastingAbility - The ability used for spellcasting (e.g., 'INT', 'WIS', 'CHA')
+ * @param characterLevel - The character's current level (1-20)
+ *
+ * @returns Maximum number of spells that can be prepared (always at least 1)
+ *
+ * @example
+ * ```typescript
+ * // Level 1 Cleric with WIS 16 (+3 modifier)
+ * const clericPrepared = getMaxPreparedSpells({ WIS: 16, INT: 10 }, 'WIS', 1);
+ * // Returns: 4  (3 + 1, minimum 1)
+ *
+ * // Level 5 Wizard with INT 18 (+4 modifier)
+ * const wizardPrepared = getMaxPreparedSpells({ WIS: 12, INT: 18 }, 'INT', 5);
+ * // Returns: 9  (4 + 5)
+ *
+ * // Level 3 Paladin with CHA 14 (+2 modifier)
+ * const paladinPrepared = getMaxPreparedSpells({ WIS: 10, CHA: 14 }, 'CHA', 3);
+ * // Returns: 5  (2 + 3)
+ *
+ * // Edge case: Low ability score
+ * const lowStatCleric = getMaxPreparedSpells({ WIS: 8, INT: 10 }, 'WIS', 1);
+ * // Returns: 1  (Minimum is always 1, even with negative modifier)
+ * ```
  */
 export function getMaxPreparedSpells(abilities: Record<string, number>, spellcastingAbility: string, characterLevel: number): number {
   const modifier = Math.floor((abilities[spellcastingAbility] - 10) / 2);
@@ -237,7 +337,68 @@ export function cleanupInvalidSpellSelections(
 }
 
 /**
- * Convert character creation spell selection to campaign character spellcasting data
+ * Convert character creation spell selection to final character spellcasting data.
+ *
+ * This function transforms the spell selections made during character creation
+ * into the complete spellcasting data structure stored on the Character object.
+ * It handles the different spellcasting systems (known, prepared, wizard) and
+ * populates all necessary fields including spell slots, spell save DC, and
+ * spell attack bonus.
+ *
+ * **Handles Three Spellcasting Types**:
+ * 1. **Known Casters** (Bard, Sorcerer, Ranger, Warlock)
+ *    - Populates `spellsKnown` array with selected spells
+ *    - Fixed spell list that doesn't change without leveling
+ *
+ * 2. **Prepared Casters** (Cleric, Druid, Paladin)
+ *    - `spellsKnown` contains full class spell list
+ *    - `preparedSpells` contains daily prepared subset
+ *
+ * 3. **Wizard (Spellbook)**
+ *    - `spellbook` contains permanently learned spells (starts with 6)
+ *    - `preparedSpells` contains daily prepared spells from spellbook
+ *
+ * **Calculates**:
+ * - Spell save DC (8 + ability modifier + proficiency bonus)
+ * - Spell attack bonus (ability modifier + proficiency bonus)
+ * - Correct spell slots for character level
+ * - Used spell slots (initialized to 0)
+ *
+ * @param spellSelection - Spell choices made during character creation wizard
+ * @param classData - Full class data including spellcasting information
+ * @param abilities - Object mapping ability names to scores (e.g., { INT: 16, WIS: 14, ... })
+ * @param characterLevel - Character's level (default: 1)
+ *
+ * @returns Complete spellcasting data structure for Character object,
+ *          or undefined if class is not a spellcaster
+ *
+ * @example
+ * ```typescript
+ * // Example: Level 1 Wizard
+ * const wizardSpellSelection = {
+ *   selectedCantrips: ['fire-bolt', 'mage-hand', 'prestidigitation'],
+ *   spellbook: ['burning-hands', 'mage-armor', 'shield', 'magic-missile', 'detect-magic', 'identify'],
+ *   dailyPrepared: ['shield', 'mage-armor', 'magic-missile', 'burning-hands']
+ * };
+ *
+ * const spellcasting = migrateSpellSelectionToCharacter(
+ *   wizardSpellSelection,
+ *   wizardClassData,
+ *   { INT: 16, WIS: 10, CHA: 8 },
+ *   1
+ * );
+ * // Returns: {
+ * //   ability: 'INT',
+ * //   spellSaveDC: 13,
+ * //   spellAttackBonus: 5,
+ * //   cantripsKnown: ['fire-bolt', 'mage-hand', 'prestidigitation'],
+ * //   spellSlots: [3, 2, 0, 0, 0, 0, 0, 0, 0, 0],  // Cantrips + level 1 slots
+ * //   usedSpellSlots: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+ * //   spellcastingType: 'wizard',
+ * //   spellbook: ['burning-hands', 'mage-armor', ...],
+ * //   preparedSpells: ['shield', 'mage-armor', ...]
+ * // }
+ * ```
  */
 export function migrateSpellSelectionToCharacter(
   spellSelection: SpellSelectionData,

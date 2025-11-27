@@ -2,8 +2,9 @@ import React from 'react';
 import { Character, AbilityName } from '../../types/dnd';
 import { AbilityScoreBlock } from './index';
 import { DiceRoll } from '../../services/diceService';
+import { calculateEquipmentBonuses } from '../../utils/equipmentUtils';
 
-export type LayoutMode = 'modern-stacked' | 'classic-dnd' | 'mobile';
+export type LayoutMode = 'modern-stacked' | 'classic-dnd' | 'mobile' | 'paper-sheet';
 
 interface AbilityScoresProps {
   character: Character;
@@ -21,6 +22,7 @@ export const AbilityScores: React.FC<AbilityScoresProps> = ({
   layoutMode = 'modern',
 }) => {
   const abilities = Object.entries(character.abilities) as [AbilityName, { score: number; modifier: number }][];
+  const equipmentBonuses = calculateEquipmentBonuses(character);
 
   // Classic D&D layout: Single column, large circular design
   if (layoutMode === 'classic-dnd') {
@@ -31,6 +33,7 @@ export const AbilityScores: React.FC<AbilityScoresProps> = ({
             key={name}
             name={name}
             ability={ability}
+            equipmentBonus={equipmentBonuses.abilityModifiers[name]}
             setRollResult={setRollResult}
             onDiceRoll={onDiceRoll}
             layoutMode="classic-dnd"
@@ -48,8 +51,10 @@ export const AbilityScores: React.FC<AbilityScoresProps> = ({
           key={name}
           name={name}
           ability={ability}
+          equipmentBonus={equipmentBonuses.abilityModifiers[name]}
           setRollResult={setRollResult}
           onDiceRoll={onDiceRoll}
+          layoutMode="modern-stacked"
         />
       ))}
     </div>

@@ -16,6 +16,7 @@ interface CombatStatsPanelProps {
   }) => void;
   onDiceRoll: (roll: DiceRoll) => void;
   onUpdateCharacter: (character: Character) => void;
+  layoutMode?: 'paper-sheet' | 'classic-dnd' | 'modern';
 }
 
 type RollType = 'normal' | 'advantage' | 'disadvantage';
@@ -25,6 +26,7 @@ export const CombatStatsPanel: React.FC<CombatStatsPanelProps> = ({
   setRollResult,
   onDiceRoll,
   onUpdateCharacter,
+  layoutMode = 'paper-sheet',
 }) => {
   const [initiativeRollType, setInitiativeRollType] = useState<RollType>('normal');
   const [tempHpInput, setTempHpInput] = useState('');
@@ -66,12 +68,21 @@ export const CombatStatsPanel: React.FC<CombatStatsPanelProps> = ({
     return character.speed;
   };
 
+
+
+  const handleRemoveTempHp = () => {
+    onUpdateCharacter({
+      ...character,
+      temporaryHitPoints: 0
+    });
+  };
+
   const handleAddTempHp = () => {
     const amount = parseInt(tempHpInput);
     if (isNaN(amount) || amount <= 0) return;
 
     const currentTempHp = character.temporaryHitPoints || 0;
-    const newTempHp = Math.max(0, currentTempHp + amount);
+    const newTempHp = currentTempHp + amount;
 
     onUpdateCharacter({
       ...character,
@@ -80,10 +91,20 @@ export const CombatStatsPanel: React.FC<CombatStatsPanelProps> = ({
     setTempHpInput('');
   };
 
-  const handleRemoveTempHp = () => {
+  const handleCurrentHpChange = (delta: number) => {
+    const newHp = Math.max(0, Math.min(character.maxHitPoints, character.hitPoints + delta));
     onUpdateCharacter({
       ...character,
-      temporaryHitPoints: 0
+      hitPoints: newHp
+    });
+  };
+
+  const handleTempHpChange = (delta: number) => {
+    const currentTempHp = character.temporaryHitPoints || 0;
+    const newTempHp = Math.max(0, currentTempHp + delta);
+    onUpdateCharacter({
+      ...character,
+      temporaryHitPoints: newTempHp
     });
   };
 
@@ -123,18 +144,40 @@ export const CombatStatsPanel: React.FC<CombatStatsPanelProps> = ({
     return breakdown;
   };
 
+  // Determine color scheme based on layout mode
+  const isPaperSheet = layoutMode === 'paper-sheet';
+  const bgClass = isPaperSheet ? 'bg-[#f5ebd2]' : 'bg-theme-tertiary/50';
+  const hoverBgClass = isPaperSheet ? 'hover:bg-[#ebe1c8]' : 'hover:bg-theme-hover';
+  const borderClass = isPaperSheet ? 'border-[#1e140a]/20' : 'border-theme-secondary';
+  const textPrimaryClass = isPaperSheet ? 'text-[#1e140a]' : 'text-theme-primary';
+  const textSecondaryClass = isPaperSheet ? 'text-[#3d2817]' : 'text-theme-tertiary';
+  const textBrownClass = isPaperSheet ? 'text-[#8b4513]' : 'text-accent-blue';
+  const iconClass = isPaperSheet ? 'text-[#8b4513]' : 'text-theme-muted';
+  const inputBgClass = isPaperSheet ? 'bg-[#fcf6e3]' : 'bg-theme-quaternary';
+  const inputTextClass = isPaperSheet ? 'text-[#1e140a]' : 'text-theme-primary';
+  const inputBorderClass = isPaperSheet ? 'border-[#1e140a]/20' : 'border-theme-muted';
+  const inputFocusBorderClass = isPaperSheet ? 'focus:border-[#8b4513]' : 'focus:border-accent-blue';
+  const buttonRedBgClass = isPaperSheet ? 'bg-[#8b0000]' : 'bg-accent-red';
+  const buttonRedHoverClass = isPaperSheet ? 'hover:bg-red-700' : 'hover:bg-red-600';
+  const buttonGreenBgClass = isPaperSheet ? 'bg-[#228b22]' : 'bg-accent-green';
+  const buttonGreenHoverClass = isPaperSheet ? 'hover:bg-green-700' : 'hover:bg-green-600';
+  const buttonBrownBgClass = isPaperSheet ? 'bg-[#8b4513]' : 'bg-accent-blue';
+  const buttonBrownHoverClass = isPaperSheet ? 'hover:bg-[#a0522d]' : 'hover:bg-blue-600';
+  const hpGreenClass = isPaperSheet ? 'text-[#228b22]' : 'text-accent-green';
+  const hpTextClass = isPaperSheet ? 'text-[#fcf6e3]' : 'text-white';
+
   return (
     <div className="space-y-3">
       {/* Top Row - AC, Initiative, Speed */}
       <div className="grid grid-cols-3 gap-3">
         {/* Armor Class */}
         <div
-          className="flex flex-col items-center bg-theme-tertiary/50 p-3 rounded border border-theme-primary cursor-help"
+          className={`flex flex-col items-center ${bgClass} p-3 rounded-sm border ${borderClass} cursor-help`}
           title={getACBreakdown().join('\n')}
         >
-          <Shield className="w-5 h-5 text-red-500 mb-1" />
-          <span className="text-xs font-semibold text-theme-muted uppercase">AC</span>
-          <div className="text-3xl font-extrabold text-theme-primary">{character.armorClass}</div>
+          <Shield className={`w-5 h-5 ${iconClass} mb-1`} />
+          <span className={`text-xs font-cinzel font-semibold ${textSecondaryClass} uppercase`}>AC</span>
+          <div className={`text-3xl font-cinzel font-extrabold ${textPrimaryClass}`}>{character.armorClass}</div>
         </div>
 
         {/* Initiative */}
@@ -147,57 +190,87 @@ export const CombatStatsPanel: React.FC<CombatStatsPanelProps> = ({
                 prev === 'normal' ? 'advantage' : prev === 'advantage' ? 'disadvantage' : 'normal'
               );
             }}
-            className="flex flex-col items-center bg-theme-tertiary/50 p-3 rounded border border-theme-primary hover:bg-accent-red-dark/50 transition-colors cursor-pointer w-full h-full"
+            className={`flex flex-col items-center ${bgClass} p-3 rounded-sm border ${borderClass} ${hoverBgClass} transition-colors cursor-pointer w-full h-full`}
             title={`Roll Initiative (${initiativeRollType}) - Right-click to cycle`}
           >
             <div className="flex items-center gap-1 mb-1">
-              <Dice6 className="w-5 h-5 text-red-500" />
+              <Dice6 className={`w-5 h-5 ${iconClass}`} />
               {initiativeRollType !== 'normal' && (
-                <span className="text-xs font-bold text-accent-green-light">
+                <span className="text-xs font-bold text-accent-green">
                   {initiativeRollType === 'advantage' ? 'A' : 'D'}
                 </span>
               )}
             </div>
-            <span className="text-xs font-semibold text-theme-muted uppercase">Init</span>
-            <div className="text-2xl font-extrabold text-accent-yellow-light">{formatModifier(character.initiative)}</div>
+            <span className={`text-xs font-cinzel font-semibold ${textSecondaryClass} uppercase`}>Init</span>
+            <div className={`text-2xl font-cinzel font-extrabold ${textBrownClass}`}>{formatModifier(character.initiative)}</div>
           </button>
         </div>
 
         {/* Speed */}
-        <div className="flex flex-col items-center bg-theme-tertiary/50 p-3 rounded border border-theme-primary">
-          <Footprints className="w-5 h-5 text-blue-500 mb-1" />
-          <span className="text-xs font-semibold text-theme-muted uppercase">Speed</span>
-          <div className="text-xl font-extrabold text-accent-blue-light">{getSpeed()} ft</div>
+        <div className={`flex flex-col items-center ${bgClass} p-3 rounded-sm border ${borderClass}`}>
+          <Footprints className={`w-5 h-5 ${iconClass} mb-1`} />
+          <span className={`text-xs font-cinzel font-semibold ${textSecondaryClass} uppercase`}>Speed</span>
+          <div className={`text-xl font-cinzel font-extrabold ${textPrimaryClass}`}>{getSpeed()} ft</div>
         </div>
       </div>
 
       {/* Middle Section - Hit Points */}
-      <div className="bg-theme-tertiary/50 border border-theme-primary rounded p-3 space-y-2">
+      <div className={`${bgClass} border ${borderClass} rounded-sm p-3 space-y-2`}>
         {/* HP Maximum */}
         <div className="flex items-center justify-between">
-          <span className="text-xs font-semibold text-theme-muted uppercase">Hit Point Maximum</span>
-          <span className="text-lg font-bold text-theme-primary">{character.maxHitPoints}</span>
+          <span className={`text-xs font-cinzel font-semibold ${textSecondaryClass} uppercase`}>Hit Point Maximum</span>
+          <span className={`text-lg font-cinzel font-bold ${textPrimaryClass}`}>{character.maxHitPoints}</span>
         </div>
 
         {/* Current HP */}
-        <div className="flex items-center justify-between border-t border-theme-primary pt-2">
-          <span className="text-xs font-semibold text-theme-muted uppercase">Current Hit Points</span>
-          <div className="text-2xl font-extrabold text-accent-green-light">
-            {character.hitPoints}
+        <div className={`flex items-center justify-between border-t ${borderClass} pt-2`}>
+          <span className={`text-xs font-cinzel font-semibold ${textSecondaryClass} uppercase`}>Current Hit Points</span>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => handleCurrentHpChange(-1)}
+              className={`w-6 h-6 ${buttonRedBgClass} ${buttonRedHoverClass} ${hpTextClass} rounded flex items-center justify-center text-sm font-bold`}
+              title="Reduce HP by 1"
+            >
+              −
+            </button>
+            <div className={`text-2xl font-cinzel font-extrabold ${hpGreenClass}`}>
+              {character.hitPoints}
+            </div>
+            <button
+              onClick={() => handleCurrentHpChange(1)}
+              className={`w-6 h-6 ${buttonGreenBgClass} ${buttonGreenHoverClass} ${hpTextClass} rounded flex items-center justify-center text-sm font-bold`}
+              title="Increase HP by 1"
+            >
+              +
+            </button>
           </div>
         </div>
 
         {/* Temporary HP */}
-        <div className="flex items-center justify-between border-t border-theme-primary pt-2">
-          <span className="text-xs font-semibold text-theme-muted uppercase">Temporary Hit Points</span>
+        <div className={`flex items-center justify-between border-t ${borderClass} pt-2`}>
+          <span className={`text-xs font-cinzel font-semibold ${textSecondaryClass} uppercase`}>Temporary Hit Points</span>
           <div className="flex items-center gap-2">
             {character.temporaryHitPoints && character.temporaryHitPoints > 0 ? (
               <div className="flex items-center gap-2">
-                <span className="text-lg font-bold text-accent-blue-light">+{character.temporaryHitPoints}</span>
+                <button
+                  onClick={() => handleTempHpChange(-1)}
+                  className={`w-4 h-4 ${buttonRedBgClass} ${buttonRedHoverClass} ${hpTextClass} rounded flex items-center justify-center text-xs`}
+                  title="Reduce temp HP by 1"
+                >
+                  −
+                </button>
+                <span className={`text-lg font-cinzel font-bold ${textBrownClass}`}>+{character.temporaryHitPoints}</span>
+                <button
+                  onClick={() => handleTempHpChange(1)}
+                  className={`w-4 h-4 ${buttonBrownBgClass} ${buttonBrownHoverClass} ${hpTextClass} rounded flex items-center justify-center text-xs`}
+                  title="Increase temp HP by 1"
+                >
+                  +
+                </button>
                 <button
                   onClick={handleRemoveTempHp}
-                  className="text-xs text-accent-red-light hover:text-red-300"
-                  title="Remove temporary HP"
+                  className={`text-xs ${buttonRedBgClass.replace('bg-', 'text-')} ${buttonRedHoverClass.replace('bg-', 'text-')}`}
+                  title="Remove all temporary HP"
                 >
                   ×
                 </button>
@@ -210,12 +283,12 @@ export const CombatStatsPanel: React.FC<CombatStatsPanelProps> = ({
                   onChange={(e) => setTempHpInput(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && handleAddTempHp()}
                   placeholder="0"
-                  className="w-12 h-6 text-xs bg-theme-tertiary text-theme-primary rounded border border-theme-primary focus:border-blue-500 focus:outline-none text-center"
+                  className={`w-12 h-6 text-xs ${inputBgClass} ${inputTextClass} rounded border ${inputBorderClass} ${inputFocusBorderClass} focus:outline-none text-center`}
                   min="1"
                 />
                 <button
                   onClick={handleAddTempHp}
-                  className="w-6 h-6 flex items-center justify-center bg-accent-blue hover:bg-accent-blue-light rounded text-theme-primary"
+                  className={`w-6 h-6 flex items-center justify-center ${buttonBrownBgClass} ${buttonBrownHoverClass} rounded ${hpTextClass}`}
                   title="Add temporary HP"
                 >
                   <Plus className="w-4 h-4" />
@@ -231,10 +304,12 @@ export const CombatStatsPanel: React.FC<CombatStatsPanelProps> = ({
         <HitDice
           character={character}
           onUpdateCharacter={onUpdateCharacter}
+          layoutMode={layoutMode}
         />
         <DeathSaves
           character={character}
           onUpdateCharacter={onUpdateCharacter}
+          layoutMode={layoutMode}
         />
       </div>
     </div>

@@ -19,6 +19,8 @@ import {
   Step8Traits,
   Step9Languages
 } from './steps';
+import { StepHighLevelSetup } from './steps/StepHighLevelSetup';
+import { StepCumulativeASI } from './steps/StepCumulativeASI';
 
 export const CharacterCreationWizard: React.FC<WizardProps> = ({
   isOpen,
@@ -105,14 +107,16 @@ export const CharacterCreationWizard: React.FC<WizardProps> = ({
       case 1: return <Step1Details {...commonProps} />;
       case 2: return <Step2Race {...commonProps} />;
       case 3: return <Step3Class {...commonProps} />;
-      case 4: return <Step3point5FightingStyle {...commonProps} />;
-      case 5: return <Step4Abilities {...commonProps} />;
-      case 6: return <Step4Spells {...commonProps} />;
-      case 7: return <Step5point5Feats {...commonProps} />;
-      case 8: return <Step9Languages {...commonProps} />;
-      case 9: return <Step6Equipment {...commonProps} skipToStep={skipToStep} />;
-      case 10: return <Step7EquipmentBrowser {...commonProps} skipToStep={skipToStep} />;
-      case 11: return <Step8Traits {...commonProps} onSubmit={() => handleSubmit(creationData)} />;
+      case 4: return <Step4Abilities {...commonProps} />;
+      case 5: return <StepHighLevelSetup {...commonProps} />;
+      case 6: return <StepCumulativeASI {...commonProps} />;
+      case 7: return <Step3point5FightingStyle {...commonProps} />;
+      case 8: return <Step4Spells {...commonProps} />;
+      case 9: return <Step5point5Feats {...commonProps} />;
+      case 10: return <Step9Languages {...commonProps} />;
+      case 11: return <Step6Equipment {...commonProps} skipToStep={skipToStep} />;
+      case 12: return <Step7EquipmentBrowser {...commonProps} skipToStep={skipToStep} />;
+      case 13: return <Step8Traits {...commonProps} onSubmit={() => handleSubmit(creationData)} />;
       default: return <div>Unknown step</div>;
     }
   };

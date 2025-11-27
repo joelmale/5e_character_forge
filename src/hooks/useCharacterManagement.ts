@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Character } from '../types/dnd';
 import { getAllCharacters, addCharacter, deleteCharacter, updateCharacter } from '../services/dbService';
+import { refreshCharacterResources } from '../services/characterService';
 
 export function useCharacterManagement() {
   const [characters, setCharacters] = useState<Character[]>([]);
@@ -11,7 +12,9 @@ export function useCharacterManagement() {
     try {
       setLoading(true);
       const chars = await getAllCharacters();
-      setCharacters(chars);
+      // Ensure all characters have up-to-date resources
+      const updatedChars = chars.map(character => refreshCharacterResources(character));
+      setCharacters(updatedChars);
       setError(null);
     } catch (e) {
       const errorMessage = e instanceof Error ? e.message : 'Failed to load characters';

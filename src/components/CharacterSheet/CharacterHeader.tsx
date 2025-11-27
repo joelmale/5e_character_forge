@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Trash2, Tent, TrendingUp, TrendingDown, Dice6 } from 'lucide-react';
 import { Character } from '../../types/dnd';
+import { DiceRoll } from '../../services/diceService';
 import { LayoutSelector } from './LayoutSelector';
 
 interface CharacterHeaderProps {
@@ -10,7 +11,7 @@ interface CharacterHeaderProps {
   onShortRest: (id: string) => void;
   onLongRest: (id: string) => void;
   onLevelUp: (id: string) => void;
-  onLevelDown?: (id: string) => void;
+  onLevelDown: (id: string) => void;
   onOpenDiceTray?: () => void;
 }
 
@@ -22,7 +23,7 @@ export const CharacterHeader: React.FC<CharacterHeaderProps> = ({
   onLongRest,
   onLevelUp,
   onLevelDown,
-  onOpenDiceTray,
+  onOpenDiceTray
 }) => {
   const [rollOnSheet, setRollOnSheet] = useState(false);
   return (
@@ -82,13 +83,16 @@ export const CharacterHeader: React.FC<CharacterHeaderProps> = ({
             >
               <Tent className="w-5 h-5 text-white" />
             </button>
-            <button
-              onClick={() => onLongRest(character.id)}
-              className="px-2 py-2 bg-accent-green hover:bg-accent-green rounded-lg transition-colors flex items-center justify-center"
-              title="Take a Long Rest (recover all HP and spell slots)"
-            >
-              <Tent className="w-5 h-5 text-white" />
-            </button>
+              <button
+                onClick={() => {
+                  console.log('🏠 [LONG REST] Long rest button clicked for character:', character.id);
+                  onLongRest(character.id);
+                }}
+                className="px-2 py-2 bg-accent-green hover:bg-accent-green rounded-lg transition-colors flex items-center justify-center"
+                title="Take a Long Rest (recover all HP and spell slots)"
+              >
+               <Tent className="w-5 h-5 text-white" />
+             </button>
             <button
               onClick={() => onLevelUp(character.id)}
               className="px-2 py-2 bg-accent-purple hover:bg-accent-purple-light rounded-lg transition-colors flex items-center justify-center"
@@ -111,15 +115,6 @@ export const CharacterHeader: React.FC<CharacterHeaderProps> = ({
             <button onClick={() => onDelete(character.id)} className="px-2 py-2 bg-accent-red-darker hover:bg-accent-red-dark rounded-lg transition-colors" title="Delete Character"><Trash2 className="w-5 h-5 text-white" /></button>
           </div>
         </div>
-      </div>
-
-      {/* Core Info Row */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-3 text-center text-xs font-semibold">
-        <div className="p-2 bg-theme-secondary rounded-lg"><span className="text-theme-primary">Race:</span> <span className="text-theme-primary block text-sm font-handwriting">{character.race}</span></div>
-        <div className="p-2 bg-theme-secondary rounded-lg"><span className="text-theme-primary">Class:</span> <span className="text-theme-primary block text-sm font-handwriting">{character.class}</span></div>
-        <div className="p-2 bg-theme-secondary rounded-lg"><span className="text-theme-primary">Level:</span> <span className="text-theme-primary block text-sm font-handwriting">{character.level}</span></div>
-        <div className="p-2 bg-theme-secondary rounded-lg col-span-2 md:col-span-1"><span className="text-theme-primary">Alignment:</span> <span className="text-theme-primary block text-sm font-handwriting">{character.alignment}</span></div>
-        <div className="p-2 bg-theme-secondary rounded-lg col-span-2 md:col-span-1"><span className="text-theme-primary">Background:</span> <span className="text-theme-primary block text-sm font-handwriting">{character.background}</span></div>
       </div>
     </>
   );

@@ -1,6 +1,8 @@
 import { CharacterCreationData, Character, AbilityName, SkillName } from '../types/dnd';
-import { getAllRaces, loadClasses, loadEquipment, BACKGROUNDS, PROFICIENCY_BONUSES, getModifier, SKILL_TO_ABILITY, ALL_SKILLS, getHitDieForClass } from '../services/dataService';
+import { getAllRaces, loadClasses, BACKGROUNDS, PROFICIENCY_BONUSES, getModifier, SKILL_TO_ABILITY, ALL_SKILLS, getHitDieForClass } from '../services/dataService';
 import { migrateSpellSelectionToCharacter } from '../utils/spellUtils';
+import { addItemToInventoryByName } from '../utils/equipmentMatching';
+import { BASE_ARMOR_CLASS } from '../constants/combat';
 
 /**
  * Calculate final character stats from character creation data
@@ -33,9 +35,19 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
 
   const finalAbilities: Character['abilities'] = {} as Character['abilities'];
 
-  // 1. Calculate Abilities with Racial Bonuses
+  // 1. Calculate Abilities with Racial Bonuses and ASI increases
   (Object.keys(data.abilities) as AbilityName[]).forEach((ability) => {
-    const rawScore = data.abilities[ability] + (raceData.ability_bonuses[ability] || 0);
+    let rawScore = data.abilities[ability] + (raceData.ability_bonuses[ability] || 0);
+
+    // Apply cumulative ASI increases for high-level characters
+    if (data.cumulativeASI) {
+      data.cumulativeASI.forEach(asiChoice => {
+        if (asiChoice.type === 'asi' && asiChoice.asiAllocations) {
+          rawScore += asiChoice.asiAllocations[ability] || 0;
+        }
+      });
+    }
+
     const modifier = getModifier(rawScore);
     finalAbilities[ability] = { score: rawScore, modifier };
   });
@@ -56,8 +68,11 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
       hitDieValue = classData.hit_die;
     }
     maxHitPoints = hitDieValue + finalAbilities.CON.modifier;
+  } else if (data.highLevelSetup) {
+    // Use high-level setup HP if available
+    maxHitPoints = data.highLevelSetup.totalHP;
   } else {
-    // Multi-level: Calculate HP for all levels
+    // Fallback: Multi-level calculation using average HP
     const conModifier = finalAbilities.CON.modifier;
     const hitDie = classData.hit_die;
 
@@ -74,7 +89,7 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
   // Add racial bonuses (like Dwarf toughness)
   maxHitPoints += (raceData.slug === 'dwarf' ? level : 0);
 
-  // 3. Calculate Skills (from selected skills + background skills)
+  // 3. Calculate Skills (from selected skills + background skills + expertise)
   const backgroundData = BACKGROUNDS.find(bg => bg.name === data.background);
   const backgroundSkills = backgroundData?.skill_proficiencies || [];
   const allProficientSkills = [...data.selectedSkills, ...backgroundSkills.map(s => s as SkillName)];
@@ -84,10 +99,17 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
     const ability = SKILL_TO_ABILITY[skillName];
     const modifier = finalAbilities[ability].modifier;
     const isProficient = allProficientSkills.includes(skillName);
+    const hasExpertise = data.expertiseSkills?.includes(skillName) || false;
+
+    // Expertise applies 2x proficiency bonus
+    let skillBonus = 0;
+    if (isProficient) {
+      skillBonus = hasExpertise ? (pb * 2) : pb;
+    }
 
     finalSkills[skillName] = {
       proficient: isProficient,
-      value: modifier + (isProficient ? pb : 0),
+      value: modifier + skillBonus,
     };
   });
 
@@ -100,25 +122,23 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
       if (choice.selected !== null && choice.selected !== undefined) {
         const selectedBundle = choice.options[choice.selected];
         selectedBundle.forEach(item => {
-          // Try to find matching equipment in database
-          const equipmentSlug = item.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-          const foundEquipment = loadEquipment().find(eq =>
-            eq.slug === equipmentSlug || eq.name.toLowerCase() === item.name.toLowerCase()
-          );
+          // Use the equipment matching utility to find and add items
+          const results = addItemToInventoryByName(item.name, item.quantity);
 
-          if (foundEquipment) {
+          // Process each result (can be multiple if pack expanded)
+          results.forEach(result => {
             // Check if item already exists in inventory
-            const existingItem = inventory.find(inv => inv.equipmentSlug === foundEquipment.slug);
+            const existingItem = inventory.find(inv => inv.equipmentSlug === result.equipmentSlug);
             if (existingItem) {
-              existingItem.quantity += item.quantity;
+              existingItem.quantity += result.quantity;
             } else {
               inventory.push({
-                equipmentSlug: foundEquipment.slug,
-                quantity: item.quantity,
+                equipmentSlug: result.equipmentSlug,
+                quantity: result.quantity,
                 equipped: false, // Will be equipped manually by player
               });
             }
-          }
+          });
         });
       }
     });
@@ -155,7 +175,7 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
   }
 
   // 5. Calculate Armor Class (simple calculation)
-  const armorClass = 10 + finalAbilities.DEX.modifier;
+  const armorClass = BASE_ARMOR_CLASS + finalAbilities.DEX.modifier;
 
   // 6. Calculate Initiative
   const initiative = finalAbilities.DEX.modifier;
@@ -177,6 +197,16 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
   };
 
   // 9. Create final character object
+  // Collect all feats (level 1 + cumulative ASI feats)
+  const allFeats = [...(data.selectedFeats || [])];
+  if (data.cumulativeASI) {
+    data.cumulativeASI.forEach(asiChoice => {
+      if (asiChoice.type === 'feat' && asiChoice.featSlug) {
+        allFeats.push(asiChoice.featSlug);
+      }
+    });
+  }
+
   const character: Character = {
     id: '', // Will be set when saving
     name: data.name,
@@ -185,6 +215,7 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
     level,
     alignment: data.alignment,
     background: data.background,
+    edition: data.edition,
     inspiration: false,
     proficiencyBonus: pb,
     armorClass,
@@ -201,15 +232,21 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
     skills: finalSkills,
     languages: data.knownLanguages,
     featuresAndTraits,
-     selectedFeats: data.selectedFeats || [],
+     selectedFeats: allFeats,
      spellcasting: spellcastingData,
      srdFeatures,
      subclass: data.subclassSlug,
      experiencePoints: 0,
-     feats: data.selectedFeats || [], // Legacy support
+     feats: allFeats, // Legacy support
      selectedFightingStyle: data.selectedFightingStyle,
      inventory,
      trinket: data.selectedTrinket,
+     expertiseSkills: data.expertiseSkills,
+     weaponMastery: data.weaponMastery,
+     divineOrder: data.divineOrder,
+     primalOrder: data.primalOrder,
+     fightingStyle: data.fightingStyle,
+     eldritchInvocations: data.eldritchInvocations,
     currency: {
       cp: 0,
       sp: 0,

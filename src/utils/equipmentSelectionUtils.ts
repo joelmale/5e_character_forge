@@ -11,6 +11,16 @@ export const validateEquipmentChoices = (choices: EquipmentChoice[]): boolean =>
 };
 
 /**
+ * Get the indices of equipment choices that haven't been made yet
+ */
+export const getMissingEquipmentChoices = (choices: EquipmentChoice[]): number[] => {
+  return choices
+    .map((choice, index) => ({ choice, index }))
+    .filter(({ choice }) => choice.selected === null)
+    .map(({ index }) => index + 1); // Return 1-based indices for display
+};
+
+/**
  * Calculate the total equipment value and weight from choices
  */
 export const calculateEquipmentTotals = (

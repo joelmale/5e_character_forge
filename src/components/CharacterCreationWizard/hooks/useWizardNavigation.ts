@@ -84,28 +84,34 @@ const shouldShowStep = (stepIndex: number, data: CharacterCreationData): boolean
     case 3: // Choose Class & Subclass - always show (but subclass UI is conditional)
       return true;
 
-    case 4: // Choose Fighting Style - only for Fighter/Paladin/Ranger at level 2+
+    case 4: // Determine Abilities - always show
+      return true;
+
+    case 5: // High-Level Setup - only for level 2+ characters
+      return data.level >= 2;
+
+    case 6: // Ability Score Improvements - only for level 4+ characters
+      return data.level >= 4;
+
+    case 7: // Choose Fighting Style - only for Fighter/Paladin/Ranger at level 2+
       return ['fighter', 'paladin', 'ranger'].includes(data.classSlug) && data.level >= 2;
 
-    case 5: // Determine Abilities - always show
-      return true;
-
-    case 6: // Select Spells - only for spellcasters at appropriate level
+    case 8: // Select Spells - only for spellcasters at appropriate level
       return hasSpellcastingAtLevel(data.classSlug, data.level);
 
-    case 7: // Choose Feats - only when character qualifies (level 4+)
+    case 9: // Choose Feats - only when character qualifies (level 4+)
       return calculateFeatAvailability(data.level) > 0;
 
-    case 8: // Select Languages - always show
+    case 10: // Select Languages - always show
       return true;
 
-    case 9: // Select Equipment - always show
+    case 11: // Select Equipment - always show
       return true;
 
-    case 10: // Customize Equipment - always show (can be skipped)
+    case 12: // Customize Equipment - always show (can be skipped)
       return true;
 
-    case 11: // Finalize Background - always show
+    case 13: // Finalize Background - always show
       return true;
 
     default:
