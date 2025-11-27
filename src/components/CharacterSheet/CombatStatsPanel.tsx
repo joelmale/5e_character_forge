@@ -110,17 +110,7 @@ export const CombatStatsPanel: React.FC<CombatStatsPanelProps> = ({
 
   const getACBreakdown = () => {
     const parts = [];
-    let total = 10;
-
-    // Base AC
-    parts.push(`Base: 10`);
-
-    // DEX modifier
-    const dexMod = character.abilities.DEX.modifier;
-    if (dexMod !== 0) {
-      parts.push(`DEX: ${dexMod >= 0 ? '+' : ''}${dexMod}`);
-      total += dexMod;
-    }
+    let total = 0;
 
     // Get equipped armor details
     const equippedArmor = character.equippedArmor
@@ -133,32 +123,48 @@ export const CombatStatsPanel: React.FC<CombatStatsPanelProps> = ({
       return item?.equipment_category === 'Armor' && item.armor_category === 'Shield';
     });
 
-    // Armor contribution
+    const dexMod = character.abilities.DEX.modifier;
+
+    // Calculate AC based on armor type (D&D 5e rules)
     if (equippedArmor && equippedArmor.armor_class) {
-      if (equippedArmor.armor_category === 'Light') {
-        parts.push(`${equippedArmor.name}: +${equippedArmor.armor_class.base}`);
-        total += equippedArmor.armor_class.base;
+      if (equippedArmor.armor_category === 'Heavy') {
+        // Heavy armor: Flat AC score, no DEX modifier
+        parts.push(`${equippedArmor.name}: ${equippedArmor.armor_class.base}`);
+        total = equippedArmor.armor_class.base;
       } else if (equippedArmor.armor_category === 'Medium') {
-        const dexBonus = Math.min(character.abilities.DEX.modifier, equippedArmor.armor_class.max_bonus || 2);
-        parts.push(`${equippedArmor.name}: +${equippedArmor.armor_class.base}`);
-        total += equippedArmor.armor_class.base;
-        if (dexBonus > 0) {
-          parts.push(`DEX: +${dexBonus}`);
+        // Medium armor: Base AC + DEX modifier (maximum +2)
+        const dexBonus = Math.min(dexMod, equippedArmor.armor_class.max_bonus || 2);
+        parts.push(`${equippedArmor.name}: ${equippedArmor.armor_class.base}`);
+        total = equippedArmor.armor_class.base;
+        if (dexBonus !== 0) {
+          parts.push(`DEX: ${dexBonus >= 0 ? '+' : ''}${dexBonus}`);
           total += dexBonus;
         }
-      } else if (equippedArmor.armor_category === 'Heavy') {
-        parts.push(`${equippedArmor.name}: +${equippedArmor.armor_class.base}`);
-        total += equippedArmor.armor_class.base;
+      } else if (equippedArmor.armor_category === 'Light') {
+        // Light armor: Base AC + full DEX modifier
+        parts.push(`${equippedArmor.name}: ${equippedArmor.armor_class.base}`);
+        total = equippedArmor.armor_class.base;
+        if (dexMod !== 0) {
+          parts.push(`DEX: ${dexMod >= 0 ? '+' : ''}${dexMod}`);
+          total += dexMod;
+        }
+      }
+    } else {
+      // Unarmored: Base 10 + full DEX modifier
+      parts.push(`Base: 10`);
+      total = 10;
+      if (dexMod !== 0) {
+        parts.push(`DEX: ${dexMod >= 0 ? '+' : ''}${dexMod}`);
+        total += dexMod;
       }
     }
 
-    // Shield contribution
+    // Shield contribution (always +2, stacks with everything)
     if (equippedShield) {
       parts.push(`Shield: +2`);
       total += 2;
     }
 
-    // Return as array for title attribute, but include total
     return [`${parts.join(', ')} = ${total} AC`];
   };
 
