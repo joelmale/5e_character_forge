@@ -1,5 +1,6 @@
 import React from 'react';
 import { Shield, Sword, Hammer, Languages } from 'lucide-react';
+import { LANGUAGES } from '../../data/languages';
 import { Character } from '../../types/dnd';
 
 interface ProficienciesAndLanguagesProps {
@@ -14,6 +15,14 @@ export const ProficienciesAndLanguages: React.FC<ProficienciesAndLanguagesProps>
   const weaponProficiencies = character.proficiencies?.weapons || [];
   const toolProficiencies = character.proficiencies?.tools || [];
   const languages = character.languages || [];
+
+  const getLanguageDescription = (languageName: string): string => {
+    const language = LANGUAGES.find(lang => lang.name === languageName);
+    if (language) {
+      return `${language.name}\n\n${language.description}\n\nTypically spoken by: ${language.typicalSpeakers}\n\nCategory: ${language.category}`;
+    }
+    return `${languageName}\n\nA language spoken in the world of Dungeons & Dragons.`;
+  };
 
   return (
     <div className="bg-emerald-900 rounded-xl shadow-lg border-l-4 border-yellow-500 p-4">
@@ -73,7 +82,11 @@ export const ProficienciesAndLanguages: React.FC<ProficienciesAndLanguagesProps>
           </div>
           <div className="flex flex-wrap gap-2">
             {languages.map((language, index) => (
-              <span key={index} className="px-2 py-1 bg-accent-green-dark text-theme-primary text-xs rounded">
+              <span
+                key={index}
+                className="px-2 py-1 bg-accent-green-dark text-theme-primary text-xs rounded cursor-help"
+                title={getLanguageDescription(language)}
+              >
                 {language}
               </span>
             ))}

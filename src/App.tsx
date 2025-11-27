@@ -267,14 +267,33 @@ const App: React.FC = () => {
   }, [latestRoll, overlayRoll?.id]);
 
   // Load characters from IndexedDB
+  // Helper function to synchronize equipped items with inventory
+  const syncEquippedItems = useCallback((character: Character): Character => {
+    const equippedArmor = character.inventory?.find(item =>
+      item.equipped && loadEquipment().find(eq => eq.slug === item.equipmentSlug)?.armor_category &&
+      loadEquipment().find(eq => eq.slug === item.equipmentSlug)?.armor_category !== 'Shield'
+    )?.equipmentSlug;
+
+    const equippedWeapons = character.inventory?.filter(item =>
+      item.equipped && (
+        loadEquipment().find(eq => eq.slug === item.equipmentSlug)?.weapon_category ||
+        loadEquipment().find(eq => eq.slug === item.equipmentSlug)?.armor_category === 'Shield'
+      )
+    ).map(item => item.equipmentSlug) || [];
+
+    return { ...character, equippedArmor, equippedWeapons };
+  }, []);
+
   const loadCharacters = useCallback(async () => {
     try {
       const chars = await getAllCharacters();
-      setCharacters(chars);
+      // Synchronize equipped items for each character
+      const syncedChars = chars.map(syncEquippedItems);
+      setCharacters(syncedChars);
     } catch {
       // Error loading characters
     }
-  }, []);
+  }, [syncEquippedItems]);
 
   useEffect(() => {
     loadCharacters();
@@ -801,7 +820,8 @@ const App: React.FC = () => {
     if (!character) return;
 
     const weapon = EQUIPMENT_DATABASE.find(eq => eq.slug === weaponSlug);
-    if (!weapon?.weapon_category) return;
+    // Allow both weapons and shields to be equipped as weapons
+    if (!weapon?.weapon_category && weapon?.armor_category !== 'Shield') return;
 
     // Add weapon to equipped weapons (max 2)
     const equippedWeapons = character.equippedWeapons || [];

@@ -109,8 +109,18 @@ export const CombatStatsPanel: React.FC<CombatStatsPanelProps> = ({
   };
 
   const getACBreakdown = () => {
-    const breakdown = [];
-    breakdown.push(`Base: 10 + ${character.abilities.DEX.modifier >= 0 ? '+' : ''}${character.abilities.DEX.modifier} DEX`);
+    const parts = [];
+    let total = 10;
+
+    // Base AC
+    parts.push(`Base: 10`);
+
+    // DEX modifier
+    const dexMod = character.abilities.DEX.modifier;
+    if (dexMod !== 0) {
+      parts.push(`DEX: ${dexMod >= 0 ? '+' : ''}${dexMod}`);
+      total += dexMod;
+    }
 
     // Get equipped armor details
     const equippedArmor = character.equippedArmor
@@ -123,25 +133,33 @@ export const CombatStatsPanel: React.FC<CombatStatsPanelProps> = ({
       return item?.equipment_category === 'Armor' && item.armor_category === 'Shield';
     });
 
+    // Armor contribution
     if (equippedArmor && equippedArmor.armor_class) {
       if (equippedArmor.armor_category === 'Light') {
-        breakdown.push(`${equippedArmor.name}: ${equippedArmor.armor_class.base} + full DEX bonus`);
+        parts.push(`${equippedArmor.name}: +${equippedArmor.armor_class.base}`);
+        total += equippedArmor.armor_class.base;
       } else if (equippedArmor.armor_category === 'Medium') {
         const dexBonus = Math.min(character.abilities.DEX.modifier, equippedArmor.armor_class.max_bonus || 2);
-        breakdown.push(`${equippedArmor.name}: ${equippedArmor.armor_class.base} + ${dexBonus} DEX (max ${equippedArmor.armor_class.max_bonus || 2})`);
+        parts.push(`${equippedArmor.name}: +${equippedArmor.armor_class.base}`);
+        total += equippedArmor.armor_class.base;
+        if (dexBonus > 0) {
+          parts.push(`DEX: +${dexBonus}`);
+          total += dexBonus;
+        }
       } else if (equippedArmor.armor_category === 'Heavy') {
-        breakdown.push(`${equippedArmor.name}: ${equippedArmor.armor_class.base} (no DEX bonus)`);
+        parts.push(`${equippedArmor.name}: +${equippedArmor.armor_class.base}`);
+        total += equippedArmor.armor_class.base;
       }
     }
 
+    // Shield contribution
     if (equippedShield) {
-      const shield = loadEquipment().find(eq => eq.slug === equippedShield);
-      if (shield) {
-        breakdown.push(`${shield.name}: +2 AC`);
-      }
+      parts.push(`Shield: +2`);
+      total += 2;
     }
 
-    return breakdown;
+    // Return as array for title attribute, but include total
+    return [`${parts.join(', ')} = ${total} AC`];
   };
 
   // Determine color scheme based on layout mode
