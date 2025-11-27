@@ -2,6 +2,37 @@ import React from 'react';
 import { Character } from '../../types/dnd';
 import { SPELL_DATABASE } from '../../services/dataService';
 
+// Helper function to get max prepared spells for a character
+const getMaxPreparedSpells = (character: Character): number => {
+  if (!character.spellcasting || character.spellcasting.spellcastingType !== 'prepared') {
+    return 0;
+  }
+
+  const abilityMod = character.abilities[character.spellcasting.ability].modifier;
+  return character.level + abilityMod;
+};
+
+// Helper function to get spells available for a given slot level (including upcasting)
+const getSpellsAvailableForSlotLevel = (character: Character, slotLevel: number) => {
+  const spellcasting = character.spellcasting;
+  if (!spellcasting) return [];
+
+  let spellList: string[] = [];
+
+  if (spellcasting.spellcastingType === 'prepared' && spellcasting.preparedSpells) {
+    spellList = spellcasting.preparedSpells;
+  } else if (spellcasting.spellcastingType === 'known' && spellcasting.spellsKnown) {
+    spellList = spellcasting.spellsKnown;
+  } else if (spellcasting.spellcastingType === 'wizard' && spellcasting.preparedSpells) {
+    spellList = spellcasting.preparedSpells;
+  }
+
+  return spellList
+    .map(slug => SPELL_DATABASE.find(s => s.slug === slug))
+    .filter(spell => spell && spell.level <= slotLevel)
+    .sort((a, b) => (a?.level || 0) - (b?.level || 0));
+};
+
 interface SpellcastingSectionProps {
   character: Character;
   onUpdateCharacter: (character: Character) => void;
@@ -84,6 +115,91 @@ export const SpellcastingSection: React.FC<SpellcastingSectionProps> = ({
         </div>
       </div>
 
+      {/* Middle Row: Known Spells or Daily Prepared Spells - Full Width */}
+      {(() => {
+        const spellcasting = character.spellcasting;
+        if (!spellcasting) return null;
+
+        if (spellcasting.spellcastingType === 'known' && spellcasting.spellsKnown) {
+          return (
+            <div className="p-4 bg-theme-secondary rounded-xl shadow-lg border-l-4 border-accent-blue">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-lg font-bold text-accent-blue-light">Known Spells</h3>
+                <span className="text-sm text-theme-muted">
+                  ({spellcasting.spellsKnown.length})
+                </span>
+              </div>
+              <div className="space-y-3">
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(level => {
+                  const spellsAtLevel = spellcasting.spellsKnown!
+                    .map(slug => SPELL_DATABASE.find(s => s.slug === slug))
+                    .filter(spell => spell && spell.level === level);
+
+                  if (spellsAtLevel.length === 0) return null;
+
+                  return (
+                    <div key={level} className="flex items-start gap-3">
+                      <span className="text-xs text-theme-muted font-mono w-12">Lvl {level}</span>
+                      <div className="flex flex-wrap gap-2 flex-1">
+                        {spellsAtLevel.map(spell => (
+                          <span
+                            key={spell!.slug}
+                            className="px-2 py-1 bg-blue-700 text-theme-primary text-xs rounded flex items-center gap-1"
+                          >
+                            {spell!.name}
+                            {spell!.ritual && <span className="text-yellow-400">(R)</span>}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        } else if ((spellcasting.spellcastingType === 'prepared' && spellcasting.preparedSpells) ||
+                   (spellcasting.spellcastingType === 'wizard' && spellcasting.preparedSpells)) {
+          return (
+            <div className="p-4 bg-theme-secondary rounded-xl shadow-lg border-l-4 border-accent-blue">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-lg font-bold text-accent-blue-light">Daily Prepared Spells</h3>
+                <span className="text-sm text-theme-muted">
+                  ({spellcasting.preparedSpells?.length || 0} / {getMaxPreparedSpells(character)})
+                </span>
+              </div>
+              <div className="space-y-3">
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(level => {
+                  const spellsAtLevel = spellcasting.preparedSpells!
+                    .map(slug => SPELL_DATABASE.find(s => s.slug === slug))
+                    .filter(spell => spell && spell.level === level);
+
+                  if (spellsAtLevel.length === 0) return null;
+
+                  return (
+                    <div key={level} className="flex items-start gap-3">
+                      <span className="text-xs text-theme-muted font-mono w-12">Lvl {level}</span>
+                      <div className="flex flex-wrap gap-2 flex-1">
+                        {spellsAtLevel.map(spell => (
+                          <span
+                            key={spell!.slug}
+                            className="px-2 py-1 bg-blue-700 text-theme-primary text-xs rounded flex items-center gap-1"
+                          >
+                            {spell!.name}
+                            {spell!.ritual && <span className="text-yellow-400">(R)</span>}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        }
+
+        return null;
+      })()}
+
       {/* Bottom Row: Spell Slots - Full Width */}
       <div className="p-4 bg-theme-secondary rounded-xl shadow-lg border-l-4 border-blue-500">
         <h3 className="text-lg font-bold text-accent-blue-light mb-3">Spell Slots</h3>
@@ -94,12 +210,27 @@ export const SpellcastingSection: React.FC<SpellcastingSectionProps> = ({
             const usedSlots = character.spellcasting?.usedSpellSlots?.[index] || 0;
             const availableSlots = maxSlots - usedSlots;
 
+            const availableSpells = getSpellsAvailableForSlotLevel(character, spellLevel);
+
             return (
               <div key={spellLevel} className="flex flex-col items-center space-y-2 p-2 bg-theme-tertiary/50 rounded-lg">
                 <div className="flex items-center justify-between w-full">
                   <span className="text-theme-muted text-xs">Level {spellLevel}</span>
                   <span className="font-bold text-theme-primary text-xs">{availableSlots}/{maxSlots}</span>
                 </div>
+
+                {/* Show available prepared spells for this slot level */}
+                {availableSpells.length > 0 && (
+                  <div className="text-xs text-center text-theme-muted max-w-full">
+                    {availableSpells.slice(0, 3).map(spell => spell!.name).join(', ')}
+                    {availableSpells.length > 3 && (
+                      <span className="text-accent-blue-light">
+                        {' '} +{availableSpells.length - 3} more
+                      </span>
+                    )}
+                  </div>
+                )}
+
                 <div className="flex items-center gap-1 justify-center flex-wrap">
                   {Array.from({ length: maxSlots }, (_, slotIndex) => (
                     <button
