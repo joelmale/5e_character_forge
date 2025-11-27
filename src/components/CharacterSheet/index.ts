@@ -26,3 +26,4 @@ export { ActiveEquipmentPanel } from './ActiveEquipmentPanel';
 export { LanguagesPanel } from './LanguagesPanel';
 export { OfficialAbilityBox } from './OfficialAbilityBox';
 export { OfficialSkillsList } from './OfficialSkillsList';
+export { PaperAbilityScoresPanel } from './PaperAbilityScoresPanel';

@@ -1,6 +1,5 @@
 import React from 'react';
 import { CharacterSheetProps } from '../../../types/components';
-import { AbilityName } from '../../../types/dnd';
 import {
   CharacterHeader,
   SavingThrows,
@@ -10,8 +9,8 @@ import {
   EquipmentSection,
   ProficienciesAndLanguages,
   PaperCurrencyPanel,
-  OfficialAbilityBox,
   OfficialSkillsList,
+  PaperAbilityScoresPanel,
 } from '../index';
 
 /**
@@ -130,19 +129,12 @@ export const PaperSheetLayout: React.FC<CharacterSheetProps> = (props) => {
           </div>
 
           {/* Ability Scores */}
-          <div className="bg-[#fcf6e3] border-2 border-[#1e140a] rounded-sm p-3 shadow-md">
-            <div className="grid grid-cols-3 gap-3">
-              {(['STR', 'DEX', 'CON', 'INT', 'WIS', 'CHA'] as AbilityName[]).map(ability => (
-                <OfficialAbilityBox
-                  key={ability}
-                  name={ability}
-                  ability={character.abilities[ability]}
-                  setRollResult={props.setRollResult}
-                  onDiceRoll={props.onDiceRoll}
-                />
-              ))}
-            </div>
-          </div>
+          <PaperAbilityScoresPanel
+            character={character}
+            setRollResult={props.setRollResult}
+            onDiceRoll={props.onDiceRoll}
+            onToggleInspiration={props.onToggleInspiration}
+          />
 
           {/* Saving Throws */}
           <div className="bg-[#fcf6e3] border-2 border-[#1e140a] rounded-sm p-3 shadow-md">
