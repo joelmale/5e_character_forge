@@ -306,7 +306,7 @@ export const EquipmentShop: React.FC<EquipmentShopProps> = ({
 
       {/* Description Modal */}
       {descriptionModal.isOpen && descriptionModal.item && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 backdrop-blur-md flex items-center justify-center z-50 p-4">
           <div className="bg-theme-secondary rounded-xl shadow-2xl w-full max-w-lg max-h-[80vh] overflow-hidden">
             <div className="flex items-center justify-between p-6 border-b border-theme-secondary">
               <h3 className="text-lg font-bold text-theme-primary">{descriptionModal.item.name}</h3>

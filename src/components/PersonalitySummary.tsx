@@ -556,7 +556,7 @@ const PersonalitySummary: React.FC<PersonalitySummaryProps> = ({
 
       {/* Standard Array Info Modal */}
       {showArrayModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 backdrop-blur-md flex items-center justify-center z-50 p-4">
           <div className="bg-theme-secondary rounded-xl shadow-2xl max-w-md w-full p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-xl font-bold text-accent-yellow-light">Standard Array</h3>

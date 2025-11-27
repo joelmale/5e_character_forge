@@ -131,7 +131,7 @@ export const LevelUpWizard: React.FC<LevelUpWizardProps> = ({
 
   return createPortal(
     <div
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100] p-4"
+      className="fixed inset-0 backdrop-blur-md flex items-center justify-center z-[100] p-4"
       onClick={onClose}
     >
       <div
