@@ -162,6 +162,48 @@ export const Step4Spells: React.FC<StepProps> = ({ data, updateData, nextStep, p
 
   const allSelectionsComplete = cantripsComplete && spellsComplete;
 
+  // Debug logging for spell selection validation
+  console.log('🧙 [Step4Spells] Validation Check:', {
+    class: data.classSlug,
+    level: data.level,
+    spellcastingType,
+    cantrips: {
+      selected: data.spellSelection.selectedCantrips.length,
+      required: cantripsKnownAtLevel,
+      complete: cantripsComplete
+    },
+    spells: {
+      type: spellcastingType,
+      ...(spellcastingType === 'wizard' && {
+        spellbook: {
+          selected: data.spellSelection.spellbook?.length || 0,
+          required: 6,
+          complete: (data.spellSelection.spellbook?.length || 0) === 6
+        },
+        dailyPrepared: {
+          selected: data.spellSelection.dailyPrepared?.length || 0,
+          required: getMaxPreparedSpells(data.abilities, 'INT', data.level),
+          complete: spellsComplete && cantripsComplete
+        }
+      }),
+      ...(spellcastingType === 'known' && {
+        knownSpells: {
+          selected: data.spellSelection.knownSpells?.length || 0,
+          required: maxPreparedSpellsAtLevel,
+          complete: spellsComplete
+        }
+      }),
+      ...(spellcastingType === 'prepared' && {
+        preparedSpells: {
+          selected: data.spellSelection.preparedSpells?.length || 0,
+          required: maxPreparedSpellsAtLevel,
+          complete: spellsComplete
+        }
+      })
+    },
+    allSelectionsComplete
+  });
+
   // Spell mode description
   const modeDescription = spellcastingType === 'wizard'
     ? 'Choose spells for your spellbook. You can prepare a subset of these each day.'
@@ -291,7 +333,7 @@ export const Step4Spells: React.FC<StepProps> = ({ data, updateData, nextStep, p
           {/* Wizard Daily Preparation Section */}
           <div className="bg-theme-tertiary/50 border border-theme-primary rounded-lg p-4 space-y-3">
             <h4 className="text-lg font-bold text-accent-yellow-light">
-              Daily Preparation ({data.spellSelection.dailyPrepared?.length || 0} / {Math.max(1, Math.floor((data.abilities.INT - 10) / 2) + 1)} selected)
+              Daily Preparation ({data.spellSelection.dailyPrepared?.length || 0} / {getMaxPreparedSpells(data.abilities, 'INT', data.level)} selected)
             </h4>
             <p className="text-xs text-theme-muted">
               Choose spells to prepare for today from your spellbook. You can change this after a long rest.
@@ -303,7 +345,7 @@ export const Step4Spells: React.FC<StepProps> = ({ data, updateData, nextStep, p
                 if (!spell) return null;
 
                 const isSelected = data.spellSelection.dailyPrepared?.includes(spell.slug) || false;
-                const maxPrepared = Math.max(1, Math.floor((data.abilities.INT - 10) / 2) + 1);
+                const maxPrepared = getMaxPreparedSpells(data.abilities, 'INT', data.level);
                 const canSelect = (data.spellSelection.dailyPrepared?.length || 0) < maxPrepared;
 
                 return (
@@ -468,7 +510,13 @@ export const Step4Spells: React.FC<StepProps> = ({ data, updateData, nextStep, p
 
       {/* Navigation */}
       <div className='flex justify-between'>
-        <button onClick={prevStep} className='px-4 py-2 bg-theme-quaternary text-white rounded-lg hover:bg-theme-hover flex items-center gap-2'>
+        <button
+          onClick={() => {
+            console.log('🔙 [Step4Spells] Back button clicked from step 8');
+            prevStep();
+          }}
+          className='px-4 py-2 bg-theme-quaternary text-white rounded-lg hover:bg-theme-hover flex items-center gap-2'
+        >
           <ArrowLeft className='w-4 h-4' />
           Back
         </button>

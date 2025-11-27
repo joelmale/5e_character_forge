@@ -15,7 +15,9 @@ export type FeatureChoiceType =
   | 'spells'           // Learn new spells
   | 'fighting-style'   // Choose a fighting style
   | 'invocation'       // Warlock Eldritch Invocation
-  | 'wild-shape';      // Druid Wild Shape options
+  | 'wild-shape'       // Druid Wild Shape options
+  | 'favored-enemy'    // Ranger favored enemy choice
+  | 'natural-explorer'; // Ranger natural explorer choice
 
 /**
  * Represents a choice the player must make at a specific level

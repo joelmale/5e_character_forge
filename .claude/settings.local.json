@@ -33,7 +33,8 @@
       "Bash(./migrate-theme.sh)",
       "Bash(git rev-parse:*)",
       "Bash(gh pr create:*)",
-      "Bash(npx eslint:*)"
+      "Bash(npx eslint:*)",
+      "Bash(npm test:*)"
     ],
     "deny": [],
     "ask": [],
@@ -41,8 +42,8 @@
       "/Users/JoelN/Coding/5e-SRD-database/"
     ]
   },
+  "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
     "docker-toolkit"
-  ],
-  "enableAllProjectMcpServers": true
+  ]
 }

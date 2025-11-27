@@ -15,6 +15,8 @@ import {
   grantsASI
 } from '../data/classProgression';
 import { fighter2024Progression } from '../data/progressions/fighter2024';
+import { paladin2024Progression } from '../data/progressions/paladin2024';
+import { ranger2024Progression } from '../data/progressions/ranger2024';
 import { PROFICIENCY_BONUSES, CANTRIPS_KNOWN_BY_CLASS } from '../services/dataService';
 import { SPELL_SLOTS_BY_CLASS } from '../data/spellSlots';
 
@@ -22,9 +24,15 @@ import { SPELL_SLOTS_BY_CLASS } from '../data/spellSlots';
  * Get the class progression data for a given class
  */
 export function getClassProgression(classSlug: string, edition: '2014' | '2024' = '2024'): ClassProgression | null {
-  // For now, only Fighter 2024 is implemented
+  // Implemented class progressions
   if (classSlug === 'fighter' && edition === '2024') {
     return fighter2024Progression;
+  }
+  if (classSlug === 'paladin' && edition === '2024') {
+    return paladin2024Progression;
+  }
+  if (classSlug === 'ranger' && edition === '2024') {
+    return ranger2024Progression;
   }
 
   // TODO: Add other class progressions as they are implemented
