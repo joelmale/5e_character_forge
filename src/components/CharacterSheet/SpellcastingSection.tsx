@@ -1,5 +1,6 @@
 import React from 'react';
 import { Character } from '../../types/dnd';
+import { SPELL_DATABASE } from '../../services/dataService';
 
 interface SpellcastingSectionProps {
   character: Character;
@@ -69,11 +70,14 @@ export const SpellcastingSection: React.FC<SpellcastingSectionProps> = ({
             <div>
               <div className="font-semibold text-theme-tertiary mb-1">Cantrips ({character.spellcasting.cantripsKnown.length})</div>
               <div className="flex flex-wrap gap-2">
-                {character.spellcasting.cantripsKnown.map((spellSlug) => (
-                  <span key={spellSlug} className="px-2 py-1 bg-purple-700 text-theme-primary text-xs rounded">
-                    {spellSlug}
-                  </span>
-                ))}
+                {character.spellcasting.cantripsKnown.map((spellSlug) => {
+                  const spell = SPELL_DATABASE.find(s => s.slug === spellSlug);
+                  return (
+                    <span key={spellSlug} className="px-2 py-1 bg-purple-700 text-theme-primary text-xs rounded">
+                      {spell?.name || spellSlug}
+                    </span>
+                  );
+                })}
               </div>
             </div>
           </div>
