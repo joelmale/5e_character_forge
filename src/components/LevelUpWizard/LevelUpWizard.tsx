@@ -135,7 +135,7 @@ export const LevelUpWizard: React.FC<LevelUpWizardProps> = ({
       onClick={onClose}
     >
       <div
-        className="relative z-10 bg-theme-secondary bg-opacity-100 rounded-2xl shadow-[0_25px_50px_-12px_rgba(0,0,0,0.9)] w-full max-w-3xl transition-all transform duration-300 scale-100 my-8 flex flex-col max-h-[calc(100vh-4rem)] pointer-events-auto"
+        className="relative z-10 bg-theme-secondary bg-opacity-100 rounded-2xl shadow-2xl w-full max-w-3xl transition-all transform duration-300 scale-100 my-8 flex flex-col max-h-[calc(100vh-4rem)] pointer-events-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
