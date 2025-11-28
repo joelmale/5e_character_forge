@@ -163,8 +163,10 @@ export interface Character {
   srdFeatures?: {
     classFeatures: Array<{ name: string; slug: string; level: number; source: 'class' }>;
     subclassFeatures: Array<{ name: string; slug: string; level: number; source: 'subclass' }>;
+
   };
   selectedFeats?: string[]; // Feat slugs selected during character creation
+  featChoices?: Record<string, Record<string, any>>; // Additional choices for feats (e.g., Elemental Adept damage type)
 
   // Sprint 4: Equipment and inventory
   inventory?: EquippedItem[]; // All carried items
@@ -214,6 +216,9 @@ export interface Character {
     piercer?: boolean; // Piercing damage on crits
     slasher?: boolean; // Slashing damage on crits
 
+    // Advanced combat state
+    gwmBonusAttackAvailable?: boolean; // GWM bonus attack available this turn
+
     // Damage type resistances ignored
     ignoredResistances?: string[]; // From Elemental Adept
 
@@ -241,6 +246,10 @@ export interface Character {
     linguist?: boolean; // Can create ciphers and forgeries
     bountifulLuck?: boolean; // Can let allies reroll 1s (Halfling feat)
     secondChance?: boolean; // Can force creature to reroll attack
+
+    // Movement & utility
+    mobile?: boolean; // +10 speed, difficult terrain benefits
+    dualWielder?: boolean; // AC bonus when dual wielding
   };
 
   // Metadata
@@ -464,6 +473,7 @@ export interface CharacterCreationData {
   subclassSlug?: string | null;
   selectedFightingStyle?: string | null;
   selectedFeats?: string[]; // Array of feat slugs
+  featChoices?: Record<string, Record<string, any>>; // Additional choices for feats (e.g., Elemental Adept damage type)
 
   // Language selection
   knownLanguages?: string[]; // Array of selected language names

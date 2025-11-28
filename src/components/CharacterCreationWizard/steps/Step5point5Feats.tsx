@@ -9,6 +9,7 @@ import {
   getFeatSourceInfo,
   canSelectMoreFeats
 } from '../../../utils/featUtils';
+import { FeatChoiceModal } from '../components';
 
 const RandomizeButton: React.FC<{ onClick: () => void; title?: string; className?: string }> = ({
   onClick,
@@ -29,6 +30,7 @@ const RandomizeButton: React.FC<{ onClick: () => void; title?: string; className
 
 export const Step5point5Feats: React.FC<StepProps> = ({ data, updateData, nextStep, prevStep, getNextStepLabel }) => {
   const [showFeatDetails, setShowFeatDetails] = useState<string | null>(null);
+  const [featChoiceModal, setFeatChoiceModal] = useState<{ isOpen: boolean; feat: any }>({ isOpen: false, feat: null });
 
   // Calculate how many feats the character can take
   const maxFeats = calculateFeatAvailability(data.level);
@@ -36,6 +38,10 @@ export const Step5point5Feats: React.FC<StepProps> = ({ data, updateData, nextSt
 
   // Filter available feats based on prerequisites
   const availableFeats = filterAvailableFeats(FEAT_DATABASE, data);
+
+  const featRequiresChoices = (featSlug: string): boolean => {
+    return ['elemental-adept', 'metamagic-adept', 'lightly-armored', 'moderately-armored'].includes(featSlug);
+  };
 
   const handleFeatToggle = (featSlug: string) => {
     const isSelected = selectedFeats.includes(featSlug);
@@ -46,11 +52,32 @@ export const Step5point5Feats: React.FC<StepProps> = ({ data, updateData, nextSt
         selectedFeats: selectedFeats.filter(s => s !== featSlug)
       });
     } else if (canSelectMoreFeats(selectedFeats, data.level)) {
-      // Select
-      updateData({
-        selectedFeats: [...selectedFeats, featSlug]
-      });
+      // Check if feat requires additional choices
+      if (featRequiresChoices(featSlug)) {
+        const feat = availableFeats.find(f => f.slug === featSlug);
+        if (feat) {
+          setFeatChoiceModal({ isOpen: true, feat });
+        }
+      } else {
+        // Select directly
+        updateData({
+          selectedFeats: [...selectedFeats, featSlug]
+        });
+      }
     }
+  };
+
+  const handleFeatChoiceConfirm = (choices: Record<string, any>) => {
+    if (!featChoiceModal.feat) return;
+
+    // Store the choices in the character data
+    const featChoices = data.featChoices || {};
+    featChoices[featChoiceModal.feat.slug] = choices;
+
+    updateData({
+      selectedFeats: [...selectedFeats, featChoiceModal.feat.slug],
+      featChoices
+    });
   };
 
   return (
@@ -182,6 +209,13 @@ export const Step5point5Feats: React.FC<StepProps> = ({ data, updateData, nextSt
           Next: {getNextStepLabel?.() || 'Continue'} <ArrowRight className="w-4 h-4 ml-2" />
         </button>
       </div>
+
+      <FeatChoiceModal
+        isOpen={featChoiceModal.isOpen}
+        onClose={() => setFeatChoiceModal({ isOpen: false, feat: null })}
+        feat={featChoiceModal.feat}
+        onConfirm={handleFeatChoiceConfirm}
+      />
     </div>
   );
 };

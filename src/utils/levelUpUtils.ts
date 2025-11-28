@@ -327,7 +327,7 @@ export function applyLevelUp(
     updatedCharacter.selectedFeats.push(choices.featChosen);
 
   // Process feat-granted abilities and spells
-  applyFeatEffects(updatedCharacter, choices.featChosen);
+  applyFeatEffects(updatedCharacter, choices.featChosen, (character as any).featChoices);
   }
 
   // Apply subclass
@@ -471,7 +471,7 @@ export function getAverageHPGain(hitDie: string, conModifier: number): number {
 /**
  * Apply effects granted by a feat to the character
  */
-function applyFeatEffects(character: Character, featSlug: string): void {
+function applyFeatEffects(character: Character, featSlug: string, featChoices?: Record<string, Record<string, any>>): void {
   const feats = loadFeats();
   const feat = feats.find(f => f.slug === featSlug);
 
@@ -787,13 +787,13 @@ function applyFeatEffects(character: Character, featSlug: string): void {
 
     // Magic-Related Feats (Non-Spell)
     case 'elemental-adept':
-      // Ignore resistance to chosen element - would need player choice
-      // For now, default to fire resistance (most common choice)
+      // Ignore resistance to chosen element
       if (!character.featEffects!.ignoredResistances) {
         character.featEffects!.ignoredResistances = [];
       }
-      if (!character.featEffects!.ignoredResistances.includes('fire')) {
-        character.featEffects!.ignoredResistances.push('fire');
+      const chosenDamageType = featChoices?.[featSlug]?.damageType || 'fire'; // Default to fire if no choice made
+      if (!character.featEffects!.ignoredResistances.includes(chosenDamageType)) {
+        character.featEffects!.ignoredResistances.push(chosenDamageType);
       }
       break;
 
