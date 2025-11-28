@@ -210,9 +210,20 @@ export interface Character {
     polearmMaster?: boolean; // Enables polearm opportunity attacks
     crossbowExpert?: boolean; // Enables crossbow expert mechanics
     gunner?: boolean; // Enables gunner mechanics
+    crusher?: boolean; // Force damage on crits
+    piercer?: boolean; // Piercing damage on crits
+    slasher?: boolean; // Slashing damage on crits
 
     // Damage type resistances ignored
     ignoredResistances?: string[]; // From Elemental Adept
+
+    // Dragon breath weapons
+    dragonBreathWeapon?: {
+      damageType: string;
+      damageDice: string;
+      saveType: string;
+      range: string;
+    };
 
     // Spell-related bonuses
     spellSniper?: boolean; // Double range, ignore half cover
@@ -228,6 +239,8 @@ export interface Character {
     // Special abilities
     inspiringLeader?: boolean; // Can rally allies for temp HP
     linguist?: boolean; // Can create ciphers and forgeries
+    bountifulLuck?: boolean; // Can let allies reroll 1s (Halfling feat)
+    secondChance?: boolean; // Can force creature to reroll attack
   };
 
   // Metadata

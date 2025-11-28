@@ -291,7 +291,13 @@ export function applyLevelUp(
   updatedCharacter.level = levelUpData.toLevel;
 
   // Apply HP increase
-  const hpGain = choices.hpGained || 0;
+  let hpGain = choices.hpGained || 0;
+
+  // Apply Tough feat bonus (+2 HP per level)
+  if (updatedCharacter.selectedFeats?.includes('tough')) {
+    hpGain += 2;
+  }
+
   updatedCharacter.maxHitPoints += hpGain;
   updatedCharacter.hitPoints += hpGain; // Also increase current HP
 
@@ -782,14 +788,287 @@ function applyFeatEffects(character: Character, featSlug: string): void {
     // Magic-Related Feats (Non-Spell)
     case 'elemental-adept':
       // Ignore resistance to chosen element - would need player choice
-      // For now, initialize empty array
+      // For now, default to fire resistance (most common choice)
       if (!character.featEffects!.ignoredResistances) {
         character.featEffects!.ignoredResistances = [];
+      }
+      if (!character.featEffects!.ignoredResistances.includes('fire')) {
+        character.featEffects!.ignoredResistances.push('fire');
       }
       break;
 
     case 'spell-sniper':
       character.featEffects!.spellSniper = true;
+      break;
+
+    // Movement & Mobility Feats
+    case 'mobile':
+      character.speed += 10; // +10 ft speed
+      // Other effects (Dash on difficult terrain, no opportunity attacks) handled in combat calculations
+      break;
+
+    case 'tough':
+      // +2 HP per level - handled in level-up HP calculation
+      break;
+
+    // Combat Feats
+    case 'dual-wielder':
+      // +1 AC when dual wielding - handled in AC calculations
+      // Other effects handled in combat system
+      break;
+
+    case 'heavy-armor-master':
+      // +1 STR and damage reduction while wearing heavy armor
+      character.abilities.STR.score += 1;
+      character.abilities.STR.modifier = Math.floor((character.abilities.STR.score - 10) / 2);
+      // Damage reduction handled in damage calculations
+      break;
+
+    case 'bountiful-luck':
+      // Halfling luck sharing - can let allies reroll 1s
+      character.featEffects!.bountifulLuck = true;
+      break;
+
+    case 'metamagic-adept':
+      // Grants 2 sorcery points and metamagic options
+      // This requires sorcerer spellcasting mechanics
+      if (character.spellcasting) {
+        // Add sorcery points resource if it doesn't exist
+        if (!character.resources) {
+          character.resources = [];
+        }
+        const existingSorceryPoints = character.resources.find(r => r.id === 'sorcery-points');
+        if (existingSorceryPoints) {
+          existingSorceryPoints.maxUses += 2;
+          existingSorceryPoints.currentUses = (existingSorceryPoints.currentUses || 0) + 2;
+        } else {
+          character.resources.push({
+            id: 'sorcery-points',
+            name: 'Sorcery Points',
+            description: 'Points for Metamagic options',
+            maxUses: 2,
+            rechargeType: 'long-rest'
+          });
+        }
+      }
+      break;
+
+    case 'grappler':
+      // Grapple advantages - handled in combat calculations
+      break;
+
+    case 'defensive-duelist':
+      // Reaction parry - handled in combat system
+      break;
+
+    case 'sentinel':
+      // Opportunity attack mechanics - handled in combat system
+      break;
+
+    // Armor Feats
+    case 'heavily-armored':
+      // Heavy armor proficiency - handled during feat selection
+      // +1 STR
+      character.abilities.STR.score += 1;
+      character.abilities.STR.modifier = Math.floor((character.abilities.STR.score - 10) / 2);
+      break;
+
+    case 'moderately-armored':
+      // Medium armor proficiency - handled during feat selection
+      // +1 STR or DEX
+      // Default to STR for now - would need player choice
+      character.abilities.STR.score += 1;
+      character.abilities.STR.modifier = Math.floor((character.abilities.STR.score - 10) / 2);
+      break;
+
+    case 'lightly-armored':
+      // Light armor proficiency - handled during feat selection
+      // +1 STR or DEX
+      // Default to DEX for now - would need player choice
+      character.abilities.DEX.score += 1;
+      character.abilities.DEX.modifier = Math.floor((character.abilities.DEX.score - 10) / 2);
+      break;
+
+    case 'medium-armor-master':
+      // Medium armor Dex bonus (+1 Dex) - handled in AC calculations
+      character.abilities.DEX.score += 1;
+      character.abilities.DEX.modifier = Math.floor((character.abilities.DEX.score - 10) / 2);
+      break;
+
+    // Skill Feats
+    case 'observant':
+      // Passive Perception bonus - handled in skill calculations
+      break;
+
+    case 'keen-mind':
+      // History/Arcana bonuses - handled in skill calculations
+      break;
+
+    case 'skill-expert':
+      // Additional skill proficiency - handled during feat selection
+      break;
+
+    // Utility Feats
+    case 'chef':
+      // Cooking benefits - flavor feat
+      break;
+
+    case 'dungeon-delver':
+      // Trap detection - handled in exploration
+      break;
+
+    case 'durable':
+      // +1 to hit dice maximum
+      character.hitDice.max += 1;
+      character.hitDice.current += 1;
+      break;
+
+    case 'second-chance':
+      // Can force creature to reroll attack once per short rest
+      character.featEffects!.secondChance = true;
+      // Add as a resource
+      if (!character.resources) {
+        character.resources = [];
+      }
+      character.resources.push({
+        id: 'second-chance',
+        name: 'Second Chance',
+        description: 'Force creature to reroll attack',
+        maxUses: 1,
+        rechargeType: 'short-rest'
+      });
+      break;
+
+    // Dragonborn Feats
+    case 'dragon-fear':
+      // Frightful presence - handled in combat
+      break;
+
+    case 'dragon-hide':
+      // AC bonus - handled in AC calculations
+      break;
+
+    // Dwarf Feats
+    case 'dwarf-fortitude':
+      // Poison resistance - handled in saving throws
+      break;
+
+    // Elf Feats
+    case 'elven-accuracy':
+      // Dex skill advantages - handled in skill checks
+      break;
+
+    // Orc Feats
+    case 'orcish-fury':
+      // Rage damage bonus - handled in combat
+      break;
+
+    // Specialty Feats
+    case 'crusher':
+      // Force damage effects on critical hits
+      character.featEffects!.crusher = true;
+      break;
+
+    case 'piercer':
+      // Piercing damage effects on critical hits
+      character.featEffects!.piercer = true;
+      break;
+
+    case 'slasher':
+      // Slashing damage effects on critical hits
+      character.featEffects!.slasher = true;
+      break;
+
+    case 'savage-attacker':
+      // Reroll damage - handled in combat
+      break;
+
+    // Weapon Feats
+    case 'weapon-master':
+      // Weapon proficiencies - handled during feat selection
+      break;
+
+    case 'fighting-initiate':
+      // Fighting style - handled during feat selection
+      break;
+
+    // Spell Feats
+    case 'eldritch-adept':
+      // Eldritch invocations - handled during feat selection
+      break;
+
+    case 'ritual-caster':
+      // Ritual casting - handled in spellcasting
+      break;
+
+    // Tiefling Feats
+    case 'infernal-constitution':
+      // Fire resistance - handled in damage calculations
+      break;
+
+    // Dragon Feats
+    case 'gift-of-the-chromatic-dragon':
+      // Breath weapon - acid, cold, fire, lightning, or poison
+      character.featEffects!.dragonBreathWeapon = {
+        damageType: 'fire', // Default - would need player choice
+        damageDice: '3d6',
+        saveType: 'DEX',
+        range: '15-foot cone'
+      };
+      break;
+
+    case 'gift-of-the-gem-dragon':
+      // Gem breath weapon - force, necrotic, psychic, radiant, or thunder
+      character.featEffects!.dragonBreathWeapon = {
+        damageType: 'force', // Default - would need player choice
+        damageDice: '2d6',
+        saveType: 'DEX',
+        range: '10-foot cone'
+      };
+      break;
+
+    case 'gift-of-the-metallic-dragon':
+      // Healing breath - healing instead of damage
+      character.featEffects!.dragonBreathWeapon = {
+        damageType: 'healing', // Special case for healing
+        damageDice: '2d6',
+        saveType: 'none',
+        range: '10-foot cone'
+      };
+      break;
+
+    // Other Specialty Feats
+    case 'fade-away':
+      // Invisibility - handled in combat
+      break;
+
+    case 'fey-teleportation':
+      // Misty step - already implemented as spell
+      break;
+
+    case 'flames-of-phlegethos':
+      // Fire damage bonus - handled in combat
+      break;
+
+    case 'mounted-combatant':
+      // Mounted combat bonuses - handled in combat
+      break;
+
+    case 'poisoner':
+      // Poison weapon effects - handled in combat
+      break;
+
+    case 'skulker':
+      // Stealth bonuses - handled in skill checks
+      break;
+
+    case 'squat-nimbleness':
+      // Speed and size benefits - handled in character stats
+      break;
+
+    // Epic Boons (rare)
+    case 'boon-of-combat-prowess':
+      // Combat bonuses - handled in combat system
       break;
 
     // Default case
