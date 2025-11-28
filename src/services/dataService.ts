@@ -1441,8 +1441,8 @@ export const getRaceProficiencies = (raceSlug: string): { armor?: string[]; weap
  * Extract proficiencies from class data
  */
 export const getClassProficiencies = (classSlug: string): { armor?: string[]; weapons?: string[]; tools?: string[] } => {
-  const classData = loadClasses().find(c => c.slug === classSlug);
-  if (!classData) return { armor: [], weapons: [], tools: [] };
+  // Hard-coded proficiencies based on D&D 5e rules
+  // This ensures accuracy rather than relying on text parsing
 
   const proficiencies: { armor?: string[]; weapons?: string[]; tools?: string[] } = {
     armor: [],
@@ -1450,41 +1450,77 @@ export const getClassProficiencies = (classSlug: string): { armor?: string[]; we
     tools: []
   };
 
-  // Extract from class features and descriptions
-  const classDesc = classData.description.toLowerCase();
+  switch (classSlug) {
+    case 'barbarian':
+      proficiencies.armor = ['Light armor', 'Medium armor', 'Shields'];
+      proficiencies.weapons = ['Simple weapons', 'Martial weapons'];
+      break;
 
-  // Armor proficiencies
-  if (classDesc.includes('light armor')) {
-    if (!proficiencies.armor) proficiencies.armor = [];
-    proficiencies.armor.push('Light armor');
-  }
-  if (classDesc.includes('medium armor')) {
-    if (!proficiencies.armor) proficiencies.armor = [];
-    proficiencies.armor.push('Medium armor');
-  }
-  if (classDesc.includes('heavy armor')) {
-    if (!proficiencies.armor) proficiencies.armor = [];
-    proficiencies.armor.push('Heavy armor');
-  }
-  if (classDesc.includes('shields')) {
-    if (!proficiencies.armor) proficiencies.armor = [];
-    proficiencies.armor.push('Shields');
-  }
+    case 'bard':
+      proficiencies.armor = ['Light armor'];
+      proficiencies.weapons = ['Simple weapons', 'Hand crossbows', 'Longswords', 'Rapiers', 'Shortswords'];
+      proficiencies.tools = ['Three musical instruments of your choice'];
+      break;
 
-  // Weapon proficiencies
-  if (classDesc.includes('simple weapons')) {
-    if (!proficiencies.weapons) proficiencies.weapons = [];
-    proficiencies.weapons.push('Simple weapons');
-  }
-  if (classDesc.includes('martial weapons')) {
-    if (!proficiencies.weapons) proficiencies.weapons = [];
-    proficiencies.weapons.push('Martial weapons');
-  }
+    case 'cleric':
+      proficiencies.armor = ['Light armor', 'Medium armor', 'Shields'];
+      proficiencies.weapons = ['Simple weapons'];
+      break;
 
-  // Tool proficiencies
-  if (classDesc.includes('thieves\' tools')) {
-    if (!proficiencies.tools) proficiencies.tools = [];
-    proficiencies.tools.push('Thieves\' tools');
+    case 'druid':
+      proficiencies.armor = ['Light armor', 'Medium armor', 'Shields'];
+      proficiencies.weapons = ['Clubs', 'Daggers', 'Darts', 'Javelins', 'Maces', 'Quarterstaffs', 'Scimitars', 'Sickles', 'Slings', 'Spears'];
+      proficiencies.tools = ['Herbalism kit'];
+      break;
+
+    case 'fighter':
+      proficiencies.armor = ['Light armor', 'Medium armor', 'Heavy armor', 'Shields'];
+      proficiencies.weapons = ['Simple weapons', 'Martial weapons'];
+      break;
+
+    case 'monk':
+      proficiencies.weapons = ['Simple weapons', 'Shortswords'];
+      proficiencies.tools = ['One type of artisan\'s tools or musical instrument'];
+      break;
+
+    case 'paladin':
+      proficiencies.armor = ['Light armor', 'Medium armor', 'Heavy armor', 'Shields'];
+      proficiencies.weapons = ['Simple weapons', 'Martial weapons'];
+      break;
+
+    case 'ranger':
+      proficiencies.armor = ['Light armor', 'Medium armor', 'Shields'];
+      proficiencies.weapons = ['Simple weapons', 'Martial weapons'];
+      break;
+
+    case 'rogue':
+      proficiencies.armor = ['Light armor'];
+      proficiencies.weapons = ['Simple weapons', 'Hand crossbows', 'Longswords', 'Rapiers', 'Shortswords'];
+      proficiencies.tools = ['Thieves\' tools'];
+      break;
+
+    case 'sorcerer':
+      proficiencies.weapons = ['Daggers', 'Darts', 'Slings', 'Quarterstaffs', 'Light crossbows'];
+      break;
+
+    case 'warlock':
+      proficiencies.armor = ['Light armor'];
+      proficiencies.weapons = ['Simple weapons'];
+      break;
+
+    case 'wizard':
+      proficiencies.weapons = ['Daggers', 'Darts', 'Slings', 'Quarterstaffs', 'Light crossbows'];
+      break;
+
+    case 'artificer':
+      proficiencies.armor = ['Light armor', 'Medium armor', 'Shields'];
+      proficiencies.weapons = ['Simple weapons'];
+      proficiencies.tools = ['Thieves\' tools', 'One type of artisan\'s tools'];
+      break;
+
+    default:
+      // Unknown class
+      break;
   }
 
   return proficiencies;
