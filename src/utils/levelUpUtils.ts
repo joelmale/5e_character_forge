@@ -23,6 +23,9 @@ import { rogue2024Progression } from '../data/progressions/rogue2024';
 import { sorcerer2024Progression } from '../data/progressions/sorcerer2024';
 import { bard2024Progression } from '../data/progressions/bard2024';
 import { cleric2024Progression } from '../data/progressions/cleric2024';
+import { druid2024Progression } from '../data/progressions/druid2024';
+import { warlock2024Progression } from '../data/progressions/warlock2024';
+import { artificer2024Progression } from '../data/progressions/artificer2024';
 import { PROFICIENCY_BONUSES, CANTRIPS_KNOWN_BY_CLASS, loadSpells, loadFeats } from '../services/dataService';
 import { SPELL_LEARNING_RULES } from '../data/spellLearning';
 import { SPELL_SLOTS_BY_CLASS } from '../data/spellSlots';
@@ -52,6 +55,15 @@ export function getClassProgression(classSlug: string, edition: '2014' | '2024' 
   }
   if (classSlug === 'cleric' && edition === '2024') {
     return cleric2024Progression;
+  }
+  if (classSlug === 'druid' && edition === '2024') {
+    return druid2024Progression;
+  }
+  if (classSlug === 'warlock' && edition === '2024') {
+    return warlock2024Progression;
+  }
+  if (classSlug === 'artificer' && edition === '2024') {
+    return artificer2024Progression;
   }
   if (classSlug === 'paladin' && edition === '2024') {
     return paladin2024Progression;
