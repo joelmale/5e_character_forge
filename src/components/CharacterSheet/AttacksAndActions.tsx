@@ -557,7 +557,7 @@ export const AttacksAndActions: React.FC<AttacksAndActionsProps> = ({
   return (
     <div className="space-y-6">
       {/* Main Header */}
-      <h2 className="text-2xl font-bold text-theme-primary border-b-2 border-theme-primary pb-2">
+      <h2 className="text-2xl font-bold text-black border-b-2 border-theme-primary pb-2">
         ⚔️ COMBAT OPTIONS
       </h2>
 

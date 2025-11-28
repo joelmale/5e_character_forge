@@ -14,6 +14,7 @@ import {
   CoinManagement,
   SpellcastingSection,
   EquipmentSection,
+  ProficienciesAndLanguages,
   FeaturesSection,
   ActiveEquipmentPanel,
   LanguagesPanel
@@ -245,18 +246,26 @@ export const ClassicDndLayout: React.FC<CharacterSheetProps> = ({
 
           {/* RIGHT COLUMN - Features, Proficiencies, Traits */}
           <div className="col-span-3 space-y-4">
-             {/* Active Equipment */}
-             <div className="bg-theme-secondary border border-theme-secondary rounded-lg p-4 shadow-lg">
+              {/* Active Equipment */}
+              <div className="bg-theme-secondary border border-theme-secondary rounded-lg p-4 shadow-lg">
+                 <h2 className="text-sm font-bold mb-3 text-theme-muted uppercase tracking-wider font-cinzel">
+                   Active Equipment
+                 </h2>
+                 <ActiveEquipmentPanel
+                   character={character}
+                   onUnequipItem={(itemSlug) => onUnequipItem(character.id, itemSlug)}
+                 />
+               </div>
+
+              {/* Proficiencies & Languages */}
+              <div className="bg-theme-secondary border border-theme-secondary rounded-lg p-4 shadow-lg">
                 <h2 className="text-sm font-bold mb-3 text-theme-muted uppercase tracking-wider font-cinzel">
-                  Active Equipment
+                  Proficiencies & Languages
                 </h2>
-                <ActiveEquipmentPanel
-                  character={character}
-                  onUnequipItem={(itemSlug) => onUnequipItem(character.id, itemSlug)}
-                />
+                <ProficienciesAndLanguages character={character} />
               </div>
 
-             {/* Conditions */}
+              {/* Conditions */}
              <div className="bg-theme-secondary border border-theme-secondary rounded-lg p-2 shadow-lg">
                <Conditions
                  character={character}

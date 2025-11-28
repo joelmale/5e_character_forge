@@ -14,6 +14,7 @@ export { CombatStatsPanel } from './CombatStatsPanel';
 export { ExperiencePoints } from './ExperiencePoints';
 export { AttunementSlots } from './AttunementSlots';
 export { ProficienciesAndLanguages } from './ProficienciesAndLanguages';
+export { CompactProficiencies } from './CompactProficiencies';
 export { Conditions } from './Conditions';
 export { CoinManagement } from './CoinManagement';
 export { PaperCurrencyPanel } from './PaperCurrencyPanel';
