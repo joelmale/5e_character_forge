@@ -17,6 +17,9 @@ import { fighter2024Progression } from '../data/progressions/fighter2024';
 import { paladin2024Progression } from '../data/progressions/paladin2024';
 import { ranger2024Progression } from '../data/progressions/ranger2024';
 import { wizard2024Progression } from '../data/progressions/wizard2024';
+import { barbarian2024Progression } from '../data/progressions/barbarian2024';
+import { monk2024Progression } from '../data/progressions/monk2024';
+import { rogue2024Progression } from '../data/progressions/rogue2024';
 import { PROFICIENCY_BONUSES, CANTRIPS_KNOWN_BY_CLASS, loadSpells, loadFeats } from '../services/dataService';
 import { SPELL_LEARNING_RULES } from '../data/spellLearning';
 import { SPELL_SLOTS_BY_CLASS } from '../data/spellSlots';
@@ -26,8 +29,17 @@ import { SPELL_SLOTS_BY_CLASS } from '../data/spellSlots';
  */
 export function getClassProgression(classSlug: string, edition: '2014' | '2024' = '2024'): ClassProgression | null {
   // Implemented class progressions
+  if (classSlug === 'barbarian' && edition === '2024') {
+    return barbarian2024Progression;
+  }
   if (classSlug === 'fighter' && edition === '2024') {
     return fighter2024Progression;
+  }
+  if (classSlug === 'monk' && edition === '2024') {
+    return monk2024Progression;
+  }
+  if (classSlug === 'rogue' && edition === '2024') {
+    return rogue2024Progression;
   }
   if (classSlug === 'paladin' && edition === '2024') {
     return paladin2024Progression;
