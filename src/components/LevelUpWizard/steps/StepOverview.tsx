@@ -34,7 +34,7 @@ export const StepOverview: React.FC<StepOverviewProps> = ({
       </div>
 
       {/* HP Increase */}
-      <div className="bg-theme-primary rounded-lg p-4">
+      <div className="bg-[#ffcc66] rounded-lg p-4 border border-accent-gold border-opacity-30">
         <h4 className="font-semibold text-accent-gold mb-2 flex items-center">
           <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
             <path d="M10 2a8 8 0 100 16 8 8 0 000-16zm1 11H9v-2h2v2zm0-4H9V5h2v4z" />
@@ -48,7 +48,7 @@ export const StepOverview: React.FC<StepOverviewProps> = ({
 
       {/* Features Gained */}
       {features.length > 0 && (
-        <div className="bg-theme-primary rounded-lg p-4">
+        <div className="bg-[#ffcc66] rounded-lg p-4 border border-accent-gold border-opacity-30">
           <h4 className="font-semibold text-accent-gold mb-2 flex items-center">
             <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
               <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
@@ -73,7 +73,7 @@ export const StepOverview: React.FC<StepOverviewProps> = ({
 
       {/* Choices Required */}
       {choices.length > 0 && (
-        <div className="bg-theme-primary rounded-lg p-4 border border-accent-gold border-opacity-30">
+        <div className="bg-[#ffcc66] rounded-lg p-4 border border-accent-gold border-opacity-30">
           <h4 className="font-semibold text-accent-gold mb-2 flex items-center">
             <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
@@ -99,7 +99,7 @@ export const StepOverview: React.FC<StepOverviewProps> = ({
 
       {/* Spell Slot Upgrades */}
       {levelUpData.newSpellSlots && (
-        <div className="bg-theme-primary rounded-lg p-4">
+        <div className="bg-[#ffcc66] rounded-lg p-4 border border-accent-gold border-opacity-30">
           <h4 className="font-semibold text-accent-gold mb-2 flex items-center">
             <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
               <path d="M11 3a1 1 0 10-2 0v1a1 1 0 102 0V3zM15.657 5.757a1 1 0 00-1.414-1.414l-.707.707a1 1 0 001.414 1.414l.707-.707zM18 10a1 1 0 01-1 1h-1a1 1 0 110-2h1a1 1 0 011 1zM5.05 6.464A1 1 0 106.464 5.05l-.707-.707a1 1 0 00-1.414 1.414l.707.707zM5 10a1 1 0 01-1 1H3a1 1 0 110-2h1a1 1 0 011 1zM8 16v-1h4v1a2 2 0 11-4 0zM12 14c.015-.34.208-.646.477-.859a4 4 0 10-4.954 0c.27.213.462.519.476.859h4.002z" />
