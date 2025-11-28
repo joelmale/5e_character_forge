@@ -7,7 +7,8 @@ import {
   filterAvailableFeats,
   featProvidesAbilityIncrease,
   getFeatSourceInfo,
-  canSelectMoreFeats
+  canSelectMoreFeats,
+  checkFeatPrerequisites
 } from '../../../utils/featUtils';
 import { FeatChoiceModal } from '../components';
 
@@ -36,11 +37,50 @@ export const Step5point5Feats: React.FC<StepProps> = ({ data, updateData, nextSt
   const maxFeats = calculateFeatAvailability(data.level);
   const selectedFeats = data.selectedFeats || [];
 
-  // Filter available feats based on prerequisites
-  const availableFeats = filterAvailableFeats(FEAT_DATABASE, data);
+  // Get all feats and their eligibility status
+  const allFeats = FEAT_DATABASE.map(feat => ({
+    feat,
+    isAvailable: checkFeatPrerequisites(feat, data),
+    requirements: feat.prerequisite ? getPrerequisiteDescription(feat.prerequisite) : null
+  }));
 
   const featRequiresChoices = (featSlug: string): boolean => {
     return ['elemental-adept', 'metamagic-adept', 'lightly-armored', 'moderately-armored'].includes(featSlug);
+  };
+
+  const getPrerequisiteDescription = (prerequisite: string): string => {
+    // Convert technical prerequisite text to user-friendly descriptions
+    const lower = prerequisite.toLowerCase();
+
+    // Ability scores
+    if (lower.includes('strength')) return prerequisite.replace(' or higher', '+');
+    if (lower.includes('dexterity')) return prerequisite.replace(' or higher', '+');
+    if (lower.includes('constitution')) return prerequisite.replace(' or higher', '+');
+    if (lower.includes('intelligence')) return prerequisite.replace(' or higher', '+');
+    if (lower.includes('wisdom')) return prerequisite.replace(' or higher', '+');
+    if (lower.includes('charisma')) return prerequisite.replace(' or higher', '+');
+
+    // Races
+    if (lower.includes('halfling')) return 'Halfling';
+    if (lower.includes('dragonborn')) return 'Dragonborn';
+    if (lower.includes('dwarf')) return 'Dwarf';
+    if (lower.includes('elf')) return 'Elf';
+    if (lower.includes('tiefling')) return 'Tiefling';
+    if (lower.includes('gnome')) return 'Gnome';
+    if (lower.includes('half-elf')) return 'Half-Elf';
+    if (lower.includes('half-orc')) return 'Half-Orc';
+    if (lower.includes('human')) return 'Human';
+
+    // Spellcasting
+    if (lower.includes('spellcasting') || lower.includes('ability to cast')) return 'Spellcasting class';
+
+    // Proficiencies
+    if (lower.includes('proficiency with light armor')) return 'Light armor proficiency';
+    if (lower.includes('proficiency with medium armor')) return 'Medium armor proficiency';
+    if (lower.includes('proficiency with heavy armor')) return 'Heavy armor proficiency';
+    if (lower.includes('proficiency with a martial weapon')) return 'Martial weapon proficiency';
+
+    return prerequisite; // Fallback to original text
   };
 
   const handleFeatToggle = (featSlug: string) => {
@@ -55,13 +95,9 @@ export const Step5point5Feats: React.FC<StepProps> = ({ data, updateData, nextSt
       // Check if feat requires additional choices
       if (featRequiresChoices(featSlug)) {
         // For feats that require choices, we need to get the feat data
-        // First try from availableFeats, then fallback to all feats
-        let feat = availableFeats.find(f => f.slug === featSlug);
-        if (!feat) {
-          feat = FEAT_DATABASE.find(f => f.slug === featSlug);
-        }
-        if (feat) {
-          setFeatChoiceModal({ isOpen: true, feat });
+        const featData = allFeats.find(f => f.feat.slug === featSlug);
+        if (featData && featData.feat) {
+          setFeatChoiceModal({ isOpen: true, feat: featData.feat });
         } else {
           // Fallback: select directly if feat not found
           updateData({
@@ -136,38 +172,49 @@ export const Step5point5Feats: React.FC<StepProps> = ({ data, updateData, nextSt
 
       {maxFeats > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 max-h-96 overflow-y-auto p-2">
-          {availableFeats.map(feat => {
+          {allFeats.map(({ feat, isAvailable, requirements }) => {
             const isSelected = selectedFeats.includes(feat.slug);
-            const canSelect = canSelectMoreFeats(selectedFeats, data.level);
+            const canSelect = canSelectMoreFeats(selectedFeats, data.level) && isAvailable;
 
             return (
               <div key={feat.slug} className="relative">
                 <button
                   onClick={() => handleFeatToggle(feat.slug)}
-                  disabled={!canSelect && !isSelected}
+                  disabled={(!canSelect && !isSelected) || !isAvailable}
                   className={`w-full p-3 rounded-lg text-left border-2 transition-all ${
                     isSelected
                       ? 'bg-green-800 border-green-500 shadow-md'
-                      : canSelect
+                      : isAvailable && canSelect
                       ? 'bg-theme-tertiary border-theme-primary hover:bg-theme-quaternary'
-                      : 'bg-theme-secondary border-theme-secondary text-theme-disabled cursor-not-allowed'
+                      : isAvailable
+                      ? 'bg-theme-secondary border-theme-secondary text-theme-disabled cursor-not-allowed'
+                      : 'bg-gray-800 border-gray-600 text-gray-500 opacity-60'
                   }`}
                 >
                   <div className="flex items-start justify-between">
-                    <p className="text-sm font-bold text-accent-yellow-light">{feat.name}</p>
+                    <p className={`text-sm font-bold ${isAvailable ? 'text-accent-yellow-light' : 'text-gray-400'}`}>
+                      {feat.name}
+                    </p>
                     {featProvidesAbilityIncrease(feat) && (
                       <span className="text-xs bg-accent-blue text-white px-1 py-0.5 rounded ml-2">
                         +ASI
                       </span>
                     )}
                   </div>
-                  <p className="text-xs text-theme-disabled mt-1">{getFeatSourceInfo(feat)}</p>
-                  {feat.prerequisite && (
+                  <p className={`text-xs mt-1 ${isAvailable ? 'text-theme-disabled' : 'text-gray-500'}`}>
+                    {getFeatSourceInfo(feat)}
+                  </p>
+                  {requirements && !isAvailable && (
+                    <p className="text-xs text-red-400 mt-1">
+                      Requires: {requirements}
+                    </p>
+                  )}
+                  {feat.prerequisite && isAvailable && (
                     <p className="text-xs text-accent-yellow-light mt-1">
                       Requires: {feat.prerequisite}
                     </p>
                   )}
-                  <p className="text-xs text-theme-muted mt-2 line-clamp-2">
+                  <p className={`text-xs mt-2 line-clamp-2 ${isAvailable ? 'text-theme-muted' : 'text-gray-500'}`}>
                     {feat.description}
                   </p>
                 </button>

@@ -17,7 +17,7 @@ export const checkFeatPrerequisites = (feat: Feat, character: Partial<CharacterC
 
   const prerequisite = feat.prerequisite.toLowerCase();
 
-  // Check for ability score prerequisites (e.g., "Strength 13")
+  // Check for ability score prerequisites (e.g., "Strength 13", "Dexterity 13 or higher")
   const abilityMatch = prerequisite.match(/(\w+)\s+(\d+)/);
   if (abilityMatch) {
     const [, abilityName, requiredScore] = abilityMatch;
@@ -26,6 +26,28 @@ export const checkFeatPrerequisites = (feat: Feat, character: Partial<CharacterC
     if (character.abilities && character.abilities[abilityKey]) {
       return character.abilities[abilityKey] >= parseInt(requiredScore);
     }
+    return false;
+  }
+
+  // Check for complex ability prerequisites (e.g., "Intelligence or Wisdom 13 or higher")
+  const complexAbilityMatch = prerequisite.match(/(intelligence|wisdom|strength|dexterity|constitution|charisma).*?(\d+)/i);
+  if (complexAbilityMatch) {
+    const [, ability1, requiredScore] = complexAbilityMatch;
+    const abilityKey1 = ability1.toUpperCase().slice(0, 3) as keyof CharacterCreationData['abilities'];
+
+    if (character.abilities) {
+      if (ability1.toLowerCase().includes('or')) {
+        // Handle "Intelligence or Wisdom" type prerequisites
+        const abilities = prerequisite.split(' or ').map(a => a.trim().toUpperCase().slice(0, 3));
+        return abilities.some(ability => {
+          const abilityKey = ability as keyof CharacterCreationData['abilities'];
+          return character.abilities![abilityKey] >= parseInt(requiredScore);
+        });
+      } else {
+        return character.abilities[abilityKey1] >= parseInt(requiredScore);
+      }
+    }
+    return false;
   }
 
   // Check for level prerequisites (e.g., "Level 5")
@@ -35,27 +57,80 @@ export const checkFeatPrerequisites = (feat: Feat, character: Partial<CharacterC
     return (character.level || 1) >= requiredLevel;
   }
 
-  // Check for class prerequisites (e.g., "Fighter")
+  // Check for race prerequisites
+  if (character.raceSlug) {
+    const characterRace = character.raceSlug.toLowerCase();
+
+    if (prerequisite.includes('halfling') && characterRace !== 'halfling') return false;
+    if (prerequisite.includes('dragonborn') && characterRace !== 'dragonborn') return false;
+    if (prerequisite.includes('dwarf') && characterRace !== 'dwarf') return false;
+    if (prerequisite.includes('elf') && !characterRace.includes('elf')) return false;
+    if (prerequisite.includes('tiefling') && characterRace !== 'tiefling') return false;
+    if (prerequisite.includes('gnome') && characterRace !== 'gnome') return false;
+    if (prerequisite.includes('half-elf') && characterRace !== 'half-elf') return false;
+    if (prerequisite.includes('half-orc') && characterRace !== 'half-orc') return false;
+    if (prerequisite.includes('human') && characterRace !== 'human') return false;
+  }
+
+  // Check for spellcasting prerequisites
+  if (prerequisite.includes('spellcasting') || prerequisite.includes('the ability to cast')) {
+    // Check if character has spellcasting ability based on class
+    if (character.classSlug) {
+      const spellcastingClasses = ['wizard', 'sorcerer', 'bard', 'cleric', 'druid', 'paladin', 'ranger', 'warlock', 'artificer'];
+      return spellcastingClasses.includes(character.classSlug.toLowerCase());
+    }
+    return false;
+  }
+
+  // Check for proficiency prerequisites
+  if (prerequisite.includes('proficiency with light armor')) {
+    // Most classes get light armor proficiency
+    if (character.classSlug) {
+      const noLightArmorClasses = ['barbarian', 'monk']; // Classes that don't get light armor
+      return !noLightArmorClasses.includes(character.classSlug.toLowerCase());
+    }
+    return true;
+  }
+
+  if (prerequisite.includes('proficiency with medium armor')) {
+    // Specific classes get medium armor
+    if (character.classSlug) {
+      const mediumArmorClasses = ['fighter', 'paladin', 'ranger', 'bard'];
+      return mediumArmorClasses.includes(character.classSlug.toLowerCase());
+    }
+    return false;
+  }
+
+  if (prerequisite.includes('proficiency with heavy armor')) {
+    // Only specific classes get heavy armor
+    if (character.classSlug) {
+      const heavyArmorClasses = ['fighter', 'paladin'];
+      return heavyArmorClasses.includes(character.classSlug.toLowerCase());
+    }
+    return false;
+  }
+
+  if (prerequisite.includes('proficiency with a martial weapon')) {
+    // Fighters, paladins, rangers, and barbarians get martial weapons
+    if (character.classSlug) {
+      const martialWeaponClasses = ['fighter', 'paladin', 'ranger', 'barbarian'];
+      return martialWeaponClasses.includes(character.classSlug.toLowerCase());
+    }
+    return false;
+  }
+
+  // Check for class prerequisites (basic check)
   if (character.classSlug) {
-    return prerequisite.toLowerCase().includes(character.classSlug.toLowerCase());
+    const classNames = ['fighter', 'rogue', 'wizard', 'cleric', 'barbarian', 'paladin', 'ranger', 'sorcerer', 'bard', 'druid', 'monk', 'warlock', 'artificer'];
+    for (const className of classNames) {
+      if (prerequisite.includes(className)) {
+        return prerequisite.includes(character.classSlug.toLowerCase());
+      }
+    }
   }
 
-  // Check for armor proficiency prerequisites
-  if (prerequisite.toLowerCase().includes('proficiency with light armor')) {
-    // For now, assume all characters can take light armor feats
-    // This could be enhanced to check actual armor proficiencies
-    return true;
-  }
-
-  // Check for other proficiency prerequisites
-  if (prerequisite.toLowerCase().includes('proficiency with')) {
-    // For now, return true for proficiency prerequisites
-    // This could be enhanced to check actual proficiencies
-    return true;
-  }
-
-  // For now, return true for unhandled prerequisites
-  // This can be enhanced with more sophisticated prerequisite parsing
+  // For complex prerequisites we can't parse, allow the feat to be visible
+  // The UI will show it as available or with requirements
   return true;
 };
 
