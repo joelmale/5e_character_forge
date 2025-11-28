@@ -193,7 +193,7 @@ export function useEquipment({ characters, setCharacters, recalculateAC }: UseEq
     const character = characters.find(c => c.id === characterId);
     if (!character) return;
 
-    let updatedInventory = [...(character.inventory || [])];
+    const updatedInventory = [...(character.inventory || [])];
 
     items.forEach(({ equipmentSlug, quantity }) => {
       const existingItem = updatedInventory.find(item => item.equipmentSlug === equipmentSlug);

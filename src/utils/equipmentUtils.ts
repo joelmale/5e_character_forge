@@ -77,7 +77,7 @@ export const calculateEquipmentBonuses = (character: Character): EquipmentBonuse
   // Calculate bonuses from all equipped items
   const allEquippedItems = getAllEquippedItems(character);
 
-  allEquippedItems.forEach(item => {
+  allEquippedItems.forEach(_item => {
     // For now, we'll focus on basic AC calculation
     // Future enhancement: parse item descriptions for magical bonuses
     // This would require natural language processing or structured bonus data

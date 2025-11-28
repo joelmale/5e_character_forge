@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { ShoppingCart, Minus, Plus, Coins, AlertTriangle, X, Info } from 'lucide-react';
 import { loadNewPlayerShop } from '../../../services/dataService';
-import { calculatePurchaseCost, canAffordPurchase } from '../../../services/equipmentService';
+import { canAffordPurchase } from '../../../services/equipmentService';
 import { ShopItem, PurchasedItem } from '../../../types/equipment';
 
 interface EquipmentShopProps {

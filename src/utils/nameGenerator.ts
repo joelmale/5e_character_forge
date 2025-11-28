@@ -97,10 +97,10 @@ function generateRaceSpecificName(race: string, gender: 'male' | 'female' | 'any
         lastName = firstName + (pattern.includes('iel') ? 'iel' : 'el');
         break;
       case 'Firstsson':
-        lastName = firstName + 'sson';
+        lastName = `${firstName  }sson`;
         break;
       case 'Firstdottir':
-        lastName = firstName + 'dottir';
+        lastName = `${firstName  }dottir`;
         break;
       case 'Clan of First':
         lastName = `of Clan ${firstName}`;
@@ -262,7 +262,6 @@ export function generateName(options: NameOptions = {}): GeneratedName {
 
   // Skip cache for now to ensure name variety
   // TODO: Implement smarter caching that doesn't reduce variety
-  const cacheKey = `${race || 'fantasy'}-${gender}-${length}`;
 
   let name: string;
   let attempts = 0;

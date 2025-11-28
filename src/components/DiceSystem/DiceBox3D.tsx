@@ -1,4 +1,4 @@
-/* eslint-disable no-empty */
+ 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import type { DiceRoll } from '../../services/diceService';
 import DiceBox from '@3d-dice/dice-box';

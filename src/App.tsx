@@ -1,4 +1,4 @@
-/* eslint-disable no-empty */
+ 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Plus, Trash2, BookOpen, Shield, Download, Upload, Settings } from 'lucide-react';
 // REFACTORED: Loader2 import removed - was unused
@@ -27,15 +27,13 @@ import SettingsModal from './components/SettingsModal';
 import { RestingScreen } from './components/RestingScreen';
 import { generateUUID, DiceRoll } from './services/diceService';
 import { featureDescriptions } from './utils/featureDescriptions';
-import { loadClasses, loadEquipment, loadFeatures, getSubclassesByClass, PROFICIENCY_BONUSES, getModifier, getHitDieForClass, CANTRIPS_KNOWN_BY_CLASS, SPELL_SLOTS_BY_CLASS, AppSubclass } from './services/dataService';
+import { loadClasses, loadEquipment, loadFeatures, getSubclassesByClass, PROFICIENCY_BONUSES, getModifier, SPELL_SLOTS_BY_CLASS, AppSubclass } from './services/dataService';
 import { getAllCharacters, addCharacter, deleteCharacter, updateCharacter } from './services/dbService';
 import { resetResources } from './utils/resourceUtils';
 import { APP_VERSION } from './version';
 // REFACTORED: Language utilities moved to languageUtils.ts for the wizard
 // Still used here in main App for character sheet display - can be removed once main app is refactored
 
-
-import levelConstantsData from './data/levelConstants.json';
 import { Ability, Character, CharacterCreationData, Equipment, EquippedItem, Feature, Monster, UserMonster } from './types/dnd';
 
 import { useDiceContext, useLayout } from './hooks';

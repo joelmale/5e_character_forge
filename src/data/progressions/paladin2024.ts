@@ -75,6 +75,19 @@ export const paladin2024Progression: ClassProgression = {
     },
     {
       level: 2,
+      name: 'Paladin Spells',
+      description: 'You learn two paladin spells of your choice.',
+      automatic: false,
+      choices: [
+        {
+          type: 'spells',
+          description: 'Choose 2 paladin spells to learn',
+          count: 2
+        }
+      ]
+    },
+    {
+      level: 2,
       name: 'Divine Smite',
       description: 'When you hit a creature with a melee weapon attack, you can expend one spell slot to deal radiant damage to the target, in addition to the weapon\'s damage. The extra damage is 2d8 for a 1st-level spell slot, plus 1d8 for each spell level higher than 1st, to a maximum of 5d8. The damage increases by 1d8 if the target is an undead or a fiend.',
       automatic: true
@@ -100,6 +113,19 @@ export const paladin2024Progression: ClassProgression = {
       description: 'Whenever you or a friendly creature within 10 feet of you must make a saving throw, the creature gains a bonus to the saving throw equal to your Charisma modifier (with a minimum bonus of +1). You must be conscious to grant this bonus.',
       automatic: true
     },
+    {
+      level: 3,
+      name: 'Paladin Spells',
+      description: 'You learn two paladin spells of your choice.',
+      automatic: false,
+      choices: [
+        {
+          type: 'spells',
+          description: 'Choose 2 paladin spells to learn',
+          count: 2
+        }
+      ]
+    },
 
     // LEVEL 4 - ASI/FEAT
     {
@@ -115,6 +141,19 @@ export const paladin2024Progression: ClassProgression = {
         }
       ]
     },
+    {
+      level: 4,
+      name: 'Paladin Spells',
+      description: 'You learn one paladin spell of your choice.',
+      automatic: false,
+      choices: [
+        {
+          type: 'spells',
+          description: 'Choose 1 paladin spell to learn',
+          count: 1
+        }
+      ]
+    },
 
     // LEVEL 5
     {
@@ -122,6 +161,19 @@ export const paladin2024Progression: ClassProgression = {
       name: 'Extra Attack',
       description: 'You can attack twice, instead of once, whenever you take the Attack action on your turn.',
       automatic: true
+    },
+    {
+      level: 5,
+      name: 'Paladin Spells',
+      description: 'You learn two paladin spells of your choice.',
+      automatic: false,
+      choices: [
+        {
+          type: 'spells',
+          description: 'Choose 2 paladin spells to learn',
+          count: 2
+        }
+      ]
     },
 
     // LEVEL 6
@@ -138,6 +190,19 @@ export const paladin2024Progression: ClassProgression = {
       name: 'Aura of Courage',
       description: 'You and friendly creatures within 10 feet of you can\'t be frightened while you are conscious.',
       automatic: true
+    },
+    {
+      level: 7,
+      name: 'Paladin Spells',
+      description: 'You learn two paladin spells of your choice.',
+      automatic: false,
+      choices: [
+        {
+          type: 'spells',
+          description: 'Choose 2 paladin spells to learn',
+          count: 2
+        }
+      ]
     },
 
     // LEVEL 8 - ASI/FEAT
@@ -162,6 +227,19 @@ export const paladin2024Progression: ClassProgression = {
       description: 'You gain a feature from your Paladin subclass.',
       automatic: true
     },
+    {
+      level: 9,
+      name: 'Paladin Spells',
+      description: 'You learn two paladin spells of your choice.',
+      automatic: false,
+      choices: [
+        {
+          type: 'spells',
+          description: 'Choose 2 paladin spells to learn',
+          count: 2
+        }
+      ]
+    },
 
     // LEVEL 10
     {
@@ -177,6 +255,19 @@ export const paladin2024Progression: ClassProgression = {
       name: 'Improved Divine Smite',
       description: 'Your Divine Smite now deals an extra 1d8 radiant damage to undead and fiends.',
       automatic: true
+    },
+    {
+      level: 11,
+      name: 'Paladin Spells',
+      description: 'You learn two paladin spells of your choice.',
+      automatic: false,
+      choices: [
+        {
+          type: 'spells',
+          description: 'Choose 2 paladin spells to learn',
+          count: 2
+        }
+      ]
     },
 
     // LEVEL 12 - ASI/FEAT
@@ -200,6 +291,19 @@ export const paladin2024Progression: ClassProgression = {
       name: 'Subclass Feature',
       description: 'You gain a feature from your Paladin subclass.',
       automatic: true
+    },
+    {
+      level: 13,
+      name: 'Paladin Spells',
+      description: 'You learn two paladin spells of your choice.',
+      automatic: false,
+      choices: [
+        {
+          type: 'spells',
+          description: 'Choose 2 paladin spells to learn',
+          count: 2
+        }
+      ]
     },
 
     // LEVEL 14
@@ -226,6 +330,19 @@ export const paladin2024Progression: ClassProgression = {
       description: 'You gain a feature from your Paladin subclass.',
       automatic: true
     },
+    {
+      level: 15,
+      name: 'Paladin Spells',
+      description: 'You learn two paladin spells of your choice.',
+      automatic: false,
+      choices: [
+        {
+          type: 'spells',
+          description: 'Choose 2 paladin spells to learn',
+          count: 2
+        }
+      ]
+    },
 
     // LEVEL 16 - ASI/FEAT
     {
@@ -248,6 +365,19 @@ export const paladin2024Progression: ClassProgression = {
       name: 'Aura of Courage Improvement',
       description: 'The range of your Aura of Courage increases to the entire battlefield (no range limit).',
       automatic: true
+    },
+    {
+      level: 17,
+      name: 'Paladin Spells',
+      description: 'You learn two paladin spells of your choice.',
+      automatic: false,
+      choices: [
+        {
+          type: 'spells',
+          description: 'Choose 2 paladin spells to learn',
+          count: 2
+        }
+      ]
     },
 
     // LEVEL 18
@@ -282,6 +412,19 @@ export const paladin2024Progression: ClassProgression = {
           type: 'feat',
           description: 'Choose an Epic Boon feat.',
           count: 1
+        }
+      ]
+    },
+    {
+      level: 19,
+      name: 'Paladin Spells',
+      description: 'You learn two paladin spells of your choice.',
+      automatic: false,
+      choices: [
+        {
+          type: 'spells',
+          description: 'Choose 2 paladin spells to learn',
+          count: 2
         }
       ]
     },

@@ -63,7 +63,7 @@ export const Step4Spells: React.FC<StepProps> = ({ data, updateData, nextStep, p
   // If not a spellcaster or has no spells available, skip this step
   if (!selectedClass || !selectedClass.spellcasting ||
       (selectedClass.spellcasting.cantripsKnown === 0 && selectedClass.spellcasting.spellsKnownOrPrepared === 0)) {
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+     
     return <div className='text-center text-theme-muted'>This class doesn't have spells available at level {data.level}. Advancing...</div>;
   }
 

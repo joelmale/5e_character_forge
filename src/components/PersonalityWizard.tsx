@@ -108,7 +108,7 @@ const PersonalityWizard: React.FC<PersonalityWizardProps> = ({ isOpen, onClose: 
     const numCantrips = cantripsByClass[selectedClassData.slug]?.['1'] || 0;
     const learningRules = SPELL_LEARNING_RULES[selectedClassData.slug];
 
-    let autoSpellSelection: SpellSelectionData = {
+    const autoSpellSelection: SpellSelectionData = {
       selectedCantrips: [],
       knownSpells: [],
       preparedSpells: []

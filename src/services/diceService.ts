@@ -1,4 +1,4 @@
-/* eslint-disable no-empty */
+ 
 // Dice roll types and utilities for 5e Character Forge
 
 export interface DiceRoll {

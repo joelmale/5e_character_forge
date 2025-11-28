@@ -15,7 +15,7 @@ export const BudgetBar: React.FC<BudgetBarProps> = ({
   maxAmount,
   spentAmount,
   currencyLabel = 'gp',
-  showWarning = false,
+  showWarning: _showWarning = false,
   className = ''
 }) => {
   const spent = spentAmount || (maxAmount - currentAmount);

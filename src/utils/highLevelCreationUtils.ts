@@ -5,7 +5,7 @@
  * choices, and stats that should be accumulated from level 1 to the target level.
  */
 
-import { ClassProgression, FeatureChoice, ClassLevelFeature, ResourceTracker } from '../data/classProgression';
+import { FeatureChoice, ClassLevelFeature, ResourceTracker } from '../data/classProgression';
 import { getClassProgression } from './levelUpUtils';
 import { PROFICIENCY_BONUSES, CANTRIPS_KNOWN_BY_CLASS } from '../services/dataService';
 import { SPELL_SLOTS_BY_CLASS } from '../data/spellSlots';

@@ -97,7 +97,7 @@ export const canEquipItem = (character: Character, equipment: Equipment): Equipm
 /**
  * Validates if a character can unequip an item
  */
-export const canUnequipItem = (character: Character, equipmentSlug: string): EquipmentValidationResult => {
+export const canUnequipItem = (_character: Character, _equipmentSlug: string): EquipmentValidationResult => {
   // Generally, unequipping is always allowed
   return { canEquip: true };
 };

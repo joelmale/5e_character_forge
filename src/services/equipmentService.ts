@@ -1,4 +1,4 @@
-import { QuickStartItem, QuickStartPreset, ClassWealthRule, ShopItem } from '../types/equipment';
+import { QuickStartItem, ShopItem } from '../types/equipment';
 import { loadQuickStartEquipment, loadStartingWealthRules, loadNewPlayerShop, loadEquipment } from './dataService';
 import { Equipment } from '../types/dnd';
 

@@ -11,7 +11,6 @@ import {
   LevelUpData,
   LevelUpRecord,
   FeatureChoice,
-  getASILevels,
   grantsASI
 } from '../data/classProgression';
 import { fighter2024Progression } from '../data/progressions/fighter2024';

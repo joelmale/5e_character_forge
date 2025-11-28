@@ -36,7 +36,8 @@
       "Bash(npx eslint:*)",
       "Bash(npm test:*)",
       "Bash(npx tsc:*)",
-      "Bash(npm audit:*)"
+      "Bash(npm audit:*)",
+      "Bash(npm run lint:*)"
     ],
     "deny": [],
     "ask": [],

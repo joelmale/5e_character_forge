@@ -135,15 +135,15 @@ export const LevelUpWizard: React.FC<LevelUpWizardProps> = ({
       onClick={onClose}
     >
       <div
-        className="relative z-10 bg-theme-secondary bg-opacity-100 rounded-2xl shadow-2xl w-full max-w-3xl transition-all transform duration-300 scale-100 my-8 flex flex-col max-h-[calc(100vh-4rem)] pointer-events-auto"
+        className="relative z-10 bg-[#f5ebd2] border-2 border-[#1e140a] rounded-sm shadow-md w-full max-w-3xl transition-all transform duration-300 scale-100 my-8 flex flex-col max-h-[calc(100vh-4rem)] pointer-events-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div className="flex-shrink-0 p-6 md:p-8 pb-4 border-b border-theme-border">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-3xl font-bold text-accent-gold">Level Up!</h2>
-              <p className="text-theme-text-secondary mt-1">
+              <h2 className="text-3xl font-bold text-gray-900">Level Up!</h2>
+              <p className="text-white mt-1">
                 {character.name} - Level {levelUpData.fromLevel} → {levelUpData.toLevel}
               </p>
             </div>
@@ -159,7 +159,7 @@ export const LevelUpWizard: React.FC<LevelUpWizardProps> = ({
 
           {/* Progress Bar */}
           <div className="mt-4">
-            <div className="flex items-center justify-between text-sm text-theme-text-secondary mb-2">
+            <div className="flex items-center justify-between text-sm text-white mb-2">
               <span>Step {currentStepIndex + 1} of {steps.length}</span>
               <span className="capitalize">{currentStep.replace('-', ' ')}</span>
             </div>
