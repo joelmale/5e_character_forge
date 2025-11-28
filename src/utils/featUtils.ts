@@ -40,6 +40,20 @@ export const checkFeatPrerequisites = (feat: Feat, character: Partial<CharacterC
     return prerequisite.toLowerCase().includes(character.classSlug.toLowerCase());
   }
 
+  // Check for armor proficiency prerequisites
+  if (prerequisite.toLowerCase().includes('proficiency with light armor')) {
+    // For now, assume all characters can take light armor feats
+    // This could be enhanced to check actual armor proficiencies
+    return true;
+  }
+
+  // Check for other proficiency prerequisites
+  if (prerequisite.toLowerCase().includes('proficiency with')) {
+    // For now, return true for proficiency prerequisites
+    // This could be enhanced to check actual proficiencies
+    return true;
+  }
+
   // For now, return true for unhandled prerequisites
   // This can be enhanced with more sophisticated prerequisite parsing
   return true;

@@ -54,9 +54,19 @@ export const Step5point5Feats: React.FC<StepProps> = ({ data, updateData, nextSt
     } else if (canSelectMoreFeats(selectedFeats, data.level)) {
       // Check if feat requires additional choices
       if (featRequiresChoices(featSlug)) {
-        const feat = availableFeats.find(f => f.slug === featSlug);
+        // For feats that require choices, we need to get the feat data
+        // First try from availableFeats, then fallback to all feats
+        let feat = availableFeats.find(f => f.slug === featSlug);
+        if (!feat) {
+          feat = FEAT_DATABASE.find(f => f.slug === featSlug);
+        }
         if (feat) {
           setFeatChoiceModal({ isOpen: true, feat });
+        } else {
+          // Fallback: select directly if feat not found
+          updateData({
+            selectedFeats: [...selectedFeats, featSlug]
+          });
         }
       } else {
         // Select directly

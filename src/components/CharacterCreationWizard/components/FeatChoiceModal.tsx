@@ -24,21 +24,9 @@ export const FeatChoiceModal: React.FC<FeatChoiceModalProps> = ({
   feat,
   onConfirm
 }) => {
-  const [selections, setSelections] = useState<Record<string, any>>({});
-
-  if (!isOpen || !feat) return null;
-
-  const handleSelection = (key: string, value: any) => {
-    setSelections(prev => ({ ...prev, [key]: value }));
-  };
-
-  const handleConfirm = () => {
-    onConfirm(selections);
-    setSelections({});
-    onClose();
-  };
-
   const getChoiceOptions = () => {
+    if (!feat) return null;
+
     switch (feat.slug) {
       case 'elemental-adept':
         return {
@@ -101,7 +89,25 @@ export const FeatChoiceModal: React.FC<FeatChoiceModalProps> = ({
   };
 
   const choiceConfig = getChoiceOptions();
-  if (!choiceConfig) return null;
+  const defaultSelections = choiceConfig && choiceConfig.multiple
+    ? { [choiceConfig.key]: [choiceConfig.options[0]?.value] }
+    : { [choiceConfig?.key || '']: choiceConfig?.options[0]?.value };
+
+  const [selections, setSelections] = useState<Record<string, any>>(defaultSelections || {});
+
+
+
+  if (!isOpen || !feat || !choiceConfig) return null;
+
+  const handleSelection = (key: string, value: any) => {
+    setSelections(prev => ({ ...prev, [key]: value }));
+  };
+
+  const handleConfirm = () => {
+    onConfirm(selections);
+    setSelections({});
+    onClose();
+  };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
