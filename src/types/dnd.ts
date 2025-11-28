@@ -192,6 +192,44 @@ export interface Character {
   resources?: ResourceTracker[]; // Trackable class resources (Second Wind, Action Surge, etc.)
   levelHistory?: LevelUpRecord[]; // Record of all level-ups and choices made
 
+  // Feat effects and bonuses
+  featEffects?: {
+    // Resource-based feat effects
+    luckPoints?: {
+      current: number;
+      max: number;
+    };
+
+    // Initiative and awareness bonuses
+    initiativeBonus?: number; // From Alert feat
+    cantBeSurprised?: boolean; // From Alert feat
+    noAdvantageFromUnseen?: boolean; // From Alert feat
+
+    // Combat bonuses
+    greatWeaponMaster?: boolean; // Enables GWM mechanics
+    polearmMaster?: boolean; // Enables polearm opportunity attacks
+    crossbowExpert?: boolean; // Enables crossbow expert mechanics
+    gunner?: boolean; // Enables gunner mechanics
+
+    // Damage type resistances ignored
+    ignoredResistances?: string[]; // From Elemental Adept
+
+    // Spell-related bonuses
+    spellSniper?: boolean; // Double range, ignore half cover
+    warCaster?: boolean; // Concentration advantage, opportunity casting
+
+    // Skill and utility bonuses
+    mimicryAdvantage?: boolean; // From Actor feat
+    standUpFree?: boolean; // From Athlete feat
+    climbSpeedBonus?: number; // From Athlete feat
+    swimSpeedBonus?: number; // From Athlete feat
+    jumpDistanceBonus?: number; // From Athlete feat
+
+    // Special abilities
+    inspiringLeader?: boolean; // Can rally allies for temp HP
+    linguist?: boolean; // Can create ciphers and forgeries
+  };
+
   // Metadata
   createdAt?: string;
   updatedAt?: string;

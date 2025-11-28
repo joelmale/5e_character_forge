@@ -471,10 +471,30 @@ function applyFeatEffects(character: Character, featSlug: string): void {
 
   if (!feat) return;
 
+  // Initialize feat effects object
+  if (!character.featEffects) {
+    character.featEffects = {};
+  }
+
   // Initialize featGrantedSpells array if it doesn't exist and feat grants spells
   if (!character.spellcasting) {
     // Some feats might grant spells to non-spellcasters, but for now we'll assume they need spellcasting
-    return;
+    // Initialize spellcasting for feats that grant spells to non-casters
+    if (['drow-high-magic', 'fey-touched', 'shadow-touched', 'wood-elf-magic', 'metallic-dragon-adept', 'telekinetic', 'telepathic'].includes(featSlug)) {
+      character.spellcasting = {
+        ability: 'CHA' as const,
+        spellSaveDC: 8 + character.proficiencyBonus + Math.floor((character.abilities.CHA.score - 10) / 2),
+        spellAttackBonus: character.proficiencyBonus + Math.floor((character.abilities.CHA.score - 10) / 2),
+        cantripsKnown: [],
+        spellcastingType: 'known' as const,
+        cantripChoicesByLevel: {},
+        spellSlots: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], // No spell slots for feat-granted spells
+        usedSpellSlots: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        featGrantedSpells: []
+      };
+    } else {
+      return;
+    }
   }
 
   if (!character.spellcasting.featGrantedSpells) {
@@ -520,8 +540,16 @@ function applyFeatEffects(character: Character, featSlug: string): void {
         rechargeType: 'long-rest',
         featSlug: 'fey-touched'
       });
-      // Note: Also grants one 1st-level divination/enchantment spell, but this requires player choice
-      // This would need to be handled during feat selection
+
+      // Grant one 1st-level divination/enchantment spell (1/LR) - default to Charm Person
+      // In a full implementation, this would require player choice between divination/enchantment spells
+      character.spellcasting.featGrantedSpells.push({
+        spellSlug: 'charm-person', // Enchantment spell
+        spellcastingAbility: 'CHA',
+        usesPerDay: 1,
+        rechargeType: 'long-rest',
+        featSlug: 'fey-touched'
+      });
       break;
 
     case 'shadow-touched':
@@ -567,17 +595,69 @@ function applyFeatEffects(character: Character, featSlug: string): void {
       break;
 
     case 'artificer-initiate':
-      // Note: This feat grants player choice of cantrip and 1st-level spell
-      // For now, we'll implement a default - in a full implementation,
-      // this would require additional UI for spell selection
-      // Grants: 1 artificer cantrip + 1 artificer 1st-level spell (1/LR)
+      // This feat grants player choice of cantrip and 1st-level spell
+      // For now, we'll grant a default artificer cantrip and spell
+      // In a full implementation, this would require additional UI for spell selection
+      if (!character.spellcasting) {
+        character.spellcasting = {
+          ability: 'INT' as const,
+          spellSaveDC: 8 + character.proficiencyBonus + Math.floor((character.abilities.INT.score - 10) / 2),
+          spellAttackBonus: character.proficiencyBonus + Math.floor((character.abilities.INT.score - 10) / 2),
+          cantripsKnown: [],
+          spellcastingType: 'known' as const,
+          cantripChoicesByLevel: {},
+          spellSlots: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+          usedSpellSlots: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+          featGrantedSpells: []
+        };
+      }
+
+      // Grant Mending cantrip (artificer staple)
+      character.spellcasting.featGrantedSpells!.push({
+        spellSlug: 'mending',
+        spellcastingAbility: 'INT',
+        rechargeType: 'at-will',
+        featSlug: 'artificer-initiate'
+      });
+
+      // Grant one 1st-level artificer spell (1/LR) - default to Identify
+      character.spellcasting.featGrantedSpells!.push({
+        spellSlug: 'identify',
+        spellcastingAbility: 'INT',
+        usesPerDay: 1,
+        rechargeType: 'long-rest',
+        featSlug: 'artificer-initiate'
+      });
       break;
 
     case 'spell-sniper':
-      // Note: This feat grants player choice of one attack cantrip
-      // For now, we'll implement a default - in a full implementation,
-      // this would require additional UI for cantrip selection
-      // Grants: One cantrip that requires attack roll (at-will)
+      // This feat grants player choice of one attack cantrip
+      // For now, we'll grant Fire Bolt as a default
+      // In a full implementation, this would require additional UI for cantrip selection
+      if (!character.spellcasting) {
+        character.spellcasting = {
+          ability: 'INT' as const,
+          spellSaveDC: 8 + character.proficiencyBonus + Math.floor((character.abilities.INT.score - 10) / 2),
+          spellAttackBonus: character.proficiencyBonus + Math.floor((character.abilities.INT.score - 10) / 2),
+          cantripsKnown: [],
+          spellcastingType: 'known' as const,
+          cantripChoicesByLevel: {},
+          spellSlots: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+          usedSpellSlots: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+          featGrantedSpells: []
+        };
+      }
+
+      // Grant Fire Bolt cantrip (attack cantrip)
+      character.spellcasting.featGrantedSpells!.push({
+        spellSlug: 'fire-bolt',
+        spellcastingAbility: 'INT',
+        rechargeType: 'at-will',
+        featSlug: 'spell-sniper'
+      });
+
+      // Apply spell sniper effects
+      character.featEffects!.spellSniper = true;
       break;
 
     case 'telekinetic':
@@ -609,12 +689,114 @@ function applyFeatEffects(character: Character, featSlug: string): void {
       break;
   }
 
-  // TODO: Handle non-spell feat effects:
-  // - Ability score increases (handled elsewhere)
-  // - Skill/tool/language proficiencies
-  // - Special combat abilities (Lucky, Great Weapon Master, etc.)
-  // - Resistance/immunities
-  // - Special actions/reactions
+  // Handle non-spell feat effects
+  switch (featSlug) {
+    // Combat Feats
+    case 'lucky':
+      character.featEffects!.luckPoints = {
+        current: 3,
+        max: 3
+      };
+      // Add luck points as a resource
+      if (!character.resources) {
+        character.resources = [];
+      }
+      character.resources.push({
+        id: 'luck-points',
+        name: 'Luck Points',
+        description: 'Reroll d20s or force rerolls against you',
+        maxUses: 3,
+        rechargeType: 'long-rest'
+      });
+      break;
+
+    case 'great-weapon-master':
+      character.featEffects!.greatWeaponMaster = true;
+      break;
+
+    case 'polearm-master':
+      character.featEffects!.polearmMaster = true;
+      break;
+
+    case 'crossbow-expert':
+      character.featEffects!.crossbowExpert = true;
+      break;
+
+    case 'sharpshooter':
+      // This is handled through attack bonuses in combat calculations
+      break;
+
+    case 'gunner':
+      character.featEffects!.gunner = true;
+      break;
+
+    // Defensive Feats
+    case 'alert':
+      character.featEffects!.initiativeBonus = (character.featEffects!.initiativeBonus || 0) + 5;
+      character.featEffects!.cantBeSurprised = true;
+      character.featEffects!.noAdvantageFromUnseen = true;
+      // Apply initiative bonus immediately
+      character.initiative += 5;
+      break;
+
+    case 'resilient':
+      // Proficiency in chosen saving throw - handled during feat selection
+      break;
+
+    case 'war-caster':
+      character.featEffects!.warCaster = true;
+      break;
+
+    // Skill/Utility Feats
+    case 'actor':
+      character.featEffects!.mimicryAdvantage = true;
+      break;
+
+    case 'athlete':
+      character.featEffects!.standUpFree = true;
+      character.featEffects!.climbSpeedBonus = 10;
+      character.featEffects!.swimSpeedBonus = 10;
+      character.featEffects!.jumpDistanceBonus = 10;
+      break;
+
+    case 'inspiring-leader':
+      character.featEffects!.inspiringLeader = true;
+      break;
+
+    case 'linguist':
+      character.featEffects!.linguist = true;
+      break;
+
+    case 'prodigy':
+      // Multiple proficiencies - handled during feat selection
+      break;
+
+    case 'skilled':
+      // Multiple proficiencies - handled during feat selection
+      break;
+
+    case 'tavern-brawler':
+      // Grapple bonuses and unarmed damage - handled in combat calculations
+      break;
+
+    // Magic-Related Feats (Non-Spell)
+    case 'elemental-adept':
+      // Ignore resistance to chosen element - would need player choice
+      // For now, initialize empty array
+      if (!character.featEffects!.ignoredResistances) {
+        character.featEffects!.ignoredResistances = [];
+      }
+      break;
+
+    case 'spell-sniper':
+      character.featEffects!.spellSniper = true;
+      break;
+
+    // Default case
+    default:
+      // No special effects for this feat
+      break;
+  }
 }
 
 /**
