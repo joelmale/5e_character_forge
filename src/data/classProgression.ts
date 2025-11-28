@@ -14,6 +14,7 @@ export type FeatureChoiceType =
   | 'subclass'         // Subclass selection
   | 'spells'           // Learn new spells
   | 'fighting-style'   // Choose a fighting style
+  | 'metamagic'        // Sorcerer Metamagic options
   | 'invocation'       // Warlock Eldritch Invocation
   | 'wild-shape'       // Druid Wild Shape options
   | 'favored-enemy'    // Ranger favored enemy choice
