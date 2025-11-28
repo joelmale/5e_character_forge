@@ -109,9 +109,10 @@ export const SelectionPoolWidget: React.FC<SelectionPoolWidgetProps> = ({
           case 'rogue':
             return properties.includes('finesse') || properties.includes('light');
 
-          case 'bard':
+          case 'bard': {
             const allowedBardWeapons = ['rapier', 'longsword', 'shortsword', 'scimitar'];
             return allowedBardWeapons.includes(weapon.index);
+          }
 
           default:
             return false;

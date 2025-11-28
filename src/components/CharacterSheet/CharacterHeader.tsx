@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Trash2, Tent, TrendingUp, TrendingDown, Dice6 } from 'lucide-react';
 import { Character } from '../../types/dnd';
-import { DiceRoll } from '../../services/diceService';
 import { LayoutSelector } from './LayoutSelector';
 
 interface CharacterHeaderProps {

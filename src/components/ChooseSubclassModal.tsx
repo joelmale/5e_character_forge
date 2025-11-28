@@ -12,7 +12,7 @@ interface ChooseSubclassModalProps {
 
 const ChooseSubclassModal: React.FC<ChooseSubclassModalProps> = ({
   isOpen,
-  onClose,
+  onClose: _onClose,
   subclasses,
   onSelect,
   characterClass,

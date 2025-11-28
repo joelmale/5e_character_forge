@@ -78,7 +78,7 @@ export const DiceRollerModal: React.FC<DiceRollerModalProps> = ({
             settleTimeout: 2000,
             enableShadows: true,
             scale: 6
-          });
+          } as any);
 
           console.log('🎲 [DiceRollerModal] DiceBox instance created, calling init()...');
           await box.init();

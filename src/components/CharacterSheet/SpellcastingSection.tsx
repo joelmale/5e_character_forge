@@ -130,6 +130,28 @@ export const SpellcastingSection: React.FC<SpellcastingSectionProps> = ({
         </div>
       </div>
 
+      {/* Feat-Granted Spells - Condensed */}
+      {character.spellcasting.featGrantedSpells && character.spellcasting.featGrantedSpells.length > 0 && (
+        <div className="p-4 bg-theme-secondary rounded-xl shadow-lg border-l-4 border-accent-red">
+          <h3 className="text-lg font-bold text-accent-red-light mb-3">Feat Spells</h3>
+          <div className="flex flex-wrap gap-2">
+            {character.spellcasting.featGrantedSpells.map((featSpell, index) => {
+              const spell = SPELL_DATABASE.find(s => s.slug === featSpell.spellSlug);
+              return (
+                <button
+                  key={`${featSpell.featSlug}-${index}`}
+                  onClick={() => handleSpellClick(featSpell.spellSlug)}
+                  className="px-2 py-1 bg-accent-red hover:bg-accent-red-dark text-theme-primary text-xs rounded cursor-pointer transition-colors"
+                  title={`${spell?.name || featSpell.spellSlug} (${featSpell.spellcastingAbility}, ${featSpell.rechargeType === 'at-will' ? 'at will' : `${featSpell.usesPerDay}/long rest`})`}
+                >
+                  {spell?.name || featSpell.spellSlug}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {/* Middle Row: Known Spells or Daily Prepared Spells - Full Width */}
       {(() => {
         const spellcasting = character.spellcasting;
@@ -219,14 +241,16 @@ export const SpellcastingSection: React.FC<SpellcastingSectionProps> = ({
         return null;
       })()}
 
+
+
       {/* Bottom Row: Spell Slots - Full Width */}
       <div className="p-4 bg-theme-secondary rounded-xl shadow-lg border-l-4 border-blue-500">
         <h3 className="text-lg font-bold text-accent-blue-light mb-3">Spell Slots</h3>
         <div className="grid grid-cols-2 gap-3 text-sm">
-          {character.spellcasting.spellSlots.map((maxSlots, index) => {
+          {character.spellcasting.spellSlots.slice(1).map((maxSlots, index) => {
             if (maxSlots === 0) return null;
             const spellLevel = index + 1;
-            const usedSlots = character.spellcasting?.usedSpellSlots?.[index] || 0;
+            const usedSlots = character.spellcasting?.usedSpellSlots?.[index + 1] || 0;
             const availableSlots = maxSlots - usedSlots;
 
             const availableSpells = getSpellsAvailableForSlotLevel(character, spellLevel);
@@ -260,10 +284,10 @@ export const SpellcastingSection: React.FC<SpellcastingSectionProps> = ({
                           ...character,
                           spellcasting: {
                             ...character.spellcasting!,
-                            usedSpellSlots: {
-                              ...character.spellcasting!.usedSpellSlots,
-                              [index]: Math.min(newUsedSlots, maxSlots)
-                            }
+                              usedSpellSlots: {
+                                ...character.spellcasting!.usedSpellSlots,
+                                [index + 1]: Math.min(newUsedSlots, maxSlots)
+                              }
                           }
                         };
                         _onUpdateCharacter(updatedCharacter);

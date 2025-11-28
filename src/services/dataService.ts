@@ -105,6 +105,7 @@ interface CombatActionsData {
 
 
 interface FightingStyle {
+  slug: string;
   name: string;
   description: string;
   prerequisite: string;
@@ -857,6 +858,7 @@ export function loadFeats(): Feat[] {
     name: 'Grappler',
     source: 'SRD',
     year: 2014,
+    category: 'general',
     prerequisite: 'Strength 13 or higher',
     benefits: [
       'Advantage on attack rolls against creatures you\'re grappling',
@@ -1004,7 +1006,10 @@ export const CLASS_CATEGORIES: ClassCategory[] = getClassCategories();
 
 export const EQUIPMENT_PACKAGES: EquipmentPackage[] = equipmentPackagesData;
 
-export const FIGHTING_STYLES: FightingStyle[] = fightingStylesData;
+export const FIGHTING_STYLES: FightingStyle[] = fightingStylesData.map(style => ({
+  ...style,
+  slug: style.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
+} as FightingStyle));
 
 export { SPELL_SLOTS_BY_CLASS, cantripsData as CANTRIPS_KNOWN_BY_CLASS };
 

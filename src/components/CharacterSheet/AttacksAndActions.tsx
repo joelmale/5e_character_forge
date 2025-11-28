@@ -95,10 +95,10 @@ export const AttacksAndActions: React.FC<AttacksAndActionsProps> = ({
   ).filter(Boolean) as Equipment[] || [];
 
   // Check for Extra Attack feature (Fighter, etc.)
-  const hasExtraAttack = character.level >= 5 && ['fighter', 'paladin', 'ranger'].includes(character.class);
+  const _hasExtraAttack = character.level >= 5 && ['fighter', 'paladin', 'ranger'].includes(character.class);
 
   // Check for Two-Weapon Fighting style
-  const hasTwoWeaponFighting = character.selectedFightingStyle === 'Two-Weapon Fighting';
+  const _hasTwoWeaponFighting = character.selectedFightingStyle === 'Two-Weapon Fighting';
 
   // Action Surge usage tracking (now uses resource system)
   const getActionSurgeInfo = () => {
@@ -163,7 +163,7 @@ export const AttacksAndActions: React.FC<AttacksAndActionsProps> = ({
     onDiceRoll(roll);
   };
 
-  const handleCantripAttack = (cantripSlug: string) => {
+  const _handleCantripAttack = (cantripSlug: string) => {
     if (!character.spellcasting) return;
 
     const attackBonus = character.spellcasting.spellAttackBonus;
@@ -184,7 +184,7 @@ export const AttacksAndActions: React.FC<AttacksAndActionsProps> = ({
     onDiceRoll(roll);
   };
 
-  const handleSavingThrow = (ability: keyof Character['abilities']) => {
+  const _handleSavingThrow = (ability: keyof Character['abilities']) => {
     const modifier = character.abilities[ability].modifier;
     // TODO: Implement proper saving throw proficiency checking based on class features
     const isProficient = false; // Temporary fix - saving throw proficiency needs proper implementation
@@ -206,7 +206,7 @@ export const AttacksAndActions: React.FC<AttacksAndActionsProps> = ({
     onDiceRoll(roll);
   };
 
-  const handleInitiative = () => {
+  const _handleInitiative = () => {
     const initiativeRoll = `1d20${character.initiative >= 0 ? '+' : ''}${character.initiative}`;
 
     const roll: CustomRoll = {
@@ -517,12 +517,12 @@ export const AttacksAndActions: React.FC<AttacksAndActionsProps> = ({
 
   // Determine color scheme based on layout mode
   const isPaperSheet = layoutMode === 'paper-sheet';
-  const bgSecondaryClass = isPaperSheet ? 'bg-[#fcf6e3]' : 'bg-theme-secondary';
-  const bgTertiaryClass = isPaperSheet ? 'bg-[#f5ebd2]' : 'bg-theme-tertiary/50';
-  const textPrimaryClass = isPaperSheet ? 'text-[#1e140a]' : 'text-theme-primary';
-  const textMutedClass = isPaperSheet ? 'text-[#3d2817]' : 'text-theme-muted';
-  const textTertiaryClass = isPaperSheet ? 'text-[#3d2817]' : 'text-theme-tertiary';
-  const borderClass = isPaperSheet ? 'border-[#1e140a]/20' : 'border-red-800';
+  const _bgSecondaryClass = isPaperSheet ? 'bg-[#fcf6e3]' : 'bg-theme-secondary';
+  const _bgTertiaryClass = isPaperSheet ? 'bg-[#f5ebd2]' : 'bg-theme-tertiary/50';
+  const _textPrimaryClass = isPaperSheet ? 'text-[#1e140a]' : 'text-theme-primary';
+  const _textMutedClass = isPaperSheet ? 'text-[#3d2817]' : 'text-theme-muted';
+  const _textTertiaryClass = isPaperSheet ? 'text-[#3d2817]' : 'text-theme-tertiary';
+  const _borderClass = isPaperSheet ? 'border-[#1e140a]/20' : 'border-red-800';
 
   // Handle tactical action clicks
   const handleTacticalAction = (actionId: string) => {

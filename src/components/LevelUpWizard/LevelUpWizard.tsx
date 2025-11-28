@@ -13,7 +13,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { Character } from '../../types/dnd';
+import { Character, LevelUpChoices } from '../../types/dnd';
 import { LevelUpData } from '../../data/classProgression';
 import { calculateLevelUpData, getLevelUpSteps, applyLevelUp } from '../../utils/levelUpUtils';
 
@@ -32,16 +32,6 @@ interface LevelUpWizardProps {
   character: Character;
   onClose: () => void;
   onComplete: (updatedCharacter: Character) => void;
-}
-
-interface LevelUpChoices {
-  hpRolled?: number;
-  hpGained: number;
-  asiChoices?: Array<{ ability: string; increase: number }>;
-  featChosen?: string;
-  subclassChosen?: string;
-  spellsLearned?: string[];
-  fightingStyleChosen?: string;
 }
 
 export const LevelUpWizard: React.FC<LevelUpWizardProps> = ({
@@ -118,14 +108,22 @@ export const LevelUpWizard: React.FC<LevelUpWizardProps> = ({
         return <StepSubclass {...stepProps} />;
       case 'spells':
         return <StepSpells {...stepProps} />;
-      case 'fighting-style':
-        return <StepFightingStyle {...stepProps} />;
-      case 'features':
-        return <StepFeatures {...stepProps} />;
-      case 'confirm':
-        return <StepConfirm {...stepProps} onComplete={handleComplete} />;
       default:
-        return <div>Unknown step</div>;
+        // Handle dynamic spell steps (spells-0, spells-1, etc.)
+        if (currentStep.startsWith('spells-')) {
+          const spellChoiceIndex = parseInt(currentStep.split('-')[1]);
+          return <StepSpells {...stepProps} spellChoiceIndex={spellChoiceIndex} />;
+        }
+        if (currentStep === 'fighting-style') {
+          return <StepFightingStyle {...stepProps} />;
+        }
+        if (currentStep === 'features') {
+          return <StepFeatures {...stepProps} />;
+        }
+        if (currentStep === 'confirm') {
+          return <StepConfirm {...stepProps} onComplete={handleComplete} />;
+        }
+        return <div>Unknown step: {currentStep}</div>;
     }
   };
 
@@ -134,7 +132,7 @@ export const LevelUpWizard: React.FC<LevelUpWizardProps> = ({
       className="fixed inset-0 backdrop-blur-md flex items-center justify-center z-[100] p-4"
       onClick={onClose}
     >
-      <div
+      <div data-theme="paper"
         className="relative z-10 bg-[#f5ebd2] border-2 border-[#1e140a] rounded-sm shadow-md w-full max-w-3xl transition-all transform duration-300 scale-100 my-8 flex flex-col max-h-[calc(100vh-4rem)] pointer-events-auto"
         onClick={(e) => e.stopPropagation()}
       >

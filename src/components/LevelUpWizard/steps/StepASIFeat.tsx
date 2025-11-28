@@ -5,9 +5,8 @@
  */
 
 import React, { useState } from 'react';
-import { Character, LevelUpChoices, AbilityName } from '../../../types/dnd';
+import { Character, LevelUpChoices, AbilityName, ABILITY_SCORES } from '../../../types/dnd';
 import { LevelUpData } from '../../../data/classProgression';
-import { ABILITY_SCORES } from '../../../types/dnd';
 import { loadFeats } from '../../../services/dataService';
 
 interface StepASIFeatProps {
@@ -21,8 +20,8 @@ interface StepASIFeatProps {
 
 export const StepASIFeat: React.FC<StepASIFeatProps> = ({
   character,
-  levelUpData,
-  choices,
+  levelUpData: _levelUpData,
+  choices: _choices,
   updateChoices,
   onNext,
   onPrev
@@ -86,7 +85,7 @@ export const StepASIFeat: React.FC<StepASIFeatProps> = ({
         <h3 className="text-2xl font-bold text-accent-gold mb-2">
           Ability Score Improvement
         </h3>
-        <p className="text-theme-text-secondary">
+        <p className="text-[#992600]">
           Choose to increase your ability scores or gain a new feat.
         </p>
       </div>
@@ -226,7 +225,7 @@ export const StepASIFeat: React.FC<StepASIFeatProps> = ({
         <button
           onClick={handleNext}
           disabled={!canProceed}
-          className="px-6 py-3 bg-accent-gold text-theme-primary font-semibold rounded-lg hover:bg-opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-6 py-3 bg-[#ffaa00] border bg-accent-gold text-theme-primary font-semibold rounded-lg hover:bg-opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Continue
         </button>

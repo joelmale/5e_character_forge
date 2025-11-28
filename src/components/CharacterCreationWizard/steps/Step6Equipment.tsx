@@ -6,10 +6,9 @@ import { loadClasses, BACKGROUNDS, EQUIPMENT_PACKAGES } from '../../../services/
 import { validateEquipmentChoices, getMissingEquipmentChoices } from '../../../utils/equipmentSelectionUtils';
 import trinketTable from '../../../data/trinketTable.json';
 import { QuickStartEquipment } from '../components/QuickStartEquipment';
-import { generateQuickStartEquipment } from '../../../services/equipmentService';
+import { generateQuickStartEquipment, rollStartingWealth } from '../../../services/equipmentService';
 import { EquipmentShop } from '../components/EquipmentShop';
 import { TrinketRoller } from '../components/TrinketRoller';
-import { rollStartingWealth } from '../../../services/equipmentService';
 import { PurchasedItem } from '../../../types/equipment';
 
 interface EquipmentPackDisplayProps {
@@ -119,14 +118,12 @@ export const Step6Equipment: React.FC<StepProps & { skipToStep?: (step: number) 
   const selectedClass = allClasses.find(c => c.slug === data.classSlug);
 
   // Equipment mode state
-  const [equipmentMode, setEquipmentMode] = React.useState<'choices' | 'quickstart' | 'buy'>('quickstart');
+  const [equipmentMode, setEquipmentMode] = React.useState<'quickstart' | 'buy'>('quickstart');
 
-  // Buy equipment state
-  const [startingGold, setStartingGold] = React.useState<number>(0);
+  // Gold rolling state
   const [goldRolled, setGoldRolled] = React.useState(false);
+  const [startingGold, setStartingGold] = React.useState(0);
 
-  // Trinket rolling state
-  const [useExtendedTrinkets, setUseExtendedTrinkets] = React.useState(false);
   const [rolledTrinket, setRolledTrinket] = React.useState<TrinketData | null>(data.selectedTrinket || null);
 
   // Fighter build selection state
@@ -134,27 +131,10 @@ export const Step6Equipment: React.FC<StepProps & { skipToStep?: (step: number) 
 
   // Missing choices modal state
   const [showMissingChoicesModal, setShowMissingChoicesModal] = React.useState(false);
-  const [missingChoices, setMissingChoices] = React.useState<number[]>([]);
 
-  if (!selectedClass) {
-    return <div>Loading...</div>;
-  }
-
-  // Initialize equipment choices if not already set
-  const equipmentChoices = data.equipmentChoices || [];
-  if (equipmentChoices.length === 0 && Array.isArray(selectedClass.equipment_choices) && selectedClass.equipment_choices.length > 0) {
-    updateData({ equipmentChoices: selectedClass.equipment_choices });
-  }
-
-  const handleEquipmentChoice = (choiceId: string, optionIndex: number) => {
-    const currentChoices = data.equipmentChoices || [];
-    const updatedChoices = currentChoices.map(choice =>
-      choice.choiceId === choiceId ? { ...choice, selected: optionIndex } : choice
-    );
-    updateData({ equipmentChoices: updatedChoices });
-    // Clear selected build when manual choice is made
-    setSelectedFighterBuild(null);
-  };
+  // Equipment choices state
+  const [selectedEquipment, setSelectedEquipment] = React.useState<EquipmentChoice[]>(data.equipmentChoices || []);
+  const [showEquipmentShop, setShowEquipmentShop] = React.useState(false);
 
   // Fighter build mappings to equipment choice indices
   const fighterBuilds = {
@@ -197,8 +177,8 @@ export const Step6Equipment: React.FC<StepProps & { skipToStep?: (step: number) 
     : equipmentMode === 'quickstart' || (equipmentMode === 'buy' && goldRolled);
 
   // Trinket rolling function
-  const rollForTrinket = () => {
-    const maxRoll = useExtendedTrinkets ? 200 : 100;
+  const _rollForTrinket = () => {
+    const maxRoll = _useExtendedTrinkets ? 200 : 100;
     const roll = Math.floor(Math.random() * maxRoll) + 1;
     const trinket = (trinketTable as TrinketData[]).find(t => t.roll === roll);
 
@@ -340,9 +320,8 @@ export const Step6Equipment: React.FC<StepProps & { skipToStep?: (step: number) 
           ) : (
             <EquipmentShop
               startingGold={startingGold}
-              onPurchaseComplete={(purchasedItems: PurchasedItem[]) => {
+              onPurchaseComplete={(_purchasedItems: PurchasedItem[]) => {
                 // Handle purchased equipment
-                console.log('Purchased items:', purchasedItems);
               }}
               onBack={() => setEquipmentMode('quickstart')}
             />

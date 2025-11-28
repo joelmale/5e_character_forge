@@ -3,7 +3,6 @@ import { Shield, Zap, Dice6, BookOpen, UserIcon, Footprints } from 'lucide-react
 import { Character } from '../../types/dnd';
 import { createInitiativeRoll, createAdvantageRoll, createDisadvantageRoll, DiceRoll } from '../../services/diceService';
 import { formatModifier } from '../../utils/formatters';
-import { calculateEquipmentBonuses } from '../../utils/equipmentUtils';
 import type { LayoutMode } from './AbilityScores';
 
 interface CharacterStatsProps {

@@ -5,7 +5,7 @@
  * Handles HP increases, spell slot progression, feature grants, and player choices.
  */
 
-import { Character } from '../types/dnd';
+import { Character, LevelUpChoices } from '../types/dnd';
 import {
   ClassProgression,
   LevelUpData,
@@ -17,7 +17,8 @@ import { fighter2024Progression } from '../data/progressions/fighter2024';
 import { paladin2024Progression } from '../data/progressions/paladin2024';
 import { ranger2024Progression } from '../data/progressions/ranger2024';
 import { wizard2024Progression } from '../data/progressions/wizard2024';
-import { PROFICIENCY_BONUSES, CANTRIPS_KNOWN_BY_CLASS } from '../services/dataService';
+import { PROFICIENCY_BONUSES, CANTRIPS_KNOWN_BY_CLASS, loadSpells, loadFeats } from '../services/dataService';
+import { SPELL_LEARNING_RULES } from '../data/spellLearning';
 import { SPELL_SLOTS_BY_CLASS } from '../data/spellSlots';
 
 /**
@@ -108,9 +109,15 @@ export function calculateLevelUpData(character: Character): LevelUpData | null {
 
     // For known casters, calculate new spells known
     if (character.spellcasting.spellcastingType === 'known') {
-      // This will be calculated based on class-specific formulas
-      // For now, this is a placeholder
-      newSpellsKnown = undefined;
+      const learningRules = SPELL_LEARNING_RULES[classSlug];
+      if (learningRules && learningRules.spellsKnown) {
+        const currentSpellsKnown = character.spellcasting.spellsKnown?.length || 0;
+        const expectedSpellsKnown = learningRules.spellsKnown[toLevel - 1] || 0; // Array is 0-indexed
+        const spellsToLearn = Math.max(0, expectedSpellsKnown - currentSpellsKnown);
+        if (spellsToLearn > 0) {
+          newSpellsKnown = spellsToLearn;
+        }
+      }
     }
 
     // Add spell choice if appropriate
@@ -212,11 +219,11 @@ export function getLevelUpSteps(levelUpData: LevelUpData): string[] {
     steps.push('subclass');
   }
 
-  // Check for spell choices
-  const hasSpells = levelUpData.choices.some(c => c.type === 'spells');
-  if (hasSpells) {
-    steps.push('spells');
-  }
+  // Check for spell choices - create separate steps for each spell choice
+  const spellChoices = levelUpData.choices.filter(c => c.type === 'spells');
+  spellChoices.forEach((choice, index) => {
+    steps.push(`spells-${index}`);
+  });
 
   // Check for fighting style
   const hasFightingStyle = levelUpData.choices.some(c => c.type === 'fighting-style');
@@ -240,15 +247,7 @@ export function getLevelUpSteps(levelUpData: LevelUpData): string[] {
 export function applyLevelUp(
   character: Character,
   levelUpData: LevelUpData,
-  choices: {
-    hpRolled?: number;
-    hpGained: number;
-    asiChoices?: Array<{ ability: string; increase: number }>;
-    featChosen?: string;
-    subclassChosen?: string;
-    spellsLearned?: string[];
-    fightingStyleChosen?: string;
-  }
+  choices: LevelUpChoices
 ): Character {
   const updatedCharacter = { ...character };
 
@@ -256,8 +255,9 @@ export function applyLevelUp(
   updatedCharacter.level = levelUpData.toLevel;
 
   // Apply HP increase
-  updatedCharacter.maxHitPoints += choices.hpGained;
-  updatedCharacter.hitPoints += choices.hpGained; // Also increase current HP
+  const hpGain = choices.hpGained || 0;
+  updatedCharacter.maxHitPoints += hpGain;
+  updatedCharacter.hitPoints += hpGain; // Also increase current HP
 
   // Apply hit dice
   updatedCharacter.hitDice.max += 1;
@@ -283,6 +283,9 @@ export function applyLevelUp(
       updatedCharacter.selectedFeats = [];
     }
     updatedCharacter.selectedFeats.push(choices.featChosen);
+
+  // Process feat-granted abilities and spells
+  applyFeatEffects(updatedCharacter, choices.featChosen);
   }
 
   // Apply subclass
@@ -305,16 +308,38 @@ export function applyLevelUp(
 
   // Apply spells learned
   if (choices.spellsLearned && updatedCharacter.spellcasting) {
-    if (updatedCharacter.spellcasting.spellcastingType === 'known') {
-      if (!updatedCharacter.spellcasting.spellsKnown) {
-        updatedCharacter.spellcasting.spellsKnown = [];
+    // Load spell data to separate cantrips from leveled spells
+    const allSpells = loadSpells();
+    const cantrips = choices.spellsLearned.filter((spellSlug: string) => {
+      const spell = allSpells.find((s: any) => s.slug === spellSlug);
+      return spell && spell.level === 0;
+    });
+    const leveledSpells = choices.spellsLearned.filter((spellSlug: string) => {
+      const spell = allSpells.find((s: any) => s.slug === spellSlug);
+      return spell && spell.level > 0;
+    });
+
+    // Add cantrips to cantripsKnown
+    if (cantrips.length > 0) {
+      if (!updatedCharacter.spellcasting.cantripsKnown) {
+        updatedCharacter.spellcasting.cantripsKnown = [];
       }
-      updatedCharacter.spellcasting.spellsKnown.push(...choices.spellsLearned);
-    } else if (updatedCharacter.spellcasting.spellcastingType === 'wizard') {
-      if (!updatedCharacter.spellcasting.spellbook) {
-        updatedCharacter.spellcasting.spellbook = [];
+      updatedCharacter.spellcasting.cantripsKnown.push(...cantrips);
+    }
+
+    // Add leveled spells based on casting type
+    if (leveledSpells.length > 0) {
+      if (updatedCharacter.spellcasting.spellcastingType === 'known') {
+        if (!updatedCharacter.spellcasting.spellsKnown) {
+          updatedCharacter.spellcasting.spellsKnown = [];
+        }
+        updatedCharacter.spellcasting.spellsKnown.push(...leveledSpells);
+      } else if (updatedCharacter.spellcasting.spellcastingType === 'wizard') {
+        if (!updatedCharacter.spellcasting.spellbook) {
+          updatedCharacter.spellcasting.spellbook = [];
+        }
+        updatedCharacter.spellcasting.spellbook.push(...leveledSpells);
       }
-      updatedCharacter.spellcasting.spellbook.push(...choices.spellsLearned);
     }
   }
 
@@ -362,8 +387,8 @@ export function applyLevelUp(
   const levelUpRecord: LevelUpRecord = {
     level: levelUpData.toLevel,
     timestamp: new Date().toISOString(),
-    hpRolled: choices.hpRolled,
-    hpGained: choices.hpGained,
+    hpRolled: choices.hpRoll,
+    hpGained: choices.hpGained || 0,
     asiChoices: choices.asiChoices,
     featChosen: choices.featChosen,
     subclassChosen: choices.subclassChosen,
@@ -399,6 +424,161 @@ export function getAverageHPGain(hitDie: string, conModifier: number): number {
   const dieSize = parseInt(hitDie.substring(1));
   const average = Math.floor(dieSize / 2) + 1;
   return Math.max(1, average + conModifier); // Minimum 1 HP
+}
+
+/**
+ * Apply effects granted by a feat to the character
+ */
+function applyFeatEffects(character: Character, featSlug: string): void {
+  const feats = loadFeats();
+  const feat = feats.find(f => f.slug === featSlug);
+
+  if (!feat) return;
+
+  // Initialize featGrantedSpells array if it doesn't exist and feat grants spells
+  if (!character.spellcasting) {
+    // Some feats might grant spells to non-spellcasters, but for now we'll assume they need spellcasting
+    return;
+  }
+
+  if (!character.spellcasting.featGrantedSpells) {
+    character.spellcasting.featGrantedSpells = [];
+  }
+
+  // Process feats that grant spells
+  switch (featSlug) {
+    case 'drow-high-magic':
+      // Detect Magic - at will
+      character.spellcasting.featGrantedSpells.push({
+        spellSlug: 'detect-magic',
+        spellcastingAbility: 'CHA',
+        rechargeType: 'at-will',
+        featSlug: 'drow-high-magic'
+      });
+
+      // Levitate - 1 per long rest
+      character.spellcasting.featGrantedSpells.push({
+        spellSlug: 'levitate',
+        spellcastingAbility: 'CHA',
+        usesPerDay: 1,
+        rechargeType: 'long-rest',
+        featSlug: 'drow-high-magic'
+      });
+
+      // Dispel Magic - 1 per long rest
+      character.spellcasting.featGrantedSpells.push({
+        spellSlug: 'dispel-magic',
+        spellcastingAbility: 'CHA',
+        usesPerDay: 1,
+        rechargeType: 'long-rest',
+        featSlug: 'drow-high-magic'
+      });
+      break;
+
+    case 'fey-touched':
+      // Misty Step - 1 per long rest
+      character.spellcasting.featGrantedSpells.push({
+        spellSlug: 'misty-step',
+        spellcastingAbility: 'CHA', // Uses the ability increased by this feat
+        usesPerDay: 1,
+        rechargeType: 'long-rest',
+        featSlug: 'fey-touched'
+      });
+      // Note: Also grants one 1st-level divination/enchantment spell, but this requires player choice
+      // This would need to be handled during feat selection
+      break;
+
+    case 'shadow-touched':
+      // Invisibility - 1 per short rest
+      character.spellcasting.featGrantedSpells.push({
+        spellSlug: 'invisibility',
+        spellcastingAbility: 'CHA', // Uses the ability increased by this feat
+        usesPerDay: 1,
+        rechargeType: 'short-rest',
+        featSlug: 'shadow-touched'
+      });
+      break;
+
+    case 'wood-elf-magic':
+      // Longstrider - 1 per long rest
+      character.spellcasting.featGrantedSpells.push({
+        spellSlug: 'longstrider',
+        spellcastingAbility: 'WIS',
+        usesPerDay: 1,
+        rechargeType: 'long-rest',
+        featSlug: 'wood-elf-magic'
+      });
+
+      // Pass Without Trace - 1 per long rest
+      character.spellcasting.featGrantedSpells.push({
+        spellSlug: 'pass-without-trace',
+        spellcastingAbility: 'WIS',
+        usesPerDay: 1,
+        rechargeType: 'long-rest',
+        featSlug: 'wood-elf-magic'
+      });
+      break;
+
+    case 'metallic-dragon-adept':
+      // Cure Wounds - 1 per long rest
+      character.spellcasting.featGrantedSpells.push({
+        spellSlug: 'cure-wounds',
+        spellcastingAbility: 'CHA', // Uses the ability increased by this feat
+        usesPerDay: 1,
+        rechargeType: 'long-rest',
+        featSlug: 'metallic-dragon-adept'
+      });
+      break;
+
+    case 'artificer-initiate':
+      // Note: This feat grants player choice of cantrip and 1st-level spell
+      // For now, we'll implement a default - in a full implementation,
+      // this would require additional UI for spell selection
+      // Grants: 1 artificer cantrip + 1 artificer 1st-level spell (1/LR)
+      break;
+
+    case 'spell-sniper':
+      // Note: This feat grants player choice of one attack cantrip
+      // For now, we'll implement a default - in a full implementation,
+      // this would require additional UI for cantrip selection
+      // Grants: One cantrip that requires attack roll (at-will)
+      break;
+
+    case 'telekinetic':
+      // Mage Hand cantrip (enhanced)
+      character.spellcasting.featGrantedSpells.push({
+        spellSlug: 'mage-hand',
+        spellcastingAbility: 'CHA', // Uses the ability increased by this feat
+        rechargeType: 'at-will',
+        featSlug: 'telekinetic'
+      });
+      break;
+
+    case 'telepathic':
+      // Detect Thoughts - 1 per long rest
+      character.spellcasting.featGrantedSpells.push({
+        spellSlug: 'detect-thoughts',
+        spellcastingAbility: 'CHA', // Uses the ability increased by this feat
+        usesPerDay: 1,
+        rechargeType: 'long-rest',
+        featSlug: 'telepathic'
+      });
+      break;
+
+    // Add more feat spell processing logic here as needed
+
+    // Add more feats as needed
+    default:
+      // No special effects for this feat
+      break;
+  }
+
+  // TODO: Handle non-spell feat effects:
+  // - Ability score increases (handled elsewhere)
+  // - Skill/tool/language proficiencies
+  // - Special combat abilities (Lucky, Great Weapon Master, etc.)
+  // - Resistance/immunities
+  // - Special actions/reactions
 }
 
 /**

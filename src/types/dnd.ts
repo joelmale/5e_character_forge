@@ -2,7 +2,7 @@ import gameConstantsData from '../data/gameConstants.json';
 import type { Level1Feature } from './widgets';
 import type { ResourceTracker, LevelUpRecord } from '../data/classProgression';
 
-export const ABILITY_SCORES = gameConstantsData.ABILITY_SCORES as readonly string[];
+export const ABILITY_SCORES = gameConstantsData.ABILITY_SCORES as readonly ('STR' | 'DEX' | 'CON' | 'INT' | 'WIS' | 'CHA')[];
 export type Ability = typeof ABILITY_SCORES[number];
 
 export interface Alignment {
@@ -43,6 +43,7 @@ export interface EquipmentPackage {
 }
 
 export interface FightingStyle {
+  slug: string;
   name: string;
   description: string;
   prerequisite: string;
@@ -136,6 +137,15 @@ export interface Character {
     // Spell slots and usage
     spellSlots: number[];          // Maximum slots by level [cantrips, 1st, 2nd, ...]
     usedSpellSlots: number[];      // Currently used slots by level
+
+    // Feat-granted spells (special casting rules)
+    featGrantedSpells?: Array<{
+      spellSlug: string;
+      spellcastingAbility: 'STR' | 'DEX' | 'CON' | 'INT' | 'WIS' | 'CHA';
+      usesPerDay?: number;
+      rechargeType: 'at-will' | 'long-rest' | 'short-rest';
+      featSlug: string;
+    }>;
 
     // Metadata and progression
     spellcastingType: 'known' | 'prepared' | 'wizard';
@@ -777,6 +787,9 @@ export interface Encounter {
 export interface LevelUpChoices {
   /** Hit points rolled (if not using average) */
   hpRoll?: number;
+
+  /** Hit points gained (final amount added to character) */
+  hpGained?: number;
 
   /** Fighting style chosen (Fighter, Paladin, Ranger) */
   fightingStyleChosen?: string;

@@ -37,7 +37,7 @@ export const TacticalCard: React.FC<TacticalCardProps> = ({ action, onAction, th
 
   // Text colors
   const textPrimaryClass = isPaperSheet ? 'text-[#1e140a]' : 'text-theme-primary';
-  const textMutedClass = isPaperSheet ? 'text-[#3d2817]' : 'text-theme-muted';
+  const _textMutedClass = isPaperSheet ? 'text-[#3d2817]' : 'text-theme-muted';
 
   // Button colors
   const buttonClass = isPaperSheet

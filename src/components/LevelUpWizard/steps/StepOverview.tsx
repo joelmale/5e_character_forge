@@ -27,7 +27,7 @@ export const StepOverview: React.FC<StepOverviewProps> = ({
         <h3 className="text-2xl font-bold text-accent-gold mb-2">
           Welcome to Level {toLevel}!
         </h3>
-        <p className="text-theme-text-secondary">
+        <p className="text-[#992600]">
           {character.name} is about to advance from level {fromLevel} to level {toLevel}.
           Here's what you'll gain:
         </p>
@@ -80,7 +80,7 @@ export const StepOverview: React.FC<StepOverviewProps> = ({
             </svg>
             Choices Required
           </h4>
-          <p className="text-theme-text-secondary mb-2">
+          <p className="text-[#992600] mb-2">
             You'll need to make the following choices:
           </p>
           <ul className="list-disc list-inside space-y-1 text-theme-text">
@@ -116,7 +116,7 @@ export const StepOverview: React.FC<StepOverviewProps> = ({
       <div className="flex justify-end pt-4">
         <button
           onClick={onNext}
-          className="px-6 py-3 bg-accent-gold text-theme-primary font-semibold rounded-lg hover:bg-opacity-90 transition-colors"
+          className="px-6 py-3 bg-[#ffaa00] border bg-accent-gold text-theme-primary font-bold rounded-lg hover:bg-opacity-90 transition-colors"
         >
           Continue
         </button>

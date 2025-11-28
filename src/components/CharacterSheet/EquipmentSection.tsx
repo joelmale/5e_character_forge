@@ -20,13 +20,13 @@ interface EquipmentSectionProps {
 
 export const EquipmentSection: React.FC<EquipmentSectionProps> = ({
   character,
-  onUpdateCharacter,
+  onUpdateCharacter: _onUpdateCharacter,
   onEquipArmor,
   onEquipWeapon,
   onUnequipItem,
   onAddItem,
   onRemoveItem,
-  setEquipmentModal,
+  setEquipmentModal: _setEquipmentModal,
   layoutMode = 'modern',
 }) => {
   const [selectedEquipment, setSelectedEquipment] = React.useState<Equipment | null>(null);

@@ -15,6 +15,7 @@ import {
   getASILevelsForCharacter,
   requiresSubclass
 } from '../../../utils/highLevelCreationUtils';
+import { getModifier } from '../../../services/dataService';
 
 export const StepHighLevelSetup: React.FC<StepProps> = ({
   data,
@@ -23,10 +24,9 @@ export const StepHighLevelSetup: React.FC<StepProps> = ({
   prevStep,
   getNextStepLabel
 }) => {
-  const [hpRolls, setHpRolls] = useState<number[]>([]);
   const [useAverage, setUseAverage] = useState(true);
 
-  const classSlug = data.selectedClass?.toLowerCase() || '';
+  const classSlug = data.classSlug?.toLowerCase() || '';
   const targetLevel = data.level || 1;
   const edition = data.edition || '2024';
 
@@ -37,7 +37,17 @@ export const StepHighLevelSetup: React.FC<StepProps> = ({
 
   // Calculate HP
   const hitDie = features?.automaticFeatures[0]?.feature?.description?.match(/d\d+/)?.[0] || 'd8';
-  const conModifier = data.abilities?.CON?.modifier || 0;
+  const conModifier = getModifier(data.abilities?.CON || 10);
+
+  // Initialize HP rolls array with lazy state
+  const [hpRolls, setHpRolls] = useState<number[]>(() => {
+    if (targetLevel > 1) {
+      const dieSize = parseInt(hitDie.substring(1));
+      const averageRoll = Math.floor(dieSize / 2) + 1;
+      return Array(targetLevel - 1).fill(averageRoll);
+    }
+    return [];
+  });
 
   const hpCalculation = calculateHPForLevel(
     hitDie,
@@ -45,16 +55,6 @@ export const StepHighLevelSetup: React.FC<StepProps> = ({
     conModifier,
     useAverage ? undefined : hpRolls
   );
-
-  // Initialize HP rolls array
-  useEffect(() => {
-    if (targetLevel > 1 && hpRolls.length === 0) {
-      const dieSize = parseInt(hitDie.substring(1));
-      const averageRoll = Math.floor(dieSize / 2) + 1;
-      const rolls = Array(targetLevel - 1).fill(averageRoll);
-      setHpRolls(rolls);
-    }
-  }, [targetLevel, hitDie, hpRolls.length]);
 
   const rollHP = (levelIndex: number) => {
     const dieSize = parseInt(hitDie.substring(1));
@@ -90,7 +90,7 @@ export const StepHighLevelSetup: React.FC<StepProps> = ({
           High-Level Character Setup
         </h3>
         <p className="text-theme-tertiary">
-          Configure your level {targetLevel} {data.selectedClass}
+          Configure your level {targetLevel} {data.classSlug}
         </p>
       </div>
 

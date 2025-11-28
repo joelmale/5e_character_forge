@@ -5,7 +5,7 @@
  * Allows distributing ability score increases or selecting feats for each ASI level.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { ArrowRight, ArrowLeft, TrendingUp, Award, Plus, Minus } from 'lucide-react';
 import { StepProps } from '../types/wizard.types';
 import { getASILevelsForCharacter } from '../../../utils/highLevelCreationUtils';
@@ -33,42 +33,36 @@ export const StepCumulativeASI: React.FC<StepProps> = ({
 
   const asiLevels = getASILevelsForCharacter(classSlug, edition, targetLevel);
 
-  const [choices, setChoices] = useState<ASIChoice[]>([]);
   const [currentASIIndex, setCurrentASIIndex] = useState(0);
-  const [availableFeats, setAvailableFeats] = useState<Feat[]>([]);
 
-  // Initialize choices
-  useEffect(() => {
-    if (asiLevels.length > 0 && choices.length === 0) {
-      setChoices(
-        asiLevels.map(level => ({
-          level,
-          type: 'asi',
-          asiAllocations: {
-            STR: 0,
-            DEX: 0,
-            CON: 0,
-            INT: 0,
-            WIS: 0,
-            CHA: 0
-          }
-        }))
-      );
-    }
-  }, [asiLevels, choices.length]);
+  // Initialize choices based on ASI levels
+  const [choices, setChoices] = useState<ASIChoice[]>(() => {
+    return asiLevels.map(level => ({
+      level,
+      type: 'asi',
+      asiAllocations: {
+        STR: 0,
+        DEX: 0,
+        CON: 0,
+        INT: 0,
+        WIS: 0,
+        CHA: 0
+      }
+    }));
+  });
 
   // Load available feats when switching to feat mode
-  useEffect(() => {
+  const availableFeats = useMemo(() => {
     const currentChoice = choices[currentASIIndex];
     if (currentChoice?.type === 'feat') {
-      const feats = getAvailableFeatsForCharacter(FEAT_DATABASE, {
+      return getAvailableFeatsForCharacter(FEAT_DATABASE, {
         level: data.level,
         classSlug: data.classSlug,
         abilities: data.abilities,
         edition: data.edition
       }, 'asi');
-      setAvailableFeats(feats);
     }
+    return [];
   }, [choices, currentASIIndex, data.level, data.classSlug, data.abilities, data.edition]);
 
   if (asiLevels.length === 0) {

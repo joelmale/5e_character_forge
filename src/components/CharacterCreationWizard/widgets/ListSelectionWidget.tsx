@@ -56,7 +56,7 @@ export const ListSelectionWidget: React.FC<ListSelectionWidgetProps> = ({
             <button
               key={option.id}
               onClick={() => handleSelect(option.id)}
-              disabled={option.prerequisite && !option.prerequisiteMet}
+              disabled={!!(option.prerequisite && option.prerequisite.trim()) && !option.prerequisiteMet}
               className={`
                 p-5 rounded-xl border-2 text-left transition-all
                 ${isSelected
@@ -275,7 +275,7 @@ function getInvocationOptions(filter?: string): ListOption[] {
 /**
  * Feat Options (placeholder - would need full feat database)
  */
-function getFeatOptions(filter?: string): ListOption[] {
+function getFeatOptions(_filter?: string): ListOption[] {
   // This would need to be populated from a feat database
   // For now, return empty array as feats are handled separately
   return [];

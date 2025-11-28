@@ -12,6 +12,7 @@ const mockCharacter: Character = {
   level: 1,
   alignment: 'Neutral Good',
   background: 'Soldier',
+  edition: '2024',
   inspiration: false,
   proficiencyBonus: 2,
   armorClass: 16,

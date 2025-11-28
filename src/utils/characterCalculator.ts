@@ -200,6 +200,7 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
     level,
     alignment: data.alignment,
     background: data.background,
+    edition: data.edition,
     languages: knownLanguages,
     inspiration: false,
     proficiencyBonus: pb,

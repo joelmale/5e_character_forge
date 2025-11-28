@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Character } from '../../types/dnd';
+import { FeatModal } from '../FeatModal';
 
 interface FeaturesAndTraitsBoxProps {
   character: Character;
@@ -15,6 +16,19 @@ interface FeaturesAndTraitsBoxProps {
  * - Selected feats
  */
 export const FeaturesAndTraitsBox: React.FC<FeaturesAndTraitsBoxProps> = ({ character }) => {
+  const [featModalState, setFeatModalState] = useState<{ isOpen: boolean; featSlug: string | null }>({
+    isOpen: false,
+    featSlug: null
+  });
+
+  const openFeatModal = (featSlug: string) => {
+    setFeatModalState({ isOpen: true, featSlug });
+  };
+
+  const closeFeatModal = () => {
+    setFeatModalState({ isOpen: false, featSlug: null });
+  };
+
   return (
     <div className="border-2 border-[#1e140a] bg-[#fcf6e3] rounded-sm shadow-md p-3">
       <div className="text-xs font-cinzel font-bold text-[#3d2817] uppercase tracking-wide mb-2 pb-1 border-b border-[#1e140a]/20">
@@ -110,7 +124,8 @@ export const FeaturesAndTraitsBox: React.FC<FeaturesAndTraitsBoxProps> = ({ char
               {character.selectedFeats.map((featSlug, index) => (
                 <div
                   key={`feat-${index}`}
-                  className="text-xs homemade-apple-regular text-[#3d2817] leading-tight"
+                  className="text-xs homemade-apple-regular text-[#3d2817] leading-tight cursor-pointer hover:text-accent-gold transition-colors"
+                  onClick={() => openFeatModal(featSlug)}
                 >
                   • {featSlug}
                 </div>
@@ -129,6 +144,13 @@ export const FeaturesAndTraitsBox: React.FC<FeaturesAndTraitsBoxProps> = ({ char
           </div>
         )}
       </div>
+
+      {/* Feat Modal */}
+      <FeatModal
+        featSlug={featModalState.featSlug || ''}
+        isOpen={featModalState.isOpen}
+        onClose={closeFeatModal}
+      />
 
       {/* Custom scrollbar styles */}
       <style>{`

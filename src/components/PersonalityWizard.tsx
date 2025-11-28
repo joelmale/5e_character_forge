@@ -306,6 +306,7 @@ const PersonalityWizard: React.FC<PersonalityWizardProps> = ({ isOpen, onClose: 
       abilityScoreMethod: 'standard-array' as const,
       background: selectedBackground || '',
       alignment: finalizationData.alignment,
+      edition: '2024',
 
       selectedSkills: selectedSkills as SkillName[],
       equipmentChoices: [], // Keep empty since we're using startingInventory

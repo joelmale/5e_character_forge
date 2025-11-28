@@ -162,47 +162,7 @@ export const Step4Spells: React.FC<StepProps> = ({ data, updateData, nextStep, p
 
   const allSelectionsComplete = cantripsComplete && spellsComplete;
 
-  // Debug logging for spell selection validation
-  console.log('🧙 [Step4Spells] Validation Check:', {
-    class: data.classSlug,
-    level: data.level,
-    spellcastingType,
-    cantrips: {
-      selected: data.spellSelection.selectedCantrips.length,
-      required: cantripsKnownAtLevel,
-      complete: cantripsComplete
-    },
-    spells: {
-      type: spellcastingType,
-      ...(spellcastingType === 'wizard' && {
-        spellbook: {
-          selected: data.spellSelection.spellbook?.length || 0,
-          required: 6,
-          complete: (data.spellSelection.spellbook?.length || 0) === 6
-        },
-        dailyPrepared: {
-          selected: data.spellSelection.dailyPrepared?.length || 0,
-          required: getMaxPreparedSpells(data.abilities, 'INT', data.level),
-          complete: spellsComplete && cantripsComplete
-        }
-      }),
-      ...(spellcastingType === 'known' && {
-        knownSpells: {
-          selected: data.spellSelection.knownSpells?.length || 0,
-          required: maxPreparedSpellsAtLevel,
-          complete: spellsComplete
-        }
-      }),
-      ...(spellcastingType === 'prepared' && {
-        preparedSpells: {
-          selected: data.spellSelection.preparedSpells?.length || 0,
-          required: maxPreparedSpellsAtLevel,
-          complete: spellsComplete
-        }
-      })
-    },
-    allSelectionsComplete
-  });
+
 
   // Generate validation feedback messages
   const getValidationMessages = (): string[] => {
@@ -557,7 +517,6 @@ export const Step4Spells: React.FC<StepProps> = ({ data, updateData, nextStep, p
         <div className='flex justify-between'>
           <button
             onClick={() => {
-              console.log('🔙 [Step4Spells] Back button clicked from step 8');
               prevStep();
             }}
             className='px-4 py-2 bg-theme-quaternary text-white rounded-lg hover:bg-theme-hover flex items-center gap-2'

@@ -20,8 +20,8 @@ interface StepSubclassProps {
 
 export const StepSubclass: React.FC<StepSubclassProps> = ({
   character,
-  levelUpData,
-  choices,
+  levelUpData: _levelUpData,
+  choices: _choices,
   updateChoices,
   onNext,
   onPrev
@@ -29,7 +29,9 @@ export const StepSubclass: React.FC<StepSubclassProps> = ({
   const [selectedSubclass, setSelectedSubclass] = useState<string>('');
 
   // Load subclasses for this character's class
-  const allSubclasses = loadSubclasses(character.edition);
+  const allSubclasses = loadSubclasses().filter(
+    s => !s.edition || s.edition === character.edition
+  );
   const classSubclasses = allSubclasses.filter(
     s => s.class.toLowerCase() === character.class.toLowerCase()
   );
@@ -45,7 +47,7 @@ export const StepSubclass: React.FC<StepSubclassProps> = ({
         <h3 className="text-2xl font-bold text-accent-gold mb-2">
           Choose Your Subclass
         </h3>
-        <p className="text-theme-text-secondary">
+        <p className="text-[#992600]">
           Select a {character.class} subclass to gain specialized abilities.
         </p>
       </div>
@@ -64,7 +66,7 @@ export const StepSubclass: React.FC<StepSubclassProps> = ({
             <div className="flex items-start justify-between">
               <div className="flex-1">
                 <h4 className="font-semibold text-accent-gold mb-1">{subclass.name}</h4>
-                <p className="text-sm text-theme-text-secondary">{subclass.description}</p>
+                <p className="text-sm text-[#992600]">{subclass.detailedDescription || subclass.desc.join(' ')}</p>
               </div>
               <div className={`flex-shrink-0 ml-4 w-5 h-5 rounded-full border-2 flex items-center justify-center ${
                 selectedSubclass === subclass.slug ? 'border-accent-gold bg-accent-gold' : 'border-theme-border'
@@ -91,7 +93,7 @@ export const StepSubclass: React.FC<StepSubclassProps> = ({
         <button
           onClick={handleNext}
           disabled={!selectedSubclass}
-          className="px-6 py-3 bg-accent-gold text-theme-primary font-semibold rounded-lg hover:bg-opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-6 py-3 bg-[#ffaa00] border bg-accent-gold text-theme-primary font-semibold rounded-lg hover:bg-opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Continue
         </button>

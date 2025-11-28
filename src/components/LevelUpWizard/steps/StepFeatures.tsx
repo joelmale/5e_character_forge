@@ -16,7 +16,7 @@ interface StepFeaturesProps {
 }
 
 export const StepFeatures: React.FC<StepFeaturesProps> = ({
-  character,
+  character: _character,
   levelUpData,
   onNext,
   onPrev
@@ -29,7 +29,7 @@ export const StepFeatures: React.FC<StepFeaturesProps> = ({
         <h3 className="text-2xl font-bold text-accent-gold mb-2">
           New Features
         </h3>
-        <p className="text-theme-text-secondary">
+        <p className="text-[#992600]">
           Here are the features you gain at level {levelUpData.toLevel}.
         </p>
       </div>
@@ -63,7 +63,7 @@ export const StepFeatures: React.FC<StepFeaturesProps> = ({
                           <svg className="w-4 h-4 text-accent-gold mr-2" fill="currentColor" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clipRule="evenodd" />
                           </svg>
-                          <span className="text-theme-text-secondary">
+                          <span className="text-[#992600]">
                             {resource.maxUses} use{resource.maxUses !== 1 ? 's' : ''} •
                             Recharges on {resource.rechargeType === 'short-rest' ? 'short or long rest' : resource.rechargeType}
                           </span>
@@ -77,7 +77,7 @@ export const StepFeatures: React.FC<StepFeaturesProps> = ({
           ))
         ) : (
           <div className="bg-theme-primary rounded-lg p-6 text-center">
-            <p className="text-theme-text-secondary">
+            <p className="text-[#992600]">
               No automatic features at this level. Continue to see your level-up summary.
             </p>
           </div>
@@ -94,7 +94,7 @@ export const StepFeatures: React.FC<StepFeaturesProps> = ({
         </button>
         <button
           onClick={onNext}
-          className="px-6 py-3 bg-accent-gold text-theme-primary font-semibold rounded-lg hover:bg-opacity-90 transition-colors"
+          className="px-6 py-3 bg-[#ffaa00] border bg-accent-gold text-theme-primary font-semibold rounded-lg hover:bg-opacity-90 transition-colors"
         >
           Continue
         </button>

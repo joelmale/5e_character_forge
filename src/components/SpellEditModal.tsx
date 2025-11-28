@@ -135,8 +135,8 @@ const SpellEditModal: React.FC<SpellEditModalProps> = ({
       name: spell.name,
       slug: spell.slug,
       level: spell.level,
-      school: spell.school?.name || 'Unknown',
-      castingTime: spell.casting_time || 'Unknown',
+      school: spell.school || 'Unknown',
+      castingTime: spell.castingTime || 'Unknown',
       range: spell.range || 'Unknown',
     };
   };
@@ -197,7 +197,7 @@ const SpellEditModal: React.FC<SpellEditModalProps> = ({
                         <h4 className="font-semibold text-white">{spell.name}</h4>
                         {isSelected && <Check className="w-5 h-5 text-accent-blue-light flex-shrink-0" />}
                       </div>
-                      <p className="text-xs text-theme-muted">{spell.school?.name || 'Cantrip'}</p>
+                      <p className="text-xs text-theme-muted">{spell.school || 'Cantrip'}</p>
                     </button>
                   );
                 })}
@@ -235,7 +235,7 @@ const SpellEditModal: React.FC<SpellEditModalProps> = ({
                         <h4 className="font-semibold text-white">{spell.name}</h4>
                         {isSelected && <Check className="w-5 h-5 text-accent-purple-light flex-shrink-0" />}
                       </div>
-                      <p className="text-xs text-theme-muted">Level {spell.level} • {spell.school?.name || 'Unknown'}</p>
+                      <p className="text-xs text-theme-muted">Level {spell.level} • {spell.school || 'Unknown'}</p>
                     </button>
                   );
                 })}
@@ -273,7 +273,7 @@ const SpellEditModal: React.FC<SpellEditModalProps> = ({
                         <h4 className="font-semibold text-white">{spell.name}</h4>
                         {isSelected && <Check className="w-5 h-5 text-accent-green-light flex-shrink-0" />}
                       </div>
-                      <p className="text-xs text-theme-muted">Level {spell.level} • {spell.school?.name || 'Unknown'}</p>
+                      <p className="text-xs text-theme-muted">Level {spell.level} • {spell.school || 'Unknown'}</p>
                     </button>
                   );
                 })}
@@ -316,7 +316,7 @@ const SpellEditModal: React.FC<SpellEditModalProps> = ({
                           <h4 className="font-semibold text-white">{spell.name}</h4>
                           {isSelected && <Check className="w-5 h-5 text-accent-purple-light flex-shrink-0" />}
                         </div>
-                        <p className="text-xs text-theme-muted">Level {spell.level} • {spell.school?.name || 'Unknown'}</p>
+                        <p className="text-xs text-theme-muted">Level {spell.level} • {spell.school || 'Unknown'}</p>
                       </button>
                     );
                   })}
@@ -355,7 +355,7 @@ const SpellEditModal: React.FC<SpellEditModalProps> = ({
                             <h4 className="font-semibold text-white">{spell.name}</h4>
                             {isSelected && <Check className="w-5 h-5 text-accent-blue-light flex-shrink-0" />}
                           </div>
-                          <p className="text-xs text-theme-muted">Level {spell.level} • {spell.school?.name || 'Unknown'}</p>
+                          <p className="text-xs text-theme-muted">Level {spell.level} • {spell.school || 'Unknown'}</p>
                         </button>
                       );
                     })}

@@ -19,9 +19,9 @@ interface StepFightingStyleProps {
 }
 
 export const StepFightingStyle: React.FC<StepFightingStyleProps> = ({
-  character,
-  levelUpData,
-  choices,
+  character: _character,
+  levelUpData: _levelUpData,
+  choices: _choices,
   updateChoices,
   onNext,
   onPrev
@@ -41,7 +41,7 @@ export const StepFightingStyle: React.FC<StepFightingStyleProps> = ({
         <h3 className="text-2xl font-bold text-accent-gold mb-2">
           Choose Fighting Style
         </h3>
-        <p className="text-theme-text-secondary">
+        <p className="text-[#992600]">
           Select a fighting style to specialize your combat abilities.
         </p>
       </div>
@@ -60,9 +60,9 @@ export const StepFightingStyle: React.FC<StepFightingStyleProps> = ({
             <div className="flex items-start justify-between">
               <div className="flex-1">
                 <h4 className="font-semibold text-accent-gold mb-1">{style.name}</h4>
-                <p className="text-sm text-theme-text-secondary">{style.description}</p>
+                <p className="text-sm text-[#992600]">{style.description}</p>
                 {style.prerequisite && style.prerequisite !== 'None' && (
-                  <p className="text-xs text-theme-text-secondary mt-2">
+                  <p className="text-xs text-[#992600] mt-2">
                     Prerequisite: {style.prerequisite}
                   </p>
                 )}
@@ -92,7 +92,7 @@ export const StepFightingStyle: React.FC<StepFightingStyleProps> = ({
         <button
           onClick={handleNext}
           disabled={!selectedStyle}
-          className="px-6 py-3 bg-accent-gold text-theme-primary font-semibold rounded-lg hover:bg-opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-6 py-3 bg-[#ffaa00] border bg-accent-gold text-theme-primary font-semibold rounded-lg hover:bg-opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Continue
         </button>

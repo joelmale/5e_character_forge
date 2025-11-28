@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { X, Shuffle, Heart, History, Volume2, BookOpen } from 'lucide-react';
 import { generateName, generateNames, getAvailableRaces, GeneratedName } from '../utils/nameGenerator';
 
@@ -34,12 +34,38 @@ const NameGeneratorModal: React.FC<NameGeneratorModalProps> = ({
 
   const availableRaces = getAvailableRaces();
 
+  const generateNewName = useCallback(() => {
+    const name = generateName({
+      race: selectedRace || undefined,
+      gender: selectedGender,
+      includeMeaning: true,
+      includePronunciation: true
+    });
+
+    setCurrentName(name);
+
+    // Add to history
+    const historyItem: NameHistoryItem = {
+      name: name.name,
+      meaning: name.meaning,
+      pronunciation: name.pronunciation,
+      gender: name.gender,
+      race: name.race,
+      timestamp: Date.now(),
+      isFavorite: false
+    };
+
+    const newHistory = [historyItem, ...nameHistory];
+    setNameHistory(newHistory);
+    saveHistory(newHistory);
+  }, [selectedRace, selectedGender, nameHistory]);
+
   useEffect(() => {
     if (isOpen) {
       generateNewName();
       loadSavedData();
     }
-  }, [isOpen, selectedRace, selectedGender]);
+  }, [isOpen, generateNewName]);
 
   const loadSavedData = () => {
     try {
@@ -81,31 +107,7 @@ const NameGeneratorModal: React.FC<NameGeneratorModalProps> = ({
     localStorage.setItem('nameGenerator_favorites', JSON.stringify(favorites));
   };
 
-  const generateNewName = () => {
-    const name = generateName({
-      race: selectedRace || undefined,
-      gender: selectedGender,
-      includeMeaning: true,
-      includePronunciation: true
-    });
 
-    setCurrentName(name);
-
-    // Add to history
-    const historyItem: NameHistoryItem = {
-      name: name.name,
-      meaning: name.meaning,
-      pronunciation: name.pronunciation,
-      gender: name.gender,
-      race: name.race,
-      timestamp: Date.now(),
-      isFavorite: false
-    };
-
-    const newHistory = [historyItem, ...nameHistory];
-    setNameHistory(newHistory);
-    saveHistory(newHistory);
-  };
 
   const generateNameOptions = () => {
     const options = generateNames(6, {

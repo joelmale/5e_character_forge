@@ -101,7 +101,7 @@ export const CoinManagement: React.FC<CoinManagementProps> = ({
     Object.entries(coinInputs).forEach(([type, value]) => {
       const amount = parseInt(value) || 0;
       if (amount > 0) {
-        updateCoin(type as 'cp' | 'sp' | 'gp' | 'pp', currency[type as keyof typeof currency] + amount);
+        updateCoin(type as 'cp' | 'sp' | 'gp' | 'pp', (currency[type as keyof typeof currency] || 0) + amount);
       }
     });
     setCoinInputs({ cp: '', sp: '', gp: '', pp: '' });
@@ -111,7 +111,7 @@ export const CoinManagement: React.FC<CoinManagementProps> = ({
     Object.entries(coinInputs).forEach(([type, value]) => {
       const amount = parseInt(value) || 0;
       if (amount > 0) {
-        updateCoin(type as 'cp' | 'sp' | 'gp' | 'pp', currency[type as keyof typeof currency] - amount);
+        updateCoin(type as 'cp' | 'sp' | 'gp' | 'pp', (currency[type as keyof typeof currency] || 0) - amount);
       }
     });
     setCoinInputs({ cp: '', sp: '', gp: '', pp: '' });

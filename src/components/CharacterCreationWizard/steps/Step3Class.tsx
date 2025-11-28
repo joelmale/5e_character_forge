@@ -4,7 +4,7 @@ import { StepProps } from '../types/wizard.types';
 import { loadClasses, getClassCategories, BACKGROUNDS, getSubclassesByClass, randomizeClassAndSkills } from '../../../services/dataService';
 import { SkillName } from '../../../types/dnd';
 import { SelectionPoolWidget, BranchChoiceWidget, AutomaticWidget, ListSelectionWidget } from '../widgets';
-import { Level1Feature } from '../../../types/widgets';
+import { Level1Feature, SelectionPoolConfig, BranchChoiceConfig, ListSelectionConfig, AutomaticConfig } from '../../../types/widgets';
 import { AnySkillPickerModal } from '../AnySkillPickerModal';
 import ChooseSubclassModal from '../../ChooseSubclassModal';
 
@@ -287,8 +287,9 @@ export const Step3Class: React.FC<StepProps> = ({ data, updateData, nextStep, pr
                 return (
                   <SelectionPoolWidget
                     key={feature.id}
-                    feature={feature}
+                    feature={feature as Level1Feature & { widget_config: SelectionPoolConfig }}
                     data={data}
+                    setData={(newData) => updateData(newData)}
                     currentSelection={
                       feature.id === 'expertise'
                         ? data.expertiseSkills || []
@@ -310,15 +311,17 @@ export const Step3Class: React.FC<StepProps> = ({ data, updateData, nextStep, pr
                 return (
                   <BranchChoiceWidget
                     key={feature.id}
-                    feature={feature}
+                    feature={feature as Level1Feature & { widget_config: BranchChoiceConfig }}
+                    data={data}
+                    setData={(newData) => updateData(newData)}
                     currentChoice={
                       feature.id === 'divine_order'
-                        ? data.divineOrder || null
+                        ? data.divineOrder || undefined
                         : feature.id === 'primal_order'
-                          ? data.primalOrder || null
+                          ? data.primalOrder || undefined
                           : feature.id === 'pact_boon'
-                            ? data.pactBoon || null
-                            : null
+                            ? data.pactBoon || undefined
+                            : undefined
                     }
                     onChoiceChange={(choice) => {
                       if (feature.id === 'divine_order') {
@@ -336,7 +339,9 @@ export const Step3Class: React.FC<StepProps> = ({ data, updateData, nextStep, pr
                 return (
                   <ListSelectionWidget
                     key={feature.id}
-                    feature={feature}
+                    feature={feature as Level1Feature & { widget_config: ListSelectionConfig }}
+                    data={data}
+                    setData={(newData) => updateData(newData)}
                     currentSelection={
                       feature.id === 'fighting_style'
                         ? data.fightingStyle ? [data.fightingStyle] : []
@@ -346,7 +351,7 @@ export const Step3Class: React.FC<StepProps> = ({ data, updateData, nextStep, pr
                     }
                     onSelectionChange={(selections) => {
                       if (feature.id === 'fighting_style') {
-                        updateData({ fightingStyle: selections[0] || null });
+                        updateData({ fightingStyle: selections[0] || undefined });
                       } else if (feature.id === 'eldritch_invocations') {
                         updateData({ eldritchInvocations: selections });
                       }
@@ -355,10 +360,16 @@ export const Step3Class: React.FC<StepProps> = ({ data, updateData, nextStep, pr
                 );
 
               case 'automatic':
-                return <AutomaticWidget key={feature.id} feature={feature} />;
+                return (
+                  <AutomaticWidget
+                    key={feature.id}
+                    feature={feature as Level1Feature & { widget_config: AutomaticConfig }}
+                    data={data}
+                    setData={(newData) => updateData(newData)}
+                  />
+                );
 
               default:
-                console.warn(`Unknown widget type: ${feature.widget_type}`);
                 return null;
             }
           })}

@@ -24,22 +24,17 @@ export const useWizardNavigation = (
   }, [currentStep, setCurrentStep, creationData]);
 
   const prevStep = useCallback(() => {
-    console.log('🧭 [Navigation] prevStep() called from step:', currentStep);
-
     let prevStepIndex = currentStep - 1;
-    console.log('🧭 [Navigation] Initial target step:', prevStepIndex);
 
     // Skip conditional steps going backwards
     while (prevStepIndex >= 0) {
       if (shouldShowStep(prevStepIndex, creationData)) {
         break;
       }
-      console.log(`🧭 [Navigation] Skipping step ${prevStepIndex} (conditional not met)`);
       prevStepIndex--;
     }
 
     const finalStep = Math.max(prevStepIndex, 0);
-    console.log('🧭 [Navigation] Final destination step:', finalStep);
     setCurrentStep(finalStep);
   }, [currentStep, setCurrentStep, creationData]);
 

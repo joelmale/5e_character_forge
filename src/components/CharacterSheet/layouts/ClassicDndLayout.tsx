@@ -36,13 +36,7 @@ export const ClassicDndLayout: React.FC<CharacterSheetProps> = ({
 }) => {
   const [showSpellPreparationModal, setShowSpellPreparationModal] = useState(false);
 
-  const handleBulkAddItems = (items: { equipmentSlug: string; quantity: number }[]) => {
-    items.forEach(item => {
-      for (let i = 0; i < item.quantity; i++) {
-        onAddItem(character.id, item.equipmentSlug, 1);
-      }
-    });
-  };
+
 
   const handleSpellPreparationSave = (preparedSpells: string[]) => {
     onUpdateCharacter({
@@ -66,7 +60,6 @@ export const ClassicDndLayout: React.FC<CharacterSheetProps> = ({
           onLevelUp={onLevelUp}
           onLevelDown={onLevelDown}
           onOpenDiceTray={onOpenDiceTray}
-          onAddItems={handleBulkAddItems}
         />
 
         {/* 3-Column Traditional Layout */}

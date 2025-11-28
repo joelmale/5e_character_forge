@@ -66,7 +66,7 @@ export const DiceBox3D: React.FC<DiceBox3DProps> = ({
         settleTimeout: 2000, // Reduced from 5000ms to 2000ms
         enableShadows: true,
         scale: 6
-      });
+      } as any);
 
       await diceBox.init();
       console.log('🎲 [DiceBox3D] DiceBox initialized successfully');

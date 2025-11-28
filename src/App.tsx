@@ -144,8 +144,6 @@ const formatModifier = (mod: number): string => mod >= 0 ? `+${mod}` : `${mod}`;
 
 /** Main Application Component */
 const App: React.FC = () => {
-  console.log('🏠 [PAGE LOAD] App component mounted');
-
   // Use DiceContext for dice rolling functionality
   const { rollHistory, latestRoll, rollDice, clearHistory, updateRollWithRealResults } = useDiceContext();
 
@@ -195,10 +193,7 @@ const App: React.FC = () => {
   // Screen flash state for critical rolls
   const [screenFlashType, setScreenFlashType] = useState<'success' | 'failure' | null>(null);
 
-  // Debug logging for dice tray modal state
-  useEffect(() => {
-    console.log('🎲 [App] isDiceTrayModalOpen state changed:', isDiceTrayModalOpen);
-  }, [isDiceTrayModalOpen]);
+
 
   const selectedCharacter = useMemo(() => {
     return characters.find(c => c.id === selectedCharacterId);
@@ -233,8 +228,6 @@ const App: React.FC = () => {
 
   // Handle dice roll - use DiceContext's rollDice function
   const handleDiceRoll = useCallback((roll: DiceRoll) => {
-    console.log('🎲 [App] handleDiceRoll called with:', roll.label, roll.notation);
-    console.log('🎲 [App] Call stack:', new Error().stack);
     rollDice(roll);
     // Overlay is now triggered by useEffect watching latestRoll
   }, [rollDice]);
@@ -249,16 +242,13 @@ const App: React.FC = () => {
         latestRoll.diceResults.length > 0 &&
         overlayRoll?.id !== latestRoll.id) {
 
-      console.log('🎲 [App] Showing overlay with complete data:', latestRoll);
       setOverlayRoll(latestRoll);
       setShowRollOverlay(true);
 
       // Trigger screen flash for critical rolls
       if (latestRoll.critical === 'success') {
-        console.log('🎲 [App] Triggering success screen flash');
         setScreenFlashType('success');
       } else if (latestRoll.critical === 'failure') {
-        console.log('🎲 [App] Triggering failure screen flash');
         setScreenFlashType('failure');
       }
     }
@@ -456,19 +446,13 @@ const App: React.FC = () => {
   };
 
   const handleLongRest = useCallback(async (characterId: string) => {
-    console.log('🏠 [LONG REST] Starting long rest for character:', characterId);
-
     const character = characters.find(c => c.id === characterId);
     if (!character) {
-      console.error('🏠 [LONG REST] Character not found:', characterId);
       return;
     }
 
-    console.log('🏠 [LONG REST] Found character:', character.name, 'HP:', character.hitPoints, '/', character.maxHitPoints);
-
     // Calculate specific changes for display
     const restChanges = calculateRestChanges(character);
-    console.log('🏠 [LONG REST] Calculated changes:', restChanges);
 
     // Execute rest logic FIRST
     let updatedCharacter = { ...character };
@@ -492,19 +476,14 @@ const App: React.FC = () => {
     }
 
     // Save the rested character
-    console.log('🏠 [LONG REST] Saving updated character:', updatedCharacter.name, 'New HP:', updatedCharacter.hitPoints);
     try {
       await updateCharacter(updatedCharacter);
-      console.log('🏠 [LONG REST] Character saved successfully');
       setCharacters(prev => prev.map(c => c.id === characterId ? updatedCharacter : c));
-      console.log('🏠 [LONG REST] Character state updated');
     } catch (e) {
-      console.error('🏠 [LONG REST] Error saving character:', e);
       return; // Don't show resting screen if save failed
     }
 
     // NOW show resting screen with specific changes
-    console.log('🏠 [LONG REST] Showing resting screen');
     setIsResting('long');
     setRestChanges(restChanges);
     // RestingScreen will handle completion via onComplete callback
@@ -669,18 +648,8 @@ const App: React.FC = () => {
   }, []);
 
   const handlePersonalityComplete = useCallback(async (characterData: CharacterCreationData) => {
-    console.log('📦 [App] Received character data:', {
-      raceSlug: characterData?.raceSlug,
-      classSlug: characterData?.classSlug,
-      background: characterData?.background,
-      level: characterData?.level,
-      abilities: characterData?.abilities,
-      selectedSkills: characterData?.selectedSkills
-    });
-
     // Validate received data
     if (!characterData) {
-      console.error('❌ [App] No character data received');
       setRollResult({
         text: 'Error: No character data received.',
         value: null
@@ -689,10 +658,6 @@ const App: React.FC = () => {
     }
 
     if (!characterData.raceSlug || !characterData.classSlug) {
-      console.error('❌ [App] Missing required slugs:', {
-        raceSlug: characterData.raceSlug,
-        classSlug: characterData.classSlug
-      });
       setRollResult({
         text: 'Error: Missing required character data.',
         value: null
@@ -702,39 +667,21 @@ const App: React.FC = () => {
 
     // Create the character directly from the summary screen
     try {
-      console.log('🔧 [App] Importing utilities...');
       const { calculateCharacterStats } = await import('./utils/characterCreationUtils');
       const { addCharacter } = await import('./services/dbService');
       const { generateUUID } = await import('./services/diceService');
 
-      console.log('⚡ [App] Calculating character stats...');
       const character = calculateCharacterStats(characterData);
-      console.log('✅ [App] Character stats calculated:', {
-        name: character.name,
-        race: character.race,
-        class: character.class,
-        level: character.level
-      });
 
-      console.log('🆔 [App] Generating UUID...');
       const characterWithId = {
         ...character,
         id: generateUUID()
       };
-      console.log('✅ [App] Character with ID created:', {
-        id: characterWithId.id,
-        name: characterWithId.name
-      });
 
-      console.log('💾 [App] Saving to database...');
       const savedId = await addCharacter(characterWithId);
-      console.log('✅ [App] Character saved successfully with ID:', savedId);
 
-      console.log('🔄 [App] Refreshing character list...');
       await loadCharacters();
-      console.log('✅ [App] Character list refreshed');
 
-      console.log('🎉 [App] Character creation complete');
       setCreationMethod(null);
 
       setRollResult({
@@ -742,7 +689,6 @@ const App: React.FC = () => {
         value: null
       });
     } catch (error) {
-      console.error('❌ [App] Character creation failed:', error);
       setRollResult({
         text: `Error creating character from personality profile: ${error instanceof Error ? error.message : 'Unknown error'}`,
         value: null
@@ -1042,12 +988,9 @@ const App: React.FC = () => {
              onAddItem={handleAddItem}
              onRemoveItem={handleRemoveItem}
              setEquipmentModal={setEquipmentModal}
-              onOpenDiceTray={() => {
-                console.log('🎲 [App] onOpenDiceTray handler called in CharacterSheet');
-                console.log('🎲 [App] Setting isDiceTrayModalOpen to true...');
-                setIsDiceTrayModalOpen(true);
-                console.log('🎲 [App] State update triggered');
-              }}
+               onOpenDiceTray={() => {
+                 setIsDiceTrayModalOpen(true);
+               }}
            />
         </div>
         <RollHistoryTicker rolls={rollHistory} layoutMode={layoutMode} />
@@ -1073,10 +1016,9 @@ const App: React.FC = () => {
         {/* Dice Roller Modal - needs to be here when character sheet is open */}
         <DiceRollerModal
           isOpen={isDiceTrayModalOpen}
-          onClose={() => {
-            console.log('🎲 [App] Closing Dice Roller Modal from character sheet view');
-            setIsDiceTrayModalOpen(false);
-          }}
+           onClose={() => {
+             setIsDiceTrayModalOpen(false);
+           }}
         />
 
         {/* Level-Up Wizard - needs to be here when character sheet is open */}
@@ -1279,10 +1221,9 @@ const App: React.FC = () => {
                     {/* Actions */}
                     <div className="flex justify-between items-center mt-4 space-x-3">
                       <button
-                        onClick={() => {
-                          console.log('📖 [CHARACTER] Opening character sheet for:', char.name, char.id);
-                          setSelectedCharacterId(char.id);
-                        }}
+                         onClick={() => {
+                           setSelectedCharacterId(char.id);
+                         }}
                         className="flex-grow py-2 bg-accent-red hover:bg-accent-red-light rounded-lg text-white font-semibold transition-colors flex items-center justify-center text-sm"
                       >
                         <BookOpen className="w-4 h-4 mr-2" /> View Sheet
@@ -1400,10 +1341,9 @@ const App: React.FC = () => {
         {/* Dice Roller Modal */}
         <DiceRollerModal
           isOpen={isDiceTrayModalOpen}
-          onClose={() => {
-            console.log('🎲 [App] Closing Dice Roller Modal from dashboard view');
-            setIsDiceTrayModalOpen(false);
-          }}
+           onClose={() => {
+             setIsDiceTrayModalOpen(false);
+           }}
         />
 
         {/* Resting Screen */}

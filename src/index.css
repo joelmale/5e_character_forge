@@ -316,7 +316,7 @@
 /* Theme-specific overrides for text-white */
 [data-theme="paper"] .text-white,
 [data-theme="light"] .text-white {
-  color: 0 0 0 !important;
+  color: rgb(0, 0, 0) !important;
 }
 
 /* Border utilities */

@@ -22,13 +22,7 @@ import {
 export const PaperSheetLayout: React.FC<CharacterSheetProps> = (props) => {
   const { character } = props;
 
-  const handleBulkAddItems = (items: { equipmentSlug: string; quantity: number }[]) => {
-    items.forEach(item => {
-      for (let i = 0; i < item.quantity; i++) {
-        props.onAddItem(character.id, item.equipmentSlug, 1);
-      }
-    });
-  };
+
 
   return (
     <div className="paper-sheet-layout bg-[#f5ebd2] p-6 space-y-4 max-w-[1400px] mx-auto">

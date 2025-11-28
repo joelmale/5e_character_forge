@@ -133,12 +133,12 @@ export const EquipmentDetailModal: React.FC<EquipmentDetailModalProps> = ({ equi
                 {equipmentData.properties && equipmentData.properties.length > 0 && (
                   <div className="bg-theme-tertiary/50 p-3 rounded">
                     <div className="text-xs text-theme-muted mb-1">Properties</div>
-                    <div className="flex flex-wrap gap-1">
-                      {equipmentData.properties.map((prop: string, idx: number) => (
-                        <span key={idx} className="text-xs bg-accent-blue/70 text-white px-2 py-1 rounded">
-                          {prop}
-                        </span>
-                      ))}
+                     <div className="flex flex-wrap gap-1">
+                       {equipmentData.properties.map((prop, idx: number) => (
+                         <span key={idx} className="text-xs bg-accent-blue/70 text-white px-2 py-1 rounded">
+                           {prop.name}
+                         </span>
+                       ))}
                     </div>
                   </div>
                 )}
@@ -146,7 +146,7 @@ export const EquipmentDetailModal: React.FC<EquipmentDetailModalProps> = ({ equi
                 {equipmentData.mastery && (
                   <div className="bg-theme-tertiary/50 p-3 rounded">
                     <div className="text-xs text-theme-muted mb-1">Weapon Mastery</div>
-                    <div className="text-sm font-bold text-purple-300">{equipmentData.mastery}</div>
+                     <div className="text-sm font-bold text-purple-300">{equipmentData.mastery.name}</div>
                   </div>
                 )}
               </div>
