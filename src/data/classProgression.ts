@@ -17,7 +17,10 @@ export type FeatureChoiceType =
   | 'invocation'       // Warlock Eldritch Invocation
   | 'wild-shape'       // Druid Wild Shape options
   | 'favored-enemy'    // Ranger favored enemy choice
-  | 'natural-explorer'; // Ranger natural explorer choice
+  | 'natural-explorer' // Ranger natural explorer choice
+  | 'skill-expertise'  // Wizard Scholar skill expertise
+  | 'spell-mastery'    // Wizard Spell Mastery choices
+  | 'signature-spells'; // Wizard Signature Spells choices
 
 /**
  * Represents a choice the player must make at a specific level

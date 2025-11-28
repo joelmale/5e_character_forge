@@ -97,8 +97,8 @@ export const StepASIFeat: React.FC<StepASIFeatProps> = ({
           onClick={() => setChoiceType('asi')}
           className={`flex-1 py-3 px-4 rounded-lg font-semibold transition-all ${
             choiceType === 'asi'
-              ? 'bg-accent-gold text-theme-primary'
-              : 'bg-theme-primary text-theme-text border border-theme-border hover:border-accent-gold'
+              ? 'bg-red-800 text-white'
+              : 'bg-[#fcf6e3] text-gray-900 border-2 border-[#1e140a] hover:border-red-800'
           }`}
         >
           Ability Score Increase
@@ -107,8 +107,8 @@ export const StepASIFeat: React.FC<StepASIFeatProps> = ({
           onClick={() => setChoiceType('feat')}
           className={`flex-1 py-3 px-4 rounded-lg font-semibold transition-all ${
             choiceType === 'feat'
-              ? 'bg-accent-gold text-theme-primary'
-              : 'bg-theme-primary text-theme-text border border-theme-border hover:border-accent-gold'
+              ? 'bg-red-800 text-white'
+              : 'bg-[#fcf6e3] text-gray-900 border-2 border-[#1e140a] hover:border-red-800'
           }`}
         >
           Choose a Feat
@@ -118,11 +118,11 @@ export const StepASIFeat: React.FC<StepASIFeatProps> = ({
       {/* ASI Selection */}
       {choiceType === 'asi' && (
         <div className="space-y-4">
-          <div className="bg-theme-primary rounded-lg p-4">
-            <p className="text-theme-text mb-2">
-              You have <span className="text-accent-gold font-bold">{remainingPoints} points</span> to spend.
+          <div className="bg-[#f5ebd2] border-2 border-[#1e140a] rounded-lg p-4">
+            <p className="text-gray-900 mb-2">
+              You have <span className="text-red-800 font-bold">{remainingPoints} points</span> to spend.
             </p>
-            <p className="text-sm text-theme-text-secondary">
+            <p className="text-sm text-gray-700">
               Increase one ability by 2, or two abilities by 1 each. No ability can exceed 20.
             </p>
           </div>
@@ -137,14 +137,14 @@ export const StepASIFeat: React.FC<StepASIFeatProps> = ({
               return (
                 <div
                   key={ability}
-                  className="bg-theme-primary rounded-lg p-4 border border-theme-border"
+                  className="bg-[#fcf6e3] border-2 border-[#1e140a] rounded-lg p-4"
                 >
                   <div className="text-center mb-2">
-                    <h4 className="text-lg font-semibold text-accent-gold">{ability}</h4>
-                    <p className="text-2xl font-bold text-theme-text">
+                    <h4 className="text-lg font-semibold text-gray-900">{ability}</h4>
+                    <p className="text-2xl font-bold text-gray-900">
                       {currentScore}
                       {increase > 0 && (
-                        <span className="text-accent-gold ml-2">→ {newScore}</span>
+                        <span className="text-red-800 ml-2">→ {newScore}</span>
                       )}
                     </p>
                   </div>
@@ -177,8 +177,8 @@ export const StepASIFeat: React.FC<StepASIFeatProps> = ({
       {/* Feat Selection */}
       {choiceType === 'feat' && (
         <div className="space-y-4">
-          <div className="bg-theme-primary rounded-lg p-4">
-            <p className="text-theme-text-secondary text-sm">
+          <div className="bg-[#f5ebd2] border-2 border-[#1e140a] rounded-lg p-4">
+            <p className="text-gray-700 text-sm">
               Select a feat to gain new abilities and features.
             </p>
           </div>
@@ -190,17 +190,17 @@ export const StepASIFeat: React.FC<StepASIFeatProps> = ({
                 onClick={() => setSelectedFeat(feat.slug)}
                 className={`w-full text-left p-4 rounded-lg border-2 transition-all ${
                   selectedFeat === feat.slug
-                    ? 'border-accent-gold bg-accent-gold bg-opacity-10'
-                    : 'border-theme-border bg-theme-primary hover:border-accent-gold hover:border-opacity-50'
+                    ? 'border-red-800 bg-red-100'
+                    : 'border-[#1e140a] bg-[#fcf6e3] hover:border-red-800'
                 }`}
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <h4 className="font-semibold text-accent-gold">{feat.name}</h4>
-                    <p className="text-sm text-theme-text-secondary mt-1">{feat.description}</p>
+                    <h4 className="font-semibold text-gray-900">{feat.name}</h4>
+                    <p className="text-sm text-gray-700 mt-1">{feat.description}</p>
                   </div>
                   <div className={`flex-shrink-0 ml-4 w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                    selectedFeat === feat.slug ? 'border-accent-gold bg-accent-gold' : 'border-theme-border'
+                    selectedFeat === feat.slug ? 'border-red-800 bg-red-800' : 'border-[#1e140a]'
                   }`}>
                     {selectedFeat === feat.slug && (
                       <svg className="w-3 h-3 text-theme-primary" fill="currentColor" viewBox="0 0 20 20">

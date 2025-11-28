@@ -16,6 +16,7 @@ import {
 import { fighter2024Progression } from '../data/progressions/fighter2024';
 import { paladin2024Progression } from '../data/progressions/paladin2024';
 import { ranger2024Progression } from '../data/progressions/ranger2024';
+import { wizard2024Progression } from '../data/progressions/wizard2024';
 import { PROFICIENCY_BONUSES, CANTRIPS_KNOWN_BY_CLASS } from '../services/dataService';
 import { SPELL_SLOTS_BY_CLASS } from '../data/spellSlots';
 
@@ -32,6 +33,9 @@ export function getClassProgression(classSlug: string, edition: '2014' | '2024' 
   }
   if (classSlug === 'ranger' && edition === '2024') {
     return ranger2024Progression;
+  }
+  if (classSlug === 'wizard' && edition === '2024') {
+    return wizard2024Progression;
   }
 
   // TODO: Add other class progressions as they are implemented
