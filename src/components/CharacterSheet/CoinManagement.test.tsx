@@ -7,7 +7,7 @@ import { Character } from '../../types/dnd';
 const mockCharacter: Character = {
   id: 'test-id',
   name: 'Test Character',
-  race: 'Human',
+  species: 'Human',
   class: 'Fighter',
   level: 1,
   alignment: 'Neutral Good',
@@ -55,9 +55,10 @@ const mockCharacter: Character = {
     ideals: 'Test ideals',
     bonds: 'Test bonds',
     flaws: 'Test flaws',
-    classFeatures: [],
-    racialTraits: [],
-  },
+     classFeatures: [],
+     speciesTraits: [],
+     musicalInstrumentProficiencies: [],
+   },
 };
 
 describe('CoinManagement Component', () => {

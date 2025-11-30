@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { ArrowLeft, ArrowRight, Dice6, Shuffle } from 'lucide-react';
 import { StepProps } from '../types/wizard.types';
 import { CharacterCreationData, AbilityName } from '../../../types/dnd';
-import { getAllRaces, randomizeAbilities, getModifier } from '../../../services/dataService';
+import { getAllSpecies, randomizeAbilities, getModifier } from '../../../services/dataService';
 import { rollDice } from '../../../services/diceService';
 import {
   ABILITY_NAMES,
@@ -35,8 +35,8 @@ const RandomizeButton: React.FC<{ onClick: () => void; title?: string; className
 const formatModifier = (mod: number): string => mod >= 0 ? `+${mod}` : `${mod}`;
 
 export const Step4Abilities: React.FC<StepProps> = ({ data, updateData, nextStep, prevStep, getNextStepLabel }) => {
-  const allRaces = getAllRaces();
-  const raceData = allRaces.find(r => r.slug === data.raceSlug);
+  const allSpecies = getAllSpecies();
+  const speciesData = allSpecies.find(s => s.slug === data.speciesSlug);
   const abilityNames = ABILITY_NAMES;
 
   // Method-specific data
@@ -212,7 +212,7 @@ export const Step4Abilities: React.FC<StepProps> = ({ data, updateData, nextStep
           <div className='grid grid-cols-2 gap-4'>
             {abilityNames.map(ability => {
               const baseScore = data.abilities[ability];
-              const racialBonus = raceData?.ability_bonuses[ability] || 0;
+              const racialBonus = speciesData?.ability_bonuses[ability] || 0;
               const finalScore = baseScore + racialBonus;
               const modifier = getModifier(finalScore);
 
@@ -283,7 +283,7 @@ export const Step4Abilities: React.FC<StepProps> = ({ data, updateData, nextStep
               <div className='grid grid-cols-2 gap-4'>
                 {abilityNames.map((ability, idx) => {
                   const baseScore = data.abilities[ability];
-                  const racialBonus = raceData?.ability_bonuses[ability] || 0;
+                  const racialBonus = speciesData?.ability_bonuses[ability] || 0;
                   const finalScore = baseScore + racialBonus;
                   const modifier = getModifier(finalScore);
 
@@ -341,7 +341,7 @@ export const Step4Abilities: React.FC<StepProps> = ({ data, updateData, nextStep
           <div className='grid grid-cols-2 gap-4'>
             {abilityNames.map(ability => {
               const baseScore = data.abilities[ability] || 8;
-              const racialBonus = raceData?.ability_bonuses[ability] || 0;
+              const racialBonus = speciesData?.ability_bonuses[ability] || 0;
               const finalScore = baseScore + racialBonus;
               const modifier = getModifier(finalScore);
 
@@ -392,7 +392,7 @@ export const Step4Abilities: React.FC<StepProps> = ({ data, updateData, nextStep
           <div className='grid grid-cols-2 gap-4'>
             {abilityNames.map(ability => {
               const baseScore = data.abilities[ability];
-              const racialBonus = raceData?.ability_bonuses[ability] || 0;
+              const racialBonus = speciesData?.ability_bonuses[ability] || 0;
               const finalScore = baseScore + racialBonus;
               const modifier = getModifier(finalScore);
 

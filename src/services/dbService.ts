@@ -2,7 +2,7 @@ import { Character, UserMonster, Encounter } from '../types/dnd';
 
 // --- IndexedDB Configuration ---
 const DB_NAME = '5e_character_forge';
-const DB_VERSION = 4; // Version 4: Add resources migration for existing characters
+const DB_VERSION = 6; // Version 6: Add musical instrument proficiencies field
 const STORE_NAME = 'characters';
 const CUSTOM_MONSTERS_STORE = 'customMonsters';
 const FAVORITES_STORE = 'favoriteMonsters';
@@ -115,6 +115,84 @@ const openDB = (): Promise<IDBDatabase> => {
           console.error('❌ [DB Migration] Failed to migrate characters:', getAllRequest.error);
         };
       }
+
+      // Version 5: Rename race field to species for existing characters
+      if (oldVersion < 5 && oldVersion > 0) {
+        const transaction = (event.target as IDBOpenDBRequest).transaction!;
+        const characterStore = transaction.objectStore(STORE_NAME);
+
+        const getAllRequest = characterStore.getAll();
+        getAllRequest.onsuccess = () => {
+          const characters = getAllRequest.result as any[]; // Use any[] to handle legacy data
+
+          console.log(`🔄 [DB Migration] Migrating ${characters.length} characters to version 5 (race → species)`);
+
+          characters.forEach((character) => {
+            // Check if character has race field but not species field
+            if (character.race && !character.species) {
+              console.log(`  ✏️ Renaming race to species for character: ${character.name}`);
+
+              // Rename race field to species
+              character.species = character.race;
+              delete character.race;
+
+              // Update the character in the store
+              characterStore.put(character);
+            }
+          });
+
+          console.log('✅ [DB Migration] Race to species migration complete');
+        };
+
+        getAllRequest.onerror = () => {
+          console.error('❌ [DB Migration] Failed to migrate characters:', getAllRequest.error);
+        };
+      }
+
+      // Version 6: Add musical instrument proficiencies field
+      if (oldVersion < 6 && oldVersion > 0) {
+        const transaction = (event.target as IDBOpenDBRequest).transaction!;
+        const characterStore = transaction.objectStore(STORE_NAME);
+
+        const getAllRequest = characterStore.getAll();
+        getAllRequest.onsuccess = () => {
+          const characters = getAllRequest.result as any[]; // Use any[] to handle legacy data
+
+          console.log(`🔄 [DB Migration] Migrating ${characters.length} characters to version 6 (add musical instruments)`);
+
+          characters.forEach((character) => {
+            // Initialize musical instrument proficiencies for bards
+            if (character.class === 'Bard' && !character.featuresAndTraits?.musicalInstrumentProficiencies) {
+              console.log(`  ✏️ Adding musical instrument proficiencies for bard: ${character.name}`);
+
+              // Initialize empty array for musical instruments
+              // (Existing bards will need to re-select their instruments)
+              if (!character.featuresAndTraits) {
+                character.featuresAndTraits = {
+                  personality: '',
+                  ideals: '',
+                  bonds: '',
+                  flaws: '',
+                  classFeatures: [],
+                  speciesTraits: [],
+                  musicalInstrumentProficiencies: []
+                };
+              } else {
+                character.featuresAndTraits.musicalInstrumentProficiencies = [];
+              }
+
+              // Update the character in the store
+              characterStore.put(character);
+            }
+          });
+
+          console.log('✅ [DB Migration] Musical instruments migration complete');
+        };
+
+        getAllRequest.onerror = () => {
+          console.error('❌ [DB Migration] Failed to migrate characters:', getAllRequest.error);
+        };
+      }
     };
   });
 };
@@ -157,7 +235,7 @@ export const addCharacter = async (character: Character): Promise<string> => {
   console.log('💾 [DB] Adding character:', {
     id: character.id,
     name: character.name,
-    race: character.race,
+    species: character.species,
     class: character.class,
     level: character.level
   });

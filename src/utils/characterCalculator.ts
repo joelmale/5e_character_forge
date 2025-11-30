@@ -3,7 +3,7 @@ import { calculateKnownLanguages } from '../utils/languageUtils';
 import { initializeSpellcasting } from '../utils/spellcastingInit';
 import { generateUUID } from '../services/diceService';
 import {
-  getAllRaces,
+  getAllSpecies,
   loadClasses,
   loadEquipment,
   PROFICIENCY_BONUSES,
@@ -19,10 +19,10 @@ import {
 import { BASE_ARMOR_CLASS, SHIELD_AC_BONUS, MAX_DEX_BONUS_MEDIUM_ARMOR } from '../constants/combat';
 
 export const calculateCharacterStats = (data: CharacterCreationData): Character => {
-  const raceData = getAllRaces().find(r => r.slug === data.raceSlug);
+  const speciesData = getAllSpecies().find(s => s.slug === data.speciesSlug);
   const classData = loadClasses().find(c => c.slug === data.classSlug);
 
-  if (!raceData || !classData) {
+  if (!speciesData || !classData) {
     throw new Error("Incomplete creation data.");
   }
 
@@ -30,7 +30,7 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
 
   // 1. Calculate Abilities with Racial Bonuses
   (Object.keys(data.abilities) as AbilityName[]).forEach((ability) => {
-    const rawScore = data.abilities[ability] + (raceData.ability_bonuses[ability] || 0);
+    const rawScore = data.abilities[ability] + (speciesData.ability_bonuses[ability] || 0);
     const modifier = getModifier(rawScore);
     finalAbilities[ability] = { score: rawScore, modifier };
   });
@@ -46,7 +46,7 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
     // Default to max for level 1
     hitDieValue = classData.hit_die;
   }
-  const maxHitPoints = hitDieValue + finalAbilities.CON.modifier + (raceData.slug === 'dwarf' ? level : 0);
+  const maxHitPoints = hitDieValue + finalAbilities.CON.modifier + (speciesData.slug === 'dwarf' ? level : 0);
 
   // 3. Calculate Skills (from selected skills + background skills)
   const backgroundData = BACKGROUNDS.find(bg => bg.name === data.background);
@@ -194,7 +194,7 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
   return {
     id: generateUUID(), // Generate UUID for IndexedDB
     name: data.name || "Unnamed Hero",
-    race: raceData.name,
+    species: speciesData.name,
     class: classData.name,
     subclass: data.subclassSlug, // Sprint 5: Store subclass slug
     level,
@@ -222,7 +222,8 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
       bonds: data.bonds,
       flaws: data.flaws,
       classFeatures: allClassFeatures, // Includes fighting style if applicable
-      racialTraits: raceData.racial_traits,
+      speciesTraits: speciesData.species_traits,
+      musicalInstrumentProficiencies: [],
     },
     spellcasting: spellcastingData, // Sprint 2: Include spell data
     // Sprint 4: Equipment and inventory

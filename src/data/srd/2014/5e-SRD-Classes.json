@@ -4730,5 +4730,299 @@
     },
     "spells": "/api/2014/classes/wizard/spells",
     "url": "/api/2014/classes/wizard"
+  },
+  {
+    "index": "artificer",
+    "name": "Artificer",
+    "hit_die": 8,
+    "proficiency_choices": [
+      {
+        "desc": "Choose two from Arcana, History, Investigation, Medicine, Nature, Perception, Sleight of Hand, and Survival",
+        "choose": 2,
+        "type": "proficiencies",
+        "from": {
+          "option_set_type": "options_array",
+          "options": [
+            {
+              "option_type": "reference",
+              "item": {
+                "index": "skill-arcana",
+                "name": "Skill: Arcana",
+                "url": "/api/2014/proficiencies/skill-arcana"
+              }
+            },
+            {
+              "option_type": "reference",
+              "item": {
+                "index": "skill-history",
+                "name": "Skill: History",
+                "url": "/api/2014/proficiencies/skill-history"
+              }
+            },
+            {
+              "option_type": "reference",
+              "item": {
+                "index": "skill-investigation",
+                "name": "Skill: Investigation",
+                "url": "/api/2014/proficiencies/skill-investigation"
+              }
+            },
+            {
+              "option_type": "reference",
+              "item": {
+                "index": "skill-medicine",
+                "name": "Skill: Medicine",
+                "url": "/api/2014/proficiencies/skill-medicine"
+              }
+            },
+            {
+              "option_type": "reference",
+              "item": {
+                "index": "skill-nature",
+                "name": "Skill: Nature",
+                "url": "/api/2014/proficiencies/skill-nature"
+              }
+            },
+            {
+              "option_type": "reference",
+              "item": {
+                "index": "skill-perception",
+                "name": "Skill: Perception",
+                "url": "/api/2014/proficiencies/skill-perception"
+              }
+            },
+            {
+              "option_type": "reference",
+              "item": {
+                "index": "skill-sleight-of-hand",
+                "name": "Skill: Sleight of Hand",
+                "url": "/api/2014/proficiencies/skill-sleight-of-hand"
+              }
+            },
+            {
+              "option_type": "reference",
+              "item": {
+                "index": "skill-survival",
+                "name": "Skill: Survival",
+                "url": "/api/2014/proficiencies/skill-survival"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "proficiencies": [
+      {
+        "index": "light-armor",
+        "name": "Light Armor",
+        "url": "/api/2014/proficiencies/light-armor"
+      },
+      {
+        "index": "medium-armor",
+        "name": "Medium Armor",
+        "url": "/api/2014/proficiencies/medium-armor"
+      },
+      {
+        "index": "shields",
+        "name": "Shields",
+        "url": "/api/2014/proficiencies/shields"
+      },
+      {
+        "index": "simple-weapons",
+        "name": "Simple Weapons",
+        "url": "/api/2014/proficiencies/simple-weapons"
+      },
+      {
+        "index": "thieves-tools",
+        "name": "Thieves' Tools",
+        "url": "/api/2014/proficiencies/thieves-tools"
+      },
+      {
+        "index": "tinkers-tools",
+        "name": "Tinker's Tools",
+        "url": "/api/2014/proficiencies/tinkers-tools"
+      },
+      {
+        "index": "saving-throw-con",
+        "name": "Saving Throw: CON",
+        "url": "/api/2014/proficiencies/saving-throw-con"
+      },
+      {
+        "index": "saving-throw-int",
+        "name": "Saving Throw: INT",
+        "url": "/api/2014/proficiencies/saving-throw-int"
+      }
+    ],
+    "saving_throws": [
+      {
+        "index": "con",
+        "name": "CON",
+        "url": "/api/2014/ability-scores/con"
+      },
+      {
+        "index": "int",
+        "name": "INT",
+        "url": "/api/2014/ability-scores/int"
+      }
+    ],
+    "starting_equipment": [
+      {
+        "equipment": {
+          "index": "leather-armor",
+          "name": "Leather Armor",
+          "url": "/api/2014/equipment/leather-armor"
+        },
+        "quantity": 1
+      },
+      {
+        "equipment": {
+          "index": "dagger",
+          "name": "Dagger",
+          "url": "/api/2014/equipment/dagger"
+        },
+        "quantity": 1
+      },
+      {
+        "equipment": {
+          "index": "thieves-tools",
+          "name": "Thieves' Tools",
+          "url": "/api/2014/equipment/thieves-tools"
+        },
+        "quantity": 1
+      },
+      {
+        "equipment": {
+          "index": "tinkers-tools",
+          "name": "Tinker's Tools",
+          "url": "/api/2014/equipment/tinkers-tools"
+        },
+        "quantity": 1
+      }
+    ],
+    "starting_equipment_options": [
+      {
+        "desc": "(a) a handaxe and a light hammer or (b) any two simple weapons",
+        "choose": 1,
+        "type": "equipment",
+        "from": {
+          "option_set_type": "options_array",
+          "options": [
+            {
+              "option_type": "multiple",
+              "items": [
+                {
+                  "option_type": "counted_reference",
+                  "count": 1,
+                  "of": {
+                    "index": "handaxe",
+                    "name": "Handaxe",
+                    "url": "/api/2014/equipment/handaxe"
+                  }
+                },
+                {
+                  "option_type": "counted_reference",
+                  "count": 1,
+                  "of": {
+                    "index": "light-hammer",
+                    "name": "Light Hammer",
+                    "url": "/api/2014/equipment/light-hammer"
+                  }
+                }
+              ]
+            },
+            {
+              "option_type": "choice",
+              "choice": {
+                "desc": "any two simple weapons",
+                "choose": 2,
+                "type": "equipment",
+                "from": {
+                  "option_set_type": "equipment_category",
+                  "equipment_category": {
+                    "index": "simple-weapons",
+                    "name": "Simple Weapons",
+                    "url": "/api/2014/equipment-categories/simple-weapons"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "spellcasting": {
+      "level": 1,
+      "spellcasting_ability": {
+        "index": "int",
+        "name": "INT",
+        "url": "/api/2014/ability-scores/int"
+      },
+      "info": [
+        {
+          "name": "Cantrips",
+          "desc": [
+            "At 1st level, you know two cantrips of your choice from the artificer spell list. You learn additional artificer cantrips of your choice at higher levels, as shown in the Cantrips Known column of the Artificer table."
+          ]
+        },
+        {
+          "name": "Spell Slots",
+          "desc": [
+            "The Artificer table shows how many spell slots you have to cast your artificer spells. To cast one of these artificer spells, you must expend a slot of the spell's level or higher. You regain all expended spell slots when you finish a long rest."
+          ]
+        },
+        {
+          "name": "Preparing and Casting Spells",
+          "desc": [
+            "You prepare the list of artificer spells that are available for you to cast, choosing from the artificer spell list. To do so, choose a number of artificer spells equal to your Intelligence modifier + half your artificer level, rounded down (minimum of one spell). The spells must be of a level for which you have spell slots.",
+            "For example, if you are a 5th-level artificer, you have four 1st-level and two 2nd-level spell slots. With an Intelligence of 14, your list of prepared spells can include four spells of 1st or 2nd level, in any combination. If you prepare the 1st-level spell cure wounds, you can cast it using a 1st-level or 2nd-level slot. Casting the spell doesn't remove it from your list of prepared spells.",
+            "You can also change your list of prepared spells when you finish a long rest. Preparing a new list of artificer spells requires time spent tinkering with your spellcasting focuses: at least 1 minute per spell level for each spell on your list."
+          ]
+        },
+        {
+          "name": "Spellcasting Ability",
+          "desc": [
+            "Intelligence is your spellcasting ability for your artificer spells; your understanding of the theory behind magic allows you to wield these spells with superior skill. You use your Intelligence whenever a spell refers to your spellcasting ability. In addition, you use your Intelligence modifier when setting the saving throw DC for an artificer spell you cast and when making an attack roll with one.",
+            "Spell save DC = 8 + your proficiency bonus + your Intelligence modifier",
+            "Spell attack modifier = your proficiency bonus + your Intelligence modifier"
+          ]
+        },
+        {
+          "name": "Ritual Casting",
+          "desc": [
+            "You can cast an artificer spell as a ritual if that spell has the ritual tag and you have it prepared."
+          ]
+        },
+        {
+          "name": "Spellcasting Focus",
+          "desc": [
+            "You can use an arcane focus or a spellcasting focus (found in chapter 5) as a spellcasting focus for your artificer spells."
+          ]
+        }
+      ]
+    },
+    "subclasses": [
+      {
+        "index": "alchemist",
+        "name": "Alchemist",
+        "url": "/api/2014/subclasses/alchemist"
+      },
+      {
+        "index": "armorer",
+        "name": "Armorer",
+        "url": "/api/2014/subclasses/armorer"
+      },
+      {
+        "index": "artillerist",
+        "name": "Artillerist",
+        "url": "/api/2014/subclasses/artillerist"
+      },
+      {
+        "index": "battle-smith",
+        "name": "Battle Smith",
+        "url": "/api/2014/subclasses/battle-smith"
+      }
+    ],
+    "spells": "/api/2014/classes/artificer/spells",
+    "url": "/api/2014/classes/artificer"
   }
 ]

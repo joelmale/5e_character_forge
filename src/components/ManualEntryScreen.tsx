@@ -1,101 +1,71 @@
-import React from 'react';
-import { ArrowLeft, FileText, Clock } from 'lucide-react';
+import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
+import { X, FileText } from 'lucide-react';
+import { Character } from '../types/dnd';
+import { CharacterEditForm } from './CharacterEditForm';
+import { useCharacterManagement } from '../hooks/useCharacterManagement';
 
 interface ManualEntryScreenProps {
-  onBack: () => void;
+  isOpen: boolean;
+  onClose: () => void;
+  onCharacterCreated?: (character: Character) => void;
 }
 
-const ManualEntryScreen: React.FC<ManualEntryScreenProps> = ({ onBack }) => {
-  return (
-    <div className="min-h-screen bg-theme-primary text-white font-sans">
-      <div className="max-w-4xl mx-auto p-4 md:p-8">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+const ManualEntryScreen: React.FC<ManualEntryScreenProps> = ({ isOpen, onClose, onCharacterCreated }) => {
+  const { createCharacter } = useCharacterManagement();
+
+  const handleCreateCharacter = async (character: Character) => {
+    const success = await createCharacter(character);
+    if (success) {
+      onCharacterCreated?.(character);
+      onClose(); // Close the modal
+    }
+  };
+
+  if (!isOpen) return null;
+
+  return createPortal(
+    <div className="fixed inset-0 backdrop-blur-md flex items-center justify-center z-50 p-4 overflow-y-auto" onClick={onClose}>
+      <div
+        className="bg-theme-secondary rounded-2xl shadow-2xl w-full max-w-6xl transition-all transform duration-300 scale-100 my-8 flex flex-col max-h-[calc(100vh-4rem)]"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Modal Header */}
+        <div className="flex items-center justify-between p-6 border-b border-theme-primary">
+          <div className="flex items-center space-x-3">
+            <FileText className="w-6 h-6 text-accent-blue-light" />
+            <h2 className="text-2xl font-bold text-accent-yellow-light">Manual Character Creation</h2>
+          </div>
           <button
-            onClick={onBack}
-            className="flex items-center space-x-2 px-4 py-2 bg-theme-tertiary hover:bg-theme-quaternary rounded-lg text-white transition-colors"
+            onClick={onClose}
+            className="text-theme-muted hover:text-theme-primary transition-colors"
           >
-            <ArrowLeft className="w-4 h-4" />
-            <span>Back to Options</span>
+            <X className="w-6 h-6" />
           </button>
-          <h1 className="text-3xl font-bold text-accent-red-light">Manual Character Entry</h1>
         </div>
 
-        {/* Coming Soon Content */}
-        <div className="bg-theme-secondary rounded-xl shadow-xl p-8 md:p-12 text-center">
-          <div className="max-w-2xl mx-auto">
-            {/* Icon */}
-            <div className="mb-6">
-              <FileText className="w-16 h-16 text-accent-blue-light mx-auto" />
-            </div>
-
-            {/* Title */}
-            <h2 className="text-2xl font-bold text-accent-yellow-light mb-4">
-              Coming Soon!
-            </h2>
-
+        {/* Modal Content */}
+        <div className="flex-1 overflow-y-auto p-6">
+          <div className="max-w-5xl mx-auto">
             {/* Description */}
-            <p className="text-theme-tertiary text-lg mb-6 leading-relaxed">
-              The manual character entry feature is currently under development. This will allow you to:
-            </p>
-
-            {/* Feature List */}
-            <div className="text-left max-w-md mx-auto mb-8">
-              <ul className="space-y-3 text-theme-tertiary">
-                <li className="flex items-start">
-                  <span className="text-accent-green-light mr-2">✓</span>
-                  Transfer pen & paper characters
-                </li>
-                <li className="flex items-start">
-                  <span className="text-accent-green-light mr-2">✓</span>
-                  Fill out complete character sheets
-                </li>
-                <li className="flex items-start">
-                  <span className="text-accent-green-light mr-2">✓</span>
-                  Import from external sources
-                </li>
-                <li className="flex items-start">
-                  <span className="text-accent-green-light mr-2">✓</span>
-                  Full manual control over all stats
-                </li>
-              </ul>
-            </div>
-
-            {/* Timeline */}
-            <div className="bg-theme-tertiary/50 rounded-lg p-4 mb-6">
-              <div className="flex items-center justify-center space-x-2 text-theme-muted">
-                <Clock className="w-4 h-4" />
-                <span className="text-sm">Expected completion: Future update</span>
-              </div>
-            </div>
-
-            {/* Call to Action */}
-            <div className="space-y-4">
-              <p className="text-theme-muted">
-                In the meantime, try our guided character creation wizards!
+            <div className="text-center mb-8">
+              <p className="text-theme-tertiary text-lg leading-relaxed">
+                Fill out a complete character sheet with full control over all stats and features.
+                Perfect for transferring pen & paper characters or building custom characters.
               </p>
-              <button
-                onClick={onBack}
-                className="px-6 py-3 bg-accent-red hover:bg-accent-red-light rounded-lg text-white font-semibold transition-colors"
-              >
-                Try Character Wizards
-              </button>
             </div>
+
+            {/* Character Edit Form */}
+            <CharacterEditForm
+              onSave={handleCreateCharacter}
+              onCancel={onClose}
+              isCreating={true}
+            />
           </div>
         </div>
-
-        {/* TODO Comments for Future Implementation */}
-        {/*
-        TODO: Implement Manual Character Entry
-        - Full character sheet form
-        - Validation for all stats
-        - Import/export functionality
-        - Pen & paper character transfer
-        - Custom item/feat/spell management
-        - Advanced character building tools
-        */}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

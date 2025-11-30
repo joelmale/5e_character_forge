@@ -63,8 +63,8 @@ export const PaperSheetLayout: React.FC<CharacterSheetProps> = (props) => {
 
           {/* Race */}
           <div className="col-span-2">
-            <div className="text-xs font-cinzel font-bold text-[#3d2817] uppercase tracking-wide mb-1">Race</div>
-            <div className="text-lg font-eb-garamond font-semibold text-[#1e140a]">{character.race}</div>
+            <div className="text-xs font-cinzel font-bold text-[#3d2817] uppercase tracking-wide mb-1">Species</div>
+            <div className="text-lg font-eb-garamond font-semibold text-[#1e140a]">{character.species}</div>
           </div>
 
           {/* Alignment */}
@@ -249,23 +249,35 @@ export const PaperSheetLayout: React.FC<CharacterSheetProps> = (props) => {
             </div>
           </div>
 
-          {/* Racial Traits */}
+          {/* Species Traits */}
           <div className="bg-[#fcf6e3] border-2 border-[#1e140a] rounded-sm p-3 shadow-md">
-            <div className="text-xs font-cinzel font-bold text-[#3d2817] uppercase tracking-wide mb-2">Racial Traits</div>
+            <div className="text-xs font-cinzel font-bold text-[#3d2817] uppercase tracking-wide mb-2">Species Traits</div>
             <div className="min-h-[60px] p-2 bg-[#f5ebd2] rounded-sm border border-[#1e140a]/20 text-sm space-y-1">
-              {character.featuresAndTraits?.racialTraits && character.featuresAndTraits.racialTraits.length > 0 ? (
-                character.featuresAndTraits.racialTraits.map((trait, index) => (
+              {character.featuresAndTraits?.speciesTraits && character.featuresAndTraits.speciesTraits.length > 0 ? (
+                character.featuresAndTraits.speciesTraits.map((trait, index) => (
                   <div key={index} className="homemade-apple-regular text-[#3d2817] text-xs leading-tight">
                     • {trait}
                   </div>
                 ))
               ) : (
-                <div className="homemade-apple-regular text-[#3d2817]/50 italic">No racial traits</div>
+                <div className="homemade-apple-regular text-[#3d2817]/50 italic">No species traits</div>
               )}
             </div>
-           </div>
+            </div>
 
-
+           {/* Musical Instrument Proficiencies */}
+           {character.featuresAndTraits?.musicalInstrumentProficiencies && character.featuresAndTraits.musicalInstrumentProficiencies.length > 0 && (
+             <div className="bg-[#fcf6e3] border-2 border-[#1e140a] rounded-sm p-3 shadow-md">
+               <div className="text-xs font-cinzel font-bold text-[#3d2817] uppercase tracking-wide mb-2">Musical Instruments</div>
+               <div className="min-h-[40px] p-2 bg-[#f5ebd2] rounded-sm border border-[#1e140a]/20 text-sm space-y-1">
+                 {character.featuresAndTraits.musicalInstrumentProficiencies.map((instrument, index) => (
+                   <div key={index} className="homemade-apple-regular text-[#3d2817] text-xs leading-tight">
+                     • {instrument}
+                   </div>
+                 ))}
+               </div>
+             </div>
+           )}
 
            {/* Proficiencies & Languages */}
           <div className="bg-[#fcf6e3] border-2 border-[#1e140a] rounded-sm p-4 shadow-md">

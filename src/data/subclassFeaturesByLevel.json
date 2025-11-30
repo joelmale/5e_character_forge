@@ -1,0 +1,196 @@
+{
+  "bard": {
+    "lore": {
+      "name": "College of Lore",
+      "description": "Bards of the College of Lore know something about most things, collecting bits of knowledge from sources as diverse as scholarly tomes and peasant tales.",
+      "features": [
+        {
+          "level": 3,
+          "name": "Bonus Proficiencies",
+          "description": "You gain proficiency with three skills of your choice."
+        },
+        {
+          "level": 3,
+          "name": "Cutting Words",
+          "description": "When a creature you can see within 60 feet makes an attack roll, ability check, or damage roll, you can use your reaction to expend one Bardic Inspiration die and subtract it from their roll."
+        },
+        {
+          "level": 6,
+          "name": "Additional Magical Secrets",
+          "description": "Learn two spells of your choice from any class. These count as bard spells but don't count against your spells known."
+        },
+        {
+          "level": 14,
+          "name": "Peerless Skill",
+          "description": "When you make an ability check, you can expend one use of Bardic Inspiration to add the die to your roll (after rolling but before knowing success/failure)."
+        }
+      ]
+    },
+    "valor": {
+      "name": "College of Valor",
+      "description": "Bards of the College of Valor are daring skalds whose tales keep alive the memory of the great heroes of the past, inspiring a new generation of heroes.",
+      "features": [
+        {
+          "level": 3,
+          "name": "Bonus Proficiencies",
+          "description": "You gain proficiency with medium armor, shields, and martial weapons."
+        },
+        {
+          "level": 3,
+          "name": "Combat Inspiration",
+          "description": "A creature with a Bardic Inspiration die can add it to a weapon damage roll or add it to their AC against one attack (as a reaction)."
+        },
+        {
+          "level": 6,
+          "name": "Extra Attack",
+          "description": "You can attack twice, instead of once, whenever you take the Attack action on your turn."
+        },
+        {
+          "level": 14,
+          "name": "Battle Magic",
+          "description": "When you use your action to cast a bard spell, you can make one weapon attack as a bonus action."
+        }
+      ]
+    },
+    "glamour": {
+      "name": "College of Glamour",
+      "description": "The College of Glamour is the home of bards who mastered their craft in the vibrant realm of the Feywild or under the tutelage of someone who dwelled there.",
+      "features": [
+        {
+          "level": 3,
+          "name": "Mantle of Inspiration",
+          "description": "As a bonus action, expend one Bardic Inspiration to grant up to 5 creatures temporary HP and let them use their reaction to move up to their speed without provoking opportunity attacks."
+        },
+        {
+          "level": 3,
+          "name": "Enthralling Performance",
+          "description": "Perform for at least 1 minute to charm humanoids. Charmed targets idolize you and hinder those opposing you (Wisdom save to resist)."
+        },
+        {
+          "level": 6,
+          "name": "Mantle of Majesty",
+          "description": "As a bonus action, cast Command without a spell slot. You can do this each turn for 1 minute. Once used, can't use again until long rest."
+        },
+        {
+          "level": 14,
+          "name": "Unbreakable Majesty",
+          "description": "As a bonus action, assume a magically majestic presence for 1 minute. Creatures attacking you must make Charisma saves or choose a new target."
+        }
+      ]
+    },
+    "swords": {
+      "name": "College of Swords",
+      "description": "Bards of the College of Swords are called blades, entertaining through weapon prowess. They perform stunts such as sword swallowing, knife throwing, and juggling.",
+      "features": [
+        {
+          "level": 3,
+          "name": "Bonus Proficiencies",
+          "description": "You gain proficiency with medium armor and scimitars. Using a weapon as your spellcasting focus for bard spells."
+        },
+        {
+          "level": 3,
+          "name": "Fighting Style",
+          "description": "Choose Dueling or Two-Weapon Fighting style."
+        },
+        {
+          "level": 3,
+          "name": "Blade Flourish",
+          "description": "When you take the Attack action, your walking speed increases by 10 feet and you can expend Bardic Inspiration for special flourishes: Defensive (+die to AC), Slashing (deal die damage to nearby creature), or Mobile (+die to damage, push target)."
+        },
+        {
+          "level": 6,
+          "name": "Extra Attack",
+          "description": "You can attack twice, instead of once, whenever you take the Attack action on your turn."
+        },
+        {
+          "level": 14,
+          "name": "Master's Flourish",
+          "description": "When you use a Blade Flourish, you can roll a d6 and use it instead of expending a Bardic Inspiration die."
+        }
+      ]
+    },
+    "whispers": {
+      "name": "College of Whispers",
+      "description": "Bards of the College of Whispers use their knowledge and magic to uncover secrets and turn them against others through extortion and threats.",
+      "features": [
+        {
+          "level": 3,
+          "name": "Psychic Blades",
+          "description": "When you hit with a weapon attack, you can expend one Bardic Inspiration to deal extra psychic damage equal to a roll of that die."
+        },
+        {
+          "level": 3,
+          "name": "Words of Terror",
+          "description": "Speak privately with a humanoid for 1 minute to frighten them for 1 hour or until harmed. Target believes you know their darkest secret (Wisdom save to resist)."
+        },
+        {
+          "level": 6,
+          "name": "Mantle of Whispers",
+          "description": "When a humanoid dies within 30 feet, you can capture its shadow as a reaction. You can use the shadow to assume the dead creature's appearance and knowledge for 1 hour."
+        },
+        {
+          "level": 14,
+          "name": "Shadow Lore",
+          "description": "Weave magic to magically charm a creature. The charmed target obeys your commands for 8 hours (Wisdom save to resist)."
+        }
+      ]
+    },
+    "creation": {
+      "name": "College of Creation",
+      "description": "Bards of the College of Creation believe the cosmos is a work of art—the creation of the first dragons and gods. That creative work included harmonies that continue to resound through existence today.",
+      "features": [
+        {
+          "level": 3,
+          "name": "Mote of Potential",
+          "description": "When you give a creature a Bardic Inspiration die, you can utter notes from the Song of Creation to create a Mote of Potential, granting additional benefits when the die is used."
+        },
+        {
+          "level": 3,
+          "name": "Performance of Creation",
+          "description": "As an action, create one nonmagical item worth up to 20 times your bard level in gold (must fit in a 5-foot cube). Item disappears after a number of hours equal to your proficiency bonus."
+        },
+        {
+          "level": 6,
+          "name": "Animating Performance",
+          "description": "As an action, animate a Large or smaller nonmagical item, turning it into a Dancing Item creature under your control for 1 hour."
+        },
+        {
+          "level": 14,
+          "name": "Creative Crescendo",
+          "description": "When you use Performance of Creation, you can create more than one item and the maximum value increases. You can create multiple nonmagical items simultaneously."
+        }
+      ]
+    },
+    "eloquence": {
+      "name": "College of Eloquence",
+      "description": "Bards of this college master the art of oratory. Persuasion is regarded as a high art, and a well-reasoned, well-spoken argument often proves more persuasive than facts.",
+      "features": [
+        {
+          "level": 3,
+          "name": "Silver Tongue",
+          "description": "When you make a Charisma (Persuasion) or Charisma (Deception) check, you can treat a d20 roll of 9 or lower as a 10."
+        },
+        {
+          "level": 3,
+          "name": "Unsettling Words",
+          "description": "As a bonus action, expend a Bardic Inspiration die to subtract it from a creature's next saving throw within the next minute."
+        },
+        {
+          "level": 6,
+          "name": "Unfailing Inspiration",
+          "description": "When a creature uses your Bardic Inspiration and fails, they can keep the die."
+        },
+        {
+          "level": 6,
+          "name": "Universal Speech",
+          "description": "You can make any creature understand your speech. A number of times equal to your Charisma modifier (minimum once), you can choose creatures to always understand you."
+        },
+        {
+          "level": 14,
+          "name": "Infectious Inspiration",
+          "description": "When a creature uses your Bardic Inspiration and succeeds, you can use your reaction to grant Bardic Inspiration to another creature within 60 feet (without expending a use)."
+        }
+      ]
+    }
+  }
+}

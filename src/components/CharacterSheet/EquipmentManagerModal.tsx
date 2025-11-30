@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { X, Search, Package, Sword, Shield, Wrench, Plus, Minus } from 'lucide-react';
 import { Character, Equipment } from '../../types/dnd';
 import { loadEquipment } from '../../services/dataService';
@@ -25,6 +25,11 @@ export const EquipmentManagerModal: React.FC<EquipmentManagerModalProps> = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<'all' | 'weapons' | 'armor' | 'gear' | 'tools'>('all');
   const [pendingItems, setPendingItems] = useState<PendingItem[]>([]);
+  const [tooltipData, setTooltipData] = useState<{
+    presetName: string;
+    items: { equipmentSlug: string; quantity: number }[];
+    position: { x: number; y: number };
+  } | null>(null);
 
   const allEquipment = useMemo(() => loadEquipment(), []);
 
@@ -123,6 +128,35 @@ export const EquipmentManagerModal: React.FC<EquipmentManagerModalProps> = ({
     'Quest Reward': [
       { equipmentSlug: 'gold-piece', quantity: 50 },
       { equipmentSlug: 'potion-of-healing', quantity: 1 }
+    ],
+    "Delver's Pack": [
+      { equipmentSlug: 'crowbar', quantity: 1 },
+      { equipmentSlug: 'chalk-1-piece', quantity: 5 },
+      { equipmentSlug: 'thieves-tools', quantity: 1 },
+      { equipmentSlug: 'healers-kit', quantity: 1 },
+      { equipmentSlug: 'signal-whistle', quantity: 1 }
+    ],
+    "Cheap Tricks Pack": [
+      { equipmentSlug: 'ball-bearings-bag-of-1000', quantity: 1 },
+      { equipmentSlug: 'caltrops', quantity: 20 }
+    ],
+    "Wilderness Survivor Kit": [
+      { equipmentSlug: 'bedroll', quantity: 1 },
+      { equipmentSlug: 'fishing-tackle', quantity: 1 },
+      { equipmentSlug: 'hunting-trap', quantity: 1 },
+      { equipmentSlug: 'antitoxin', quantity: 2 }
+    ],
+    "Urban Infiltrator Kit": [
+      { equipmentSlug: 'manacles', quantity: 1 },
+      { equipmentSlug: 'crowbar', quantity: 1 },
+      { equipmentSlug: 'sealing-wax', quantity: 1 },
+      { equipmentSlug: 'soap', quantity: 1 }
+    ],
+    "Vampire Hunter Kit": [
+      { equipmentSlug: 'holy-water-flask', quantity: 5 },
+      { equipmentSlug: 'dagger', quantity: 1 },
+      { equipmentSlug: 'oil-flask', quantity: 5 },
+      { equipmentSlug: 'healers-kit', quantity: 1 }
     ]
   };
 
@@ -310,6 +344,15 @@ export const EquipmentManagerModal: React.FC<EquipmentManagerModalProps> = ({
                   <button
                     key={presetName}
                     onClick={() => applyQuickPreset(presetName)}
+                    onMouseEnter={(e) => {
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      setTooltipData({
+                        presetName,
+                        items,
+                        position: { x: rect.right + 10, y: rect.top }
+                      });
+                    }}
+                    onMouseLeave={() => setTooltipData(null)}
                     className="w-full p-3 bg-theme-tertiary hover:bg-theme-hover rounded-lg text-left transition-colors"
                   >
                     <div className="font-medium text-theme-primary text-sm">{presetName}</div>
@@ -348,6 +391,30 @@ export const EquipmentManagerModal: React.FC<EquipmentManagerModalProps> = ({
             </button>
           </div>
         </div>
+
+        {/* Preset Tooltip */}
+        {tooltipData && (
+          <div
+            className="fixed z-50 bg-theme-secondary border border-theme-primary rounded-lg shadow-lg p-3 max-w-xs"
+            style={{
+              left: tooltipData.position.x,
+              top: tooltipData.position.y,
+              pointerEvents: 'none'
+            }}
+          >
+            <div className="text-sm font-medium text-theme-primary mb-2">{tooltipData.presetName}</div>
+            <div className="space-y-1">
+              {tooltipData.items.map((item, index) => {
+                const equipment = allEquipment.find(eq => eq.slug === item.equipmentSlug);
+                return (
+                  <div key={index} className="text-xs text-theme-muted">
+                    • {equipment?.name || item.equipmentSlug} ×{item.quantity}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

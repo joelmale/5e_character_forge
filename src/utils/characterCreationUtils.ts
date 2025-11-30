@@ -1,5 +1,5 @@
 import { CharacterCreationData, Character, AbilityName, SkillName } from '../types/dnd';
-import { getAllRaces, loadClasses, BACKGROUNDS, PROFICIENCY_BONUSES, getModifier, SKILL_TO_ABILITY, ALL_SKILLS, getHitDieForClass } from '../services/dataService';
+import { getAllSpecies, loadClasses, BACKGROUNDS, PROFICIENCY_BONUSES, getModifier, SKILL_TO_ABILITY, ALL_SKILLS, getHitDieForClass } from '../services/dataService';
 import { migrateSpellSelectionToCharacter } from '../utils/spellUtils';
 import { addItemToInventoryByName } from '../utils/equipmentMatching';
 import { BASE_ARMOR_CLASS } from '../constants/combat';
@@ -10,7 +10,7 @@ import { BASE_ARMOR_CLASS } from '../constants/combat';
 export const calculateCharacterStats = (data: CharacterCreationData): Character => {
   console.log('🔧 [CharacterCreation] Starting stat calculation');
   console.log('📊 [CharacterCreation] Input data:', {
-    raceSlug: data.raceSlug,
+    speciesSlug: data.speciesSlug,
     classSlug: data.classSlug,
     level: data.level,
     background: data.background,
@@ -18,15 +18,15 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
     selectedSkills: data.selectedSkills
   });
 
-  const raceData = getAllRaces().find(r => r.slug === data.raceSlug);
+  const speciesData = getAllSpecies().find(s => s.slug === data.speciesSlug);
   const classData = loadClasses().find(c => c.slug === data.classSlug);
 
   console.log('🔍 [CharacterCreation] Data lookup results:', {
-    raceData: raceData ? { name: raceData.name, slug: raceData.slug } : null,
+    speciesData: speciesData ? { name: speciesData.name, slug: speciesData.slug } : null,
     classData: classData ? { name: classData.name, slug: classData.slug } : null
   });
 
-  if (!raceData || !classData) {
+  if (!speciesData || !classData) {
     console.error('❌ [CharacterCreation] Missing race or class data - throwing error');
     throw new Error("Incomplete creation data.");
   }
@@ -37,7 +37,7 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
 
   // 1. Calculate Abilities with Racial Bonuses and ASI increases
   (Object.keys(data.abilities) as AbilityName[]).forEach((ability) => {
-    let rawScore = data.abilities[ability] + (raceData.ability_bonuses[ability] || 0);
+    let rawScore = data.abilities[ability] + (speciesData.ability_bonuses[ability] || 0);
 
     // Apply cumulative ASI increases for high-level characters
     if (data.cumulativeASI) {
@@ -87,7 +87,7 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
   }
 
   // Add racial bonuses (like Dwarf toughness)
-  maxHitPoints += (raceData.slug === 'dwarf' ? level : 0);
+  maxHitPoints += (speciesData.slug === 'dwarf' ? level : 0);
 
   // 3. Calculate Skills (from selected skills + background skills + expertise)
   const backgroundData = BACKGROUNDS.find(bg => bg.name === data.background);
@@ -187,7 +187,8 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
     bonds: data.bonds || '',
     flaws: data.flaws || '',
     classFeatures: classData.class_features || [],
-    racialTraits: raceData.racial_traits || [],
+    speciesTraits: speciesData.species_traits || [],
+    musicalInstrumentProficiencies: [],
   };
 
   // 8. Calculate SRD Features (from the original implementation)
@@ -210,7 +211,7 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
   const character: Character = {
     id: '', // Will be set when saving
     name: data.name,
-    race: raceData.name,
+    species: speciesData.name,
     class: classData.name,
     level,
     alignment: data.alignment,

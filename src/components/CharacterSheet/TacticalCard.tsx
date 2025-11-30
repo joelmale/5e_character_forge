@@ -37,6 +37,7 @@ export const TacticalCard: React.FC<TacticalCardProps> = ({ action, onAction, th
 
   // Text colors
   const textPrimaryClass = isPaperSheet ? 'text-[#1e140a]' : 'text-theme-primary';
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const _textMutedClass = isPaperSheet ? 'text-[#3d2817]' : 'text-theme-muted';
 
   // Button colors

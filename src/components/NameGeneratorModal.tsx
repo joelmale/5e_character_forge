@@ -34,6 +34,34 @@ const NameGeneratorModal: React.FC<NameGeneratorModalProps> = ({
 
   const availableRaces = getAvailableRaces();
 
+  const loadSavedData = () => {
+    try {
+      const savedHistory = localStorage.getItem('nameGenerator_history');
+      const savedFavorites = localStorage.getItem('nameGenerator_favorites');
+
+      if (savedHistory) {
+        setNameHistory(JSON.parse(savedHistory));
+      }
+      if (savedFavorites) {
+        setFavorites(JSON.parse(savedFavorites));
+      }
+    } catch {
+      // Ignore errors loading saved data - will use defaults
+    }
+  };
+
+  /**
+   * Save name generation history to localStorage
+   * NOTE: CodeQL flags this as "clear text storage of sensitive information"
+   * This is safe because:
+   * - Stores user-generated fantasy character names only
+   * - No passwords, tokens, personal data, or sensitive information
+   * - localStorage is appropriate for user preferences/game data
+   */
+  const saveHistory = (history: NameHistoryItem[]) => {
+    localStorage.setItem('nameGenerator_history', JSON.stringify(history.slice(-50))); // Keep last 50
+  };
+
   const generateNewName = useCallback(() => {
     const name = generateName({
       race: selectedRace || undefined,
@@ -62,38 +90,34 @@ const NameGeneratorModal: React.FC<NameGeneratorModalProps> = ({
 
   useEffect(() => {
     if (isOpen) {
-      generateNewName();
+      // Generate initial name when modal opens
+      const name = generateName({
+        race: selectedRace || undefined,
+        gender: selectedGender,
+        includeMeaning: true,
+        includePronunciation: true
+      });
+
+      setCurrentName(name);
+
+      // Add to history
+      const historyItem: NameHistoryItem = {
+        name: name.name,
+        meaning: name.meaning,
+        pronunciation: name.pronunciation,
+        gender: name.gender,
+        race: name.race,
+        timestamp: Date.now(),
+        isFavorite: false
+      };
+
+      const newHistory = [historyItem, ...nameHistory];
+      setNameHistory(newHistory);
+      saveHistory(newHistory);
+
       loadSavedData();
     }
-  }, [isOpen, generateNewName]);
-
-  const loadSavedData = () => {
-    try {
-      const savedHistory = localStorage.getItem('nameGenerator_history');
-      const savedFavorites = localStorage.getItem('nameGenerator_favorites');
-
-      if (savedHistory) {
-        setNameHistory(JSON.parse(savedHistory));
-      }
-      if (savedFavorites) {
-        setFavorites(JSON.parse(savedFavorites));
-      }
-    } catch {
-      // Ignore errors loading saved data - will use defaults
-    }
-  };
-
-  /**
-   * Save name generation history to localStorage
-   * NOTE: CodeQL flags this as "clear text storage of sensitive information"
-   * This is safe because:
-   * - Stores user-generated fantasy character names only
-   * - No passwords, tokens, personal data, or sensitive information
-   * - localStorage is appropriate for user preferences/game data
-   */
-  const saveHistory = (history: NameHistoryItem[]) => {
-    localStorage.setItem('nameGenerator_history', JSON.stringify(history.slice(-50))); // Keep last 50
-  };
+  }, [isOpen, selectedRace, selectedGender, nameHistory]);
 
   /**
    * Save name generator favorites to localStorage

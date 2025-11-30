@@ -5,11 +5,11 @@
  * Allows distributing ability score increases or selecting feats for each ASI level.
  */
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { ArrowRight, ArrowLeft, TrendingUp, Award, Plus, Minus } from 'lucide-react';
 import { StepProps } from '../types/wizard.types';
 import { getASILevelsForCharacter } from '../../../utils/highLevelCreationUtils';
-import { AbilityName, Feat } from '../../../types/dnd';
+import { AbilityName } from '../../../types/dnd';
 import { getAvailableFeatsForCharacter } from '../../../utils/featUtils';
 import { FEAT_DATABASE } from '../../../services/dataService';
 

@@ -4,7 +4,6 @@ import { StepProps } from '../types/wizard.types';
 import { FEAT_DATABASE, randomizeFeats } from '../../../services/dataService';
 import {
   calculateFeatAvailability,
-  filterAvailableFeats,
   featProvidesAbilityIncrease,
   getFeatSourceInfo,
   canSelectMoreFeats,
@@ -117,8 +116,7 @@ export const Step5point5Feats: React.FC<StepProps> = ({ data, updateData, nextSt
     if (!featChoiceModal.feat) return;
 
     // Store the choices in the character data
-    const featChoices = data.featChoices || {};
-    featChoices[featChoiceModal.feat.slug] = choices;
+    const featChoices = { ...(data.featChoices || {}), [featChoiceModal.feat.slug]: choices };
 
     updateData({
       selectedFeats: [...selectedFeats, featChoiceModal.feat.slug],

@@ -1,15 +1,15 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import RacialTraitModal from './RacialTraitModal';
+import SpeciesTraitModal from './SpeciesTraitModal';
 
-describe('RacialTraitModal', () => {
+describe('SpeciesTraitModal', () => {
   it('should display correct description for Mask of the Wild', () => {
     render(
-      <RacialTraitModal
+      <SpeciesTraitModal
         isOpen={true}
         onClose={() => {}}
         traitName="Mask of the Wild"
-        raceName="Wood Elf"
+        speciesName="Wood Elf"
       />
     );
 
@@ -18,11 +18,11 @@ describe('RacialTraitModal', () => {
 
   it('should display correct description for Fleet of Foot', () => {
     render(
-      <RacialTraitModal
+      <SpeciesTraitModal
         isOpen={true}
         onClose={() => {}}
         traitName="Fleet of Foot"
-        raceName="Wood Elf"
+        speciesName="Wood Elf"
       />
     );
 
@@ -31,14 +31,14 @@ describe('RacialTraitModal', () => {
 
   it('should display fallback message for unknown traits', () => {
     render(
-      <RacialTraitModal
+      <SpeciesTraitModal
         isOpen={true}
         onClose={() => {}}
         traitName="Unknown Trait"
-        raceName="Test Race"
+        speciesName="Test Species"
       />
     );
 
-    expect(screen.getByText(/This racial trait provides special abilities or bonuses to Test Race characters/)).toBeInTheDocument();
+    expect(screen.getByText(/This species trait provides special abilities or bonuses to Test Species characters/)).toBeInTheDocument();
   });
 });

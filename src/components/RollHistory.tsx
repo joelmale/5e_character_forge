@@ -41,7 +41,7 @@ export const RollHistoryTicker: React.FC<RollHistoryTickerProps> = ({ rolls, lay
   const styles = getLayoutStyles();
 
   return (
-    <div className={styles.container}>
+    <div className={`${styles.container} max-h-32 overflow-y-auto`}>
       <div className={`${styles.maxWidth} mx-auto flex items-center gap-4 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800`}>
         <span className="text-xs font-bold text-theme-muted whitespace-nowrap">
           Recent Rolls:

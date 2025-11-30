@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Trash2, Tent, TrendingUp, TrendingDown, Dice6 } from 'lucide-react';
+import { Trash2, Tent, TrendingUp, TrendingDown, Dice6, Edit3 } from 'lucide-react';
 import { Character } from '../../types/dnd';
 import { LayoutSelector } from './LayoutSelector';
 
@@ -7,6 +7,7 @@ interface CharacterHeaderProps {
   character: Character;
   onClose: () => void;
   onDelete: (id: string) => void;
+  onEdit?: () => void;
   onShortRest: (id: string) => void;
   onLongRest: (id: string) => void;
   onLevelUp: (id: string) => void;
@@ -18,6 +19,7 @@ export const CharacterHeader: React.FC<CharacterHeaderProps> = ({
   character,
   onClose,
   onDelete,
+  onEdit,
   onShortRest,
   onLongRest,
   onLevelUp,
@@ -35,7 +37,7 @@ export const CharacterHeader: React.FC<CharacterHeaderProps> = ({
             {character.name}
           </h1>
           <div className="text-sm text-theme-tertiary">
-            {character.race} {character.class} • Level {character.level}
+            {character.species} {character.class} • Level {character.level}
           </div>
         </div>
 
@@ -74,31 +76,40 @@ export const CharacterHeader: React.FC<CharacterHeaderProps> = ({
 
            <LayoutSelector />
 
-           <div className="grid grid-cols-2 gap-2">
-            <button
-              onClick={() => onShortRest(character.id)}
-              className="px-2 py-2 bg-accent-blue hover:bg-accent-blue-light rounded-lg transition-colors flex items-center justify-center"
-              title="Take a Short Rest (recover HP with hit dice)"
-            >
-              <Tent className="w-5 h-5 text-white" />
-            </button>
-              <button
-                onClick={() => {
-                  console.log('🏠 [LONG REST] Long rest button clicked for character:', character.id);
-                  onLongRest(character.id);
-                }}
-                className="px-2 py-2 bg-accent-green hover:bg-accent-green rounded-lg transition-colors flex items-center justify-center"
-                title="Take a Long Rest (recover all HP and spell slots)"
-              >
+            <div className="grid grid-cols-3 gap-2">
+             {onEdit && (
+               <button
+                 onClick={onEdit}
+                 className="px-2 py-2 bg-accent-yellow hover:bg-accent-yellow-light rounded-lg transition-colors flex items-center justify-center"
+                 title="Edit character details"
+               >
+                 <Edit3 className="w-5 h-5 text-white" />
+               </button>
+             )}
+             <button
+               onClick={() => onShortRest(character.id)}
+               className="px-2 py-2 bg-accent-blue hover:bg-accent-blue-light rounded-lg transition-colors flex items-center justify-center"
+               title="Take a Short Rest (recover HP with hit dice)"
+             >
                <Tent className="w-5 h-5 text-white" />
              </button>
-            <button
-              onClick={() => onLevelUp(character.id)}
-              className="px-2 py-2 bg-accent-purple hover:bg-accent-purple-light rounded-lg transition-colors flex items-center justify-center"
-              title="Level up your character"
-            >
-              <TrendingUp className="w-5 h-5 text-white" />
-            </button>
+               <button
+                 onClick={() => {
+                   console.log('🏠 [LONG REST] Long rest button clicked for character:', character.id);
+                   onLongRest(character.id);
+                 }}
+                 className="px-2 py-2 bg-accent-green hover:bg-accent-green rounded-lg transition-colors flex items-center justify-center"
+                 title="Take a Long Rest (recover all HP and spell slots)"
+               >
+                <Tent className="w-5 h-5 text-white" />
+              </button>
+             <button
+               onClick={() => onLevelUp(character.id)}
+               className="px-2 py-2 bg-accent-purple hover:bg-accent-purple-light rounded-lg transition-colors flex items-center justify-center"
+               title="Level up your character"
+             >
+               <TrendingUp className="w-5 h-5 text-white" />
+             </button>
             {onLevelDown && (
               <button
                 onClick={() => onLevelDown(character.id)}

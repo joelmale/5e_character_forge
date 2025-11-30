@@ -1,6 +1,6 @@
 export { Step0Level } from './Step0Level';
 export { Step1Details } from './Step1Details';
-export { Step2Race } from './Step2Race';
+export { Step2Species } from './Step2Species';
 export { Step3Class } from './Step3Class';
 export { Step3point5FightingStyle } from './Step3point5FightingStyle';
 export { Step4Spells } from './Step4Spells';

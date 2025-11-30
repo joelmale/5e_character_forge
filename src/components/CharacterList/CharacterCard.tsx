@@ -24,7 +24,7 @@ export const CharacterCard: React.FC<CharacterCardProps> = ({
       <div className="flex items-start justify-between mb-2">
         <div className="flex-grow">
           <h3 className="text-2xl font-bold text-accent-red-light truncate">{character.name}</h3>
-          <p className="text-sm text-theme-muted mb-3">{character.race} | {character.class} (Level {character.level})</p>
+          <p className="text-sm text-theme-muted mb-3">{character.species} | {character.class} (Level {character.level})</p>
         </div>
         <label className="flex items-center cursor-pointer ml-2" title="Select for export">
           <input

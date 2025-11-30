@@ -142,17 +142,30 @@
     "icon": "🌑",
     "themeColor": "#4B0082"
   },
-  "wizard": {
+   "wizard": {
+    "category": "Arcane",
+    "abilityPriorities": ["INT", "CON", "DEX", "WIS", "CHA", "STR"],
+    "detailedDescription": "Wizards are supreme magic-users, defined and united as a class by the spells they cast. Drawing on the subtle weave of magic that permeates the cosmos, wizards cast spells of explosive fire, arcing lightning, subtle deception, and brute-force mind control.",
+    "roleplayingTips": [
+      "Embrace your scholarly nature and thirst for knowledge",
+      "Show curiosity about magical phenomena and ancient mysteries",
+      "Balance your pursuit of power with wisdom and caution"
+    ],
+    "keyFeatures": ["Spellcasting", "Arcane Recovery", "Spellbook", "Arcane Tradition"],
+    "icon": "🧙",
+    "themeColor": "#4169E1"
+  },
+  "artificer": {
     "category": "Arcane",
     "abilityPriorities": ["INT", "CON", "DEX", "WIS", "STR", "CHA"],
-    "detailedDescription": "Wizards are scholars of arcane magic who master spells through study and intellect. They are repositories of magical knowledge, capable of wielding incredible power through understanding and preparation.",
+    "detailedDescription": "Artificers are inventors who infuse magic into everyday objects, creating powerful tools and weapons. Masters of invention who see magic as just another tool for their creations, they excel at creating temporary magical items and infusing existing items with magical properties.",
     "roleplayingTips": [
-      "Pursue knowledge and understanding of magic relentlessly",
-      "Document your discoveries and share knowledge with others",
-      "Approach problems with logic and scholarly analysis"
+      "Show enthusiasm for invention and experimentation",
+      "Demonstrate curiosity about how things work and how to improve them",
+      "Balance creativity with practicality in your magical tinkering"
     ],
-    "keyFeatures": ["Spellcasting", "Arcane Recovery", "Spellbook", "Ritual Casting"],
-    "icon": "📚",
-    "themeColor": "#4169E1"
+    "keyFeatures": ["Magical Tinkering", "Spellcasting", "Infuse Item", "Artificer Specialist"],
+    "icon": "⚙️",
+    "themeColor": "#708090"
   }
 }

@@ -49,12 +49,9 @@ const NewCharacterModal: React.FC<NewCharacterModalProps> = ({
                 <FileText className="w-6 h-6 text-accent-blue-light mr-2 group-hover:text-blue-300" />
                 <h3 className="text-lg font-semibold text-blue-300">Manual Entry</h3>
               </div>
-              <p className="text-sm text-theme-tertiary leading-relaxed">
-                Transfer a pen & paper character or fill out a complete character sheet manually.
-              </p>
-              <div className="mt-3 text-xs text-accent-yellow-light">
-                Coming Soon
-              </div>
+               <p className="text-sm text-theme-tertiary leading-relaxed">
+                 Transfer a pen & paper character or fill out a complete character sheet manually.
+               </p>
             </button>
 
             {/* Character Wizard Option */}

@@ -1,7 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { ArrowLeft, ArrowRight, Check, Shuffle } from 'lucide-react';
 import { StepProps } from '../types/wizard.types';
-import { loadClasses, getCantripsByClass, getLeveledSpellsByClass, AppSpell } from '../../../services/dataService';
+import { loadClasses, getCantripsByClass, getLeveledSpellsByClass, AppSpell, SPELLS_KNOWN_BY_CLASS } from '../../../services/dataService';
 import {
   getSpellcastingType,
   cleanupInvalidSpellSelections,
@@ -28,7 +28,7 @@ const RandomizeButton: React.FC<{ onClick: () => void; title?: string; className
 };
 
 export const Step4Spells: React.FC<StepProps> = ({ data, updateData, nextStep, prevStep, getNextStepLabel }) => {
-  const allClasses = loadClasses();
+  const allClasses = loadClasses(data.edition);
   const selectedClass = allClasses.find(c => c.slug === data.classSlug);
   const hasProcessedAutoAdvance = useRef(false);
 
@@ -92,10 +92,16 @@ export const Step4Spells: React.FC<StepProps> = ({ data, updateData, nextStep, p
     cantripsKnownAtLevel += 1;
   }
 
-  // For prepared casters (Cleric, Druid, Paladin), calculate max prepared spells
-  const maxPreparedSpellsAtLevel = spellcastingType === 'prepared'
-    ? getMaxPreparedSpells(data.abilities, spellcasting.ability, data.level)
-    : spellcasting.spellsKnownOrPrepared;
+  // Calculate max spells based on caster type
+  let maxPreparedSpellsAtLevel: number;
+  if (spellcastingType === 'prepared') {
+    maxPreparedSpellsAtLevel = getMaxPreparedSpells(data.abilities, spellcasting.ability, data.level);
+  } else if (spellcastingType === 'known') {
+    // For known casters, use level-aware spells known data
+    maxPreparedSpellsAtLevel = (SPELLS_KNOWN_BY_CLASS as Record<string, Record<string, number>>)[data.classSlug]?.[data.level] || spellcasting.spellsKnownOrPrepared;
+  } else {
+    maxPreparedSpellsAtLevel = spellcasting.spellsKnownOrPrepared;
+  }
 
   const handleCantripToggle = (spellSlug: string) => {
     const current = data.spellSelection.selectedCantrips;

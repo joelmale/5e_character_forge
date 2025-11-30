@@ -2,20 +2,20 @@ import React from 'react';
 import { X } from 'lucide-react';
 import { featureDescriptions } from '../utils/featureDescriptions';
 
-interface RacialTraitModalProps {
+interface SpeciesTraitModalProps {
   isOpen: boolean;
   onClose: () => void;
   traitName: string;
-  raceName: string;
+  speciesName: string;
   traitDescription?: string;
   position?: { x: number; y: number } | null;
 }
 
-const RacialTraitModal: React.FC<RacialTraitModalProps> = ({
+const SpeciesTraitModal: React.FC<SpeciesTraitModalProps> = ({
   isOpen,
   onClose,
   traitName,
-  raceName,
+  speciesName,
   traitDescription,
   position
 }) => {
@@ -31,7 +31,7 @@ const RacialTraitModal: React.FC<RacialTraitModalProps> = ({
       return featureDesc.description;
     }
 
-    return `This racial trait provides special abilities or bonuses to ${raceName} characters.`;
+    return `This species trait provides special abilities or bonuses to ${speciesName} characters.`;
   };
 
   // Calculate modal position
@@ -83,10 +83,10 @@ const RacialTraitModal: React.FC<RacialTraitModalProps> = ({
         </div>
 
         <div className="p-4 space-y-3">
-          <div>
-            <span className="text-sm text-theme-muted">From: </span>
-            <span className="text-sm text-blue-300">{raceName}</span>
-          </div>
+           <div>
+             <span className="text-sm text-theme-muted">From: </span>
+             <span className="text-sm text-blue-300">{speciesName}</span>
+           </div>
 
           <div>
             <p className="text-sm text-theme-tertiary leading-relaxed">
@@ -99,4 +99,4 @@ const RacialTraitModal: React.FC<RacialTraitModalProps> = ({
   );
 };
 
-export default RacialTraitModal;
+export default SpeciesTraitModal;

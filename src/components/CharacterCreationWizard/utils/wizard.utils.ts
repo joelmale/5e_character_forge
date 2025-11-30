@@ -1,14 +1,14 @@
 import { CharacterCreationData, Character, AbilityName, SkillName, EquippedItem } from '../../../types/dnd';
-import { getAllRaces, loadClasses, loadEquipment, getFeaturesByClass, getFeaturesBySubclass, PROFICIENCY_BONUSES, ALL_SKILLS, SKILL_TO_ABILITY, BACKGROUNDS, EQUIPMENT_PACKAGES, getModifier, getHitDieForClass } from '../../../services/dataService';
+import { getAllSpecies, loadClasses, loadEquipment, getFeaturesByClass, getFeaturesBySubclass, PROFICIENCY_BONUSES, ALL_SKILLS, SKILL_TO_ABILITY, BACKGROUNDS, EQUIPMENT_PACKAGES, getModifier, getHitDieForClass } from '../../../services/dataService';
 import { migrateSpellSelectionToCharacter } from '../../../utils/spellUtils';
 import { generateUUID } from '../../../services/diceService';
 import { calculateKnownLanguages } from '../../../utils/languageUtils';
 
 export const calculateCharacterStats = (data: CharacterCreationData): Character => {
-  const raceData = getAllRaces().find(r => r.slug === data.raceSlug);
+  const speciesData = getAllSpecies().find(s => s.slug === data.speciesSlug);
   const classData = loadClasses(data.edition).find(c => c.slug === data.classSlug);
 
-  if (!raceData || !classData) {
+  if (!speciesData || !classData) {
     throw new Error("Incomplete creation data.");
   }
 
@@ -16,10 +16,10 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
 
   // 1. Calculate Abilities with Racial Bonuses
   (Object.keys(data.abilities) as AbilityName[]).forEach((ability) => {
-    let racialBonus = raceData.ability_bonuses[ability] || 0;
+    let racialBonus = speciesData.ability_bonuses[ability] || 0;
 
     // Handle variant human ability bonuses
-    if (raceData.slug === 'human' && data.selectedRaceVariant === 'variant' && data.variantAbilityBonuses) {
+    if (speciesData.slug === 'human' && data.selectedSpeciesVariant === 'variant' && data.variantAbilityBonuses) {
       racialBonus = data.variantAbilityBonuses[ability] || 0;
     }
 
@@ -39,14 +39,14 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
     // Default to max for level 1
     hitDieValue = classData.hit_die;
   }
-  const maxHitPoints = hitDieValue + finalAbilities.CON.modifier + (raceData.slug === 'dwarf' ? level : 0);
+  const maxHitPoints = hitDieValue + finalAbilities.CON.modifier + (speciesData.slug === 'dwarf' ? level : 0);
 
   // 3. Calculate Skills (from selected skills + background skills + variant skills)
     const backgroundData = BACKGROUNDS.find(bg => bg.name === data.background);
     const backgroundSkills = backgroundData?.skill_proficiencies || [];
 
     // Add variant human skill proficiency
-    const variantSkills = data.selectedRaceVariant === 'variant' && data.variantSkillProficiency
+    const variantSkills = data.selectedSpeciesVariant === 'variant' && data.variantSkillProficiency
       ? [data.variantSkillProficiency]
       : [];
 
@@ -262,7 +262,7 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
     id: generateUUID(), // Generate UUID for IndexedDB
     name: data.name || "Unnamed Hero",
     edition: data.edition, // Store edition (2014 or 2024)
-    race: raceData.name,
+    species: speciesData.name,
     class: classData.name,
     subclass: data.subclassSlug, // Sprint 5: Store subclass slug
     level,
@@ -290,7 +290,8 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
       bonds: data.bonds,
       flaws: data.flaws,
       classFeatures: allClassFeatures, // Includes fighting style if applicable
-      racialTraits: raceData.racial_traits,
+      speciesTraits: speciesData.species_traits,
+      musicalInstrumentProficiencies: data.selectedMusicalInstruments,
     },
     spellcasting: spellcastingData, // Sprint 2: Include spell data
     // Sprint 4: Equipment and inventory
@@ -311,10 +312,10 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
     },
     selectedFeats: [
       ...(data.selectedFeats || []),
-      ...(data.selectedRaceVariant === 'variant' && data.variantFeat ? [data.variantFeat] : [])
+      ...(data.selectedSpeciesVariant === 'variant' && data.variantFeat ? [data.variantFeat] : [])
     ],
     // Race variant information
-    selectedRaceVariant: data.selectedRaceVariant,
+    selectedSpeciesVariant: data.selectedSpeciesVariant,
     // 2024 Level 1 Feature Choices
     divineOrder: data.divineOrder, // 2024 Cleric Divine Order choice
     primalOrder: data.primalOrder, // 2024 Druid Primal Order choice

@@ -36,7 +36,7 @@ export const Step9Languages: React.FC<StepProps> = ({ data, updateData, nextStep
   autoLanguages.add('Common'); // Always included
 
   // Add racial languages
-  getRacialLanguages(data.raceSlug).forEach((lang: string) => autoLanguages.add(lang));
+  getRacialLanguages(data.speciesSlug).forEach((lang: string) => autoLanguages.add(lang));
 
   // Add class languages
   getClassLanguages(data.classSlug).forEach((lang: string) => autoLanguages.add(lang));
@@ -91,7 +91,7 @@ export const Step9Languages: React.FC<StepProps> = ({ data, updateData, nextStep
         <h3 className='text-xl font-bold text-red-300'>Select Languages</h3>
         <RandomizeButton
           onClick={() => {
-            const languages = randomizeLanguages(data.raceSlug, data.background);
+            const languages = randomizeLanguages(data.speciesSlug, data.background);
             updateData({ knownLanguages: languages });
           }}
           title="Randomize language selection"

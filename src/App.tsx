@@ -24,6 +24,7 @@ import ChooseSubclassModal from './components/ChooseSubclassModal';
 import AbilityScoreIncreaseModal from './components/AbilityScoreIncreaseModal';
 import { DiceRollerModal } from './components/DiceRollerModal';
 import SettingsModal from './components/SettingsModal';
+import { CharacterEditModal } from './components/CharacterEditModal';
 import { RestingScreen } from './components/RestingScreen';
 import { generateUUID, DiceRoll } from './services/diceService';
 import { featureDescriptions } from './utils/featureDescriptions';
@@ -159,6 +160,9 @@ const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'characters' | 'monsters'>('characters');
   const [selectedMonster, setSelectedMonster] = useState<Monster | UserMonster | null>(null);
   const [editingMonster, setEditingMonster] = useState<UserMonster | null>(null);
+
+  // Character editing state
+  const [editingCharacter, setEditingCharacter] = useState<Character | null>(null);
   const [showEncounterView, setShowEncounterView] = useState(false);
   const [rollResult, setRollResult] = useState<{
     text: string;
@@ -175,6 +179,7 @@ const App: React.FC = () => {
   // New character creation modal states
   const [isNewCharacterModalOpen, setIsNewCharacterModalOpen] = useState<boolean>(false);
   const [creationMethod, setCreationMethod] = useState<'manual' | 'wizard' | 'personality' | null>(null);
+  const [isManualEntryOpen, setIsManualEntryOpen] = useState<boolean>(false);
 
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState<boolean>(false);
   const [isDiceTrayModalOpen, setIsDiceTrayModalOpen] = useState<boolean>(false);
@@ -479,7 +484,7 @@ const App: React.FC = () => {
     try {
       await updateCharacter(updatedCharacter);
       setCharacters(prev => prev.map(c => c.id === characterId ? updatedCharacter : c));
-    } catch (e) {
+    } catch {
       return; // Don't show resting screen if save failed
     }
 
@@ -633,7 +638,7 @@ const App: React.FC = () => {
   // New character creation handlers
   const handleSelectManualEntry = useCallback(() => {
     setIsNewCharacterModalOpen(false);
-    setCreationMethod('manual');
+    setIsManualEntryOpen(true);
   }, []);
 
   const handleSelectWizard = useCallback(() => {
@@ -657,7 +662,7 @@ const App: React.FC = () => {
       return;
     }
 
-    if (!characterData.raceSlug || !characterData.classSlug) {
+    if (!characterData.speciesSlug || !characterData.classSlug) {
       setRollResult({
         text: 'Error: Missing required character data.',
         value: null
@@ -678,7 +683,7 @@ const App: React.FC = () => {
         id: generateUUID()
       };
 
-      const savedId = await addCharacter(characterWithId);
+      await addCharacter(characterWithId);
 
       await loadCharacters();
 
@@ -969,10 +974,11 @@ const App: React.FC = () => {
     return (
       <div className="flex flex-col h-screen">
         <div className="flex-1 overflow-auto">
-          <CharacterSheet
-             character={selectedCharacter}
-             onClose={() => setSelectedCharacterId(null)}
-             onDelete={handleDeleteCharacter}
+           <CharacterSheet
+              character={selectedCharacter}
+              onClose={() => setSelectedCharacterId(null)}
+              onDelete={handleDeleteCharacter}
+              onEdit={() => setEditingCharacter(selectedCharacter)}
              setRollResult={setRollResult}
              onDiceRoll={handleDiceRoll}
              onToggleInspiration={handleToggleInspiration}
@@ -1199,7 +1205,7 @@ const App: React.FC = () => {
                     <div className="flex items-start justify-between mb-2">
                       <div className="flex-grow">
                         <h3 className="text-2xl font-bold text-accent-red-light truncate">{char.name}</h3>
-                        <p className="text-sm text-theme-muted mb-3">{char.race} | {char.class} (Level {char.level})</p>
+                        <p className="text-sm text-theme-muted mb-3">{char.species} | {char.class} (Level {char.level})</p>
                       </div>
                       <label className="flex items-center cursor-pointer ml-2" title="Select for export">
                         <input
@@ -1262,10 +1268,18 @@ const App: React.FC = () => {
           onSelectPersonality={handleSelectPersonality}
         />
 
-        {/* Manual Entry Screen */}
-        {creationMethod === 'manual' && (
-          <ManualEntryScreen onBack={handleBackToModal} />
-        )}
+        {/* Manual Entry Modal */}
+        <ManualEntryScreen
+          isOpen={isManualEntryOpen}
+          onClose={() => {
+            setIsManualEntryOpen(false);
+            setCreationMethod(null);
+          }}
+          onCharacterCreated={() => {
+            // Refresh character list
+            loadCharacters();
+          }}
+        />
 
         {/* Character Creation Wizard */}
         <CharacterCreationWizard
@@ -1345,6 +1359,16 @@ const App: React.FC = () => {
              setIsDiceTrayModalOpen(false);
            }}
         />
+
+        {/* Character Edit Modal */}
+        {editingCharacter && (
+          <CharacterEditModal
+            character={editingCharacter}
+            isOpen={true}
+            onClose={() => setEditingCharacter(null)}
+            onSave={handleUpdateCharacter}
+          />
+        )}
 
         {/* Resting Screen */}
         {isResting && (

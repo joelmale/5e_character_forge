@@ -13,6 +13,7 @@ export const DeathSaves: React.FC<DeathSavesProps> = ({
   onUpdateCharacter,
   layoutMode = 'paper-sheet',
 }) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const _updateDeathSaves = (field: 'successes' | 'failures', delta: number) => {
     const current = character.deathSaves || { successes: 0, failures: 0 };
     const newValue = Math.max(0, Math.min(3, current[field] + delta));

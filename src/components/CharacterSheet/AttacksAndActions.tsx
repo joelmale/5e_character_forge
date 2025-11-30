@@ -95,9 +95,11 @@ export const AttacksAndActions: React.FC<AttacksAndActionsProps> = ({
   ).filter(Boolean) as Equipment[] || [];
 
   // Check for Extra Attack feature (Fighter, etc.)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const _hasExtraAttack = character.level >= 5 && ['fighter', 'paladin', 'ranger'].includes(character.class);
 
   // Check for Two-Weapon Fighting style
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const _hasTwoWeaponFighting = character.selectedFightingStyle === 'Two-Weapon Fighting';
 
   // Action Surge usage tracking (now uses resource system)
@@ -110,7 +112,7 @@ export const AttacksAndActions: React.FC<AttacksAndActionsProps> = ({
     return info.current > 0;
   };
 
-  const useActionSurge = () => {
+  const consumeActionSurge = () => {
     if (canUseActionSurge()) {
       const updatedCharacter = consumeResource(character, 'action-surge');
       onUpdateCharacter(updatedCharacter);
@@ -163,6 +165,7 @@ export const AttacksAndActions: React.FC<AttacksAndActionsProps> = ({
     onDiceRoll(roll);
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const _handleCantripAttack = (cantripSlug: string) => {
     if (!character.spellcasting) return;
 
@@ -184,6 +187,7 @@ export const AttacksAndActions: React.FC<AttacksAndActionsProps> = ({
     onDiceRoll(roll);
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const _handleSavingThrow = (ability: keyof Character['abilities']) => {
     const modifier = character.abilities[ability].modifier;
     // TODO: Implement proper saving throw proficiency checking based on class features
@@ -206,6 +210,7 @@ export const AttacksAndActions: React.FC<AttacksAndActionsProps> = ({
     onDiceRoll(roll);
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const _handleInitiative = () => {
     const initiativeRoll = `1d20${character.initiative >= 0 ? '+' : ''}${character.initiative}`;
 
@@ -271,7 +276,7 @@ export const AttacksAndActions: React.FC<AttacksAndActionsProps> = ({
     // Special handling for Action Surge
     if (actionSlug === 'action-surge') {
       if (canUseActionSurge()) {
-        useActionSurge();
+        consumeActionSurge();
       }
       return;
     }
@@ -517,11 +522,17 @@ export const AttacksAndActions: React.FC<AttacksAndActionsProps> = ({
 
   // Determine color scheme based on layout mode
   const isPaperSheet = layoutMode === 'paper-sheet';
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const _bgSecondaryClass = isPaperSheet ? 'bg-[#fcf6e3]' : 'bg-theme-secondary';
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const _bgTertiaryClass = isPaperSheet ? 'bg-[#f5ebd2]' : 'bg-theme-tertiary/50';
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const _textPrimaryClass = isPaperSheet ? 'text-[#1e140a]' : 'text-theme-primary';
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const _textMutedClass = isPaperSheet ? 'text-[#3d2817]' : 'text-theme-muted';
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const _textTertiaryClass = isPaperSheet ? 'text-[#3d2817]' : 'text-theme-tertiary';
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const _borderClass = isPaperSheet ? 'border-[#1e140a]/20' : 'border-red-800';
 
   // Handle tactical action clicks
@@ -557,7 +568,9 @@ export const AttacksAndActions: React.FC<AttacksAndActionsProps> = ({
   return (
     <div className="space-y-6">
       {/* Main Header */}
-      <h2 className="text-2xl font-bold text-black border-b-2 border-theme-primary pb-2">
+      <h2 className={`text-2xl font-bold border-b-2 border-theme-primary pb-2 ${
+        layoutMode === 'paper-sheet' ? 'text-black' : 'text-theme-primary'
+      }`}>
         ⚔️ COMBAT OPTIONS
       </h2>
 

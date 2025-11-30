@@ -3,12 +3,12 @@ import { createPortal } from 'react-dom';
 import { WizardProps } from './types/wizard.types';
 import { useWizardState, useWizardNavigation } from './hooks';
 import { WizardHeader, WizardProgressBar, WizardStepContainer } from './components';
-import { getAllRaces } from '../../services/dataService';
-import RacialTraitModal from '../RacialTraitModal';
+import { getAllSpecies } from '../../services/dataService';
+import SpeciesTraitModal from '../SpeciesTraitModal';
 import {
   Step0Level,
   Step1Details,
-  Step2Race,
+  Step2Species,
   Step3Class,
   Step3point5FightingStyle,
   Step4Spells,
@@ -105,7 +105,7 @@ export const CharacterCreationWizard: React.FC<WizardProps> = ({
     switch (currentStep) {
       case 0: return <Step0Level {...commonProps} />;
       case 1: return <Step1Details {...commonProps} />;
-      case 2: return <Step2Race {...commonProps} />;
+      case 2: return <Step2Species {...commonProps} />;
       case 3: return <Step3Class {...commonProps} />;
       case 4: return <Step4Abilities {...commonProps} />;
       case 5: return <StepHighLevelSetup {...commonProps} />;
@@ -174,13 +174,13 @@ export const CharacterCreationWizard: React.FC<WizardProps> = ({
         </WizardStepContainer>
       </div>
 
-      {/* Racial Trait Modal */}
+      {/* Species Trait Modal */}
       {selectedTrait && (
-        <RacialTraitModal
+        <SpeciesTraitModal
           isOpen={showTraitModal}
           onClose={closeTraitModal}
           traitName={selectedTrait}
-          raceName={creationData.raceSlug ? getAllRaces().find(r => r.slug === creationData.raceSlug)?.name || 'Unknown Race' : 'Unknown Race'}
+          speciesName={creationData.speciesSlug ? getAllSpecies().find(s => s.slug === creationData.speciesSlug)?.name || 'Unknown Species' : 'Unknown Species'}
           position={modalPosition}
         />
       )}

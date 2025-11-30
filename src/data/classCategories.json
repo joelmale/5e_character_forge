@@ -5,12 +5,12 @@
     "description": "Warriors who excel in physical combat, discipline, and martial prowess. These classes focus on strength, skill, and tactical mastery.",
     "classSlugs": ["barbarian", "fighter", "monk", "rogue"]
   },
-  {
+   {
     "name": "🔮 Arcane Classes",
     "icon": "🔮",
     "description": "Spellcasters who master magical forces through study, innate talent, or otherworldly pacts. These classes wield powerful magic and arcane knowledge.",
-    "classSlugs": ["bard", "sorcerer", "warlock", "wizard"]
-  },
+    "classSlugs": ["artificer", "bard", "sorcerer", "warlock", "wizard"]
+   },
   {
     "name": "✨ Divine Classes",
     "icon": "✨",

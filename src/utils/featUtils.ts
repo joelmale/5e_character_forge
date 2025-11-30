@@ -57,19 +57,19 @@ export const checkFeatPrerequisites = (feat: Feat, character: Partial<CharacterC
     return (character.level || 1) >= requiredLevel;
   }
 
-  // Check for race prerequisites
-  if (character.raceSlug) {
-    const characterRace = character.raceSlug.toLowerCase();
+  // Check for species prerequisites
+  if (character.speciesSlug) {
+    const characterSpecies = character.speciesSlug.toLowerCase();
 
-    if (prerequisite.includes('halfling') && characterRace !== 'halfling') return false;
-    if (prerequisite.includes('dragonborn') && characterRace !== 'dragonborn') return false;
-    if (prerequisite.includes('dwarf') && characterRace !== 'dwarf') return false;
-    if (prerequisite.includes('elf') && !characterRace.includes('elf')) return false;
-    if (prerequisite.includes('tiefling') && characterRace !== 'tiefling') return false;
-    if (prerequisite.includes('gnome') && characterRace !== 'gnome') return false;
-    if (prerequisite.includes('half-elf') && characterRace !== 'half-elf') return false;
-    if (prerequisite.includes('half-orc') && characterRace !== 'half-orc') return false;
-    if (prerequisite.includes('human') && characterRace !== 'human') return false;
+    if (prerequisite.includes('halfling') && characterSpecies !== 'halfling') return false;
+    if (prerequisite.includes('dragonborn') && characterSpecies !== 'dragonborn') return false;
+    if (prerequisite.includes('dwarf') && characterSpecies !== 'dwarf') return false;
+    if (prerequisite.includes('elf') && !characterSpecies.includes('elf')) return false;
+    if (prerequisite.includes('tiefling') && characterSpecies !== 'tiefling') return false;
+    if (prerequisite.includes('gnome') && characterSpecies !== 'gnome') return false;
+    if (prerequisite.includes('half-elf') && characterSpecies !== 'half-elf') return false;
+    if (prerequisite.includes('half-orc') && characterSpecies !== 'half-orc') return false;
+    if (prerequisite.includes('human') && characterSpecies !== 'human') return false;
   }
 
   // Check for spellcasting prerequisites

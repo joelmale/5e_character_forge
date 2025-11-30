@@ -1,65 +1,65 @@
 import { describe, it, expect } from 'vitest';
-import { loadRaces } from '../services/dataService';
+import { loadSpecies } from '../services/dataService';
 
-describe('Race Data Loading', () => {
-  it('should load all 32 races from JSON', () => {
-    const races = loadRaces();
-    expect(races).toHaveLength(32);
+describe('Species Data Loading', () => {
+  it('should load all 32 species from JSON', () => {
+    const species = loadSpecies();
+    expect(species).toHaveLength(32);
   });
 
-  it('should have valid race data structure', () => {
-    const races = loadRaces();
-    races.forEach(race => {
-      expect(race.slug).toBeDefined();
-      expect(typeof race.slug).toBe('string');
-      expect(race.name).toBeDefined();
-      expect(typeof race.name).toBe('string');
-      expect(race.source).toBeDefined();
-      expect(typeof race.source).toBe('string');
-      expect(race.speed).toBeDefined();
-      expect(typeof race.speed).toBe('number');
-      expect(race.ability_bonuses).toBeDefined();
-      expect(typeof race.ability_bonuses).toBe('object');
-      expect(Array.isArray(race.racial_traits)).toBe(true);
-      expect(race.description).toBeDefined();
-      expect(typeof race.description).toBe('string');
-      expect(Array.isArray(race.typicalRoles)).toBe(true);
+  it('should have valid species data structure', () => {
+    const species = loadSpecies();
+    species.forEach(species => {
+      expect(species.slug).toBeDefined();
+      expect(typeof species.slug).toBe('string');
+      expect(species.name).toBeDefined();
+      expect(typeof species.name).toBe('string');
+      expect(species.source).toBeDefined();
+      expect(typeof species.source).toBe('string');
+      expect(species.speed).toBeDefined();
+      expect(typeof species.speed).toBe('number');
+      expect(species.ability_bonuses).toBeDefined();
+      expect(typeof species.ability_bonuses).toBe('object');
+      expect(Array.isArray(species.species_traits)).toBe(true);
+      expect(species.description).toBeDefined();
+      expect(typeof species.description).toBe('string');
+      expect(Array.isArray(species.typicalRoles)).toBe(true);
     });
   });
 
-  it('should include all expected races', () => {
-    const races = loadRaces();
-    const raceSlugs = races.map(r => r.slug);
+  it('should include all expected species', () => {
+    const species = loadSpecies();
+    const speciesSlugs = species.map(s => s.slug);
 
     // Test some key races
-    expect(raceSlugs).toContain('human');
-    expect(raceSlugs).toContain('wood-elf');
-    expect(raceSlugs).toContain('mountain-dwarf');
-    expect(raceSlugs).toContain('dragonborn');
-    expect(raceSlugs).toContain('tiefling');
-    expect(raceSlugs).toContain('aasimar');
-    expect(raceSlugs).toContain('firbolg');
-    expect(raceSlugs).toContain('goliath');
-    expect(raceSlugs).toContain('kenku');
-    expect(raceSlugs).toContain('tabaxi');
-    expect(raceSlugs).toContain('triton');
-    expect(raceSlugs).toContain('bugbear');
-    expect(raceSlugs).toContain('goblin');
-    expect(raceSlugs).toContain('hobgoblin');
-    expect(raceSlugs).toContain('kobold');
-    expect(raceSlugs).toContain('orc');
-    expect(raceSlugs).toContain('yuan-ti-pureblood');
-    expect(raceSlugs).toContain('fairy');
-    expect(raceSlugs).toContain('harengon');
-    expect(raceSlugs).toContain('loxodon');
-    expect(raceSlugs).toContain('owlin');
-    expect(raceSlugs).toContain('githyanki');
-    expect(raceSlugs).toContain('fire-genasi');
+    expect(speciesSlugs).toContain('human');
+    expect(speciesSlugs).toContain('wood-elf');
+    expect(speciesSlugs).toContain('mountain-dwarf');
+    expect(speciesSlugs).toContain('dragonborn');
+    expect(speciesSlugs).toContain('tiefling');
+    expect(speciesSlugs).toContain('aasimar');
+    expect(speciesSlugs).toContain('firbolg');
+    expect(speciesSlugs).toContain('goliath');
+    expect(speciesSlugs).toContain('kenku');
+    expect(speciesSlugs).toContain('tabaxi');
+    expect(speciesSlugs).toContain('triton');
+    expect(speciesSlugs).toContain('bugbear');
+    expect(speciesSlugs).toContain('goblin');
+    expect(speciesSlugs).toContain('hobgoblin');
+    expect(speciesSlugs).toContain('kobold');
+    expect(speciesSlugs).toContain('orc');
+    expect(speciesSlugs).toContain('yuan-ti-pureblood');
+    expect(speciesSlugs).toContain('fairy');
+    expect(speciesSlugs).toContain('harengon');
+    expect(speciesSlugs).toContain('loxodon');
+    expect(speciesSlugs).toContain('owlin');
+    expect(speciesSlugs).toContain('githyanki');
+    expect(speciesSlugs).toContain('fire-genasi');
   });
 
   it('should have correct ability bonuses for human', () => {
-    const races = loadRaces();
-    const human = races.find(r => r.slug === 'human');
+    const species = loadSpecies();
+    const human = species.find(s => s.slug === 'human');
     expect(human).toBeDefined();
     expect(human?.ability_bonuses).toEqual({
       STR: 1,
@@ -72,29 +72,29 @@ describe('Race Data Loading', () => {
   });
 
   it('should have correct data for wood elf', () => {
-    const races = loadRaces();
-    const woodElf = races.find(r => r.slug === 'wood-elf');
+    const species = loadSpecies();
+    const woodElf = species.find(s => s.slug === 'wood-elf');
     expect(woodElf).toBeDefined();
     expect(woodElf?.name).toBe('Wood Elf');
     expect(woodElf?.source).toBe('PHB');
     expect(woodElf?.speed).toBe(30);
     expect(woodElf?.ability_bonuses).toEqual({ DEX: 2, WIS: 1 });
-    expect(woodElf?.racial_traits).toContain('Mask of the Wild');
+    expect(woodElf?.species_traits).toContain('Mask of the Wild');
     expect(woodElf?.typicalRoles).toContain('Ranger');
   });
 
   it('should have valid speed values', () => {
-    const races = loadRaces();
-    races.forEach(race => {
-      expect(race.speed).toBeGreaterThanOrEqual(20);
-      expect(race.speed).toBeLessThanOrEqual(40);
+    const species = loadSpecies();
+    species.forEach(species => {
+      expect(species.speed).toBeGreaterThanOrEqual(20);
+      expect(species.speed).toBeLessThanOrEqual(40);
     });
   });
 
   it('should have valid ability bonus values', () => {
-    const races = loadRaces();
-    races.forEach(race => {
-      Object.values(race.ability_bonuses).forEach(bonus => {
+    const species = loadSpecies();
+    species.forEach(species => {
+      Object.values(species.ability_bonuses).forEach(bonus => {
         expect(bonus).toBeGreaterThanOrEqual(-2);
         expect(bonus).toBeLessThanOrEqual(3);
       });

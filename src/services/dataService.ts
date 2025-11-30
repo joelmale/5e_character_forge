@@ -36,7 +36,7 @@ import racialLanguagesData from '../data/racialLanguages.json';
 import backgroundDefaultsData from '../data/backgroundDefaults.json';
 import combatActionsData from '../data/combatActions.json';
 import { generateName } from '../utils/nameGenerator';
-import { AbilityName, Race, Class, Equipment, Feature, Subclass, Feat, RaceCategory, ClassCategory, EquipmentPackage, EquipmentChoice, EquipmentItem, EquippedItem, SpellcastingType, SkillName, Monster, MonsterType, Edition } from '../types/dnd';
+import { AbilityName, Species, Class, Equipment, Feature, Subclass, Feat, SpeciesCategory, ClassCategory, EquipmentPackage, EquipmentChoice, EquipmentItem, EquippedItem, SpellcastingType, SkillName, Monster, MonsterType, Edition } from '../types/dnd';
 import { Level1Feature } from '../types/widgets';
 
 // Local type definitions for dataService
@@ -165,6 +165,7 @@ interface SRDClass {
   name: string;
   hit_die: number;
   proficiency_choices: Array<{
+    desc?: string;
     choose: number;
     type: string;
     from: { options: Array<{ item: { index: string; name: string } }> };
@@ -373,9 +374,9 @@ export function transformSpell(srdSpell: SRDSpell): AppSpell {
   };
 }
 
-export function transformRace(srdRace: SRDRace, year: number = 2014): Race {
+export function transformSpecies(srdSpecies: SRDRace, year: number = 2014): Species {
   const abilityBonuses: Partial<Record<AbilityName, number>> = {};
-  srdRace.ability_bonuses.forEach(bonus => {
+  srdSpecies.ability_bonuses.forEach(bonus => {
     const ability = mapAbilityScore(bonus.ability_score.index);
     abilityBonuses[ability] = bonus.bonus;
   });
@@ -384,9 +385,9 @@ export function transformRace(srdRace: SRDRace, year: number = 2014): Race {
    let variants = undefined;
    let defaultVariant = undefined;
    let finalAbilityBonuses = abilityBonuses;
-   let finalRacialTraits = srdRace.traits.map(t => t.name);
+   let finalSpeciesTraits = srdSpecies.traits.map(t => t.name);
 
-   if (srdRace.index === 'human') {
+   if (srdSpecies.index === 'human') {
      // Define human variants
      variants = [
        {
@@ -394,7 +395,7 @@ export function transformRace(srdRace: SRDRace, year: number = 2014): Race {
          name: 'Standard Human',
          description: 'The classic human from the Basic Rules - +1 to all ability scores for broad versatility.',
          ability_bonuses: { STR: 1, DEX: 1, CON: 1, INT: 1, WIS: 1, CHA: 1 },
-         racial_traits: [],
+         species_traits: [],
          features: []
        },
        {
@@ -402,7 +403,7 @@ export function transformRace(srdRace: SRDRace, year: number = 2014): Race {
          name: 'Variant Human',
          description: 'The specialist human - +1 to two abilities, one skill proficiency, and one feat for focused power.',
          ability_bonuses: {},
-         racial_traits: ['Variant Skills', 'Variant Feat'],
+         species_traits: ['Variant Skills', 'Variant Feat'],
          features: []
        }
      ];
@@ -410,17 +411,17 @@ export function transformRace(srdRace: SRDRace, year: number = 2014): Race {
 
      // Clear base ability bonuses and traits for human (handled by variants)
      finalAbilityBonuses = {};
-     finalRacialTraits = [];
+     finalSpeciesTraits = [];
    }
 
    return {
-     slug: srdRace.index,
-     name: srdRace.name,
+     slug: srdSpecies.index,
+     name: srdSpecies.name,
      source: `SRD ${year}`,
-     speed: srdRace.speed,
+     speed: srdSpecies.speed,
      ability_bonuses: finalAbilityBonuses,
-     racial_traits: finalRacialTraits,
-     description: `${srdRace.name} from the System Reference Document.`,
+     species_traits: finalSpeciesTraits,
+     description: `${srdSpecies.name} from the System Reference Document.`,
      typicalRoles: [], // SRD doesn't include this, would need to be added manually
      variants,
      defaultVariant
@@ -431,17 +432,33 @@ export function transformClass(srdClass: SRDClass, year: number = 2014): Class {
   // Determine edition based on year
   const edition: Edition = year === 2024 ? '2024' : '2014';
 
-  // Extract skill proficiencies from proficiency_choices (with safety checks)
-  const skillProficiencies = (srdClass.proficiency_choices || [])
-    .filter(choice => choice && choice.type === 'proficiencies')
+  // Separate skill and musical instrument proficiencies from proficiency_choices
+  const skillChoices = (srdClass.proficiency_choices || [])
+    .filter(choice => choice && choice.type === 'proficiencies' && !choice.desc?.toLowerCase().includes('musical instrument'));
+
+  const instrumentChoices = (srdClass.proficiency_choices || [])
+    .filter(choice => choice && choice.type === 'proficiencies' && choice.desc?.toLowerCase().includes('musical instrument'));
+
+  // Extract skill proficiencies
+  const skillProficiencies = skillChoices
+    .flatMap(choice =>
+      (choice.from?.options || [])
+        .filter(opt => opt && opt.item && opt.item.name)
+        .map(opt => opt.item.name.replace(/^Skill:\s*/, ''))
+    );
+
+  const numSkillChoices = skillChoices
+    .reduce((sum, choice) => sum + (choice.choose || 0), 0);
+
+  // Extract musical instrument proficiencies
+  const musicalInstrumentProficiencies = instrumentChoices
     .flatMap(choice =>
       (choice.from?.options || [])
         .filter(opt => opt && opt.item && opt.item.name)
         .map(opt => opt.item.name)
     );
 
-  const numSkillChoices = (srdClass.proficiency_choices || [])
-    .filter(choice => choice && choice.type === 'proficiencies')
+  const numInstrumentChoices = instrumentChoices
     .reduce((sum, choice) => sum + (choice.choose || 0), 0);
 
   // Transform spellcasting data if present
@@ -576,6 +593,8 @@ export function transformClass(srdClass: SRDClass, year: number = 2014): Class {
     save_throws: srdClass.saving_throws.map(st => st.name),
     skill_proficiencies: skillProficiencies,
     num_skill_choices: numSkillChoices,
+    musical_instrument_proficiencies: musicalInstrumentProficiencies,
+    num_instrument_choices: numInstrumentChoices,
     class_features: [], // Would need to be populated from features database
     description: `${srdClass.name} from the System Reference Document.`,
     keyRole: 'Varies', // Would need manual mapping
@@ -740,21 +759,29 @@ export const getLeveledSpellsByClass = (classSlug: string, level: number = 1): A
   return getSpellsForClass(classSlug).filter(spell => spell.level === level);
 };
 
-export function loadRaces(): Race[] {
-  // Return comprehensive race database from JSON
-  return (racesData as { races: Race[] }).races;
+export function loadSpecies(): Species[] {
+  // Return comprehensive species database from JSON
+  return (racesData as { races: Species[] }).races;
 }
 
-// Legacy function for backward compatibility - returns SRD races only
-export function loadSRDRaces(): Race[] {
-  const races2014 = (srdRaces2014 as SRDRace[]).map(race => transformRace(race, 2014));
-  return races2014;
+// Legacy function for backward compatibility - returns SRD species only
+export function loadSRDSpecies(): Species[] {
+  const species2014 = (srdRaces2014 as SRDRace[]).map(species => transformSpecies(species, 2014));
+  return species2014;
 }
 
-// Get all races from categories (flattened)
-export function getAllRaces(): Race[] {
-  return RACE_CATEGORIES.flatMap(category => category.races);
+// Get all species from categories (flattened)
+export function getAllSpecies(): Species[] {
+  return SPECIES_CATEGORIES.flatMap(category => category.species);
 }
+
+// Backwards compatibility aliases (deprecated)
+/** @deprecated Use loadSpecies instead */
+export const loadRaces = loadSpecies;
+/** @deprecated Use loadSRDSpecies instead */
+export const loadSRDRaces = loadSRDSpecies;
+/** @deprecated Use getAllSpecies instead */
+export const getAllRaces = getAllSpecies;
 
 export function loadClasses(edition?: Edition): Class[] {
   const classes2014 = (srdClasses2014 as SRDClass[]).map(cls => transformClass(cls, 2014));
@@ -911,10 +938,12 @@ export { srdSpellsMerged, srdRaces2014, srdClasses2014, srdEquipment2014, srdEqu
 
 import { SPELL_SLOTS_BY_CLASS } from '../data/spellSlots';
 import cantripsData from '../data/cantrips.json';
+import spellsKnownData from '../data/spellsKnown.json';
 
 // --- Static Data and Helper Functions from App.tsx ---
 
 export const PROFICIENCY_BONUSES = gameConstantsData.PROFICIENCY_BONUSES;
+export { spellsKnownData as SPELLS_KNOWN_BY_CLASS };
 
 export function getModifier(abilityScore: number): number {
   return Math.floor((abilityScore - 10) / 2);
@@ -939,11 +968,11 @@ export const ALIGNMENT_INFO: Record<string, string> = ALIGNMENTS_DATA.reduce((ac
 
 export const BACKGROUNDS: Background[] = backgroundsData;
 
-// Comprehensive race database with 40+ races from multiple sources
-// Load races from JSON data
-const COMPREHENSIVE_RACES: Race[] = loadRaces();
+// Comprehensive species database with 40+ species from multiple sources
+// Load species from JSON data
+const COMPREHENSIVE_SPECIES: Species[] = loadSpecies();
 
-interface RaceCategoryData {
+interface SpeciesCategoryData {
   name: string;
   icon: string;
   description: string;
@@ -954,20 +983,24 @@ interface RaceCategoryData {
   };
 }
 
-export const RACE_CATEGORIES: RaceCategory[] = raceCategoriesData.map((category: RaceCategoryData) => ({
+export const SPECIES_CATEGORIES: SpeciesCategory[] = raceCategoriesData.map((category: SpeciesCategoryData) => ({
   name: category.name,
   icon: category.icon,
   description: category.description,
-  races: category.filterCriteria.source
-    ? COMPREHENSIVE_RACES.filter(race => race.source === category.filterCriteria.source)
+  species: category.filterCriteria.source
+    ? COMPREHENSIVE_SPECIES.filter(species => species.source === category.filterCriteria.source)
     : category.filterCriteria.sources
-    ? COMPREHENSIVE_RACES.filter(race => category.filterCriteria.sources?.includes(race.source))
+    ? COMPREHENSIVE_SPECIES.filter(species => category.filterCriteria.sources?.includes(species.source))
     : category.filterCriteria.slugs
-    ? COMPREHENSIVE_RACES.filter(race =>
-        ['VGtM'].includes(race.source) && category.filterCriteria.slugs?.includes(race.slug)
+    ? COMPREHENSIVE_SPECIES.filter(species =>
+        ['VGtM'].includes(species.source) && category.filterCriteria.slugs?.includes(species.slug)
       )
     : []
 }));
+
+// Backwards compatibility (deprecated)
+/** @deprecated Use SPECIES_CATEGORIES instead */
+export const RACE_CATEGORIES = SPECIES_CATEGORIES;
 
 // Enhanced class data with rich descriptions and categorization
 interface EnhancedClassData {
@@ -1048,29 +1081,35 @@ export const randomizeLevel = (): number => {
 /**
  * Randomize character identity (name, alignment, background)
  */
-export const randomizeIdentity = (race?: string): { name: string; alignment: string; background: string } => {
+export const randomizeIdentity = (species?: string): { name: string; alignment: string; background: string } => {
   return {
-    name: race ? generateRaceSpecificName(race) : generateRandomName(),
+    name: species ? generateSpeciesSpecificName(species) : generateRandomName(),
     alignment: getRandomElement(ALIGNMENTS),
     background: getRandomElement(BACKGROUNDS).name
   };
 };
 
 /**
- * Generate a race-specific name
+ * Generate a species-specific name
  */
-export const generateRaceSpecificName = (race: string, gender?: 'male' | 'female'): string => {
-  return generateName({ race, gender }).name;
+export const generateSpeciesSpecificName = (species: string, gender?: 'male' | 'female'): string => {
+  return generateName({ race: species, gender }).name;
 };
 
 /**
- * Randomize race selection
+ * Randomize species selection
  */
-export const randomizeRace = (): string => {
-  const category = getRandomElement(RACE_CATEGORIES);
-  const race = getRandomElement(category.races);
-  return race.slug;
+export const randomizeSpecies = (): string => {
+  const category = getRandomElement(SPECIES_CATEGORIES);
+  const species = getRandomElement(category.species);
+  return species.slug;
 };
+
+// Backwards compatibility (deprecated)
+/** @deprecated Use generateSpeciesSpecificName instead */
+export const generateRaceSpecificName = generateSpeciesSpecificName;
+/** @deprecated Use randomizeSpecies instead */
+export const randomizeRace = randomizeSpecies;
 
 /**
  * Randomize class and required skills
@@ -1392,11 +1431,11 @@ export const randomizePersonality = (): { personality: string; ideals: string; b
 };
 
 /**
- * Extract proficiencies from race data
+ * Extract proficiencies from species data
  */
-export const getRaceProficiencies = (raceSlug: string): { armor?: string[]; weapons?: string[]; tools?: string[] } => {
-  const race = loadRaces().find(r => r.slug === raceSlug);
-  if (!race) return { armor: [], weapons: [], tools: [] };
+export const getSpeciesProficiencies = (speciesSlug: string): { armor?: string[]; weapons?: string[]; tools?: string[] } => {
+  const species = loadSpecies().find(s => s.slug === speciesSlug);
+  if (!species) return { armor: [], weapons: [], tools: [] };
 
   const proficiencies: { armor?: string[]; weapons?: string[]; tools?: string[] } = {
     armor: [],
@@ -1404,8 +1443,8 @@ export const getRaceProficiencies = (raceSlug: string): { armor?: string[]; weap
     tools: []
   };
 
-  // Check racial traits for proficiency information
-  race.racial_traits.forEach(trait => {
+  // Check species traits for proficiency information
+  species.species_traits.forEach(trait => {
     const traitLower = trait.toLowerCase();
 
     // Armor proficiencies
@@ -1436,6 +1475,10 @@ export const getRaceProficiencies = (raceSlug: string): { armor?: string[]; weap
 
   return proficiencies;
 };
+
+// Backwards compatibility (deprecated)
+/** @deprecated Use getSpeciesProficiencies instead */
+export const getRaceProficiencies = getSpeciesProficiencies;
 
 /**
  * Extract proficiencies from class data
@@ -1550,10 +1593,10 @@ export const getBackgroundProficiencies = (background: string): { armor?: string
 };
 
 /**
- * Aggregate proficiencies from race, class, and background
+ * Aggregate proficiencies from species, class, and background
  */
-export const aggregateProficiencies = (raceSlug: string, classSlug: string, background: string): { armor?: string[]; weapons?: string[]; tools?: string[] } => {
-  const raceProf = getRaceProficiencies(raceSlug);
+export const aggregateProficiencies = (speciesSlug: string, classSlug: string, background: string): { armor?: string[]; weapons?: string[]; tools?: string[] } => {
+  const speciesProf = getSpeciesProficiencies(speciesSlug);
   const classProf = getClassProficiencies(classSlug);
   const backgroundProf = getBackgroundProficiencies(background);
 
@@ -1564,15 +1607,15 @@ export const aggregateProficiencies = (raceSlug: string, classSlug: string, back
   };
 
   // Merge armor proficiencies
-  const armorSet = new Set([...(raceProf.armor || []), ...(classProf.armor || []), ...(backgroundProf.armor || [])]);
+  const armorSet = new Set([...(speciesProf.armor || []), ...(classProf.armor || []), ...(backgroundProf.armor || [])]);
   aggregated.armor = Array.from(armorSet);
 
   // Merge weapon proficiencies
-  const weaponSet = new Set([...(raceProf.weapons || []), ...(classProf.weapons || []), ...(backgroundProf.weapons || [])]);
+  const weaponSet = new Set([...(speciesProf.weapons || []), ...(classProf.weapons || []), ...(backgroundProf.weapons || [])]);
   aggregated.weapons = Array.from(weaponSet);
 
   // Merge tool proficiencies
-  const toolSet = new Set([...(raceProf.tools || []), ...(classProf.tools || []), ...(backgroundProf.tools || [])]);
+  const toolSet = new Set([...(speciesProf.tools || []), ...(classProf.tools || []), ...(backgroundProf.tools || [])]);
   aggregated.tools = Array.from(toolSet);
 
   return aggregated;

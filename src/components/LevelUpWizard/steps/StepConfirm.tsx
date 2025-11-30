@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { Character, LevelUpChoices, ABILITY_SCORES } from '../../../types/dnd';
+import { Character, LevelUpChoices } from '../../../types/dnd';
 import { LevelUpData } from '../../../data/classProgression';
 
 interface StepConfirmProps {
@@ -41,7 +41,7 @@ export const StepConfirm: React.FC<StepConfirmProps> = ({
         <div className="flex items-center justify-between mb-4">
           <div>
             <h4 className="text-xl font-bold text-theme-text">{character.name}</h4>
-            <p className="text-[#992600]">{character.race} {character.class}</p>
+            <p className="text-[#992600]">{character.species} {character.class}</p>
           </div>
           <div className="text-right">
             <p className="text-sm text-[#992600]">Level</p>

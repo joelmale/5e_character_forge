@@ -3,7 +3,7 @@ import { ArrowLeft, ArrowRight, Heart, Shield, Zap, Sparkles } from 'lucide-reac
 import { generateCharacterProfile, CharacterProfile } from '../data/characterProfiles';
 import PersonalitySummary from './PersonalitySummary';
 import CharacterFinalization from './CharacterFinalization';
-import { loadClasses, getAllRaces, BACKGROUNDS, getCantripsByClass, getLeveledSpellsByClass } from '../services/dataService';
+import { loadClasses, getAllSpecies, BACKGROUNDS, getCantripsByClass, getLeveledSpellsByClass } from '../services/dataService';
 import { CharacterCreationData, SpellSelectionData, SkillName } from '../types/dnd';
 import { getSpellcastingType } from '../utils/spellUtils';
 import { SPELL_LEARNING_RULES } from '../data/spellLearning';
@@ -256,17 +256,17 @@ const PersonalityWizard: React.FC<PersonalityWizardProps> = ({ isOpen, onClose: 
     };
 
     const allClasses = loadClasses();
-    const allRaces = getAllRaces();
+    const allSpecies = getAllSpecies();
 
     const baseClassName = extractBaseName(selectedClass || '');
-    const baseRaceName = extractBaseName(selectedRace || '');
+    const baseSpeciesName = extractBaseName(selectedRace || '');
 
     const selectedClassData = allClasses.find(c => c.name === baseClassName);
-    const selectedRaceData = allRaces.find(r => r.name === baseRaceName);
+    const selectedSpeciesData = allSpecies.find(s => s.name === baseSpeciesName);
 
-    if (!selectedClassData || !selectedRaceData) {
-      console.error('❌ [PersonalityWizard] Failed to find class/race data');
-      alert('Error: Could not find class or race data. Please try again.');
+    if (!selectedClassData || !selectedSpeciesData) {
+      console.error('❌ [PersonalityWizard] Failed to find class/species data');
+      alert('Error: Could not find class or species data. Please try again.');
       return;
     }
 
@@ -300,7 +300,7 @@ const PersonalityWizard: React.FC<PersonalityWizardProps> = ({ isOpen, onClose: 
     const characterData: CharacterCreationData = {
       name: finalizationData.name,
       level: 1,
-      raceSlug: selectedRaceData.slug,
+      speciesSlug: selectedSpeciesData.slug,
       classSlug: selectedClassData.slug,
       abilities,
       abilityScoreMethod: 'standard-array' as const,
@@ -308,8 +308,9 @@ const PersonalityWizard: React.FC<PersonalityWizardProps> = ({ isOpen, onClose: 
       alignment: finalizationData.alignment,
       edition: '2024',
 
-      selectedSkills: selectedSkills as SkillName[],
-      equipmentChoices: [], // Keep empty since we're using startingInventory
+       selectedSkills: selectedSkills as SkillName[],
+       selectedMusicalInstruments: [],
+       equipmentChoices: [], // Keep empty since we're using startingInventory
       hpCalculationMethod: 'max' as const,
 
       spellSelection: spellSelection,
@@ -336,7 +337,7 @@ const PersonalityWizard: React.FC<PersonalityWizardProps> = ({ isOpen, onClose: 
 
     console.log('📦 [PersonalityWizard] Complete character data created:', {
       name: characterData.name,
-      raceSlug: characterData.raceSlug,
+      speciesSlug: characterData.speciesSlug,
       classSlug: characterData.classSlug,
       background: characterData.background,
       alignment: characterData.alignment,

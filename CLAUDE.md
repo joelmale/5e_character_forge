@@ -101,7 +101,7 @@ All custom hooks are exported from `/src/hooks/index.ts`:
 
 **Core Character Interface:**
 The `Character` interface is the canonical data structure for all saved characters. Key sections:
-- Basic stats (name, race, class, level, alignment)
+- Basic stats (name, species, class, level, alignment)
 - Abilities (STR, DEX, CON, INT, WIS, CHA) with modifiers
 - 18 D&D skills with proficiency tracking
 - Optional spellcasting data (ability, slots, known/prepared spells)
@@ -428,7 +428,7 @@ If schema changes are needed, increment `DB_VERSION` in `dbService.ts` and handl
 - **spellUtils.ts** - Spell slot management, preparation validation
 - **equipmentUtils.ts** - Equipment filtering, AC calculations
 - **featUtils.ts** - Feat validation, ability score increases
-- **languageUtils.ts** - Language selection from race/background
+- **languageUtils.ts** - Language selection from species/background
 - **formatters.ts** - Display formatting (modifiers, HP, etc.)
 
 ### Important Helper Functions

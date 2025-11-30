@@ -6,6 +6,7 @@ export interface CharacterSheetProps {
   character: Character;
   onClose: () => void;
   onDelete: (id: string) => void;
+  onEdit?: () => void;
   setRollResult: (result: {
     text: string;
     value: number | null;

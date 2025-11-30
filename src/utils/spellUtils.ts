@@ -1,6 +1,6 @@
 // Spell management utilities for character creation and campaign play
 import { SpellcastingType, Class, Character, SpellSelectionData } from '../types/dnd';
-import { getCantripsByClass, getLeveledSpellsByClass, loadClasses, AppSpell } from '../services/dataService';
+import { getCantripsByClass, getLeveledSpellsByClass, loadClasses, AppSpell, SPELLS_KNOWN_BY_CLASS } from '../services/dataService';
 import { SPELL_SLOT_TABLES } from '../data/spellSlots';
 import { SPELL_LEARNING_RULES } from '../data/spellLearning';
 import spellcastingTypesData from '../data/spellcastingTypes.json';
@@ -141,8 +141,9 @@ export function calculateSpellAttackBonus(abilities: Record<string, number>, spe
  * // Returns: 1  (Minimum is always 1, even with negative modifier)
  * ```
  */
-export function getMaxPreparedSpells(abilities: Record<string, number>, spellcastingAbility: string, characterLevel: number): number {
-  const modifier = Math.floor((abilities[spellcastingAbility] - 10) / 2);
+export function getMaxPreparedSpells(abilities: Record<string, number | string>, spellcastingAbility: string, characterLevel: number): number {
+  const abilityScore = Number(abilities[spellcastingAbility]) || 0;
+  const modifier = Math.floor((abilityScore - 10) / 2);
   return Math.max(1, modifier + characterLevel);
 }
 
@@ -322,9 +323,13 @@ export function cleanupInvalidSpellSelections(
 
   // Validate based on spellcasting type
   if (spellcastingType === 'known') {
-    updatedSelection.knownSpells = (spellSelection.knownSpells || []).slice(0, spellcasting.spellsKnownOrPrepared);
+    // For known casters, use level-aware spells known data
+    const maxKnownSpells = (SPELLS_KNOWN_BY_CLASS as Record<string, Record<string, number>>)[classSlug]?.[level] || spellcasting.spellsKnownOrPrepared;
+    updatedSelection.knownSpells = (spellSelection.knownSpells || []).slice(0, maxKnownSpells);
   } else if (spellcastingType === 'prepared') {
-    updatedSelection.preparedSpells = (spellSelection.preparedSpells || []).slice(0, spellcasting.spellsKnownOrPrepared);
+    // For prepared casters, calculate max prepared spells based on abilities and level
+    const maxPreparedSpells = getMaxPreparedSpells(abilities, spellcasting.ability, level);
+    updatedSelection.preparedSpells = (spellSelection.preparedSpells || []).slice(0, maxPreparedSpells);
   } else if (spellcastingType === 'wizard') {
     // Validate spellbook (6 spells)
     updatedSelection.spellbook = (spellSelection.spellbook || []).slice(0, 6);

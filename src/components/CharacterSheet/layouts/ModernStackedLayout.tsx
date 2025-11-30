@@ -199,6 +199,7 @@ export const ModernStackedLayout: React.FC<CharacterSheetProps> = ({
             setRollResult={setRollResult}
             onDiceRoll={onDiceRoll as (roll: DiceRoll & { description: string; damageNotation?: string; damageType?: string }) => void}
             onUpdateCharacter={onUpdateCharacter}
+            layoutMode="modern"
           />
         )
       },

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { XCircle, Shuffle, Volume2, Heart, History, BookOpen, ArrowLeft, ArrowRight } from 'lucide-react';
 import { StepProps } from '../types/wizard.types';
-import { ALIGNMENTS_DATA, BACKGROUNDS, ALIGNMENTS, randomizeIdentity, randomizeRace, randomizeClassAndSkills, randomizeFightingStyle, randomizeSpells, randomizeAbilities, randomizeFeats, randomizeEquipmentChoices, randomizeAdditionalEquipment, randomizeLanguages, randomizePersonality } from '../../../services/dataService';
+import { ALIGNMENTS_DATA, BACKGROUNDS, ALIGNMENTS, randomizeIdentity, randomizeSpecies, randomizeClassAndSkills, randomizeFightingStyle, randomizeSpells, randomizeAbilities, randomizeFeats, randomizeEquipmentChoices, randomizeAdditionalEquipment, randomizeLanguages, randomizePersonality } from '../../../services/dataService';
 import { generateName, generateNames, GeneratedName } from '../../../utils/nameGenerator';
 
 interface RandomizeButtonProps {
@@ -63,7 +63,7 @@ export const Step1Details: React.FC<StepProps> = ({ data, updateData, nextStep, 
   // Name generator functions
   const generateNewName = () => {
     const name = generateName({
-      race: data.raceSlug,
+      race: data.speciesSlug,
       includeMeaning: true,
       includePronunciation: true
     });
@@ -87,7 +87,7 @@ export const Step1Details: React.FC<StepProps> = ({ data, updateData, nextStep, 
 
   const generateNameOptions = () => {
     const options = generateNames(6, {
-      race: data.raceSlug,
+      race: data.speciesSlug,
       includeMeaning: true
     });
     setNameOptions(options);
@@ -162,8 +162,8 @@ export const Step1Details: React.FC<StepProps> = ({ data, updateData, nextStep, 
               onClick={() => {
                 // Randomize the entire character (preserve the selected level)
                 const level = data.level;
-                const race = randomizeRace();
-                const identity = randomizeIdentity(race);
+                const species = randomizeSpecies();
+                const identity = randomizeIdentity(species);
                 const classAndSkills = randomizeClassAndSkills();
                 const fightingStyle = randomizeFightingStyle(classAndSkills.classSlug);
                 const spells = randomizeSpells(classAndSkills.classSlug, level);
@@ -171,12 +171,12 @@ export const Step1Details: React.FC<StepProps> = ({ data, updateData, nextStep, 
                 const feats = randomizeFeats();
                 const equipmentChoices = randomizeEquipmentChoices(classAndSkills.classSlug);
                 const additionalEquipment = randomizeAdditionalEquipment();
-                const languages = randomizeLanguages(race, identity.background);
+                const languages = randomizeLanguages(species, identity.background);
                 const personality = randomizePersonality();
 
                 updateData({
                   ...identity,
-                  raceSlug: race,
+                  speciesSlug: species,
                   ...classAndSkills,
                   selectedFightingStyle: fightingStyle,
                   spellSelection: spells,

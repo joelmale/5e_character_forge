@@ -11,7 +11,7 @@ export const HumanVariantSelector: React.FC<HumanVariantSelectorProps> = ({
   updateData
 }) => {
   const handleVariantChange = (variantSlug: string) => {
-    updateData({ selectedRaceVariant: variantSlug });
+    updateData({ selectedSpeciesVariant: variantSlug });
 
     // Reset variant-specific data when changing variants
     if (variantSlug === 'standard') {
@@ -56,7 +56,7 @@ export const HumanVariantSelector: React.FC<HumanVariantSelectorProps> = ({
             type="radio"
             name="humanVariant"
             value="standard"
-            checked={data.selectedRaceVariant === 'standard'}
+            checked={data.selectedSpeciesVariant === 'standard'}
             onChange={(e) => handleVariantChange(e.target.value)}
             className="mt-1"
           />
@@ -76,7 +76,7 @@ export const HumanVariantSelector: React.FC<HumanVariantSelectorProps> = ({
             type="radio"
             name="humanVariant"
             value="variant"
-            checked={data.selectedRaceVariant === 'variant'}
+            checked={data.selectedSpeciesVariant === 'variant'}
             onChange={(e) => handleVariantChange(e.target.value)}
             className="mt-1"
           />
@@ -93,7 +93,7 @@ export const HumanVariantSelector: React.FC<HumanVariantSelectorProps> = ({
       </div>
 
       {/* Variant Human Options */}
-      {data.selectedRaceVariant === 'variant' && (
+      {data.selectedSpeciesVariant === 'variant' && (
         <div className="space-y-4 p-4 bg-orange-50 rounded-lg border border-accent-orange/20">
           <h5 className="font-semibold text-accent-orange">Variant Human Selections</h5>
 

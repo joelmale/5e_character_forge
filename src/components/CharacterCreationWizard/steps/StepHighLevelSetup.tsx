@@ -6,7 +6,7 @@
  * and summarizes the choices that will be required.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { ArrowRight, ArrowLeft, Dices, TrendingUp, Zap, Heart } from 'lucide-react';
 import { StepProps } from '../types/wizard.types';
 import {

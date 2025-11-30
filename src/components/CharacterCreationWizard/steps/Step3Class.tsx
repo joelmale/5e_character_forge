@@ -277,6 +277,60 @@ export const Step3Class: React.FC<StepProps> = ({ data, updateData, nextStep, pr
         </div>
       )}
 
+      {/* Musical Instrument Selection */}
+      {selectedClass && (selectedClass.num_instrument_choices || 0) > 0 && (
+        <div className="bg-theme-tertiary/50 border border-theme-primary rounded-lg p-4 space-y-3">
+          <h4 className="text-lg font-bold text-accent-yellow-light">
+            Choose Musical Instruments ({data.selectedMusicalInstruments.length} / {(selectedClass.num_instrument_choices || 0)} selected)
+          </h4>
+          <p className="text-xs text-theme-muted">
+            Select {(selectedClass.num_instrument_choices || 0)} musical instrument{(selectedClass.num_instrument_choices || 0) !== 1 ? 's' : ''} from your class options.
+            Musical instruments can be used as spellcasting focuses.
+          </p>
+
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+            {selectedClass.musical_instrument_proficiencies.map(instrument => {
+              const isSelected = data.selectedMusicalInstruments.includes(instrument);
+              const canSelect = data.selectedMusicalInstruments.length < (selectedClass.num_instrument_choices || 0);
+
+              return (
+                <button
+                  key={instrument}
+                  onClick={() => {
+                    if (isSelected) {
+                      // Remove instrument
+                      updateData({
+                        selectedMusicalInstruments: data.selectedMusicalInstruments.filter(i => i !== instrument)
+                      });
+                    } else if (canSelect) {
+                      // Add instrument
+                      updateData({
+                        selectedMusicalInstruments: [...data.selectedMusicalInstruments, instrument]
+                      });
+                    }
+                  }}
+                  className={`p-3 rounded-lg text-left border-2 transition-all ${
+                    isSelected
+                      ? 'bg-accent-red-darker border-red-500 shadow-md'
+                      : canSelect
+                        ? 'bg-theme-tertiary border-theme-primary hover:bg-theme-quaternary'
+                        : 'bg-theme-disabled border-theme-primary opacity-50 cursor-not-allowed'
+                  }`}
+                >
+                  <p className='text-sm font-bold text-accent-yellow-light'>{instrument}</p>
+                </button>
+              );
+            })}
+          </div>
+
+          {data.selectedMusicalInstruments.length < (selectedClass.num_instrument_choices || 0) && (
+            <div className="text-xs text-accent-yellow-light mt-2">
+              ⚠️ Please select {((selectedClass.num_instrument_choices || 0) - data.selectedMusicalInstruments.length)} more musical instrument{((selectedClass.num_instrument_choices || 0) - data.selectedMusicalInstruments.length) !== 1 ? 's' : ''}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Level 1 Features (Widget System) */}
       {selectedClass && selectedClass.level_1_features && selectedClass.level_1_features.length > 0 && (
         <div className="space-y-4">
@@ -403,51 +457,26 @@ export const Step3Class: React.FC<StepProps> = ({ data, updateData, nextStep, pr
 
              {hasSubclassUnlocked ? (
                 <>
-                  {selectedClass?.slug === 'wizard' ? (
-                    // For wizards, use modal with detailed subclass information
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      {availableSubclasses.map(subclass => (
-                        <button
-                          key={subclass.slug}
-                          onClick={() => setShowSubclassModal(true)}
-                          className={`p-3 rounded-lg text-left border-2 transition-all ${
-                            data.subclassSlug === subclass.slug
-                              ? 'bg-accent-purple-darker border-accent-purple shadow-md'
-                              : 'bg-theme-tertiary border-theme-primary hover:bg-theme-quaternary'
-                          }`}
-                        >
-                          <p className="text-sm font-bold text-accent-yellow-light">{subclass.name}</p>
-                          <p className="text-xs text-theme-muted mt-1">{subclass.subclassFlavor}</p>
-                          <p className="text-xs text-theme-disabled mt-2">
-                            Click to see detailed features and benefits
-                          </p>
-                        </button>
-                      ))}
-                    </div>
-                  ) : (
-                    // For other classes, keep the original inline selection
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      {availableSubclasses.map(subclass => (
-                        <button
-                          key={subclass.slug}
-                          onClick={() => updateData({ subclassSlug: subclass.slug })}
-                          className={`p-3 rounded-lg text-left border-2 transition-all ${
-                            data.subclassSlug === subclass.slug
-                              ? 'bg-accent-purple-darker border-accent-purple shadow-md'
-                              : 'bg-theme-tertiary border-theme-primary hover:bg-theme-quaternary'
-                          }`}
-                        >
-                          <p className="text-sm font-bold text-accent-yellow-light">{subclass.name}</p>
-                          <p className="text-xs text-theme-muted mt-1">{subclass.subclassFlavor}</p>
-                          {subclass.desc && subclass.desc.length > 0 && (
-                            <p className="text-xs text-theme-disabled mt-2 line-clamp-2">
-                              {subclass.desc[0]}
-                            </p>
-                          )}
-                        </button>
-                      ))}
-                    </div>
-                  )}
+                  {/* All classes now use modal with detailed subclass information */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {availableSubclasses.map(subclass => (
+                      <button
+                        key={subclass.slug}
+                        onClick={() => setShowSubclassModal(true)}
+                        className={`p-3 rounded-lg text-left border-2 transition-all ${
+                          data.subclassSlug === subclass.slug
+                            ? 'bg-accent-purple-darker border-accent-purple shadow-md'
+                            : 'bg-theme-tertiary border-theme-primary hover:bg-theme-quaternary'
+                        }`}
+                      >
+                        <p className="text-sm font-bold text-accent-yellow-light">{subclass.name}</p>
+                        <p className="text-xs text-theme-muted mt-1">{subclass.subclassFlavor}</p>
+                        <p className="text-xs text-theme-disabled mt-2">
+                          Click to see detailed features and benefits
+                        </p>
+                      </button>
+                    ))}
+                  </div>
 
                  {!data.subclassSlug && (
                    <div className="text-xs text-accent-yellow-light mt-2">
@@ -482,11 +511,12 @@ export const Step3Class: React.FC<StepProps> = ({ data, updateData, nextStep, pr
         </button>
         <button
           onClick={nextStep}
-           disabled={
-             !data.classSlug ||
-             !selectedClass ||
-             data.selectedSkills.length < (selectedClass.num_skill_choices || 0) ||
-             (getSubclassesByClass(data.classSlug).length > 0 && data.level >= 3 && !data.subclassSlug) ||
+            disabled={
+              !data.classSlug ||
+              !selectedClass ||
+              data.selectedSkills.length < (selectedClass.num_skill_choices || 0) ||
+              data.selectedMusicalInstruments.length < (selectedClass.num_instrument_choices || 0) ||
+              (getSubclassesByClass(data.classSlug).length > 0 && data.level >= 3 && !data.subclassSlug) ||
              // Check Level 1 feature completion (widget system)
              (selectedClass.level_1_features?.some((feature: Level1Feature) => {
                switch (feature.widget_type) {
@@ -556,8 +586,8 @@ export const Step3Class: React.FC<StepProps> = ({ data, updateData, nextStep, pr
         />
       )}
 
-      {/* Wizard Subclass Modal */}
-      {showSubclassModal && selectedClass?.slug === 'wizard' && (
+      {/* Subclass Modal (All Classes) */}
+      {showSubclassModal && selectedClass && (
         <ChooseSubclassModal
           isOpen={showSubclassModal}
           onClose={() => setShowSubclassModal(false)}
@@ -566,7 +596,7 @@ export const Step3Class: React.FC<StepProps> = ({ data, updateData, nextStep, pr
             updateData({ subclassSlug: subclass.slug });
             setShowSubclassModal(false);
           }}
-          characterClass="wizard"
+          characterClass={selectedClass?.name || 'Character'}
         />
       )}
     </div>

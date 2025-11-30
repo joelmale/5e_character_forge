@@ -11,7 +11,7 @@
  * - Feature summary
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { Character, LevelUpChoices } from '../../types/dnd';
 import { LevelUpData } from '../../data/classProgression';
@@ -48,18 +48,25 @@ export const LevelUpWizard: React.FC<LevelUpWizardProps> = ({
   });
 
   // Calculate level-up data when wizard opens
-  useEffect(() => {
+  const calculatedData = useMemo(() => {
     if (isOpen) {
-      const data = calculateLevelUpData(character);
-      if (data) {
-        setLevelUpData(data);
-        const wizardSteps = getLevelUpSteps(data);
-        setSteps(wizardSteps);
-        setCurrentStepIndex(0);
-        setChoices({ hpGained: data.averageHpGain });
-      }
+      return calculateLevelUpData(character);
     }
+    return null;
   }, [isOpen, character]);
+
+  // Initialize state when calculatedData changes
+  const wizardSteps = useMemo(() => calculatedData ? getLevelUpSteps(calculatedData) : [], [calculatedData]);
+  const initialChoices = useMemo(() => calculatedData ? { hpGained: calculatedData.averageHpGain } : { hpGained: 0 }, [calculatedData]);
+
+  useEffect(() => {
+    if (calculatedData) {
+      setLevelUpData(calculatedData);
+      setSteps(wizardSteps);
+      setCurrentStepIndex(0);
+      setChoices(initialChoices);
+    }
+  }, [calculatedData, wizardSteps, initialChoices]);
 
   if (!isOpen || !levelUpData) return null;
 

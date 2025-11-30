@@ -65,8 +65,8 @@ export type Edition = '2014' | '2024';
 export interface Character {
   id: string;
   name: string;
-  race: string;
-  selectedRaceVariant?: string; // For human variants
+  species: string;
+  selectedSpeciesVariant?: string; // For human variants
   class: string;
   level: number;
   alignment: string;
@@ -111,14 +111,15 @@ export interface Character {
      weapons?: string[];
      tools?: string[];
    };
-   featuresAndTraits: {
-    personality: string;
-    ideals: string;
-    bonds: string;
-    flaws: string;
-    classFeatures: string[];
-    racialTraits: string[];
-  };
+    featuresAndTraits: {
+     personality: string;
+     ideals: string;
+     bonds: string;
+     flaws: string;
+     classFeatures: string[];
+     speciesTraits: string[];
+     musicalInstrumentProficiencies: string[]; // Musical instruments proficient in (for bards)
+   };
 
   // Sprint 2: Spellcasting data (enhanced for differentiated types)
   spellcasting?: {
@@ -427,8 +428,8 @@ export interface CharacterCreationData {
   name: string;
   level: number;
   edition: Edition; // D&D edition (2014 or 2024 rules)
-  raceSlug: string;
-  selectedRaceVariant?: string; // e.g., "standard", "variant"
+  speciesSlug: string;
+  selectedSpeciesVariant?: string; // e.g., "standard", "variant"
 
   // Variant Human Choices
   variantAbilityBonuses?: Record<AbilityName, number>; // +1 to two abilities
@@ -448,6 +449,7 @@ export interface CharacterCreationData {
 
   // Sprint 1 additions
   selectedSkills: SkillName[]; // Skills chosen from class options (Step 2)
+  selectedMusicalInstruments: string[]; // Musical instruments chosen from class options (Step 2)
   overflowSkills?: string[]; // Skills chosen via "Any Skill" duplicate rule (Step 2)
   equipmentChoices: EquipmentChoice[]; // Equipment selection choices
   hpCalculationMethod: 'max' | 'rolled';
@@ -501,34 +503,42 @@ export interface CharacterCreationData {
   }>;
 }
 
-export interface RaceVariant {
+export interface SpeciesVariant {
   slug: string;
   name: string;
   description: string;
   ability_bonuses: Partial<Record<AbilityName, number>>;
-  racial_traits: string[];
+  species_traits: string[];
   features: string[];
 }
 
-export interface Race {
+export interface Species {
   slug: string;
   name: string;
   source: string;
   speed: number;
   ability_bonuses: Partial<Record<AbilityName, number>>;
-  racial_traits: string[];
+  species_traits: string[];
   description: string;
   typicalRoles: string[];
-  variants?: RaceVariant[];
+  variants?: SpeciesVariant[];
   defaultVariant?: string;
 }
 
-export interface RaceCategory {
+export interface SpeciesCategory {
   name: string;
   icon: string;
   description: string;
-  races: Race[];
+  species: Species[];
 }
+
+// Backwards compatibility aliases (deprecated - use Species instead)
+/** @deprecated Use Species instead */
+export type Race = Species;
+/** @deprecated Use SpeciesVariant instead */
+export type RaceVariant = SpeciesVariant;
+/** @deprecated Use SpeciesCategory instead */
+export type RaceCategory = SpeciesCategory;
 
 export interface StartingEquipmentPackage {
   level: number;
@@ -548,6 +558,8 @@ export interface Class {
   save_throws: string[];
   skill_proficiencies: string[]; // Available skill choices
   num_skill_choices?: number; // How many skills to choose (filled by helper if missing)
+  musical_instrument_proficiencies: string[]; // Available musical instrument choices (for bards)
+  num_instrument_choices?: number; // How many instruments to choose (filled by helper if missing)
   class_features: string[];
   description: string;
   keyRole: string;

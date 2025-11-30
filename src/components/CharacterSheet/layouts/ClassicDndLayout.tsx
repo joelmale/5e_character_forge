@@ -202,12 +202,13 @@ export const ClassicDndLayout: React.FC<CharacterSheetProps> = ({
                <h2 className="text-sm font-bold mb-3 text-theme-muted uppercase tracking-wider font-cinzel">
                  Attacks & Spellcasting
                </h2>
-               <AttacksAndActions
-                 character={character}
-                 setRollResult={setRollResult}
-                 onDiceRoll={onDiceRoll}
-                 onUpdateCharacter={onUpdateCharacter}
-               />
+                <AttacksAndActions
+                  character={character}
+                  setRollResult={setRollResult}
+                  onDiceRoll={onDiceRoll}
+                  onUpdateCharacter={onUpdateCharacter}
+                  layoutMode="classic-dnd"
+                />
              </div>
 
              {/* Spellcasting (if applicable) */}
