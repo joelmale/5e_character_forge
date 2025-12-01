@@ -11,13 +11,27 @@ export interface Alignment {
 }
 
 export interface Background {
+  slug: string; // Unique identifier
   name: string;
+  edition: Edition; // '2014' | '2024'
   description: string;
   skill_proficiencies: string[];
   languages?: string[];
   equipment: string[];
-  feature: string;
-  feature_description: string;
+  
+  // 2014 Legacy Fields
+  feature?: string;
+  feature_description?: string;
+  
+  // 2024 Fields
+  abilityScores?: {
+    choose: number;
+    from: AbilityName[];
+    fixed?: Partial<Record<AbilityName, number>>;
+  };
+  originFeat?: string;
+  tool_proficiencies?: string[]; // 2024 specific
+
   personality_traits: string[];
   ideals: string[];
   bonds: string[];
@@ -84,9 +98,11 @@ export interface Character {
   secondWindUses?: number; // Fighter: Second Wind uses remaining
 
   // Background data (2024)
-  backgroundFeat?: string; // Origin Feat from background
+  backgroundFeat?: string; // Origin Feat from background (Legacy/Internal use)
+  originFeat?: string; // 2024 Origin Feat (can be from Background or Human)
 
   inspiration: boolean;
+  heroicInspiration?: boolean; // 2024 Mechanics (resets on Long Rest)
   proficiencyBonus: number;
   armorClass: number;
   hitPoints: number;
@@ -116,9 +132,10 @@ export interface Character {
      ideals: string;
      bonds: string;
      flaws: string;
-     classFeatures: string[];
-     speciesTraits: string[];
-     musicalInstrumentProficiencies: string[]; // Musical instruments proficient in (for bards)
+      classFeatures: string[];
+      speciesTraits: string[];
+      backgroundFeatures: Array<{name: string, description: string}>; // Background features and descriptions
+      musicalInstrumentProficiencies: string[]; // Musical instruments proficient in (for bards)
    };
 
   // Sprint 2: Spellcasting data (enhanced for differentiated types)
@@ -307,13 +324,14 @@ export interface Equipment {
   slug: string;
   name: string;
   year: number; // 2014 or 2024
-  equipment_category: string; // 'Weapon', 'Armor', 'Adventuring Gear', 'Tools', etc.
-  cost: {
-    quantity: number;
-    unit: 'cp' | 'sp' | 'gp' | 'pp';
-  };
-  weight: number;
-  description?: string;
+   equipment_category: string; // 'Weapon', 'Armor', 'Adventuring Gear', 'Tools', etc.
+   equipable?: boolean; // Can this item be equipped? (weapons, armor, clothing)
+   cost: {
+     quantity: number;
+     unit: 'cp' | 'sp' | 'gp' | 'pp';
+   };
+   weight: number;
+   description?: string;
 
   // Weapon-specific fields
   weapon_category?: 'Simple' | 'Martial';
@@ -366,6 +384,7 @@ export interface EquippedItem {
   equipped: boolean; // Is this item currently equipped?
   attuned?: boolean; // Is this magic item attuned? (requires attunement slot)
   notes?: string; // Player notes about the item
+  trinket?: TrinketData; // If this is a trinket item
 }
 
 // Sprint 5: Class Features, Subclasses, and Feats
@@ -424,6 +443,21 @@ export interface Feat {
   description: string;
 }
 
+// Validation types for enhanced wizard feedback
+export interface ValidationResult {
+  isComplete: boolean;
+  missingSelections: string[];
+  warnings?: string[];
+  nextRequiredAction?: string;
+}
+
+export interface StepValidation {
+  canProceed: boolean;
+  blockingIssues: string[];
+  optionalItems?: string[];
+  progressPercentage?: number;
+}
+
 export interface CharacterCreationData {
   name: string;
   level: number;
@@ -445,14 +479,23 @@ export interface CharacterCreationData {
   // 2024 Universal Wizard Flow Fields
   backgroundSkills?: string[]; // Skills granted by background (Step 1)
   backgroundTools?: string[]; // Tools granted by background (Step 1)
+  speciesFeat?: string; // 2024: Feat chosen from species options
+  humanVersatileFeat?: string; // 2024: Extra Origin Feat for humans
   backgroundFeat?: string; // Origin Feat from background (Step 1)
+  backgroundAbilityChoices?: {
+    method: '2/1' | '1/1/1';
+    bonuses: Partial<Record<AbilityName, number>>;
+  };
+  humanOriginFeat?: string; // 2024 Human bonus Origin Feat
 
   // Sprint 1 additions
   selectedSkills: SkillName[]; // Skills chosen from class options (Step 2)
   selectedMusicalInstruments: string[]; // Musical instruments chosen from class options (Step 2)
   overflowSkills?: string[]; // Skills chosen via "Any Skill" duplicate rule (Step 2)
-  equipmentChoices: EquipmentChoice[]; // Equipment selection choices
-  hpCalculationMethod: 'max' | 'rolled';
+   equipmentChoices: EquipmentChoice[]; // Equipment selection choices
+   equipmentChoice?: 'background' | 'gold'; // 2024: Choose background equipment or gold
+   equipmentGold?: number; // Gold amount for gold choice
+   hpCalculationMethod: 'max' | 'rolled';
   rolledHP?: number; // If rolled, store the result
 
   // 2024 Level 1 Feature Choices (Step 3 - Variable by Class)
@@ -515,14 +558,36 @@ export interface SpeciesVariant {
 export interface Species {
   slug: string;
   name: string;
+  edition: Edition; // '2014' | '2024'
   source: string;
   speed: number;
-  ability_bonuses: Partial<Record<AbilityName, number>>;
+  ability_bonuses?: Partial<Record<AbilityName, number>>; // Optional in 2024 (moved to Background)
   species_traits: string[];
   description: string;
   typicalRoles: string[];
   variants?: SpeciesVariant[];
   defaultVariant?: string;
+
+  // 2024 Fields
+  creatureType?: 'Humanoid' | 'Construct' | 'Undead' | string;
+  speciesFeat?: string; // Fixed feat for species like Half-Elf Prodigy
+  speciesFeatOptions?: string[]; // Choice of feats for species like Elf, Dwarf, etc.
+  traits?: string[]; // Core species traits for 2024
+  lineages?: Record<string, SpeciesLineage>; // Lineage choices (Elf, Gnome)
+  fiendishLegacies?: Record<string, FiendishLegacy>; // Tiefling options
+  giantAncestry?: Record<string, string>; // Goliath options
+  ancestries?: Record<string, string[]>; // Dragonborn options
+  celestialRevelationOptions?: string[]; // Aasimar options
+}
+
+export interface SpeciesLineage {
+  traits?: string[];
+  spells?: string[];
+}
+
+export interface FiendishLegacy {
+  resistance: string;
+  spells: string[];
 }
 
 export interface SpeciesCategory {

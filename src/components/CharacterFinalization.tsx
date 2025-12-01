@@ -13,8 +13,9 @@ import {
 interface CharacterFinalizationProps {
   profile: CharacterProfile;
   selectedClass: string;
-  selectedRace: string;
+  selectedSpecies: string;
   selectedBackground: string;
+  edition: Edition; // Add edition prop
   onCreateCharacter: (characterData: {
     name: string;
     alignment: string;
@@ -41,20 +42,21 @@ const ALIGNMENTS = [
 const CharacterFinalization: React.FC<CharacterFinalizationProps> = ({
   profile,
   selectedClass,
-  selectedRace,
+  selectedSpecies,
   selectedBackground,
+  edition, // Add edition to props
   onCreateCharacter,
   onBack
 }) => {
-  const [name, setName] = useState(() => generateAllCharacterDetails(selectedRace).name);
+  const [name, setName] = useState(() => generateAllCharacterDetails(selectedSpecies, edition).name);
   const [alignment, setAlignment] = useState('Neutral');
-  const [personality, setPersonality] = useState(() => generateAllCharacterDetails(selectedRace).personality);
-  const [ideals, setIdeals] = useState(() => generateAllCharacterDetails(selectedRace).ideals);
-  const [bonds, setBonds] = useState(() => generateAllCharacterDetails(selectedRace).bonds);
-  const [flaws, setFlaws] = useState(() => generateAllCharacterDetails(selectedRace).flaws);
+  const [personality, setPersonality] = useState(() => generateAllCharacterDetails(selectedSpecies, edition).personality);
+  const [ideals, setIdeals] = useState(() => generateAllCharacterDetails(selectedSpecies, edition).ideals);
+  const [bonds, setBonds] = useState(() => generateAllCharacterDetails(selectedSpecies, edition).bonds);
+  const [flaws, setFlaws] = useState(() => generateAllCharacterDetails(selectedSpecies, edition).flaws);
 
   // Randomize handlers
-  const randomizeName = () => setName(generateRandomName(selectedRace));
+  const randomizeName = () => setName(generateRandomName(selectedSpecies, edition));
   const randomizePersonality = () => setPersonality(generateRandomPersonality());
   const randomizeIdeals = () => setIdeals(generateRandomIdeal());
   const randomizeBonds = () => setBonds(generateRandomBond());
@@ -101,8 +103,8 @@ const CharacterFinalization: React.FC<CharacterFinalizationProps> = ({
               <div className="text-white font-semibold">{profile.name}</div>
             </div>
             <div>
-              <span className="text-theme-muted">Race:</span>
-              <div className="text-white font-semibold">{selectedRace}</div>
+              <span className="text-theme-muted">Species:</span>
+              <div className="text-white font-semibold">{selectedSpecies}</div>
             </div>
             <div>
               <span className="text-theme-muted">Class:</span>

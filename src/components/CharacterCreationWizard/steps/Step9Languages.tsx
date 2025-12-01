@@ -41,9 +41,11 @@ export const Step9Languages: React.FC<StepProps> = ({ data, updateData, nextStep
   // Add class languages
   getClassLanguages(data.classSlug).forEach((lang: string) => autoLanguages.add(lang));
 
-  // Get background language choices
+  // Get background language choices (2024 backgrounds don't grant languages)
   const background = BACKGROUNDS.find(bg => bg.name === data.background);
-  const backgroundChoices = background ? parseBackgroundLanguageChoices(background.languages || []) : { direct: [], choices: 0 };
+  const backgroundChoices = (data.edition === '2024')
+    ? { direct: [], choices: 0 }
+    : background ? parseBackgroundLanguageChoices(background.languages || []) : { direct: [], choices: 0 };
 
   // Add direct background languages
   backgroundChoices.direct.forEach((lang: string) => autoLanguages.add(lang));
@@ -51,7 +53,7 @@ export const Step9Languages: React.FC<StepProps> = ({ data, updateData, nextStep
   // Calculate remaining language slots
   const intelligenceScore = data.abilities.INT;
   const maxLanguages = getMaxLanguages(intelligenceScore);
-  const totalAvailableSlots = maxLanguages + backgroundChoices.choices;
+  const totalAvailableSlots = maxLanguages + (data.edition === '2024' ? 0 : backgroundChoices.choices);
   const remainingSlots = Math.max(0, totalAvailableSlots - selectedLanguages.length);
 
   const toggleCategory = (categoryName: string) => {
@@ -76,7 +78,7 @@ export const Step9Languages: React.FC<StepProps> = ({ data, updateData, nextStep
   };
 
   // Validation for required background language selections
-  const hasRequiredBackgroundSelections = selectedLanguages.length >= backgroundChoices.choices;
+  const hasRequiredBackgroundSelections = data.edition === '2024' || selectedLanguages.length >= backgroundChoices.choices;
 
   const languageCategories = [
     { name: 'Standard' as const, icon: '🏛️', description: 'Common languages of major civilizations' },
@@ -127,7 +129,7 @@ export const Step9Languages: React.FC<StepProps> = ({ data, updateData, nextStep
       <div className="bg-accent-blue-darker/20 border border-accent-blue-dark rounded-lg p-4">
         <h4 className="text-lg font-bold text-blue-300 mb-3">Auto-Included Languages</h4>
         <p className="text-sm text-theme-muted mb-3">
-          These languages are automatically known based on your race, class, and background choices.
+          These languages are automatically known based on your species, class, and background choices.
         </p>
         <div className="flex flex-wrap gap-2">
           {Array.from(autoLanguages).sort().map(language => (

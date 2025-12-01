@@ -1,14 +1,15 @@
 {
   "metadata": {
-    "version": "1.0",
-    "description": "Comprehensive race data for D&D 5e character creation",
-    "lastUpdated": "2024-01-01",
-    "totalRaces": 32
+    "version": "1.1",
+    "description": "Comprehensive race data for D&D 5e character creation (2014 & 2024)",
+    "lastUpdated": "2025-11-29",
+    "totalRaces": 33
   },
   "races": [
     {
       "slug": "human",
       "name": "Human",
+      "edition": "2014",
       "source": "PHB",
       "speed": 30,
       "ability_bonuses": { "STR": 1, "DEX": 1, "CON": 1, "INT": 1, "WIS": 1, "CHA": 1 },
@@ -36,8 +37,22 @@
       "defaultVariant": "variant"
     },
     {
+      "slug": "human-2024",
+      "name": "Human",
+      "edition": "2024",
+      "source": "PHB 2024",
+      "speed": 30,
+      "creatureType": "Humanoid",
+      "size": "Medium",
+      "ability_bonuses": {},
+      "species_traits": ["Resourceful", "Skillful", "Versatile"],
+      "description": "Humans are the most adaptable and ambitious people among the common races. In the 2024 rules, they are defined by their versatility and resilience.",
+      "typicalRoles": ["Any"]
+    },
+    {
       "slug": "mountain-dwarf",
       "name": "Mountain Dwarf",
+      "edition": "2014",
       "source": "PHB",
       "speed": 25,
       "ability_bonuses": { "STR": 2, "CON": 2 },
@@ -46,8 +61,22 @@
       "typicalRoles": ["Fighter", "Barbarian", "Cleric", "Paladin"]
     },
     {
+      "slug": "dwarf-2024",
+      "name": "Dwarf",
+      "edition": "2024",
+      "source": "PHB 2024",
+      "speed": 30,
+      "creatureType": "Humanoid",
+      "size": "Medium",
+      "ability_bonuses": {},
+      "species_traits": ["Darkvision", "Dwarven Resilience", "Dwarven Toughness", "Stonecunning"],
+      "description": "Dwarves are solid and enduring like the mountains they love, weathering the passage of centuries with stoic endurance.",
+      "typicalRoles": ["Fighter", "Cleric", "Paladin"]
+    },
+    {
       "slug": "hill-dwarf",
       "name": "Hill Dwarf",
+      "edition": "2014",
       "source": "PHB",
       "speed": 25,
       "ability_bonuses": { "CON": 2, "WIS": 1 },
@@ -58,6 +87,7 @@
     {
       "slug": "high-elf",
       "name": "High Elf",
+      "edition": "2014",
       "source": "PHB",
       "speed": 30,
       "ability_bonuses": { "DEX": 2, "INT": 1 },
@@ -66,8 +96,27 @@
       "typicalRoles": ["Wizard", "Fighter", "Rogue", "Cleric", "Any"]
     },
     {
+      "slug": "elf-2024",
+      "name": "Elf",
+      "edition": "2024",
+      "source": "PHB 2024",
+      "speed": 30,
+      "creatureType": "Humanoid",
+      "size": "Medium",
+      "ability_bonuses": {},
+      "species_traits": ["Darkvision", "Elven Lineage", "Fey Ancestry", "Keen Senses", "Trance"],
+      "description": "Elves are a magical people of otherworldly grace, living in the world but not entirely part of it.",
+      "typicalRoles": ["Wizard", "Rogue", "Ranger", "Druid"],
+      "variants": [
+          { "slug": "drow-lineage", "name": "Drow Lineage", "description": "Descended from the Underdark.", "ability_bonuses": {}, "species_traits": ["Superior Darkvision", "Drow Magic"], "features": []},
+          { "slug": "high-elf-lineage", "name": "High Elf Lineage", "description": "Descended from the Feywild courts.", "ability_bonuses": {}, "species_traits": ["Cantrip", "Detect Magic"], "features": []},
+          { "slug": "wood-elf-lineage", "name": "Wood Elf Lineage", "description": "Descended from the primeval forests.", "ability_bonuses": {}, "species_traits": ["Fleet of Foot", "Mask of the Wild"], "features": []}
+      ]
+    },
+    {
       "slug": "wood-elf",
       "name": "Wood Elf",
+      "edition": "2014",
       "source": "PHB",
       "speed": 30,
       "ability_bonuses": { "DEX": 2, "WIS": 1 },
@@ -78,6 +127,7 @@
     {
       "slug": "drow",
       "name": "Drow (Dark Elf)",
+      "edition": "2014",
       "source": "PHB",
       "speed": 30,
       "ability_bonuses": { "DEX": 2, "CHA": 1 },
@@ -88,6 +138,7 @@
     {
       "slug": "lightfoot-halfling",
       "name": "Lightfoot Halfling",
+      "edition": "2014",
       "source": "PHB",
       "speed": 30,
       "ability_bonuses": { "DEX": 2, "CHA": 1 },
@@ -96,8 +147,22 @@
       "typicalRoles": ["Rogue", "Bard", "Cleric", "Wizard", "Any"]
     },
     {
+      "slug": "halfling-2024",
+      "name": "Halfling",
+      "edition": "2024",
+      "source": "PHB 2024",
+      "speed": 30,
+      "creatureType": "Humanoid",
+      "size": "Small",
+      "ability_bonuses": {},
+      "species_traits": ["Brave", "Halfling Nimbleness", "Lucky", "Naturally Stealthy"],
+      "description": "The diminutive halflings survive in a world full of larger creatures by avoiding notice or, barring that, avoiding offense.",
+      "typicalRoles": ["Rogue", "Bard"]
+    },
+    {
       "slug": "stout-halfling",
       "name": "Stout Halfling",
+      "edition": "2014",
       "source": "PHB",
       "speed": 30,
       "ability_bonuses": { "DEX": 2, "CON": 1 },
@@ -108,6 +173,7 @@
     {
       "slug": "forest-gnome",
       "name": "Forest Gnome",
+      "edition": "2014",
       "source": "PHB",
       "speed": 30,
       "ability_bonuses": { "INT": 2, "DEX": 1 },
@@ -116,8 +182,26 @@
       "typicalRoles": ["Wizard", "Druid", "Bard", "Rogue"]
     },
     {
+      "slug": "gnome-2024",
+      "name": "Gnome",
+      "edition": "2024",
+      "source": "PHB 2024",
+      "speed": 30,
+      "creatureType": "Humanoid",
+      "size": "Small",
+      "ability_bonuses": {},
+      "species_traits": ["Darkvision", "Gnomish Cunning", "Gnomish Lineage"],
+      "description": "A constant hum of busy activity pervades the warrens and neighborhoods where gnomes form their close-knit communities.",
+      "typicalRoles": ["Wizard", "Artificer", "Rogue"],
+      "variants": [
+          { "slug": "forest-gnome-lineage", "name": "Forest Gnome Lineage", "description": "Natural illusionists.", "ability_bonuses": {}, "species_traits": ["Minor Illusion", "Speak with Small Beasts"], "features": []},
+          { "slug": "rock-gnome-lineage", "name": "Rock Gnome Lineage", "description": "Natural tinkerers.", "ability_bonuses": {}, "species_traits": ["Mending", "Prestidigitation", "Tinker"], "features": []}
+      ]
+    },
+    {
       "slug": "rock-gnome",
       "name": "Rock Gnome",
+      "edition": "2014",
       "source": "PHB",
       "speed": 30,
       "ability_bonuses": { "INT": 2, "CON": 1 },
@@ -128,6 +212,7 @@
     {
       "slug": "dragonborn",
       "name": "Dragonborn",
+      "edition": "2014",
       "source": "PHB",
       "speed": 30,
       "ability_bonuses": { "STR": 2, "CHA": 1 },
@@ -136,8 +221,22 @@
       "typicalRoles": ["Fighter", "Barbarian", "Paladin", "Sorcerer"]
     },
     {
+      "slug": "dragonborn-2024",
+      "name": "Dragonborn",
+      "edition": "2024",
+      "source": "PHB 2024",
+      "speed": 30,
+      "creatureType": "Humanoid",
+      "size": "Medium",
+      "ability_bonuses": {},
+      "species_traits": ["Draconic Ancestry", "Breath Weapon", "Damage Resistance", "Darkvision", "Draconic Flight"],
+      "description": "Born of dragons, as their name proclaims, the dragonborn walk proudly through a world that greets them with fearful incomprehension.",
+      "typicalRoles": ["Paladin", "Fighter", "Sorcerer"]
+    },
+    {
       "slug": "half-elf",
       "name": "Half-Elf",
+      "edition": "2014",
       "source": "PHB",
       "speed": 30,
       "ability_bonuses": { "CHA": 2 },
@@ -148,6 +247,7 @@
     {
       "slug": "half-orc",
       "name": "Half-Orc",
+      "edition": "2014",
       "source": "PHB",
       "speed": 30,
       "ability_bonuses": { "STR": 2, "CON": 1 },
@@ -156,8 +256,22 @@
       "typicalRoles": ["Barbarian", "Fighter", "Rogue", "Paladin"]
     },
     {
+      "slug": "orc-2024",
+      "name": "Orc",
+      "edition": "2024",
+      "source": "PHB 2024",
+      "speed": 30,
+      "creatureType": "Humanoid",
+      "size": "Medium",
+      "ability_bonuses": {},
+      "species_traits": ["Adrenaline Rush", "Darkvision", "Powerful Build", "Relentless Endurance"],
+      "description": "Orcs are people of deep emotion and great passion, renowned for their unyielding endurance and determination.",
+      "typicalRoles": ["Barbarian", "Fighter"]
+    },
+    {
       "slug": "tiefling",
       "name": "Tiefling",
+      "edition": "2014",
       "source": "PHB",
       "speed": 30,
       "ability_bonuses": { "INT": 1, "CHA": 2 },
@@ -166,8 +280,27 @@
       "typicalRoles": ["Warlock", "Wizard", "Rogue", "Bard"]
     },
     {
+      "slug": "tiefling-2024",
+      "name": "Tiefling",
+      "edition": "2024",
+      "source": "PHB 2024",
+      "speed": 30,
+      "creatureType": "Humanoid",
+      "size": "Medium",
+      "ability_bonuses": {},
+      "species_traits": ["Darkvision", "Otherworldly Presence", "Fiendish Legacy"],
+      "description": "To be greeted with stares and whispers, to suffer violence and insult on the street, to see mistrust and fear in every eye: this is the lot of the tiefling.",
+      "typicalRoles": ["Warlock", "Sorcerer", "Bard"],
+      "variants": [
+          { "slug": "abyssal-tiefling", "name": "Abyssal Tiefling", "description": "Descended from demons of the Abyss.", "ability_bonuses": {}, "species_traits": ["Abyssal Fortitude", "Abyssal Arcana"], "features": []},
+          { "slug": "chthonic-tiefling", "name": "Chthonic Tiefling", "description": "Descended from fiends of the neutral lower planes.", "ability_bonuses": {}, "species_traits": ["Chthonic Resistance", "Chthonic Arcana"], "features": []},
+          { "slug": "infernal-tiefling", "name": "Infernal Tiefling", "description": "Descended from devils of the Nine Hells.", "ability_bonuses": {}, "species_traits": ["Infernal Legacy", "Hellish Resistance"], "features": []}
+      ]
+    },
+    {
       "slug": "aasimar",
       "name": "Aasimar",
+      "edition": "2014",
       "source": "VGtM",
       "speed": 30,
       "ability_bonuses": { "WIS": 1, "CHA": 2 },
@@ -176,8 +309,22 @@
       "typicalRoles": ["Paladin", "Cleric", "Bard", "Fighter"]
     },
     {
+      "slug": "aasimar-2024",
+      "name": "Aasimar",
+      "edition": "2024",
+      "source": "PHB 2024",
+      "speed": 30,
+      "creatureType": "Humanoid",
+      "size": "Medium",
+      "ability_bonuses": {},
+      "species_traits": ["Celestial Resistance", "Darkvision", "Healing Hands", "Light Bearer", "Celestial Revelation"],
+      "description": "Aasimar are souls touched by the power of Mount Celestia, the divine realm of law and good.",
+      "typicalRoles": ["Paladin", "Cleric"]
+    },
+    {
       "slug": "firbolg",
       "name": "Firbolg",
+      "edition": "2014",
       "source": "VGtM",
       "speed": 30,
       "ability_bonuses": { "STR": 1, "WIS": 2 },
@@ -188,6 +335,7 @@
     {
       "slug": "goliath",
       "name": "Goliath",
+      "edition": "2014",
       "source": "VGtM",
       "speed": 30,
       "ability_bonuses": { "STR": 2, "CON": 1 },
@@ -196,8 +344,30 @@
       "typicalRoles": ["Barbarian", "Fighter", "Ranger", "Paladin"]
     },
     {
+      "slug": "goliath-2024",
+      "name": "Goliath",
+      "edition": "2024",
+      "source": "PHB 2024",
+      "speed": 35,
+      "creatureType": "Humanoid",
+      "size": "Medium",
+      "ability_bonuses": {},
+      "species_traits": ["Giant Ancestry", "Large Form", "Powerful Build"],
+      "description": "Goliaths are the distant descendants of giants. They are tough and resilient, with abilities inherited from their giant forebears.",
+      "typicalRoles": ["Barbarian", "Fighter"],
+      "variants": [
+          { "slug": "cloud-giant-ancestry", "name": "Cloud Giant Ancestry", "description": "Legacy of Cloud Giants.", "ability_bonuses": {}, "species_traits": ["Cloud Jaunt"], "features": []},
+          { "slug": "fire-giant-ancestry", "name": "Fire Giant Ancestry", "description": "Legacy of Fire Giants.", "ability_bonuses": {}, "species_traits": ["Fire's Burn"], "features": []},
+           { "slug": "frost-giant-ancestry", "name": "Frost Giant Ancestry", "description": "Legacy of Frost Giants.", "ability_bonuses": {}, "species_traits": ["Frost's Chill"], "features": []},
+            { "slug": "hill-giant-ancestry", "name": "Hill Giant Ancestry", "description": "Legacy of Hill Giants.", "ability_bonuses": {}, "species_traits": ["Hill's Tumble"], "features": []},
+             { "slug": "stone-giant-ancestry", "name": "Stone Giant Ancestry", "description": "Legacy of Stone Giants.", "ability_bonuses": {}, "species_traits": ["Stone's Endurance"], "features": []},
+              { "slug": "storm-giant-ancestry", "name": "Storm Giant Ancestry", "description": "Legacy of Storm Giants.", "ability_bonuses": {}, "species_traits": ["Storm's Thunder"], "features": []}
+      ]
+    },
+    {
       "slug": "kenku",
       "name": "Kenku",
+      "edition": "2014",
       "source": "VGtM",
       "speed": 30,
       "ability_bonuses": { "DEX": 2, "WIS": 1 },
@@ -208,6 +378,7 @@
     {
       "slug": "tabaxi",
       "name": "Tabaxi",
+      "edition": "2014",
       "source": "VGtM",
       "speed": 30,
       "ability_bonuses": { "DEX": 2, "CHA": 1 },
@@ -218,6 +389,7 @@
     {
       "slug": "triton",
       "name": "Triton",
+      "edition": "2014",
       "source": "VGtM",
       "speed": 30,
       "ability_bonuses": { "STR": 1, "CON": 1, "CHA": 1 },
@@ -228,6 +400,7 @@
     {
       "slug": "bugbear",
       "name": "Bugbear",
+      "edition": "2014",
       "source": "VGtM",
       "speed": 30,
       "ability_bonuses": { "STR": 2, "DEX": 1 },
@@ -238,6 +411,7 @@
     {
       "slug": "goblin",
       "name": "Goblin",
+      "edition": "2014",
       "source": "VGtM",
       "speed": 30,
       "ability_bonuses": { "DEX": 2, "CON": 1 },
@@ -248,6 +422,7 @@
     {
       "slug": "hobgoblin",
       "name": "Hobgoblin",
+      "edition": "2014",
       "source": "VGtM",
       "speed": 30,
       "ability_bonuses": { "CON": 2, "INT": 1 },
@@ -258,6 +433,7 @@
     {
       "slug": "kobold",
       "name": "Kobold",
+      "edition": "2014",
       "source": "VGtM",
       "speed": 30,
       "ability_bonuses": { "DEX": 2, "STR": -2 },
@@ -268,6 +444,7 @@
     {
       "slug": "orc",
       "name": "Orc",
+      "edition": "2014",
       "source": "VGtM",
       "speed": 30,
       "ability_bonuses": { "STR": 2, "CON": 1, "INT": -2 },
@@ -278,6 +455,7 @@
     {
       "slug": "yuan-ti-pureblood",
       "name": "Yuan-Ti Pureblood",
+      "edition": "2014",
       "source": "VGtM",
       "speed": 30,
       "ability_bonuses": { "CHA": 2, "INT": 1 },
@@ -288,6 +466,7 @@
     {
       "slug": "fairy",
       "name": "Fairy",
+      "edition": "2014",
       "source": "WGtE",
       "speed": 30,
       "ability_bonuses": { "DEX": 2, "CHA": 1 },
@@ -298,6 +477,7 @@
     {
       "slug": "harengon",
       "name": "Harengon",
+      "edition": "2014",
       "source": "WGtE",
       "speed": 30,
       "ability_bonuses": { "DEX": 2, "WIS": 1 },
@@ -308,6 +488,7 @@
     {
       "slug": "loxodon",
       "name": "Loxodon",
+      "edition": "2014",
       "source": "GGtR",
       "speed": 30,
       "ability_bonuses": { "CON": 2, "WIS": 1 },
@@ -318,6 +499,7 @@
     {
       "slug": "owlin",
       "name": "Owlin",
+      "edition": "2014",
       "source": "Strixhaven",
       "speed": 30,
       "ability_bonuses": { "DEX": 2, "WIS": 1 },
@@ -328,6 +510,7 @@
     {
       "slug": "githyanki",
       "name": "Githyanki",
+      "edition": "2014",
       "source": "MToF",
       "speed": 30,
       "ability_bonuses": { "STR": 1, "INT": 1 },
@@ -338,6 +521,7 @@
     {
       "slug": "fire-genasi",
       "name": "Fire Genasi",
+      "edition": "2014",
       "source": "EE",
       "speed": 30,
       "ability_bonuses": { "CON": 2, "INT": 1 },

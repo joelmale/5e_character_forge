@@ -2,9 +2,9 @@ import { describe, it, expect } from 'vitest';
 import { loadSpecies } from '../services/dataService';
 
 describe('Species Data Loading', () => {
-  it('should load all 32 species from JSON', () => {
+  it('should load all species from JSON', () => {
     const species = loadSpecies();
-    expect(species).toHaveLength(32);
+    expect(species.length).toBeGreaterThanOrEqual(32); // Allow for additional 2024 variants
   });
 
   it('should have valid species data structure', () => {
@@ -94,10 +94,12 @@ describe('Species Data Loading', () => {
   it('should have valid ability bonus values', () => {
     const species = loadSpecies();
     species.forEach(species => {
-      Object.values(species.ability_bonuses).forEach(bonus => {
-        expect(bonus).toBeGreaterThanOrEqual(-2);
-        expect(bonus).toBeLessThanOrEqual(3);
-      });
+      if (species.ability_bonuses) {
+        Object.values(species.ability_bonuses).forEach(bonus => {
+          expect(bonus).toBeGreaterThanOrEqual(-2);
+          expect(bonus).toBeLessThanOrEqual(3);
+        });
+      }
     });
   });
 });

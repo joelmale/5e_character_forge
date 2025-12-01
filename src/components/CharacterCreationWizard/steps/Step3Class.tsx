@@ -7,6 +7,8 @@ import { SelectionPoolWidget, BranchChoiceWidget, AutomaticWidget, ListSelection
 import { Level1Feature, SelectionPoolConfig, BranchChoiceConfig, ListSelectionConfig, AutomaticConfig } from '../../../types/widgets';
 import { AnySkillPickerModal } from '../AnySkillPickerModal';
 import ChooseSubclassModal from '../../ChooseSubclassModal';
+import { SmartNavigationButton } from '../components';
+import { useStepValidation } from '../hooks';
 
 interface RandomizeButtonProps {
   onClick: () => void;
@@ -37,6 +39,9 @@ export const Step3Class: React.FC<StepProps> = ({ data, updateData, nextStep, pr
   const allClasses = loadClasses(data.edition);
   const selectedClass = allClasses.find(c => c.slug === data.classSlug);
   const availableSubclasses = getSubclassesByClass(data.classSlug);
+
+  // Validation hook
+  const { canProceed, missingItems, nextAction } = useStepValidation(3, data);
 
   const toggleCategory = (categoryName: string) => {
     setExpandedCategories(prev => {
@@ -505,60 +510,20 @@ export const Step3Class: React.FC<StepProps> = ({ data, updateData, nextStep, pr
           );
         })()}
 
-       <div className='flex justify-between'>
-        <button onClick={prevStep} className="px-4 py-2 bg-theme-quaternary hover:bg-theme-hover rounded-lg text-white flex items-center">
-          <ArrowLeft className="w-4 h-4 mr-2" /> Back
-        </button>
-        <button
-          onClick={nextStep}
-            disabled={
-              !data.classSlug ||
-              !selectedClass ||
-              data.selectedSkills.length < (selectedClass.num_skill_choices || 0) ||
-              data.selectedMusicalInstruments.length < (selectedClass.num_instrument_choices || 0) ||
-              (getSubclassesByClass(data.classSlug).length > 0 && data.level >= 3 && !data.subclassSlug) ||
-             // Check Level 1 feature completion (widget system)
-             (selectedClass.level_1_features?.some((feature: Level1Feature) => {
-               switch (feature.widget_type) {
-                 case 'selection_pool':
-                   if (feature.id === 'expertise') {
-                     return (data.expertiseSkills?.length || 0) < (feature.widget_config as any).count;
-                   }
-                   if (feature.id === 'weapon_mastery') {
-                     return (data.weaponMastery?.length || 0) < (feature.widget_config as any).count;
-                   }
-                   return false;
-                 case 'branch_choice':
-                   if (feature.id === 'divine_order') {
-                     return !data.divineOrder;
-                   }
-                   if (feature.id === 'primal_order') {
-                     return !data.primalOrder;
-                   }
-                   if (feature.id === 'pact_boon') {
-                     return !data.pactBoon;
-                   }
-                   return false;
-                 case 'list_selection':
-                   if (feature.id === 'fighting_style') {
-                     return !data.fightingStyle;
-                   }
-                   if (feature.id === 'eldritch_invocations') {
-                     return (data.eldritchInvocations?.length || 0) < (feature.widget_config as any).count;
-                   }
-                   return false;
-                 case 'automatic':
-                   return false; // Automatic features don't require validation
-                 default:
-                   return false;
-               }
-             }) ?? false)
-           }
-          className="px-4 py-2 bg-accent-red hover:bg-accent-red-light rounded-lg text-white flex items-center disabled:bg-theme-quaternary disabled:cursor-not-allowed"
-        >
-          Next: {getNextStepLabel?.() || 'Continue'} <ArrowRight className="w-4 h-4 ml-2" />
-        </button>
-      </div>
+        <div className='flex justify-between'>
+         <button onClick={prevStep} className="px-4 py-2 bg-theme-quaternary hover:bg-theme-hover rounded-lg text-white flex items-center">
+           <ArrowLeft className="w-4 h-4 mr-2" /> Back
+         </button>
+         <SmartNavigationButton
+           canProceed={canProceed}
+           missingItems={missingItems}
+           nextAction={nextAction}
+           onClick={nextStep}
+           variant="next"
+         >
+           Next: {getNextStepLabel?.() || 'Continue'}
+         </SmartNavigationButton>
+       </div>
 
       {/* Duplicate Skill Modal (2024 Rule) */}
       {duplicateSkill && (

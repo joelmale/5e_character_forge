@@ -19,6 +19,7 @@ interface PersonalityWizardProps {
   onClose: () => void;
   onComplete: (characterData: CharacterCreationData) => void;
   onBack: () => void;
+  edition: Edition;
 }
 
 type PathChoice = 'skill' | 'magic' | null;
@@ -28,7 +29,7 @@ type CombatChoice = 'frontline' | 'skirmisher' | 'overwhelming' | 'tactical' | n
 type SocialChoice = 'leader' | 'supporter' | 'independent' | 'mediator' | 'enforcer' | 'counselor' | null;
 type WorldChoice = 'guardian' | 'revolutionary' | 'pragmatist' | 'spiritual' | 'free_spirit' | 'justice' | null;
 
-const PersonalityWizard: React.FC<PersonalityWizardProps> = ({ isOpen, onClose: _onClose, onComplete, onBack }) => {
+const PersonalityWizard: React.FC<PersonalityWizardProps> = ({ isOpen, onClose: _onClose, onComplete, onBack, edition }) => {
   const [currentStep, setCurrentStep] = useState<number>(0);
   const [selectedPath, setSelectedPath] = useState<PathChoice>(null);
   // Use a ref to store choices synchronously
@@ -50,7 +51,7 @@ const PersonalityWizard: React.FC<PersonalityWizardProps> = ({ isOpen, onClose: 
 
   const [completedProfile, setCompletedProfile] = useState<CharacterProfile | null>(null);
   const [selectedClass, setSelectedClass] = useState<string | null>(null);
-  const [selectedRace, setSelectedRace] = useState<string | null>(null);
+  const [selectedSpecies, setSelectedSpecies] = useState<string | null>(null); // Renamed from selectedRace
   const [selectedBackground, setSelectedBackground] = useState<string | null>(null);
   const [spellSelection, setSpellSelection] = useState<SpellSelectionData>({
     selectedCantrips: [],
@@ -411,13 +412,14 @@ const PersonalityWizard: React.FC<PersonalityWizardProps> = ({ isOpen, onClose: 
                 <ProfileDisplay
                   profile={completedProfile}
                   selectedClass={selectedClass}
-                  selectedRace={selectedRace}
+                  selectedSpecies={selectedSpecies}
                   selectedBackground={selectedBackground}
                   onClassSelect={setSelectedClass}
-                  onRaceSelect={setSelectedRace}
+                  onSpeciesSelect={setSelectedSpecies}
                   onBackgroundSelect={setSelectedBackground}
                   onContinue={() => setCurrentStep(6)}
                   onBack={() => setCurrentStep(4)}
+                  edition={edition}
                 />
               ) : (
                 <WelcomeStep onChoice={handlePathChoice} />
@@ -427,7 +429,7 @@ const PersonalityWizard: React.FC<PersonalityWizardProps> = ({ isOpen, onClose: 
                 <PersonalitySummary
                   profile={completedProfile}
                   selectedClass={selectedClass || undefined}
-                  selectedRace={selectedRace || undefined}
+                  selectedSpecies={selectedSpecies || undefined}
                   selectedBackground={selectedBackground || undefined}
                   spellSelection={spellSelection}
                   onSpellSelectionChange={setSpellSelection}
@@ -435,6 +437,7 @@ const PersonalityWizard: React.FC<PersonalityWizardProps> = ({ isOpen, onClose: 
                   onSkillsChange={setCustomSkills}
                   customAbilities={customAbilities}
                   onAbilitiesChange={setCustomAbilities}
+                  edition={edition}
                   onContinue={() => setCurrentStep(7)}
                   onBack={() => setCurrentStep(5)}
                 />
@@ -446,14 +449,16 @@ const PersonalityWizard: React.FC<PersonalityWizardProps> = ({ isOpen, onClose: 
                 <CharacterFinalization
                   profile={completedProfile}
                   selectedClass={selectedClass || ''}
-                  selectedRace={selectedRace || ''}
+                  selectedSpecies={selectedSpecies || ''}
                   selectedBackground={selectedBackground || ''}
                   onCreateCharacter={handleFinalizeCharacter}
                   onBack={() => setCurrentStep(6)}
+                  edition={edition}
                 />
               ) : (
                 <WelcomeStep onChoice={handlePathChoice} />
               );
+
             default:
               return <WelcomeStep onChoice={handlePathChoice} />;
           }
@@ -665,26 +670,28 @@ const MagicPathStep: React.FC<{ onChoice: (choice: MagicChoice) => void }> = ({ 
 const ProfileDisplay: React.FC<{
   profile: CharacterProfile;
   selectedClass?: string | null;
-  selectedRace?: string | null;
+  selectedSpecies?: string | null;
   selectedBackground?: string | null;
   onClassSelect?: (className: string) => void;
-  onRaceSelect?: (raceName: string) => void;
+  onSpeciesSelect?: (speciesName: string) => void;
   onBackgroundSelect?: (backgroundName: string) => void;
   onContinue: () => void;
   onBack: () => void;
+  edition: Edition;
 }> = ({
   profile,
   selectedClass: initialClass,
-  selectedRace: initialRace,
+  selectedSpecies: initialSpecies,
   selectedBackground: initialBackground,
   onClassSelect,
-  onRaceSelect,
+  onSpeciesSelect,
   onBackgroundSelect,
   onContinue,
-  onBack
+  onBack,
+  edition
 }) => {
   const [selectedClass, setSelectedClass] = React.useState<string | null>(initialClass || null);
-  const [selectedRace, setSelectedRace] = React.useState<string | null>(initialRace || null);
+  const [selectedSpecies, setSelectedSpecies] = React.useState<string | null>(initialSpecies || null);
   const [selectedBackground, setSelectedBackground] = React.useState<string | null>(initialBackground || null);
 
   const handleClassSelect = (className: string) => {
@@ -693,10 +700,10 @@ const ProfileDisplay: React.FC<{
     onClassSelect?.(className);
   };
 
-  const handleRaceSelect = (raceName: string) => {
-    console.log('📝 [ProfileDisplay] Race selected:', raceName);
-    setSelectedRace(raceName);
-    onRaceSelect?.(raceName);
+  const handleSpeciesSelect = (speciesName: string) => {
+    console.log('📝 [ProfileDisplay] Species selected:', speciesName);
+    setSelectedSpecies(speciesName);
+    onSpeciesSelect?.(speciesName);
   };
 
   const handleBackgroundSelect = (backgroundName: string) => {
@@ -737,16 +744,16 @@ const ProfileDisplay: React.FC<{
           </div>
         </div>
 
-        {/* Races */}
+        {/* Species */}
         <div>
-          <h3 className="text-xl font-semibold text-accent-blue-light mb-3">Recommended Races</h3>
+          <h3 className="text-xl font-semibold text-accent-blue-light mb-3">Recommended Species</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {profile.recommendedRaces.map((rec, idx) => (
+            {profile.recommendedRaces.filter(rec => getAllSpecies(edition).some(s => s.name === rec.race)).map((rec, idx) => ( // Filter by edition
               <button
                 key={idx}
-                onClick={() => handleRaceSelect(rec.race)}
+                onClick={() => handleSpeciesSelect(rec.race)}
                 className={`p-4 rounded-lg border-2 transition-all text-left ${
-                  selectedRace === rec.race
+                  selectedSpecies === rec.race
                     ? 'bg-accent-blue-darker border-blue-500 shadow-md'
                     : 'bg-theme-tertiary border-theme-primary hover:bg-theme-quaternary'
                 }`}

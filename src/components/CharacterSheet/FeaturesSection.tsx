@@ -29,21 +29,41 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({
             </ul>
           </div>
 
-          {/* Species Traits */}
-          <div className="p-4 bg-theme-secondary rounded-xl shadow-lg border-l-4 border-green-500">
-            <h3 className="text-lg font-bold text-accent-green-light mb-2">Species Traits</h3>
-            <div className="flex flex-wrap gap-2">
-              {character.featuresAndTraits.speciesTraits.map((trait, index) => (
-                <button
-                  key={`r-${index}`}
-                  onClick={() => onFeatureClick(trait)}
-                  className="px-2 py-1 bg-accent-green-dark text-theme-primary text-xs rounded hover:bg-accent-green transition-colors cursor-pointer"
-                >
-                  {trait}
-                </button>
-              ))}
+           {/* Species Traits */}
+           <div className="p-4 bg-theme-secondary rounded-xl shadow-lg border-l-4 border-green-500">
+             <h3 className="text-lg font-bold text-accent-green-light mb-2">Species Traits</h3>
+             <div className="flex flex-wrap gap-2">
+               {character.featuresAndTraits.speciesTraits.map((trait, index) => (
+                 <button
+                   key={`r-${index}`}
+                   onClick={() => onFeatureClick(trait)}
+                   className="px-2 py-1 bg-accent-green-dark text-theme-primary text-xs rounded hover:bg-accent-green transition-colors cursor-pointer"
+                 >
+                   {trait}
+                 </button>
+               ))}
+             </div>
             </div>
-           </div>
+
+           {/* Background Features */}
+           {character.featuresAndTraits.backgroundFeatures && character.featuresAndTraits.backgroundFeatures.length > 0 && (
+             <div className="p-4 bg-theme-secondary rounded-xl shadow-lg border-l-4 border-blue-500">
+               <h3 className="text-lg font-bold text-accent-blue-light mb-2">Background Features</h3>
+               <div className="space-y-2">
+                 {character.featuresAndTraits.backgroundFeatures.map((feature, index) => (
+                   <div key={`bg-${index}`} className="border border-theme-primary rounded p-3">
+                     <button
+                       onClick={() => onFeatureClick(feature.name)}
+                       className="font-medium text-theme-primary hover:text-accent-yellow-light transition-colors cursor-pointer text-left w-full"
+                     >
+                       {feature.name}
+                     </button>
+                     <p className="text-xs text-theme-muted mt-1">{feature.description}</p>
+                   </div>
+                 ))}
+               </div>
+             </div>
+           )}
 
           {/* Musical Instrument Proficiencies */}
           {character.featuresAndTraits.musicalInstrumentProficiencies && character.featuresAndTraits.musicalInstrumentProficiencies.length > 0 && (

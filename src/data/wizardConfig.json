@@ -25,9 +25,12 @@
     "abilityScoreMethod": "standard-array",
     "background": "Outlander",
     "alignment": "Neutral Good",
+    "backgroundAbilityChoices": null,
     "selectedSkills": [],
     "selectedMusicalInstruments": [],
     "equipmentChoices": [],
+    "equipmentChoice": null,
+    "equipmentGold": 0,
     "hpCalculationMethod": "max",
     "spellSelection": {
       "selectedCantrips": [],

@@ -1,11 +1,21 @@
 import { Feat, CharacterCreationData } from '../types/dnd';
 
 /**
- * Calculate how many feats a character can take based on their level
+ * Calculate how many feats a character can take based on their level and edition
  * Feats are available at levels 4, 8, 12, 16, 19 (every 4 levels starting at 4)
+ * For 2024 Human, gain an additional feat at Level 1.
  */
-export const calculateFeatAvailability = (level: number): number => {
-  return Math.floor((level - 1) / 4);
+export const calculateFeatAvailability = (data: CharacterCreationData): number => {
+  const level = data.level;
+  let baseFeats = Math.floor((level - 1) / 4); // Standard feat progression from level 4
+
+  // 2024 Human additional feat at Level 1
+  if (data.edition === '2024' && data.speciesSlug === 'human-2024') {
+    baseFeats += 1; // 2024 Humans get an extra feat at Level 1
+  }
+
+  // Ensure minimum of 0 feats
+  return Math.max(0, baseFeats);
 };
 
 /**

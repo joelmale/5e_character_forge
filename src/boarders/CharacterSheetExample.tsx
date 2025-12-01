@@ -17,7 +17,7 @@ interface CharacterSheetProps {
     name: string;
     class: string;
     level: number;
-    race: string;
+    species: string;
     background: string;
     stats: {
       strength: number;
@@ -44,7 +44,7 @@ const ExampleCharacterSheet: React.FC<CharacterSheetProps> = ({
     name: 'Thorin Ironforge',
     class: 'Fighter',
     level: 5,
-    race: 'Dwarf',
+    species: 'Dwarf',
     background: 'Soldier',
     stats: {
       strength: 18,
@@ -99,8 +99,8 @@ const ExampleCharacterSheet: React.FC<CharacterSheetProps> = ({
             <div style={{ fontSize: '1.125rem' }}>{character.class} {character.level}</div>
           </div>
           <div>
-            <label style={{ fontSize: '0.875rem', color: '#666' }}>RACE</label>
-            <div style={{ fontSize: '1.125rem' }}>{character.race}</div>
+            <label style={{ fontSize: '0.875rem', color: '#666' }}>SPECIES</label>
+            <div style={{ fontSize: '1.125rem' }}>{character.species}</div>
           </div>
           <div>
             <label style={{ fontSize: '0.875rem', color: '#666' }}>BACKGROUND</label>

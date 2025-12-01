@@ -180,6 +180,7 @@ const App: React.FC = () => {
   const [isNewCharacterModalOpen, setIsNewCharacterModalOpen] = useState<boolean>(false);
   const [creationMethod, setCreationMethod] = useState<'manual' | 'wizard' | 'personality' | null>(null);
   const [isManualEntryOpen, setIsManualEntryOpen] = useState<boolean>(false);
+  const [selectedEdition, setSelectedEdition] = useState<Edition>('2024');
 
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState<boolean>(false);
   const [isDiceTrayModalOpen, setIsDiceTrayModalOpen] = useState<boolean>(false);
@@ -636,19 +637,22 @@ const App: React.FC = () => {
   }, []);
 
   // New character creation handlers
-  const handleSelectManualEntry = useCallback(() => {
+  const handleSelectManualEntry = useCallback((edition: Edition) => {
     setIsNewCharacterModalOpen(false);
+    setSelectedEdition(edition);
     setIsManualEntryOpen(true);
   }, []);
 
-  const handleSelectWizard = useCallback(() => {
+  const handleSelectWizard = useCallback((edition: Edition) => {
     setIsNewCharacterModalOpen(false);
+    setSelectedEdition(edition);
     setCreationMethod('wizard');
     setIsWizardOpen(true);
   }, []);
 
-  const handleSelectPersonality = useCallback(() => {
+  const handleSelectPersonality = useCallback((edition: Edition) => {
     setIsNewCharacterModalOpen(false);
+    setSelectedEdition(edition);
     setCreationMethod('personality');
   }, []);
 
@@ -1271,6 +1275,7 @@ const App: React.FC = () => {
         {/* Manual Entry Modal */}
         <ManualEntryScreen
           isOpen={isManualEntryOpen}
+          edition={selectedEdition}
           onClose={() => {
             setIsManualEntryOpen(false);
             setCreationMethod(null);
@@ -1284,6 +1289,7 @@ const App: React.FC = () => {
         {/* Character Creation Wizard */}
         <CharacterCreationWizard
           isOpen={isWizardOpen}
+          edition={selectedEdition}
           onClose={() => {
             setIsWizardOpen(false);
             setCreationMethod(null);
@@ -1299,6 +1305,7 @@ const App: React.FC = () => {
         {creationMethod === 'personality' && (
           <PersonalityWizard
             isOpen={creationMethod === 'personality'}
+            edition={selectedEdition}
             onClose={() => setCreationMethod(null)}
             onComplete={handlePersonalityComplete}
             onBack={handleBackToModal}

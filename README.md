@@ -34,6 +34,8 @@ The 5e Character Forge allows users to:
 
 ### D&D 5e Features
 
+- **Dual Edition Support**: Full support for both D&D 5e 2014 (original) and 2024 (revised) rules
+- **2024 PHB Complete**: All 12 Origin backgrounds, 10 core species with lineages, and comprehensive Origin Feat system
 - **Persistent Storage (F1)**: Save, load, and delete multiple characters locally
 - **Character Dashboard (F2)**: View all saved characters with key details
 - **Creation Wizard (F3)**: Step-by-step guided character creation
@@ -55,6 +57,10 @@ The 5e Character Forge allows users to:
   - Spell preparation for Clerics, Druids, Paladins, and Wizards
   - Cantrip and leveled spell management
   - Automatic spell slot calculation by level
+- **Feat System (F9)**: Complete Origin Feat support for 2024 rules
+  - All 12 background Origin Feats implemented
+  - Versatile Human extra feat selection
+  - Dynamic feat validation and application
 - **Responsive Design (F8)**: Mobile-first design with Tailwind CSS
 
 ## Technical Stack

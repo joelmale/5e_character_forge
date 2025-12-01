@@ -118,11 +118,18 @@ export const Step6Equipment: React.FC<StepProps & { skipToStep?: (step: number) 
   const selectedClass = allClasses.find(c => c.slug === data.classSlug);
 
   // Equipment mode state
-  const [equipmentMode, setEquipmentMode] = React.useState<'quickstart' | 'buy' | 'choices'>('quickstart');
+  const [equipmentMode, setEquipmentMode] = React.useState<'quickstart' | 'buy' | 'choices' | 'background-choice'>(
+    data.edition === '2024' ? 'background-choice' : 'quickstart'
+  );
+
+  // Background equipment choice state
+  const [backgroundChoice, setBackgroundChoice] = React.useState<'background' | 'gold' | null>(
+    data.equipmentChoice || null
+  );
 
   // Gold rolling state
-  const [goldRolled, setGoldRolled] = React.useState(false);
-  const [startingGold, setStartingGold] = React.useState(0);
+  const [goldRolled, setGoldRolled] = React.useState(data.equipmentChoice === 'gold');
+  const [startingGold, setStartingGold] = React.useState(data.equipmentChoice === 'gold' ? (data.equipmentGold || 50) : 0);
 
   const [rolledTrinket, setRolledTrinket] = React.useState<TrinketData | null>(data.selectedTrinket || null);
 
@@ -216,84 +223,199 @@ export const Step6Equipment: React.FC<StepProps & { skipToStep?: (step: number) 
         />
       </div>
 
-      {/* Equipment Mode Selection */}
-      <div className="bg-theme-secondary/50 border border-theme-primary rounded-lg p-4 space-y-4">
-        <h4 className="text-lg font-bold text-accent-yellow-light">Choose Equipment Method</h4>
-        <p className="text-sm text-theme-muted">
-          Select how you want to equip your character. Quick Start gives you a curated loadout, while Buy Equipment lets you spend starting wealth on custom gear.
-        </p>
+       {/* Equipment Mode Selection */}
+       {equipmentMode === 'background-choice' && data.edition === '2024' ? (
+         <div className="bg-theme-secondary/50 border border-theme-primary rounded-lg p-4 space-y-4">
+           <h4 className="text-lg font-bold text-accent-yellow-light">Choose Your Starting Equipment</h4>
+           <p className="text-sm text-theme-muted">
+             Your background provides you with starting equipment. You can take this equipment or exchange it for 50 gp to spend in the shop.
+           </p>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <button
-            onClick={() => setEquipmentMode('quickstart')}
-            className={`p-4 rounded-lg border-2 transition-all text-left ${
-              equipmentMode === 'quickstart'
-                ? 'bg-accent-green-darker border-accent-green'
-                : 'bg-theme-tertiary border-theme-primary hover:border-theme-secondary'
-            }`}
-          >
-            <h5 className="font-semibold text-accent-green-light mb-2">Quick Start Loadout</h5>
-            <p className="text-sm text-theme-tertiary">
-              Get a curated set of equipment perfectly suited for your class and background. Recommended for beginners.
-            </p>
-          </button>
+           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+             {/* Background Equipment Option */}
+             <button
+               onClick={() => {
+                 setBackgroundChoice('background');
+                 updateData({ equipmentChoice: 'background' });
+                 setEquipmentMode('quickstart');
+               }}
+               className={`p-4 rounded-lg border-2 transition-all text-left ${
+                 backgroundChoice === 'background'
+                   ? 'bg-accent-green-darker border-accent-green'
+                   : 'bg-theme-tertiary border-theme-primary hover:border-theme-secondary'
+               }`}
+             >
+               <h5 className="font-semibold text-accent-green-light mb-2">Background Equipment</h5>
+               <p className="text-sm text-theme-tertiary mb-3">
+                 Take the equipment provided by your background choice.
+               </p>
+               {(() => {
+                 const background = BACKGROUNDS.find((bg: any) => bg.slug === data.background);
+                 return background?.equipment ? (
+                   <div className="space-y-1">
+                     <div className="text-xs font-medium text-theme-muted uppercase">Equipment:</div>
+                     {background.equipment.map((item: string, index: number) => (
+                       <div key={index} className="text-sm text-theme-primary flex items-center">
+                         <span className="text-accent-yellow-light mr-2">•</span>
+                         {item}
+                       </div>
+                     ))}
+                   </div>
+                 ) : (
+                   <div className="text-sm text-theme-muted">No equipment specified</div>
+                 );
+               })()}
+             </button>
 
-          <button
-            onClick={() => setEquipmentMode('buy')}
-            className={`p-4 rounded-lg border-2 transition-all text-left ${
-              equipmentMode === 'buy'
-                ? 'bg-accent-blue-darker border-accent-blue'
-                : 'bg-theme-tertiary border-theme-primary hover:border-theme-secondary'
-            }`}
-          >
-            <h5 className="font-semibold text-accent-blue-light mb-2">Buy Equipment</h5>
-            <p className="text-sm text-theme-tertiary">
-              Roll for starting wealth and spend it in the shop. Maximum flexibility for advanced players.
-            </p>
-          </button>
+             {/* Gold Alternative Option */}
+             <button
+               onClick={() => {
+                 setBackgroundChoice('gold');
+                 updateData({ equipmentChoice: 'gold', equipmentGold: 50 });
+                 setEquipmentMode('buy');
+               }}
+               className={`p-4 rounded-lg border-2 transition-all text-left ${
+                 backgroundChoice === 'gold'
+                   ? 'bg-accent-blue-darker border-accent-blue'
+                   : 'bg-theme-tertiary border-theme-primary hover:border-theme-secondary'
+               }`}
+             >
+               <h5 className="font-semibold text-accent-blue-light mb-2">50 GP to Spend</h5>
+               <p className="text-sm text-theme-tertiary mb-3">
+                 Exchange your background equipment for 50 gold pieces to spend in the shop.
+               </p>
+               <div className="space-y-1">
+                 <div className="text-xs font-medium text-theme-muted uppercase">Benefits:</div>
+                 <div className="text-sm text-theme-primary flex items-center">
+                   <span className="text-accent-yellow-light mr-2">•</span>
+                   Maximum equipment flexibility
+                 </div>
+                 <div className="text-sm text-theme-primary flex items-center">
+                   <span className="text-accent-yellow-light mr-2">•</span>
+                   Choose exactly what you want
+                 </div>
+                 <div className="text-sm text-theme-primary flex items-center">
+                   <span className="text-accent-yellow-light mr-2">•</span>
+                   Access to rare or specialized items
+                 </div>
+               </div>
+             </button>
+           </div>
+         </div>
+       ) : (
+         <div className="bg-theme-secondary/50 border border-theme-primary rounded-lg p-4 space-y-4">
+           <h4 className="text-lg font-bold text-accent-yellow-light">
+             {data.edition === '2024' ? 'Equipment Package' : 'Choose Equipment Method'}
+           </h4>
+           <p className="text-sm text-theme-muted">
+             {data.edition === '2024'
+               ? 'In 2024 rules, you receive a standard equipment package based on your class and background choices.'
+               : 'Select how you want to equip your character. Quick Start gives you a curated loadout, while Buy Equipment lets you spend starting wealth on custom gear.'
+             }
+           </p>
 
-          <button
-            onClick={() => setEquipmentMode('choices')}
-            className={`p-4 rounded-lg border-2 transition-all text-left ${
-              equipmentMode === 'choices'
-                ? 'bg-accent-purple-darker border-accent-purple'
-                : 'bg-theme-tertiary border-theme-primary hover:border-theme-secondary'
-            }`}
-          >
-            <h5 className="font-semibold text-accent-purple-light mb-2">Custom Choices</h5>
-            <p className="text-sm text-theme-tertiary">
-              Make individual equipment selections from your class options. Full control over every item.
-            </p>
-          </button>
-        </div>
-      </div>
+           <div className={`grid grid-cols-1 ${data.edition === '2024' ? 'md:grid-cols-1' : 'md:grid-cols-3'} gap-3`}>
+             <button
+               onClick={() => setEquipmentMode('quickstart')}
+               className={`p-4 rounded-lg border-2 transition-all text-left ${
+                 equipmentMode === 'quickstart'
+                   ? 'bg-accent-green-darker border-accent-green'
+                   : 'bg-theme-tertiary border-theme-primary hover:border-theme-secondary'
+               }`}
+             >
+               <h5 className="font-semibold text-accent-green-light mb-2">
+                 {data.edition === '2024' ? 'Standard Equipment Package' : 'Quick Start Loadout'}
+               </h5>
+               <p className="text-sm text-theme-tertiary">
+                 {data.edition === '2024'
+                   ? 'Get the standard equipment package for your class and background as defined in the 2024 rules.'
+                   : 'Get a curated set of equipment perfectly suited for your class and background. Recommended for beginners.'
+                 }
+               </p>
+             </button>
 
-      {/* Equipment Content Based on Mode */}
-      {equipmentMode === 'quickstart' && (
-        <QuickStartEquipment
-          classSlug={data.classSlug}
-          backgroundName={data.background}
-          onAccept={() => {
-            // Generate and save QuickStart equipment to startingInventory
-            const quickStartEquipment = generateQuickStartEquipment(data.classSlug, data.background);
-            const startingInventory = quickStartEquipment.items.map(item => ({
-              equipmentSlug: item.equipmentSlug,
-              quantity: item.quantity,
-              equipped: item.equipped || false
-            }));
+            {data.edition !== '2024' && (
+              <>
+                <button
+                  onClick={() => setEquipmentMode('buy')}
+                  className={`p-4 rounded-lg border-2 transition-all text-left ${
+                    equipmentMode === 'buy'
+                      ? 'bg-accent-blue-darker border-accent-blue'
+                      : 'bg-theme-tertiary border-theme-primary hover:border-theme-secondary'
+                  }`}
+                >
+                  <h5 className="font-semibold text-accent-blue-light mb-2">Buy Equipment</h5>
+                  <p className="text-sm text-theme-tertiary">
+                    Roll for starting wealth and spend it in the shop. Maximum flexibility for advanced players.
+                  </p>
+                </button>
 
-            updateData({ startingInventory });
+                <button
+                  onClick={() => setEquipmentMode('choices')}
+                  className={`p-4 rounded-lg border-2 transition-all text-left ${
+                    equipmentMode === 'choices'
+                      ? 'bg-accent-purple-darker border-accent-purple'
+                      : 'bg-theme-tertiary border-theme-primary hover:border-theme-secondary'
+                  }`}
+                >
+                  <h5 className="font-semibold text-accent-purple-light mb-2">Custom Choices</h5>
+                  <p className="text-sm text-theme-tertiary">
+                    Make individual equipment selections from your class options. Full control over every item.
+                  </p>
+                </button>
+              </>
+            )}
+          </div>
+         </div>
+       )}
 
-            // Skip to traits/finalize step
-            if (skipToStep) {
-              skipToStep(13);
-            } else {
-              nextStep();
-            }
-          }}
-          onBuyInstead={() => setEquipmentMode('buy')}
-        />
-      )}
+       {/* Equipment Content Based on Mode */}
+       {equipmentMode === 'quickstart' && (
+         <QuickStartEquipment
+           classSlug={data.classSlug}
+           backgroundName={data.background}
+           onAccept={() => {
+             let startingInventory: Array<{equipmentSlug: string, quantity: number, equipped: boolean}>;
+
+             if (data.equipmentChoice === 'background' && data.edition === '2024') {
+               // Use only background equipment for 2024 background choice
+               const background = BACKGROUNDS.find((bg: any) => bg.slug === data.background);
+               if (background?.equipment) {
+                 startingInventory = background.equipment.map(itemName => {
+                   // Try to find the equipment item by name
+                   const equipmentItem = EQUIPMENT_PACKAGES.flatMap(pkg => pkg.items)
+                     .find(item => item.name.toLowerCase() === itemName.toLowerCase());
+                   return {
+                     equipmentSlug: equipmentItem?.slug || `custom-${itemName.toLowerCase().replace(/\s+/g, '-')}`,
+                     quantity: 1,
+                     equipped: false
+                   };
+                 });
+               } else {
+                 startingInventory = [];
+               }
+             } else {
+               // Generate and save QuickStart equipment to startingInventory
+               const quickStartEquipment = generateQuickStartEquipment(data.classSlug, data.background);
+               startingInventory = quickStartEquipment.items.map(item => ({
+                 equipmentSlug: item.equipmentSlug,
+                 quantity: item.quantity,
+                 equipped: item.equipped || false
+               }));
+             }
+
+             updateData({ startingInventory });
+
+             // Skip to traits/finalize step
+             if (skipToStep) {
+               skipToStep(13);
+             } else {
+               nextStep();
+             }
+           }}
+           onBuyInstead={() => setEquipmentMode('buy')}
+         />
+       )}
 
       {equipmentMode === 'buy' && (
         <div className="space-y-4">

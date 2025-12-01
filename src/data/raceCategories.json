@@ -4,7 +4,7 @@
     "icon": "📖",
     "description": "The fundamental species from the Player's Handbook, perfect for traditional D&D campaigns.",
     "filterCriteria": {
-      "source": "PHB"
+      "sources": ["PHB", "PHB 2024"]
     }
   },
   {

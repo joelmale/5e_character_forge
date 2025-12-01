@@ -176,14 +176,19 @@ export const EquipmentSection: React.FC<EquipmentSectionProps> = ({
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-grow min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <button
-                          onClick={() => equipment && handleEquipmentClick(equipment)}
-                          className={`font-semibold ${textPrimaryClass} hover:text-orange-300 transition-colors text-left`}
-                        >
-                          {equipment?.name || item.equipmentSlug}
-                        </button>
-                        {item.equipped && <span className="text-xs bg-accent-green px-2 py-0.5 rounded">Equipped</span>}
-                        {/* Weapon Mastery Indicator */}
+                        {equipment ? (
+                          <button
+                            onClick={() => handleEquipmentClick(equipment)}
+                            className={`font-semibold ${textPrimaryClass} hover:text-orange-300 transition-colors text-left`}
+                          >
+                            {equipment.name}
+                          </button>
+                        ) : (
+                          <span className={`font-semibold ${textPrimaryClass} text-left`}>
+                            {item.trinket?.short_name || item.equipmentSlug}
+                          </span>
+                        )}                        {item.equipped && <span className="text-xs bg-accent-green px-2 py-0.5 rounded">Equipped</span>}
+                        {item.trinket && <span className="text-xs bg-purple-600 px-2 py-0.5 rounded">Trinket</span>}\                        {/* Weapon Mastery Indicator */}
                         {isWeapon && isMastered && masteryProperty && (
                           <span
                             className="text-xs bg-amber-900/50 border border-amber-500/50 text-amber-300 px-2 py-0.5 rounded flex items-center gap-1"
@@ -199,69 +204,69 @@ export const EquipmentSection: React.FC<EquipmentSectionProps> = ({
                     </div>
                     <div className="flex items-center gap-2 flex-shrink-0">
                       <span className={`font-mono text-sm ${textTertiaryClass}`}>×{item.quantity}</span>
-                      <div className="flex gap-1">
-                        {/* Equip/Unequip buttons */}
-                        {equipment && (
-                          <>
-                            {equipment.equipment_category === 'Armor' && equipment.armor_category !== 'Shield' && (
-                              <button
-                                onClick={() => {
-                                  if (item.equipped) {
-                                    onUnequipItem(character.id, item.equipmentSlug);
-                                  } else {
-                                    onEquipArmor(character.id, item.equipmentSlug);
-                                  }
-                                }}
-                                className={`px-2 py-0.5 rounded text-xs transition-colors ${
-                                  item.equipped
-                                    ? 'bg-accent-red hover:bg-accent-red-light text-white'
-                                    : 'bg-accent-green hover:bg-accent-green-dark text-white'
-                                }`}
-                                title={item.equipped ? 'Unequip armor' : 'Equip armor'}
-                              >
-                                {item.equipped ? 'Unequip' : 'Equip'}
-                              </button>
-                            )}
-                            {equipment.equipment_category === 'Weapon' && (
-                              <button
-                                onClick={() => {
-                                  if (item.equipped) {
-                                    onUnequipItem(character.id, item.equipmentSlug);
-                                  } else {
-                                    onEquipWeapon(character.id, item.equipmentSlug);
-                                  }
-                                }}
-                                className={`px-2 py-0.5 rounded text-xs transition-colors ${
-                                  item.equipped
-                                    ? 'bg-accent-red hover:bg-accent-red-light text-white'
-                                    : 'bg-accent-blue hover:bg-accent-blue-dark text-white'
-                                }`}
-                                title={item.equipped ? 'Unequip weapon' : 'Equip weapon'}
-                              >
-                                {item.equipped ? 'Unequip' : 'Equip'}
-                              </button>
-                            )}
-                            {equipment.armor_category === 'Shield' && (
-                              <button
-                                onClick={() => {
-                                  if (item.equipped) {
-                                    onUnequipItem(character.id, item.equipmentSlug);
-                                  } else {
-                                    onEquipWeapon(character.id, item.equipmentSlug);
-                                  }
-                                }}
-                                className={`px-2 py-0.5 rounded text-xs transition-colors ${
-                                  item.equipped
-                                    ? 'bg-accent-red hover:bg-accent-red-light text-white'
-                                    : 'bg-accent-purple hover:bg-accent-purple-dark text-white'
-                                }`}
-                                title={item.equipped ? 'Unequip shield' : 'Equip shield'}
-                              >
-                                {item.equipped ? 'Unequip' : 'Equip'}
-                              </button>
-                            )}
-                          </>
-                        )}
+                       <div className="flex gap-1">
+                         {/* Equip/Unequip buttons */}
+                         {equipment && equipment.equipable && (
+                           <>
+                             {equipment.equipment_category === 'Armor' && equipment.armor_category !== 'Shield' && (
+                               <button
+                                 onClick={() => {
+                                   if (item.equipped) {
+                                     onUnequipItem(character.id, item.equipmentSlug);
+                                   } else {
+                                     onEquipArmor(character.id, item.equipmentSlug);
+                                   }
+                                 }}
+                                 className={`px-2 py-0.5 rounded text-xs transition-colors ${
+                                   item.equipped
+                                     ? 'bg-accent-red hover:bg-accent-red-light text-white'
+                                     : 'bg-accent-green hover:bg-accent-green-dark text-white'
+                                 }`}
+                                 title={item.equipped ? 'Unequip armor' : 'Equip armor'}
+                               >
+                                 {item.equipped ? 'Unequip' : 'Equip'}
+                               </button>
+                             )}
+                             {equipment.equipment_category === 'Weapon' && (
+                               <button
+                                 onClick={() => {
+                                   if (item.equipped) {
+                                     onUnequipItem(character.id, item.equipmentSlug);
+                                   } else {
+                                     onEquipWeapon(character.id, item.equipmentSlug);
+                                   }
+                                 }}
+                                 className={`px-2 py-0.5 rounded text-xs transition-colors ${
+                                   item.equipped
+                                     ? 'bg-accent-red hover:bg-accent-red-light text-white'
+                                     : 'bg-accent-blue hover:bg-accent-blue-dark text-white'
+                                 }`}
+                                 title={item.equipped ? 'Unequip weapon' : 'Equip weapon'}
+                               >
+                                 {item.equipped ? 'Unequip' : 'Equip'}
+                               </button>
+                             )}
+                             {equipment.armor_category === 'Shield' && (
+                               <button
+                                 onClick={() => {
+                                   if (item.equipped) {
+                                     onUnequipItem(character.id, item.equipmentSlug);
+                                   } else {
+                                     onEquipWeapon(character.id, item.equipmentSlug);
+                                   }
+                                 }}
+                                 className={`px-2 py-0.5 rounded text-xs transition-colors ${
+                                   item.equipped
+                                     ? 'bg-accent-red hover:bg-accent-red-light text-white'
+                                     : 'bg-accent-purple hover:bg-accent-purple-dark text-white'
+                                 }`}
+                                 title={item.equipped ? 'Unequip shield' : 'Equip shield'}
+                               >
+                                 {item.equipped ? 'Unequip' : 'Equip'}
+                               </button>
+                             )}
+                           </>
+                         )}
                         {/* Quantity adjustment buttons */}
                         <div className="flex flex-col gap-1">
                           <div className="flex items-center gap-1">
@@ -303,12 +308,11 @@ export const EquipmentSection: React.FC<EquipmentSectionProps> = ({
             setSelectedEquipment(null);
             setEquipError('');
           }}
-          onEquip={selectedEquipment ? handleEquipFromModal : undefined}
-          onUnequip={selectedEquipment && (
-            character.equippedArmor === selectedEquipment.slug ||
-            character.equippedWeapons?.includes(selectedEquipment.slug)
-          ) ? handleUnequipFromModal : undefined}
-          canEquip={selectedEquipment ? canEquipItem(character, selectedEquipment).canEquip : true}
+          onEquip={selectedEquipment && selectedEquipment.equipable ? handleEquipFromModal : undefined}
+           onUnequip={selectedEquipment && selectedEquipment.equipable && (
+             character.equippedArmor === selectedEquipment.slug ||
+             character.equippedWeapons?.includes(selectedEquipment.slug)
+           ) ? handleUnequipFromModal : undefined}          canEquip={selectedEquipment ? canEquipItem(character, selectedEquipment).canEquip : true}
           equipError={equipError}
         />
 

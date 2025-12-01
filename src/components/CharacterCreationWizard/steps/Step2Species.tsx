@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { ChevronUp, ChevronDown, XCircle, Shuffle, ArrowLeft, ArrowRight } from 'lucide-react';
 import { StepProps } from '../types/wizard.types';
 import { getAllSpecies, SPECIES_CATEGORIES, randomizeSpecies } from '../../../services/dataService';
-import { HumanVariantSelector } from '../components/HumanVariantSelector';
+import { HumanVariantSelector, OriginFeatSelector, SmartNavigationButton } from '../components';
+import { useStepValidation } from '../hooks';
 
 interface RandomizeButtonProps {
   onClick: () => void;
@@ -25,6 +26,9 @@ export const Step2Species: React.FC<StepProps> = ({ data, updateData, nextStep, 
 
   const selectedSpecies = getAllSpecies().find(s => s.slug === data.speciesSlug);
 
+  // Validation hook
+  const { canProceed, missingItems, nextAction } = useStepValidation(2, data);
+
   const isStepComplete = () => {
     if (!data.speciesSlug) return false;
 
@@ -38,6 +42,24 @@ export const Step2Species: React.FC<StepProps> = ({ data, updateData, nextStep, 
           ? Object.values(data.variantAbilityBonuses).reduce((sum, val) => sum + val, 0)
           : 0;
         return totalBonuses === 2 && !!data.variantSkillProficiency && !!data.variantFeat;
+      }
+    }
+
+    // 2024 Species Feat Validation
+    if (data.edition === '2024' && selectedSpecies) {
+      const speciesData = selectedSpecies as any;
+      if (speciesData.speciesFeatOptions && !data.speciesFeat) {
+        return false; // Must choose a feat if options are available
+      }
+    }
+
+    // 2024 Human Versatile Feat Validation
+    if (data.edition === '2024' && data.speciesSlug === 'human-2024') {
+      if (!data.humanOriginFeat) {
+        return false; // Must choose an Origin Feat
+      }
+      if (data.humanOriginFeat === 'versatile' && !data.humanVersatileFeat) {
+        return false; // Must choose extra Origin Feat if Versatile is selected
       }
     }
 
@@ -92,7 +114,7 @@ export const Step2Species: React.FC<StepProps> = ({ data, updateData, nextStep, 
             {/* Category Species */}
             {expandedCategories.has(category.name) && (
               <div className='p-4 bg-theme-secondary/50 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3'>
-                {category.species.map(species => (
+                {category.species.filter(s => s.edition === data.edition).map(species => ( // Filter by edition
                   <button
                     key={species.slug}
                     onClick={() => updateData({ speciesSlug: species.slug })}
@@ -130,20 +152,132 @@ export const Step2Species: React.FC<StepProps> = ({ data, updateData, nextStep, 
             </div>
           </div>
 
-          <p className="text-sm text-theme-tertiary">{selectedSpecies.description}</p>
+           <p className="text-sm text-theme-tertiary">{(selectedSpecies as any).detailedDescription || selectedSpecies.description}</p>
 
-          <div className="space-y-2 text-sm">
-            <div>
-              <span className="font-semibold text-accent-red-light">Ability Bonuses: </span>
-              <div className="flex flex-wrap gap-2 mt-1">
-                {Object.entries(selectedSpecies.ability_bonuses).map(([ability, bonus]) => (
-                  <span key={ability} className="px-2 py-1 bg-blue-700 text-white text-xs rounded">
-                    {ability} +{bonus}
-                  </span>
-                ))}
+           <div className="space-y-3 text-sm">
+             {/* 2024 Traits */}
+             {data.edition === '2024' && (selectedSpecies as any).traits && (
+               <div>
+                 <h5 className="font-semibold text-accent-green-light mb-2">Traits:</h5>
+                 <ul className="space-y-1">
+                   {(selectedSpecies as any).traits.map((trait: string, index: number) => (
+                     <li key={index} className="flex items-start">
+                       <span className="text-accent-yellow-light mr-2">•</span>
+                       <span className="text-theme-primary">{trait}</span>
+                     </li>
+                   ))}
+                 </ul>
+               </div>
+             )}
+
+             {/* 2014 Ability Bonuses */}
+             {data.edition === '2014' && selectedSpecies.ability_bonuses && Object.keys(selectedSpecies.ability_bonuses).length > 0 && (
+               <div>
+                 <h5 className="font-semibold text-accent-red-light mb-2">Ability Bonuses:</h5>
+                 <div className="flex flex-wrap gap-2">
+                   {Object.entries(selectedSpecies.ability_bonuses).map(([ability, bonus]) => (
+                     <span key={ability} className="px-2 py-1 bg-blue-700 text-white text-xs rounded">
+                       {ability} +{bonus}
+                     </span>
+                   ))}
+                 </div>
+               </div>
+             )}
+
+             {/* Lineage Choices for 2024 */}
+             {data.edition === '2024' && (selectedSpecies as any).lineages && (
+               <div>
+                 <h5 className="font-semibold text-accent-blue-light mb-2">Choose Lineage:</h5>
+                 <div className="space-y-2">
+                   {Object.entries((selectedSpecies as any).lineages).map(([lineageName, lineageData]) => (
+                     <div key={lineageName} className="border border-theme-primary rounded p-3">
+                       <h6 className="font-medium text-theme-primary mb-1">{lineageName}</h6>
+                       {(lineageData as any).traits && (
+                         <div className="text-xs text-theme-muted mb-1">
+                           <strong>Traits:</strong> {(lineageData as any).traits.join(', ')}
+                         </div>
+                       )}
+                       {(lineageData as any).spells && (
+                         <div className="text-xs text-theme-muted">
+                           <strong>Spells:</strong> {(lineageData as any).spells.join(', ')}
+                         </div>
+                       )}
+                     </div>
+                   ))}
+                 </div>
+               </div>
+             )}
+
+             {/* Ancestry Choices for Dragonborn */}
+             {data.edition === '2024' && selectedSpecies.slug === 'dragonborn' && (selectedSpecies as any).ancestries && (
+               <div>
+                 <h5 className="font-semibold text-accent-purple-light mb-2">Choose Draconic Ancestry:</h5>
+                 <div className="grid grid-cols-2 gap-2">
+                   {Object.entries((selectedSpecies as any).ancestries).map(([color, damageType]) => (
+                     <div key={color} className="text-xs p-2 bg-theme-secondary rounded border">
+                       <strong className="capitalize">{color}:</strong> {String(damageType)} damage
+                     </div>
+                   ))}
+                 </div>
+               </div>
+             )}
+
+             {/* Fiendish Legacy Choices for Tiefling */}
+             {data.edition === '2024' && selectedSpecies.slug === 'tiefling' && (selectedSpecies as any).fiendishLegacies && (
+               <div>
+                 <h5 className="font-semibold text-accent-orange-light mb-2">Choose Fiendish Legacy:</h5>
+                 <div className="space-y-2">
+                   {Object.entries((selectedSpecies as any).fiendishLegacies).map(([legacyName, legacyData]: [string, any]) => (
+                     <div key={legacyName} className="border border-theme-primary rounded p-3">
+                       <h6 className="font-medium text-theme-primary mb-1 capitalize">{legacyName}</h6>
+                       <div className="text-xs text-theme-muted mb-1">
+                         <strong>Resistance:</strong> {legacyData.resistance}
+                       </div>
+                       <div className="text-xs text-theme-muted">
+                         <strong>Spells:</strong> {legacyData.spells.join(', ')}
+                       </div>
+                     </div>
+                   ))}
+                 </div>
+               </div>
+             )}
+
+             {/* Giant Ancestry Choices for Goliath */}
+             {data.edition === '2024' && selectedSpecies.slug === 'goliath' && (selectedSpecies as any).giantAncestry && (
+               <div>
+                 <h5 className="font-semibold text-accent-stone-light mb-2">Choose Giant Ancestry:</h5>
+                 <div className="space-y-2">
+                   {Object.entries((selectedSpecies as any).giantAncestry).map(([ancestry, effect]) => (
+                     <div key={ancestry} className="border border-theme-primary rounded p-3">
+                       <h6 className="font-medium text-theme-primary mb-1 capitalize">{ancestry} Giant</h6>
+                       <div className="text-xs text-theme-muted">{String(effect)}</div>
+                     </div>
+                   ))}
+                 </div>
+               </div>
+             )}
+
+             {/* Celestial Revelation Choices for Aasimar */}
+             {data.edition === '2024' && selectedSpecies.slug === 'aasimar' && (selectedSpecies as any).celestialRevelationOptions && (
+               <div>
+                 <h5 className="font-semibold text-accent-gold-light mb-2">Celestial Revelation (Level 3):</h5>
+                 <div className="space-y-2">
+                   {(selectedSpecies as any).celestialRevelationOptions.map((option: string, index: number) => (
+                     <div key={index} className="border border-theme-primary rounded p-3">
+                       <div className="text-xs text-theme-muted">{option}</div>
+                     </div>
+                   ))}
+                 </div>
+               </div>
+             )}
+            {data.edition === '2024' && (
+              <div>
+                <span className="font-semibold text-accent-red-light">Ability Score Increases: </span>
+                <p className="text-theme-tertiary mt-1">
+                  Your Ability Score Increases are determined by your chosen Background.
+                </p>
               </div>
-            </div>
-
+            )}
              <div>
                <span className="font-semibold text-accent-red-light">Species Traits: </span>
                <div className="flex flex-wrap gap-2 mt-1">
@@ -176,24 +310,82 @@ export const Step2Species: React.FC<StepProps> = ({ data, updateData, nextStep, 
       )}
 
       {/* Human Variant Selection */}
-      {selectedSpecies?.slug === 'human' && (
+      {selectedSpecies?.slug === 'human' && data.edition === '2014' && (
         <HumanVariantSelector
           data={data}
           updateData={updateData}
         />
-      )}
+       )}
+
+       {/* 2024 Species Feat Selection */}
+       {data.edition === '2024' && selectedSpecies && (selectedSpecies as any).speciesFeatOptions && (
+         <div className="text-sm text-theme-muted p-4 bg-theme-secondary/50 rounded-lg border border-theme-primary space-y-4">
+           <div>
+             <p className="font-semibold text-accent-yellow-light">Species Feat:</p>
+             <p className="mt-2">Choose one feat from the following options granted by your species:</p>
+           </div>
+
+           <OriginFeatSelector
+             selectedFeat={data.speciesFeat}
+             onSelect={(featSlug) => updateData({ speciesFeat: featSlug })}
+             featOptions={(selectedSpecies as any).speciesFeatOptions}
+           />
+         </div>
+       )}
+
+       {/* 2024 Species Fixed Feat Display */}
+       {data.edition === '2024' && selectedSpecies && (selectedSpecies as any).speciesFeat && (
+         <div className="text-sm text-theme-muted p-4 bg-theme-secondary/50 rounded-lg border border-theme-primary">
+           <p className="font-semibold text-accent-yellow-light">Species Feat:</p>
+           <p className="mt-2">Your species grants you the <strong>{(selectedSpecies as any).speciesFeat}</strong> feat.</p>
+         </div>
+       )}
+
+        {selectedSpecies?.slug === 'human-2024' && data.edition === '2024' && (
+         <div className="text-sm text-theme-muted p-4 bg-theme-secondary/50 rounded-lg border border-theme-primary space-y-4">
+           <div>
+             <p className="font-semibold text-accent-yellow-light">Human (2024) Traits:</p>
+             <ul className="list-disc list-inside ml-4 mt-2 text-theme-tertiary">
+               <li>You gain the Heroic Inspiration Trait.</li>
+               <li>You gain one additional 1st-level feat (Origin Feat).</li>
+             </ul>
+           </div>
+
+           <OriginFeatSelector
+             selectedFeat={data.humanOriginFeat}
+             onSelect={(featSlug) => updateData({ humanOriginFeat: featSlug })}
+           />
+
+           {/* Show second Origin Feat selector if Versatile is selected */}
+           {data.humanOriginFeat === 'versatile' && (
+             <div className="border-t border-theme-primary pt-4">
+               <div>
+                 <p className="font-semibold text-accent-yellow-light">Versatile Extra Origin Feat:</p>
+                 <p className="mt-2 text-theme-tertiary">Since you selected the Versatile feat, choose one additional Origin Feat:</p>
+               </div>
+
+               <OriginFeatSelector
+                 selectedFeat={data.humanVersatileFeat}
+                 onSelect={(featSlug) => updateData({ humanVersatileFeat: featSlug })}
+               />
+             </div>
+           )}
+         </div>
+       )}
 
       <div className='flex justify-between'>
         <button onClick={prevStep} className="px-4 py-2 bg-theme-quaternary hover:bg-theme-hover rounded-lg text-white flex items-center">
           <ArrowLeft className="w-4 h-4 mr-2" /> Back
         </button>
-        <button
+        <SmartNavigationButton
+          canProceed={canProceed}
+          missingItems={missingItems}
+          nextAction={nextAction}
           onClick={nextStep}
-          disabled={!isStepComplete()}
-          className="px-4 py-2 bg-accent-red hover:bg-accent-red-light rounded-lg text-white flex items-center disabled:bg-theme-quaternary"
+          variant="next"
         >
-          Next: {getNextStepLabel?.() || 'Continue'} <ArrowRight className="w-4 h-4 ml-2" />
-        </button>
+          Next: {getNextStepLabel?.() || 'Continue'}
+        </SmartNavigationButton>
       </div>
     </div>
   );

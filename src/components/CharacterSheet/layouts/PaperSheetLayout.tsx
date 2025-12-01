@@ -61,7 +61,7 @@ export const PaperSheetLayout: React.FC<CharacterSheetProps> = (props) => {
             <div className="text-lg font-eb-garamond font-semibold text-[#1e140a]">{character.background}</div>
           </div>
 
-          {/* Race */}
+          {/* Species */}
           <div className="col-span-2">
             <div className="text-xs font-cinzel font-bold text-[#3d2817] uppercase tracking-wide mb-1">Species</div>
             <div className="text-lg font-eb-garamond font-semibold text-[#1e140a]">{character.species}</div>

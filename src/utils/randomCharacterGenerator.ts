@@ -124,29 +124,45 @@ function randomItem<T>(array: T[]): T {
   return array[Math.floor(Math.random() * array.length)];
 }
 
-// Helper function to extract base race name (remove parenthetical variants)
-function getBaseRace(race: string): string {
-  const parenIndex = race.indexOf(' (');
-  const baseName = parenIndex > 0 ? race.substring(0, parenIndex) : race;
+// Helper function to extract base species name (remove parenthetical variants)
+function getBaseSpecies(speciesSlug: string, edition: Edition): string {
+  const baseName = speciesSlug.split('-')[0]; // Get "human" from "human-2024" or "human"
 
-  // Map some race variations
-  if (baseName.includes('Elf')) return 'Elf';
-  if (baseName === 'Hobgoblin' || baseName === 'Goblin') return 'Half-Orc';
-  if (baseName === 'Aasimar' || baseName === 'Genasi') return 'Tiefling';
+  if (edition === '2024') {
+    switch (baseName) {
+      case 'human': return 'Human';
+      case 'dwarf': return 'Dwarf';
+      case 'elf': return 'Elf';
+      case 'halfling': return 'Halfling';
+      case 'gnome': return 'Gnome';
+      case 'dragonborn': return 'Dragonborn';
+      case 'tiefling': return 'Tiefling';
+      case 'orc': return 'Half-Orc'; // For name generation, 2024 Orcs can use Half-Orc names
+      default: return 'Human'; // Fallback for 2024 new species
+    }
+  } else {
+    // 2014 logic (original mapping)
+    const parenIndex = speciesSlug.indexOf(' (');
+    const nameWithoutVariant = parenIndex > 0 ? speciesSlug.substring(0, parenIndex) : speciesSlug;
 
-  return baseName;
+    if (nameWithoutVariant.includes('Elf')) return 'Elf';
+    if (nameWithoutVariant === 'Hobgoblin' || nameWithoutVariant === 'Goblin') return 'Half-Orc';
+    if (nameWithoutVariant === 'Aasimar' || nameWithoutVariant === 'Genasi') return 'Tiefling';
+
+    return nameWithoutVariant;
+  }
 }
 
-export function generateRandomName(race: string): string {
-  const baseRace = getBaseRace(race);
-  const firstNames = FIRST_NAMES[baseRace as keyof typeof FIRST_NAMES] || FIRST_NAMES.default;
-  const lastNames = LAST_NAMES[baseRace as keyof typeof LAST_NAMES] || LAST_NAMES.default;
+export function generateRandomName(speciesSlug: string, edition: Edition): string {
+  const baseSpecies = getBaseSpecies(speciesSlug, edition);
+  const firstNames = FIRST_NAMES[baseSpecies as keyof typeof FIRST_NAMES] || FIRST_NAMES.default;
+  const lastNames = LAST_NAMES[baseSpecies as keyof typeof LAST_NAMES] || LAST_NAMES.default;
 
   const firstName = randomItem(firstNames);
   const lastName = randomItem(lastNames);
 
-  // Some races don't use last names
-  if (baseRace === 'Tiefling' || baseRace === 'Half-Orc') {
+  // Some species don't use last names
+  if (baseSpecies === 'Tiefling' || baseSpecies === 'Half-Orc') {
     return firstName;
   }
 
@@ -170,9 +186,9 @@ export function generateRandomFlaw(): string {
 }
 
 // Generate all character details at once
-export function generateAllCharacterDetails(race: string) {
+export function generateAllCharacterDetails(speciesSlug: string, edition: Edition) {
   return {
-    name: generateRandomName(race),
+    name: generateRandomName(speciesSlug, edition),
     personality: generateRandomPersonality(),
     ideals: generateRandomIdeal(),
     bonds: generateRandomBond(),

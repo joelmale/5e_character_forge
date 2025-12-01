@@ -27,7 +27,7 @@
     "name": "Alert",
     "source": "PHB",
     "year": 2014,
-    "category": "origin",
+    "category": "general",
     "prerequisite": null,
     "prerequisites": {
       "level": 1
@@ -1104,408 +1104,353 @@
     }
   },
   {
-    "slug": "savage-attacker",
-    "name": "Savage Attacker",
+    "slug": "boon-of-combat-prowess",
+    "name": "Boon of Combat Prowess",
+    "source": "DMG",
+    "year": 2014,
+    "prerequisite": null,
+    "benefits": [
+      "You have advantage on all attack rolls"
+    ],
+    "description": "You have advantage on all attack rolls.",
+    "category": "origin",
+    "prerequisites": {
+      "level": 1
+    }
+  },
+  {
+    "slug": "actor",
+    "name": "Actor",
     "source": "PHB",
-    "year": 2014,
+    "year": 2024,
+    "category": "origin",
     "prerequisite": null,
-    "benefits": [
-      "Reroll melee weapon attack damage once per turn"
-    ],
-    "description": "Once per turn when you roll damage for a melee weapon attack, you can reroll the weapon's damage dice and use either total.",
-    "category": "general",
     "prerequisites": {
-      "level": 4
-    }
-  },
-  {
-    "slug": "second-chance",
-    "name": "Second Chance",
-    "source": "XGtE",
-    "year": 2014,
-    "prerequisite": "Halfling",
-    "abilityScoreIncrease": {
-      "choices": 1,
-      "options": [
-        "DEX",
-        "CON",
-        "CHA"
-      ],
-      "amount": 1
+      "level": 1
     },
     "benefits": [
-      "Force creature to reroll attack that hits you"
+      "+1 Charisma",
+      "Advantage on Deception and Performance checks when mimicking",
+      "Can mimic speech and sounds after hearing them for 1 minute"
     ],
-    "description": "Fortune favors you when someone tries to strike you. You gain the following benefits:\n\n• Increase your Dexterity, Constitution, or Charisma score by 1, to a maximum of 20.\n• When a creature you can see hits you with an attack roll, you can use your reaction to force that creature to reroll. Once you use this ability, you can't use it again until you roll initiative at the start of combat or until you finish a short or long rest.",
-    "category": "general",
-    "prerequisites": {
-      "level": 4
-    }
+    "description": "Skilled at mimicry and dramatics, you gain the following benefits:\n\n• Increase your Charisma score by 1, to a maximum of 20.\n• You have advantage on Charisma (Deception) and Charisma (Performance) checks when trying to pass yourself off as a different person.\n• You can mimic the speech of another person or the sounds made by other creatures. You must have heard the person speaking, or heard the creature make the sound, for at least 1 minute. A successful Wisdom (Insight) check contested by your Charisma (Deception) check allows a listener to determine that the effect is faked."
   },
   {
-    "slug": "sentinel",
-    "name": "Sentinel",
+    "slug": "chef",
+    "name": "Chef",
     "source": "PHB",
-    "year": 2014,
+    "year": 2024,
+    "category": "origin",
     "prerequisite": null,
-    "benefits": [
-      "Successful opportunity attack reduces creature's speed to 0",
-      "Opportunity attack even if creature takes Disengage",
-      "Reaction attack when creature within 5 feet attacks someone else"
-    ],
-    "description": "You have mastered techniques to take advantage of every drop in any enemy's guard, gaining the following benefits:\n\n• When you hit a creature with an opportunity attack, the creature's speed becomes 0 for the rest of the turn.\n• Creatures provoke opportunity attacks from you even if they take the Disengage action before leaving your reach.\n• When a creature within 5 feet of you makes an attack against a target other than you (and that target doesn't have this feat), you can use your reaction to make a melee weapon attack against the attacking creature.",
-    "category": "general",
     "prerequisites": {
-      "level": 4
-    }
-  },
-  {
-    "slug": "shadow-touched",
-    "name": "Shadow Touched",
-    "source": "TCoE",
-    "year": 2014,
-    "prerequisite": null,
-    "abilityScoreIncrease": {
-      "choices": 1,
-      "options": [
-        "INT",
-        "WIS",
-        "CHA"
-      ],
-      "amount": 1
+      "level": 1
     },
     "benefits": [
-      "Learn invisibility",
-      "Learn one 1st-level illusion or necromancy spell"
+      "Cook's utensils proficiency",
+      "Can prepare special meals that grant benefits",
+      "Can prepare a feast for up to 12 people"
     ],
-    "description": "Your exposure to the Shadowfell's magic has changed you, granting you the following benefits:\n\n• Increase your Intelligence, Wisdom, or Charisma score by 1, to a maximum of 20.\n• You learn the invisibility spell and one 1st-level spell of your choice. The 1st-level spell must be from the illusion or necromancy school of magic. You can cast each of these spells without expending a spell slot. Once you cast either of these spells in this way, you can't cast that spell in this way again until you finish a long rest. You can also cast these spells using spell slots you have of the appropriate level. The spells' spellcasting ability is the ability increased by this feat.",
-    "category": "general",
-    "prerequisites": {
-      "level": 4
-    }
+    "description": "Time and effort spent mastering the culinary arts has paid off. You gain the following benefits:\n\n• You gain proficiency with cook's utensils if you don't already have it.\n• As an action, you can inspect a drink or plate of food within 5 feet of you and determine whether it is poisoned, provided that you can see and smell it.\n• During a short rest, you can prepare a special meal that helps you and your companions. You and up to five other creatures can eat the meal to gain benefits. The meal takes 1 hour to prepare and requires 10 gp of ingredients. After eating, each creature gains one of the following benefits of your choice: a +2 bonus to a saving throw, resistance to poison damage for 1 hour, or advantage on Wisdom (Perception) checks for 1 hour."
   },
   {
-    "slug": "great-weapon-master",
-    "name": "Great Weapon Master",
+    "slug": "criminal",
+    "name": "Criminal",
     "source": "PHB",
-    "year": 2014,
-    "category": "general",
-    "prerequisite": "Strength 13",
+    "year": 2024,
+    "category": "origin",
+    "prerequisite": null,
     "prerequisites": {
-      "level": 4,
-      "stats": {
-        "STR": 13
-      }
+      "level": 1
     },
     "benefits": [
-      "+10 damage on heavy weapon attacks",
-      "Reduce attack roll by 5 for +10 damage",
-      "Free attack on critical hits or reducing creature to 0 HP"
+      "Thieves' tools proficiency",
+      "Criminal contact in any city",
+      "Can find fences and underworld contacts"
     ],
-    "description": "You've learned to put the weight of a weapon to your advantage, letting its momentum empower your strikes. You gain the following benefits:\n\n• On your turn, when you score a critical hit with a melee weapon or reduce a creature to 0 hit points with one, you can make one melee weapon attack as a bonus action.\n• Before you make a melee attack with a heavy weapon that you are proficient with, you can choose to take a -5 penalty to the attack roll. If the attack hits, you add +10 to the attack's damage."
+    "description": "You are a member of the criminal underworld. You gain the following benefits:\n\n• You gain proficiency with thieves' tools if you don't already have it.\n• You have a contact in the criminal underworld who can provide information about criminal activities in any city. You know how to contact this individual and how to send and receive messages through them.\n• You are able to find a fence (someone who buys stolen goods) in any city, provided that the city has a population of at least 1,000."
   },
   {
-    "slug": "sharpshooter",
-    "name": "Sharpshooter",
+    "slug": "entertainer",
+    "name": "Entertainer",
     "source": "PHB",
-    "year": 2014,
-    "category": "general",
+    "year": 2024,
+    "category": "origin",
     "prerequisite": null,
     "prerequisites": {
-      "level": 4
+      "level": 1
     },
     "benefits": [
-      "No disadvantage on long range",
-      "Ignore half and three-quarters cover",
-      "Reduce attack roll by 5 for +10 damage"
+      "Musical instrument proficiency",
+      "Can perform for free lodging and food",
+      "Local figure status in towns where you've performed"
     ],
-    "description": "You have mastered ranged weapons and can make shots that others find impossible. You gain the following benefits:\n\n• Attacking at long range doesn't impose disadvantage on your ranged weapon attack rolls.\n• Your ranged weapon attacks ignore half cover and three-quarters cover.\n• Before you make an attack with a ranged weapon that you are proficient with, you can choose to take a -5 penalty to the attack roll. If the attack hits, you add +10 to the attack's damage."
+    "description": "You are a gifted performer. You gain the following benefits:\n\n• You gain proficiency with one musical instrument of your choice.\n• You can always find a place to perform, usually in an inn or tavern but possibly with a circus, at a theater, or even in a noble's court. At such a place, you receive free lodging and food of a modest or comfortable standard (depending on the quality of the establishment), as long as you perform each night. In addition, your performance makes you something of a local figure. When strangers recognize you in a town where you have performed, they typically take a liking to you."
   },
   {
-    "slug": "skill-expert",
-    "name": "Skill Expert",
-    "source": "TCoE",
-    "year": 2014,
+    "slug": "guild-artisan",
+    "name": "Guild Artisan",
+    "source": "PHB",
+    "year": 2024,
+    "category": "origin",
     "prerequisite": null,
-    "abilityScoreIncrease": {
-      "choices": 1,
-      "options": [
-        "STR",
-        "DEX",
-        "CON",
-        "INT",
-        "WIS",
-        "CHA"
-      ],
-      "amount": 1
+    "prerequisites": {
+      "level": 1
     },
     "benefits": [
-      "Proficiency in one skill",
-      "Expertise in one skill you have proficiency in"
+      "Artisan's tools proficiency",
+      "Guild membership with contacts and resources",
+      "Can find guild-sponsored lodging"
     ],
-    "description": "You have honed your proficiency with particular skills, granting you the following benefits:\n\n• Increase one ability score of your choice by 1, to a maximum of 20.\n• You gain proficiency in one skill of your choice.\n• Choose one skill in which you have proficiency. You gain expertise with that skill, which means your proficiency bonus is doubled for any ability check you make with it. The skill you choose must be one that isn't already benefiting from a feature, such as Expertise, that doubles your proficiency bonus.",
-    "category": "general",
+    "description": "You are a member of a guild. You gain the following benefits:\n\n• You gain proficiency with one type of artisan's tools of your choice.\n• You have a guild letter of introduction that indicates your membership. Presenting this letter gains you access to guild facilities and guild members who can provide assistance. Guild members will provide food and lodging, and will expedite any tasks related to your profession.\n• You can find a place to stay in any city that has a guildhall for your profession. You and your companions can stay at the guildhall for free for up to 3 days."
+  },
+  {
+    "slug": "noble",
+    "name": "Noble",
+    "source": "PHB",
+    "year": 2024,
+    "category": "origin",
+    "prerequisite": null,
     "prerequisites": {
-      "level": 4
-    }
+      "level": 1
+    },
+    "benefits": [
+      "Position of privilege in society",
+      "Can secure audience with local nobility",
+      "Retainers available for service"
+    ],
+    "description": "You are a member of the nobility. You gain the following benefits:\n\n• You have a position of privilege in society. You are welcome in high society, and people assume you have the right to be wherever you are. The common folk make every effort to accommodate you and avoid your displeasure, and other people of high birth treat you as a member of the same social sphere. You can secure an audience with a local noble if you need to.\n• You gain proficiency in one language of your choice.\n• You have a retainer: a loyal servant who attends to your needs. Your retainer is a commoner who bears a signet ring emblazoned with your family crest. While in a city or town, you can direct your retainer to purchase goods or hire workers on your behalf."
+  },
+  {
+    "slug": "outlander",
+    "name": "Outlander",
+    "source": "PHB",
+    "year": 2024,
+    "category": "origin",
+    "prerequisite": null,
+    "prerequisites": {
+      "level": 1
+    },
+    "benefits": [
+      "Wanderer - can find food and fresh water",
+      "Favored Enemy - choose a creature type for advantage on attacks and checks",
+      "Can always recall the general layout of terrain and settlements"
+    ],
+    "description": "You grew up in the wilds, far from civilization and the comforts of town and technology. You gain the following benefits:\n\n• You are proficient in one skill of your choice from among Animal Handling, Athletics, Nature, Stealth, or Survival.\n• You can find food and fresh water for yourself and up to five other people each day, provided that the land offers berries, small game, water, and so forth.\n• You can recall the general layout of terrain, settlements, and other features nearby. In addition, you can find hidden water sources in deserts or wastelands."
+  },
+  {
+    "slug": "sage",
+    "name": "Sage",
+    "source": "PHB",
+    "year": 2024,
+    "category": "origin",
+    "prerequisite": null,
+    "prerequisites": {
+      "level": 1
+    },
+    "benefits": [
+      "Researcher - can find lore in libraries",
+      "Arcane Recovery - regain expended spell slot",
+      "Can decipher ancient scripts and languages"
+    ],
+    "description": "You have studied extensively and are an expert on a particular field of knowledge. You gain the following benefits:\n\n• You gain proficiency in two skills of your choice from among Arcana, History, Nature, Religion, or Investigation.\n• You can identify the properties of any magic item you examine (such as whether it's cursed, what its properties are, and so on) after examining it for 1 minute.\n• You can cast the Identify spell twice per long rest without expending a spell slot."
+  },
+  {
+    "slug": "sailor",
+    "name": "Sailor",
+    "source": "PHB",
+    "year": 2024,
+    "category": "origin",
+    "prerequisite": null,
+    "prerequisites": {
+      "level": 1
+    },
+    "benefits": [
+      "Bad Reputation - advantage on Intimidation checks",
+      "Ship's Passage - can secure free passage on ships",
+      "Can always find work on a ship"
+    ],
+    "description": "You have spent time at sea on a sailing ship or naval vessel. You gain the following benefits:\n\n• You gain proficiency with vehicles (water) and navigator's tools if you don't already have them.\n• You have advantage on Dexterity (Acrobatics) checks made to keep your balance while on a slippery deck and on Strength (Athletics) checks made to climb a ship's rigging.\n• You can always find a place on a ship willing to take you and your companions on a voyage. In return for your work as a crew member, you and your companions receive free passage and food for the voyage."
+  },
+  {
+    "slug": "soldier",
+    "name": "Soldier",
+    "source": "PHB",
+    "year": 2024,
+    "category": "origin",
+    "prerequisite": null,
+    "prerequisites": {
+      "level": 1
+    },
+    "benefits": [
+      "Military Rank - can exert authority over lower-ranking soldiers",
+      "Weapon Proficiency - martial weapons and armor",
+      "Can requisition simple equipment from military allies"
+    ],
+    "description": "You have military training and discipline. You gain the following benefits:\n\n• You gain proficiency with two weapons of your choice from among the martial weapons.\n• You gain proficiency with one type of armor of your choice from among light, medium, or heavy armor.\n• You have advantage on initiative rolls.\n• You can requisition simple equipment or horses for temporary use during your adventures by providing an official-looking document from your military."
+  },
+  {
+    "slug": "urchin",
+    "name": "Urchin",
+    "source": "PHB",
+    "year": 2024,
+    "category": "origin",
+    "prerequisite": null,
+    "prerequisites": {
+      "level": 1
+    },
+    "benefits": [
+      "City Secrets - know hidden paths and passages in cities",
+      "Sneak Attack - extra damage when attacking with advantage or when enemy is flanked",
+      "Can find food and shelter in cities"
+    ],
+    "description": "You grew up on the streets, surviving by your wits and cunning. You gain the following benefits:\n\n• You gain proficiency in two skills of your choice from among Deception, Sleight of Hand, Stealth, or Persuasion.\n• You can find secret entrances, hidden passages, and areas to hide in any city you visit. In addition, you can find food and shelter for yourself and up to four other people for free in any city, provided that the city has a population of at least 1,000."
+  },
+   {
+    "slug": "versatile",
+    "name": "Versatile",
+    "source": "PHB",
+    "year": 2024,
+    "category": "species",
+    "prerequisite": null,
+    "prerequisites": {
+      "level": 1
+    },
+    "benefits": [
+      "Gain one additional Origin Feat"
+    ],
+    "description": "Humans are incredibly versatile. You gain one additional Origin Feat of your choice."
   },
   {
     "slug": "skilled",
     "name": "Skilled",
     "source": "PHB",
-    "year": 2014,
+    "year": 2024,
+    "category": "origin",
     "prerequisite": null,
-    "benefits": [
-      "Proficiency in three skills or tools of your choice"
-    ],
-    "description": "You gain proficiency in any combination of three skills or tools of your choice.",
-    "category": "general",
     "prerequisites": {
-      "level": 4
-    }
+      "level": 1
+    },
+    "benefits": [
+      "Proficiency in one skill",
+      "Expertise in one skill you have proficiency in"
+    ],
+    "description": "You have exceptional training in a skill. You gain the following benefits:\n\n• You gain proficiency in one skill of your choice.\n• Choose one skill in which you have proficiency. You gain expertise with that skill, which means your proficiency bonus is doubled for any ability check you make with it. The skill you choose must be one that isn't already benefiting from a feature, such as Expertise, that doubles your proficiency bonus."
   },
   {
-    "slug": "skulker",
-    "name": "Skulker",
+    "slug": "musician",
+    "name": "Musician",
     "source": "PHB",
-    "year": 2014,
-    "prerequisite": "Dexterity 13 or higher",
-    "benefits": [
-      "Ranged weapon attack doesn't reveal position when hidden",
-      "Hide in lightly obscured area",
-      "Miss with ranged weapon doesn't reveal position"
-    ],
-    "description": "You are expert at slinking through shadows. You gain the following benefits:\n\n• You can try to hide when you are lightly obscured from the creature from which you are hiding.\n• When you are hidden from a creature and miss it with a ranged weapon attack, making the attack doesn't reveal your position.\n• Dim light doesn't impose disadvantage on your Wisdom (Perception) checks relying on sight.",
-    "category": "general",
-    "prerequisites": {
-      "level": 4
-    }
-  },
-  {
-    "slug": "slasher",
-    "name": "Slasher",
-    "source": "TCoE",
-    "year": 2014,
+    "year": 2024,
+    "category": "origin",
     "prerequisite": null,
-    "abilityScoreIncrease": {
-      "choices": 1,
-      "options": [
-        "STR",
-        "DEX"
-      ],
-      "amount": 1
+    "prerequisites": {
+      "level": 1
     },
     "benefits": [
-      "Reduce target's speed by 10 feet when dealing slashing damage",
-      "Target has disadvantage on attack rolls after critical hit with slashing damage"
+      "Proficiency with one musical instrument",
+      "Can perform for free lodging and food",
+      "Local figure status in towns where you've performed"
     ],
-    "description": "You've learned where to cut to have the greatest results, granting you the following benefits:\n\n• Increase your Strength or Dexterity by 1, to a maximum of 20.\n• Once per turn when you hit a creature with an attack that deals slashing damage, you can reduce the speed of the target by 10 feet until the start of your next turn.\n• When you score a critical hit that deals slashing damage to a creature, you grievously wound it. Until the start of your next turn, the target has disadvantage on all attack rolls.",
-    "category": "general",
-    "prerequisites": {
-      "level": 4
-    }
+    "description": "You are a gifted performer. You gain the following benefits:\n\n• You gain proficiency with one musical instrument of your choice.\n• You can always find a place to perform, usually in an inn or tavern but possibly with a circus, at a theater, or even in a noble's court. At such a place, you receive free lodging and food of a modest or comfortable standard (depending on the quality of the establishment), as long as you perform each night. In addition, your performance makes you something of a local figure. When strangers recognize you in a town where you have performed, they typically take a liking to you."
   },
   {
-    "slug": "spell-sniper",
-    "name": "Spell Sniper",
+    "slug": "crafter",
+    "name": "Crafter",
     "source": "PHB",
-    "year": 2014,
-    "prerequisite": "The ability to cast at least one spell",
-    "benefits": [
-      "Double range of offensive spells",
-      "Offensive spells ignore half and three-quarters cover",
-      "Learn one offensive cantrip"
-    ],
-    "description": "You have learned techniques to enhance your attacks with certain kinds of spells, gaining the following benefits:\n\n• When you cast a spell that requires you to make an attack roll, the spell's range is doubled.\n• Your ranged spell attacks ignore half cover and three-quarters cover.\n• You learn one cantrip that requires an attack roll. Choose the cantrip from the bard, cleric, druid, sorcerer, warlock, or wizard spell list. Your spellcasting ability for this cantrip depends on the spell list you chose from: Charisma for bard, sorcerer, or warlock; Wisdom for cleric or druid; or Intelligence for wizard.",
-    "category": "general",
+    "year": 2024,
+    "category": "origin",
+    "prerequisite": null,
     "prerequisites": {
-      "level": 4
-    }
-  },
-  {
-    "slug": "squat-nimbleness",
-    "name": "Squat Nimbleness",
-    "source": "XGtE",
-    "year": 2014,
-    "prerequisite": "Dwarf or a Small race",
-    "abilityScoreIncrease": {
-      "choices": 1,
-      "options": [
-        "STR",
-        "DEX"
-      ],
-      "amount": 1
+      "level": 1
     },
     "benefits": [
-      "Speed increases by 5 feet",
-      "Proficiency and advantage on Acrobatics or Athletics checks to escape"
+      "Proficiency with one type of artisan's tools",
+      "Can craft items for half the normal cost",
+      "Can sell crafted items for profit"
     ],
-    "description": "You are uncommonly nimble for your race. You gain the following benefits:\n\n• Increase your Strength or Dexterity score by 1, to a maximum of 20.\n• Increase your walking speed by 5 feet.\n• You gain proficiency in the Acrobatics or Athletics skill (your choice).\n• You have advantage on any Strength (Athletics) or Dexterity (Acrobatics) check you make to escape from being grappled.",
-    "category": "general",
-    "prerequisites": {
-      "level": 4
-    }
+    "description": "You are skilled at crafting items. You gain the following benefits:\n\n• You gain proficiency with one type of artisan's tools of your choice.\n• You can craft nonmagical items in half the time and for half the cost of normal. You must have the appropriate tools and materials.\n• When you sell a crafted item, you can sell it for its full market value instead of half."
   },
   {
-    "slug": "tavern-brawler",
-    "name": "Tavern Brawler",
+    "slug": "healer",
+    "name": "Healer",
     "source": "PHB",
-    "year": 2014,
+    "year": 2024,
+    "category": "origin",
     "prerequisite": null,
-    "abilityScoreIncrease": {
-      "choices": 1,
-      "options": [
-        "STR",
-        "CON"
-      ],
-      "amount": 1
+    "prerequisites": {
+      "level": 1
     },
     "benefits": [
-      "Proficiency with improvised weapons",
-      "Unarmed strikes deal 1d4 damage",
-      "Grapple as bonus action after hitting with unarmed strike or improvised weapon"
+      "Proficiency with healer's kit",
+      "Can stabilize creatures with bonus action",
+      "Can cure diseases and poison with rest"
     ],
-    "description": "Accustomed to rough-and-tumble fighting using whatever weapons happen to be at hand, you gain the following benefits:\n\n• Increase your Strength or Constitution score by 1, to a maximum of 20.\n• You are proficient with improvised weapons.\n• Your unarmed strike uses a d4 for damage.\n• When you hit a creature with an unarmed strike or an improvised weapon on your turn, you can use a bonus action to attempt to grapple the target.",
-    "category": "general",
-    "prerequisites": {
-      "level": 4
-    }
-  },
-  {
-    "slug": "telekinetic",
-    "name": "Telekinetic",
-    "source": "TCoE",
-    "year": 2014,
-    "prerequisite": null,
-    "abilityScoreIncrease": {
-      "choices": 1,
-      "options": [
-        "INT",
-        "WIS",
-        "CHA"
-      ],
-      "amount": 1
-    },
-    "benefits": [
-      "Learn mage hand cantrip (can be invisible)",
-      "Telekinetically shove one creature 5 feet as bonus action"
-    ],
-    "description": "You learn to move things with your mind, granting you the following benefits:\n\n• Increase your Intelligence, Wisdom, or Charisma score by 1, to a maximum of 20.\n• You learn the mage hand cantrip. You can cast it without verbal or somatic components, and you can make the spectral hand invisible. If you already know this spell, its range increases by 30 feet when you cast it. Its spellcasting ability is the ability increased by this feat.\n• As a bonus action, you can try to telekinetically shove one creature you can see within 30 feet of you. When you do so, the target must succeed on a Strength saving throw (DC 8 + your proficiency bonus + the ability modifier of the score increased by this feat) or be moved 5 feet toward you or away from you. A creature can willingly fail this save.",
-    "category": "general",
-    "prerequisites": {
-      "level": 4
-    }
-  },
-  {
-    "slug": "telepathic",
-    "name": "Telepathic",
-    "source": "TCoE",
-    "year": 2014,
-    "prerequisite": null,
-    "abilityScoreIncrease": {
-      "choices": 1,
-      "options": [
-        "INT",
-        "WIS",
-        "CHA"
-      ],
-      "amount": 1
-    },
-    "benefits": [
-      "Cast detect thoughts once per long rest",
-      "Speak telepathically to any creature within 60 feet"
-    ],
-    "description": "You awaken the ability to mentally connect with others, granting you the following benefits:\n\n• Increase your Intelligence, Wisdom, or Charisma score by 1, to a maximum of 20.\n• You can speak telepathically to any creature you can see within 60 feet of you. Your telepathic utterances are in a language you know, and the creature understands you only if it knows that language. Your communication doesn't give the creature the ability to respond to you telepathically.\n• You can cast the detect thoughts spell, requiring no spell slot or components, and you must finish a long rest before you can cast it this way again. Your spellcasting ability for the spell is the ability increased by this feat. If you have spell slots of 2nd level or higher, you can cast this spell with them.",
-    "category": "general",
-    "prerequisites": {
-      "level": 4
-    }
+    "description": "You have a knack for helping others recover from wounds and ailments. You gain the following benefits:\n\n• You gain proficiency with the healer's kit if you don't already have it.\n• As an action, you can spend one use of a healer's kit to stabilize a creature that has 0 hit points, without needing to make a Wisdom (Medicine) check.\n• When you finish a short or long rest, you can tend to one creature. That creature can remove one disease or one poison affecting it. You must have access to a healer's kit to use this benefit."
   },
   {
     "slug": "tough",
     "name": "Tough",
     "source": "PHB",
-    "year": 2014,
+    "year": 2024,
     "category": "origin",
     "prerequisite": null,
     "prerequisites": {
       "level": 1
     },
     "benefits": [
-      "+2 HP per level"
+      "Maximum hit points increase by 2 per level",
+      "Hit point maximum increases by 2"
     ],
-    "description": "Your hit point maximum increases by an amount equal to twice your level when you gain this feat. Whenever you gain a level thereafter, your hit point maximum increases by an additional 2 hit points."
+    "description": "Your body is exceptionally resilient. You gain the following benefits:\n\n• Your hit point maximum increases by 2, and it increases by 2 every time you gain a level.\n• You have advantage on saving throws against being poisoned."
   },
   {
-    "slug": "war-caster",
-    "name": "War Caster",
+    "slug": "tavern-brawler",
+    "name": "Tavern Brawler",
     "source": "PHB",
-    "year": 2014,
-    "category": "general",
-    "prerequisite": "The ability to cast at least one spell",
-    "prerequisites": {
-      "level": 4,
-      "spellcasting": true
-    },
-    "benefits": [
-      "Advantage on Con saves for concentration",
-      "Somatic components with hands full",
-      "Cast spells as opportunity attacks"
-    ],
-    "description": "You have practiced casting spells in the midst of combat, learning techniques that grant you the following benefits:\n\n• You have advantage on Constitution saving throws that you make to maintain your concentration on a spell when you take damage.\n• You can perform the somatic components of spells even when you have weapons or a shield in one or both hands.\n• When a hostile creature's movement provokes an opportunity attack from you, you can use your reaction to cast a spell at the creature, rather than making an opportunity attack. The spell must have a casting time of 1 action and must target only that creature."
-  },
-  {
-    "slug": "weapon-master",
-    "name": "Weapon Master",
-    "source": "PHB",
-    "year": 2014,
-    "prerequisite": null,
-    "abilityScoreIncrease": {
-      "choices": 1,
-      "options": [
-        "STR",
-        "DEX"
-      ],
-      "amount": 1
-    },
-    "benefits": [
-      "Proficiency with four weapons of your choice"
-    ],
-    "description": "You have practiced extensively with a variety of weapons, gaining the following benefits:\n\n• Increase your Strength or Dexterity score by 1, to a maximum of 20.\n• You gain proficiency with four weapons of your choice. Each one must be a simple or a martial weapon.",
-    "category": "general",
-    "prerequisites": {
-      "level": 4
-    }
-  },
-  {
-    "slug": "wood-elf-magic",
-    "name": "Wood Elf Magic",
-    "source": "XGtE",
-    "year": 2014,
-    "prerequisite": "Elf (wood)",
-    "benefits": [
-      "Learn one druid cantrip",
-      "Longstrider and Pass Without Trace once per long rest"
-    ],
-    "description": "You learn the magic of the wood elves. You learn one druid cantrip of your choice. You also learn the longstrider and pass without trace spells, each of which you can cast once per long rest. Wisdom is your spellcasting ability for all three spells.",
+    "year": 2024,
     "category": "origin",
+    "prerequisite": null,
     "prerequisites": {
       "level": 1
-    }
-  },
-  {
-    "slug": "boon-of-combat-prowess",
-    "name": "Boon of Combat Prowess",
-    "source": "DMG",
-    "year": 2014,
-    "category": "epic_boon",
-    "prerequisite": null,
-    "prerequisites": {
-      "level": 19
     },
     "benefits": [
-      "When you miss an attack, you can choose to hit instead"
+      "Proficiency with improvised weapons and unarmed strikes",
+      "Can use Strength for unarmed strikes",
+      "Can grapple as bonus action after unarmed strike hit"
     ],
-    "description": "You have honed your combat skills to an unparalleled degree. When you miss with an attack roll, you can choose to hit instead. Once you use this boon, you can't use it again until you finish a short or long rest."
+    "description": "Accustomed to rough-and-tumble fighting using whatever weapons happen to be at hand, you gain the following benefits:\n\n• You gain proficiency with improvised weapons and unarmed strikes.\n• Your unarmed strike uses a d4 for damage.\n• When you hit a creature with an unarmed strike or an improvised weapon on your turn, you can use a bonus action to attempt to grapple the target."
+  },
+  {
+    "slug": "savage-attacker",
+    "name": "Savage Attacker",
+    "source": "PHB",
+    "year": 2024,
+    "category": "origin",
+    "prerequisite": null,
+    "prerequisites": {
+      "level": 1
+    },
+    "benefits": [
+      "Reroll weapon damage dice once per turn",
+      "Can choose the higher roll"
+    ],
+    "description": "You have trained to deal particularly damaging blows. You gain the following benefits:\n\n• Once per turn when you roll damage for a melee weapon attack, you can reroll the weapon's damage dice and use either total.\n• You have advantage on Strength (Athletics) checks to grapple."
+  },
+  {
+    "slug": "magic-initiate",
+    "name": "Magic Initiate",
+    "source": "PHB",
+    "year": 2014,
+    "category": "general",
+    "prerequisite": null,
+    "prerequisites": {
+      "level": 1
+    },
+    "benefits": [
+      "Learn two cantrips",
+      "Learn one 1st-level spell",
+      "Cast the 1st-level spell once per long rest"
+    ],
+    "description": "Choose a class: bard, cleric, druid, sorcerer, warlock, or wizard. You learn two cantrips of your choice from that class's spell list.\n\nIn addition, choose one 1st-level spell from that same list. You learn that spell and can cast it at its lowest level. Once you cast it, you must finish a long rest before you can cast it again using this feat.\n\nYour spellcasting ability for these spells depends on the class you chose: Charisma for bard, sorcerer, or warlock; Wisdom for cleric or druid; or Intelligence for wizard."
   }
 ]

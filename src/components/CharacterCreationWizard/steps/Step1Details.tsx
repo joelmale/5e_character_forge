@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { XCircle, Shuffle, Volume2, Heart, History, BookOpen, ArrowLeft, ArrowRight } from 'lucide-react';
 import { StepProps } from '../types/wizard.types';
-import { ALIGNMENTS_DATA, BACKGROUNDS, ALIGNMENTS, randomizeIdentity, randomizeSpecies, randomizeClassAndSkills, randomizeFightingStyle, randomizeSpells, randomizeAbilities, randomizeFeats, randomizeEquipmentChoices, randomizeAdditionalEquipment, randomizeLanguages, randomizePersonality } from '../../../services/dataService';
+import { ALIGNMENTS_DATA, BACKGROUNDS, ALIGNMENTS, randomizeIdentity, randomizeSpecies, randomizeClassAndSkills, randomizeFightingStyle, randomizeSpells, randomizeAbilities, randomizeFeats, randomizeEquipmentChoices, randomizeAdditionalEquipment, randomizeLanguages, randomizePersonality, FEAT_DATABASE } from '../../../services/dataService';
 import { generateName, generateNames, GeneratedName } from '../../../utils/nameGenerator';
+import { BackgroundASIWidget, FeatDetailsModal, SkillModal, SmartNavigationButton } from '../components';
+import { useStepValidation } from '../hooks';
 
 interface RandomizeButtonProps {
   onClick: () => void;
@@ -56,9 +58,15 @@ export const Step1Details: React.FC<StepProps> = ({ data, updateData, nextStep, 
   const [showHistory, setShowHistory] = useState(false);
   const [showFavorites, setShowFavorites] = useState(false);
   const [showMeaning, setShowMeaning] = useState(false);
+  const [viewingFeat, setViewingFeat] = useState<string | null>(null);
+  const [viewingSkill, setViewingSkill] = useState<string | null>(null);
+  const [showDetailedDescription, setShowDetailedDescription] = useState(false);
 
   const selectedAlignmentData = ALIGNMENTS_DATA.find(a => a.name === data.alignment);
-  const selectedBackground = BACKGROUNDS.find(bg => bg.name === data.background);
+  const selectedBackground = BACKGROUNDS.find((bg: any) => bg.slug === data.background);
+
+  // Validation hook
+  const { canProceed, missingItems, nextAction } = useStepValidation(1, data);
 
   // Name generator functions
   const generateNewName = () => {
@@ -265,12 +273,20 @@ export const Step1Details: React.FC<StepProps> = ({ data, updateData, nextStep, 
           className="w-full p-3 bg-theme-tertiary text-white rounded-lg focus:ring-red-500 focus:border-red-500"
         >
           <option value="">Select Background</option>
-          {BACKGROUNDS.map(bg => (
-            <option key={bg.name} value={bg.name}>{bg.name}</option>
+          {BACKGROUNDS.filter((bg: any) => bg.edition === data.edition).map((bg: any) => (
+            <option key={bg.slug} value={bg.slug}>{bg.name}</option>
           ))}
         </select>
       </div>
 
+      {/* 2024 Background Ability Score Selection */}
+      {data.edition === '2024' && (selectedBackground as any)?.abilityScores && (
+        <BackgroundASIWidget
+          availableOptions={(selectedBackground as any).abilityScores.from}
+          data={data}
+          updateData={updateData}
+        />
+      )}
       {selectedBackground && showBackgroundInfo && (
         <div className="bg-theme-tertiary/50 border border-theme-primary rounded-lg p-4 space-y-4 relative max-h-[70vh] overflow-y-auto">
           <button
@@ -283,7 +299,19 @@ export const Step1Details: React.FC<StepProps> = ({ data, updateData, nextStep, 
 
           <div>
             <h4 className="text-lg font-bold text-accent-yellow-light">{selectedBackground.name}</h4>
-            <p className="text-sm text-theme-tertiary mt-2">{selectedBackground.description}</p>
+            <div className="text-sm text-theme-tertiary mt-2">
+              <p className={showDetailedDescription ? '' : 'line-clamp-2'}>
+                {(selectedBackground as any).detailedDescription || selectedBackground.description}
+              </p>
+              {((selectedBackground as any).detailedDescription || selectedBackground.description.length > 100) && (
+                <button
+                  onClick={() => setShowDetailedDescription(!showDetailedDescription)}
+                  className="text-accent-blue-light hover:text-blue-300 text-xs mt-1 underline"
+                >
+                  {showDetailedDescription ? 'Show Less' : 'Read More'}
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Feature */}
@@ -292,14 +320,38 @@ export const Step1Details: React.FC<StepProps> = ({ data, updateData, nextStep, 
             <p className="text-xs text-theme-tertiary">{selectedBackground.feature_description}</p>
           </div>
 
+          {/* 2024 Origin Feat */}
+          {(selectedBackground as any).edition === '2024' && (selectedBackground as any).originFeat && (
+            <div className="border-t border-theme-primary pt-3">
+              <div className="flex items-center gap-2 mb-2">
+                <h5 className="text-sm font-semibold text-yellow-200">Origin Feat: {(selectedBackground as any).originFeat}</h5>
+                <button
+                  onClick={() => setViewingFeat((selectedBackground as any).originFeat)}
+                  className="text-accent-blue-light hover:text-blue-300"
+                  title="View Feat Details"
+                >
+                  <BookOpen className="w-4 h-4" />
+                </button>
+              </div>
+              <p className="text-xs text-theme-tertiary">
+                This feat is granted at 1st level by your background.
+              </p>
+            </div>
+          )}
+
           {/* Skill Proficiencies */}
           <div className="border-t border-theme-primary pt-3">
             <h5 className="text-sm font-semibold text-yellow-200 mb-2">Skill Proficiencies</h5>
             <div className="flex flex-wrap gap-2">
               {selectedBackground.skill_proficiencies.map(skill => (
-                <span key={skill} className="px-2 py-1 bg-blue-700 text-white text-xs rounded">
+                <button
+                  key={skill}
+                  onClick={() => setViewingSkill(skill)}
+                  className="px-2 py-1 bg-blue-700 hover:bg-blue-600 text-white text-xs rounded transition-colors cursor-pointer"
+                  title={`Click for ${skill} details`}
+                >
                   {skill}
-                </span>
+                </button>
               ))}
             </div>
           </div>
@@ -535,14 +587,30 @@ export const Step1Details: React.FC<StepProps> = ({ data, updateData, nextStep, 
           <ArrowLeft className="w-4 h-4 mr-2" /> Back to Level
         </button>
 
-        <button
+        <SmartNavigationButton
+          canProceed={canProceed}
+          missingItems={missingItems}
+          nextAction={nextAction}
           onClick={nextStep}
-          disabled={!data.name || !data.alignment || !data.background}
-          className="px-4 py-2 bg-accent-red hover:bg-accent-red-light rounded-lg text-white flex items-center disabled:bg-theme-quaternary"
+          variant="next"
         >
-          Next: {getNextStepLabel?.() || 'Continue'} <ArrowRight className="w-4 h-4 ml-2" />
-        </button>
+          Next: {getNextStepLabel?.() || 'Continue'}
+        </SmartNavigationButton>
       </div>
+
+      {/* Feat Details Modal */}
+      <FeatDetailsModal
+        feat={viewingFeat ? FEAT_DATABASE.find(f => f.slug === viewingFeat) || null : null}
+        isOpen={viewingFeat !== null}
+        onClose={() => setViewingFeat(null)}
+      />
+
+      {/* Skill Details Modal */}
+      <SkillModal
+        skill={viewingSkill || ''}
+        isOpen={viewingSkill !== null}
+        onClose={() => setViewingSkill(null)}
+      />
     </div>
   );
 };

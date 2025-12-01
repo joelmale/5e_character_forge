@@ -1,7 +1,8 @@
-import { CharacterCreationData } from '../../../types/dnd';
+import { CharacterCreationData, Edition } from '../../../types/dnd';
 
 export interface WizardProps {
   isOpen: boolean;
+  edition: Edition;
   onClose: () => void;
   onCharacterCreated: () => void;
   setRollResult: (result: { text: string; value: number | null }) => void;

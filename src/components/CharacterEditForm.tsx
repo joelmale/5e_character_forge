@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Save, X, AlertCircle, CheckCircle } from 'lucide-react';
+import { Save, X, AlertCircle } from 'lucide-react';
 import { Character } from '../types/dnd';
 import { loadClasses, loadSpecies, BACKGROUNDS } from '../services/dataService';
 
@@ -1062,77 +1062,10 @@ export const CharacterEditForm: React.FC<CharacterEditFormProps> = ({
                     />
                   </div>
                 ))}
+              </div>
             </div>
-          </div>
 
-          {/* Languages */}
-          <div className="bg-theme-secondary rounded-lg p-4">
-            <h3 className="text-lg font-bold mb-3 text-accent-yellow-light">Languages</h3>
-            <div className="space-y-3">
-              {/* Language dropdowns - start with 3, can add more */}
-              {[0, 1, 2, ...Array(Math.max(0, (formData.languages?.length || 0) - 3))].map((index) => (
-                <div key={index} className="flex items-center gap-2">
-                  <select
-                    value={formData.languages?.[index] || ''}
-                    onChange={(e) => {
-                      const newLanguages = [...(formData.languages || [])];
-                      newLanguages[index] = e.target.value;
-                      // Remove empty entries at the end
-                      while (newLanguages.length > 0 && !newLanguages[newLanguages.length - 1]) {
-                        newLanguages.pop();
-                      }
-                      updateFormData({ languages: newLanguages });
-                    }}
-                    className="flex-1 px-3 py-2 bg-theme-tertiary border border-theme-primary rounded text-white"
-                  >
-                    <option value="">Select Language</option>
-                    <option value="Common">Common</option>
-                    <option value="Dwarvish">Dwarvish</option>
-                    <option value="Elvish">Elvish</option>
-                    <option value="Giant">Giant</option>
-                    <option value="Gnomish">Gnomish</option>
-                    <option value="Goblin">Goblin</option>
-                    <option value="Halfling">Halfling</option>
-                    <option value="Orc">Orc</option>
-                    <option value="Abyssal">Abyssal</option>
-                    <option value="Celestial">Celestial</option>
-                    <option value="Draconic">Draconic</option>
-                    <option value="Deep Speech">Deep Speech</option>
-                    <option value="Infernal">Infernal</option>
-                    <option value="Primordial">Primordial</option>
-                    <option value="Sylvan">Sylvan</option>
-                    <option value="Undercommon">Undercommon</option>
-                  </select>
-                  {index >= 3 && (
-                    <button
-                      onClick={() => {
-                        const newLanguages = [...(formData.languages || [])];
-                        newLanguages.splice(index, 1);
-                        updateFormData({ languages: newLanguages });
-                      }}
-                      className="px-2 py-1 bg-red-600 hover:bg-red-500 rounded text-white text-sm"
-                      title="Remove language"
-                    >
-                      ×
-                    </button>
-                  )}
-                </div>
-              ))}
-
-              {/* Add more languages button */}
-              <button
-                onClick={() => {
-                  const newLanguages = [...(formData.languages || []), ''];
-                  updateFormData({ languages: newLanguages });
-                }}
-                className="w-full px-3 py-2 bg-theme-tertiary hover:bg-theme-quaternary border border-theme-primary rounded text-theme-primary hover:text-white transition-colors"
-              >
-                + Add Another Language
-              </button>
-            </div>
-          </div>
-
-          {/* Equipment List - Simplified for now */}
+            {/* Equipment List - Simplified for now */}
             <div>
               <h4 className="text-sm font-medium text-theme-muted mb-2">Equipment</h4>
               <div className="text-sm text-theme-muted">

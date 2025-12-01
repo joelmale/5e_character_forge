@@ -7429,5 +7429,212 @@
     },
     "weight": 1,
     "url": "/api/2024/equipment/yew-wand"
+  },
+  {
+    "index": "crossbow-bolts",
+    "name": "Crossbow Bolts",
+    "equipment_categories": [
+      {
+        "index": "adventuring-gear",
+        "name": "Adventuring Gear",
+        "url": "/api/2024/equipment-categories/adventuring-gear"
+      }
+    ],
+    "cost": {
+      "quantity": 5,
+      "unit": "sp"
+    },
+    "weight": 1,
+    "quantity": 20,
+    "description": "Ammunition for crossbows. Each bolt deals 1d6 piercing damage."
+  },
+  {
+    "index": "sling-bullets",
+    "name": "Sling Bullets",
+    "equipment_categories": [
+      {
+        "index": "adventuring-gear",
+        "name": "Adventuring Gear",
+        "url": "/api/2024/equipment-categories/adventuring-gear"
+      }
+    ],
+    "cost": {
+      "quantity": 4,
+      "unit": "cp"
+    },
+    "weight": 1,
+    "quantity": 20,
+    "description": "Ammunition for slings. Each bullet deals 1d4 bludgeoning damage."
+  },
+  {
+    "index": "blowgun-needles",
+    "name": "Blowgun Needles",
+    "equipment_categories": [
+      {
+        "index": "adventuring-gear",
+        "name": "Adventuring Gear",
+        "url": "/api/2024/equipment-categories/adventuring-gear"
+      }
+    ],
+    "cost": {
+      "quantity": 1,
+      "unit": "cp"
+    },
+    "weight": 1,
+    "quantity": 50,
+    "description": "Ammunition for blowguns. Each needle deals 1 piercing damage."
+    },
+   {
+     "index": "abacus",
+     "name": "Abacus",
+     "equipment_categories": [
+       {
+         "index": "adventuring-gear",
+         "name": "Adventuring Gear",
+         "url": "/api/2024/equipment-categories/adventuring-gear"
+       }
+     ],
+     "cost": {
+       "quantity": 2,
+       "unit": "gp"
+     },
+     "weight": 2,
+     "description": "A calculating tool that helps with mathematical computations. Useful for merchants, scholars, and anyone dealing with numbers."
+   },
+   {
+     "index": "horse",
+    "name": "Horse",
+    "equipment_categories": [
+      {
+        "index": "mounts-and-vehicles",
+        "name": "Mounts and Vehicles",
+        "url": "/api/2024/equipment-categories/mounts-and-vehicles"
+      }
+    ],
+    "cost": {
+      "quantity": 75,
+      "unit": "gp"
+    },
+    "weight": 0,
+    "description": "A riding horse. Speed: 60 feet. Carrying Capacity: 480 pounds."
+  },
+  {
+    "index": "pony",
+    "name": "Pony",
+    "equipment_categories": [
+      {
+        "index": "mounts-and-vehicles",
+        "name": "Mounts and Vehicles",
+        "url": "/api/2024/equipment-categories/mounts-and-vehicles"
+      }
+    ],
+    "cost": {
+      "quantity": 30,
+      "unit": "gp"
+    },
+    "weight": 0,
+    "description": "A pony. Speed: 40 feet. Carrying Capacity: 225 pounds."
+  },
+  {
+    "index": "camel",
+    "name": "Camel",
+    "equipment_categories": [
+      {
+        "index": "mounts-and-vehicles",
+        "name": "Mounts and Vehicles",
+        "url": "/api/2024/equipment-categories/mounts-and-vehicles"
+      }
+    ],
+    "cost": {
+      "quantity": 50,
+      "unit": "gp"
+    },
+    "weight": 0,
+    "description": "A camel. Speed: 50 feet. Carrying Capacity: 480 pounds. Can travel for 8 hours without water."
+  },
+  {
+    "index": "holy-symbol",
+    "name": "Holy Symbol",
+    "equipment_categories": [
+      {
+        "index": "adventuring-gear",
+        "name": "Adventuring Gear",
+        "url": "/api/2024/equipment-categories/adventuring-gear"
+      }
+    ],
+    "cost": {
+      "quantity": 5,
+      "unit": "gp"
+    },
+    "weight": 0,
+    "description": "A holy symbol is a representation of a god or pantheon. It might be an amulet depicting a symbol representing a deity, the same symbol carefully engraved or inlaid as an emblem on a shield, or a tiny box holding a fragment of a sacred relic."
+  },
+  {
+    "index": "prayer-book",
+    "name": "Prayer Book",
+    "equipment_categories": [
+      {
+        "index": "adventuring-gear",
+        "name": "Adventuring Gear",
+        "url": "/api/2024/equipment-categories/adventuring-gear"
+      }
+    ],
+    "cost": {
+      "quantity": 0,
+      "unit": "gp"
+    },
+    "weight": 0,
+    "description": "A book containing prayers and religious texts."
+  },
+  {
+    "index": "stick-of-incense",
+    "name": "Stick of Incense",
+    "equipment_categories": [
+      {
+        "index": "adventuring-gear",
+        "name": "Adventuring Gear",
+        "url": "/api/2024/equipment-categories/adventuring-gear"
+      }
+    ],
+    "cost": {
+      "quantity": 0,
+      "unit": "gp"
+    },
+    "weight": 0,
+    "description": "A stick of incense used in religious ceremonies."
+  },
+  {
+    "index": "vestments",
+    "name": "Vestments",
+    "equipment_categories": [
+      {
+        "index": "adventuring-gear",
+        "name": "Adventuring Gear",
+        "url": "/api/2024/equipment-categories/adventuring-gear"
+      }
+    ],
+    "cost": {
+      "quantity": 0,
+      "unit": "gp"
+    },
+    "weight": 4,
+    "description": "Religious clothing worn during ceremonies and rituals."
+  },
+  {
+    "index": "common-clothes",
+    "name": "Common Clothes",
+    "equipment_categories": [
+      {
+        "index": "adventuring-gear",
+        "name": "Adventuring Gear",
+        "url": "/api/2024/equipment-categories/adventuring-gear"
+      }
+    ],
+    "cost": {
+      "quantity": 5,
+      "unit": "sp"
+    },
+    "weight": 3,
+    "description": "Everyday clothing suitable for common folk."
   }
 ]

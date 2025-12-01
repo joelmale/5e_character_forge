@@ -2,8 +2,10 @@ import React, { useState, useMemo } from 'react';
 import { ArrowLeft, ArrowRight, Dice6, Shuffle } from 'lucide-react';
 import { StepProps } from '../types/wizard.types';
 import { CharacterCreationData, AbilityName } from '../../../types/dnd';
-import { getAllSpecies, randomizeAbilities, getModifier } from '../../../services/dataService';
+import { getAllSpecies, randomizeAbilities, getModifier, BACKGROUNDS } from '../../../services/dataService';
 import { rollDice } from '../../../services/diceService';
+import { SmartNavigationButton } from '../components';
+import { useStepValidation } from '../hooks';
 import {
   ABILITY_NAMES,
   STANDARD_ARRAY_SCORES,
@@ -35,9 +37,33 @@ const RandomizeButton: React.FC<{ onClick: () => void; title?: string; className
 const formatModifier = (mod: number): string => mod >= 0 ? `+${mod}` : `${mod}`;
 
 export const Step4Abilities: React.FC<StepProps> = ({ data, updateData, nextStep, prevStep, getNextStepLabel }) => {
-  const allSpecies = getAllSpecies();
+  const allSpecies = getAllSpecies(data.edition);
   const speciesData = allSpecies.find(s => s.slug === data.speciesSlug);
+  const backgroundData = BACKGROUNDS.find((bg: any) => bg.slug === data.background && bg.edition === data.edition);
   const abilityNames = ABILITY_NAMES;
+
+  // Validation hook
+  const { canProceed, missingItems, nextAction } = useStepValidation(4, data);
+
+  // Helper to get bonus based on edition
+  const getBonus = (ability: AbilityName) => {
+    // Species bonuses apply in both editions
+    const speciesBonus = speciesData?.ability_bonuses?.[ability] || 0;
+
+    if (data.edition === '2024') {
+      // In 2024, bonuses come from Species + Background (User Selected + Fixed)
+      const userBonus = data.backgroundAbilityChoices?.bonuses?.[ability] || 0;
+      const fixedBonus = (backgroundData as any)?.abilityScores?.fixed?.[ability] || 0;
+      // Background bonuses are in addition to species bonuses
+      const backgroundBonus = Math.max(userBonus, fixedBonus);
+      return speciesBonus + backgroundBonus;
+    } else {
+      // In 2014, bonuses come from Species only
+      return speciesBonus;
+    }
+  };
+
+  const bonusSourceLabel = data.edition === '2024' ? '(Background)' : '(Species)';
 
   // Method-specific data
   const standardArrayScores = useMemo(() => STANDARD_ARRAY_SCORES, []);
@@ -184,18 +210,88 @@ export const Step4Abilities: React.FC<StepProps> = ({ data, updateData, nextStep
         </select>
       </div>
 
-      <div className='flex justify-between items-center'>
-        <h3 className='text-xl font-bold text-red-300'>
-          Determine Ability Scores ({ABILITY_METHOD_TITLES[data.abilityScoreMethod]})
-        </h3>
-        <RandomizeButton
-          onClick={() => {
-            const abilities = randomizeAbilities();
-            updateData(abilities);
-          }}
-          title="Randomize ability scores and method"
-        />
-      </div>
+       <div className='flex justify-between items-center'>
+         <h3 className='text-xl font-bold text-red-300'>
+           Determine Ability Scores ({ABILITY_METHOD_TITLES[data.abilityScoreMethod]})
+         </h3>
+         <RandomizeButton
+           onClick={() => {
+             const abilities = randomizeAbilities();
+             updateData(abilities);
+           }}
+           title="Randomize ability scores and method"
+         />
+       </div>
+
+       {/* Character Summary - Species & Background Bonuses */}
+       <div className="bg-theme-secondary/50 border border-theme-primary rounded-lg p-4 space-y-4">
+         <h4 className="text-lg font-bold text-accent-yellow-light">Character Summary</h4>
+
+         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+           {/* Species Information */}
+           <div className="bg-theme-tertiary/50 p-3 rounded-lg">
+             <h5 className="text-sm font-semibold text-accent-blue-light mb-2">Species: {speciesData?.name || 'Unknown'}</h5>
+             {speciesData?.ability_bonuses && Object.keys(speciesData.ability_bonuses).length > 0 ? (
+               <div className="space-y-1">
+                 <div className="text-xs font-medium text-theme-muted uppercase">Ability Bonuses:</div>
+                 {Object.entries(speciesData.ability_bonuses).map(([ability, bonus]) => (
+                   <div key={ability} className="text-sm text-theme-primary flex items-center">
+                     <span className="text-accent-yellow-light mr-2">•</span>
+                     {ability}: +{bonus}
+                   </div>
+                 ))}
+               </div>
+             ) : (
+               <div className="text-sm text-theme-muted">
+                 {data.edition === '2024'
+                   ? 'No ability bonuses (moved to Background in 2024)'
+                   : 'No ability bonuses'
+                 }
+               </div>
+             )}
+           </div>
+
+           {/* Background Information */}
+           <div className="bg-theme-tertiary/50 p-3 rounded-lg">
+             <h5 className="text-sm font-semibold text-accent-green-light mb-2">Background: {backgroundData?.name || 'Unknown'}</h5>
+             {data.edition === '2024' ? (
+               <div className="space-y-1">
+                 <div className="text-xs font-medium text-theme-muted uppercase">Ability Bonuses:</div>
+                 {data.backgroundAbilityChoices?.bonuses && Object.keys(data.backgroundAbilityChoices.bonuses).length > 0 ? (
+                   Object.entries(data.backgroundAbilityChoices.bonuses).map(([ability, bonus]) => (
+                     <div key={ability} className="text-sm text-theme-primary flex items-center">
+                       <span className="text-accent-yellow-light mr-2">•</span>
+                       {ability}: +{bonus} (from background choice)
+                     </div>
+                   ))
+                 ) : (
+                   <div className="text-sm text-theme-muted">No ability bonuses selected yet</div>
+                 )}
+               </div>
+             ) : (
+               <div className="text-sm text-theme-muted">Background bonuses not used in 2014</div>
+             )}
+           </div>
+         </div>
+
+         {/* Total Bonuses Summary */}
+         <div className="bg-theme-tertiary/30 p-3 rounded-lg">
+           <h5 className="text-sm font-semibold text-theme-muted uppercase mb-2">Total Racial/Background Bonuses:</h5>
+           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2">
+             {abilityNames.map(ability => {
+               const bonus = getBonus(ability);
+               return (
+                 <div key={ability} className="text-center">
+                   <div className="text-sm font-medium text-theme-primary">{ability}</div>
+                   <div className={`text-lg font-bold ${bonus > 0 ? 'text-accent-green-light' : 'text-theme-muted'}`}>
+                     {bonus > 0 ? `+${bonus}` : '0'}
+                   </div>
+                 </div>
+               );
+             })}
+           </div>
+         </div>
+       </div>
 
       {/* Standard Array UI */}
       {data.abilityScoreMethod === 'standard-array' && (
@@ -212,8 +308,8 @@ export const Step4Abilities: React.FC<StepProps> = ({ data, updateData, nextStep
           <div className='grid grid-cols-2 gap-4'>
             {abilityNames.map(ability => {
               const baseScore = data.abilities[ability];
-              const racialBonus = speciesData?.ability_bonuses[ability] || 0;
-              const finalScore = baseScore + racialBonus;
+              const bonus = getBonus(ability);
+              const finalScore = baseScore + bonus;
               const modifier = getModifier(finalScore);
 
               return (
@@ -241,7 +337,7 @@ export const Step4Abilities: React.FC<StepProps> = ({ data, updateData, nextStep
                       {baseScore > 0 && `${finalScore} (${formatModifier(modifier)})`}
                     </span>
                   </div>
-                  {racialBonus > 0 && baseScore > 0 && <p className='text-xs text-accent-green-light mt-1'>+ {racialBonus} (Racial)</p>}
+                  {bonus > 0 && baseScore > 0 && <p className='text-xs text-accent-green-light mt-1'>+ {bonus} {bonusSourceLabel}</p>}
                 </div>
               );
             })}
@@ -283,8 +379,8 @@ export const Step4Abilities: React.FC<StepProps> = ({ data, updateData, nextStep
               <div className='grid grid-cols-2 gap-4'>
                 {abilityNames.map((ability, idx) => {
                   const baseScore = data.abilities[ability];
-                  const racialBonus = speciesData?.ability_bonuses[ability] || 0;
-                  const finalScore = baseScore + racialBonus;
+                  const bonus = getBonus(ability);
+                  const finalScore = baseScore + bonus;
                   const modifier = getModifier(finalScore);
 
                   return (
@@ -317,7 +413,7 @@ export const Step4Abilities: React.FC<StepProps> = ({ data, updateData, nextStep
                           {baseScore > 0 && `${finalScore} (${formatModifier(modifier)})`}
                         </span>
                       </div>
-                      {racialBonus > 0 && baseScore > 0 && <p className='text-xs text-accent-green-light mt-1'>+ {racialBonus} (Racial)</p>}
+                      {bonus > 0 && baseScore > 0 && <p className='text-xs text-accent-green-light mt-1'>+ {bonus} {bonusSourceLabel}</p>}
                     </div>
                   );
                 })}
@@ -341,8 +437,8 @@ export const Step4Abilities: React.FC<StepProps> = ({ data, updateData, nextStep
           <div className='grid grid-cols-2 gap-4'>
             {abilityNames.map(ability => {
               const baseScore = data.abilities[ability] || 8;
-              const racialBonus = speciesData?.ability_bonuses[ability] || 0;
-              const finalScore = baseScore + racialBonus;
+              const bonus = getBonus(ability);
+              const finalScore = baseScore + bonus;
               const modifier = getModifier(finalScore);
 
               return (
@@ -372,7 +468,7 @@ export const Step4Abilities: React.FC<StepProps> = ({ data, updateData, nextStep
                       {finalScore} ({formatModifier(modifier)})
                     </span>
                   </div>
-                  {racialBonus > 0 && <p className='text-xs text-accent-green-light mt-1'>+ {racialBonus} (Racial)</p>}
+                  {bonus > 0 && <p className='text-xs text-accent-green-light mt-1'>+ {bonus} {bonusSourceLabel}</p>}
                 </div>
               );
             })}
@@ -392,8 +488,8 @@ export const Step4Abilities: React.FC<StepProps> = ({ data, updateData, nextStep
           <div className='grid grid-cols-2 gap-4'>
             {abilityNames.map(ability => {
               const baseScore = data.abilities[ability];
-              const racialBonus = speciesData?.ability_bonuses[ability] || 0;
-              const finalScore = baseScore + racialBonus;
+              const bonus = getBonus(ability);
+              const finalScore = baseScore + bonus;
               const modifier = getModifier(finalScore);
 
               return (
@@ -414,7 +510,7 @@ export const Step4Abilities: React.FC<StepProps> = ({ data, updateData, nextStep
                       {baseScore > 0 && `${finalScore} (${formatModifier(modifier)})`}
                     </span>
                   </div>
-                  {racialBonus > 0 && baseScore > 0 && <p className='text-xs text-accent-green-light mt-1'>+ {racialBonus} (Racial)</p>}
+                  {bonus > 0 && baseScore > 0 && <p className='text-xs text-accent-green-light mt-1'>+ {bonus} {bonusSourceLabel}</p>}
                 </div>
               );
             })}
@@ -426,13 +522,15 @@ export const Step4Abilities: React.FC<StepProps> = ({ data, updateData, nextStep
         <button onClick={prevStep} className="px-4 py-2 bg-theme-quaternary hover:bg-theme-hover rounded-lg text-white flex items-center">
           <ArrowLeft className="w-4 h-4 mr-2" /> Back
         </button>
-        <button
+        <SmartNavigationButton
+          canProceed={canProceed}
+          missingItems={missingItems}
+          nextAction={nextAction}
           onClick={nextStep}
-          disabled={!isComplete}
-          className="px-4 py-2 bg-accent-red hover:bg-accent-red-light rounded-lg text-white flex items-center disabled:bg-theme-quaternary disabled:cursor-not-allowed"
+          variant="next"
         >
-          Next: {getNextStepLabel?.() || 'Continue'} <ArrowRight className="w-4 h-4 ml-2" />
-        </button>
+          Next: {getNextStepLabel?.() || 'Continue'}
+        </SmartNavigationButton>
       </div>
     </div>
   );

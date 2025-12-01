@@ -2,7 +2,7 @@ import { Character, UserMonster, Encounter } from '../types/dnd';
 
 // --- IndexedDB Configuration ---
 const DB_NAME = '5e_character_forge';
-const DB_VERSION = 6; // Version 6: Add musical instrument proficiencies field
+const DB_VERSION = 7; // Version 7: Add ruleset/edition migration
 const STORE_NAME = 'characters';
 const CUSTOM_MONSTERS_STORE = 'customMonsters';
 const FAVORITES_STORE = 'favoriteMonsters';
@@ -191,6 +191,48 @@ const openDB = (): Promise<IDBDatabase> => {
 
         getAllRequest.onerror = () => {
           console.error('❌ [DB Migration] Failed to migrate characters:', getAllRequest.error);
+        };
+      } // Correctly closing the if (oldVersion < 6) block
+
+      // Version 7: Ensure all characters have an edition field
+      if (oldVersion < 7 && oldVersion > 0) {
+        const transaction = (event.target as IDBOpenDBRequest).transaction!;
+        const characterStore = transaction.objectStore(STORE_NAME);
+
+        const getAllRequest = characterStore.getAll();
+        getAllRequest.onsuccess = () => {
+          const characters = getAllRequest.result as any[];
+
+          console.log(`🔄 [DB Migration] Migrating ${characters.length} characters to version 7 (edition field)`);
+
+          characters.forEach((character) => {
+            let updated = false;
+            
+            // Ensure edition is set
+            if (!character.edition) {
+              console.log(`  ✏️ Setting edition to '2014' for character: ${character.name}`);
+              character.edition = '2014';
+              updated = true;
+            }
+            
+            // Ensure species is set (legacy 'race' fallback)
+            if (!character.species && character.race) {
+               console.log(`  ✏️ Migrating 'race' to 'species' for character: ${character.name}`);
+               character.species = character.race;
+               // We keep 'race' for now as per plan to prevent breakage, but strictly use species in 2024 logic
+               updated = true;
+            }
+
+            if (updated) {
+              characterStore.put(character);
+            }
+          });
+
+          console.log('✅ [DB Migration] Version 7 migration complete');
+        };
+        
+        getAllRequest.onerror = () => {
+           console.error('❌ [DB Migration] Failed to migrate characters to v7:', getAllRequest.error);
         };
       }
     };

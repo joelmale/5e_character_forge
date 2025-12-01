@@ -66,7 +66,7 @@ describe('CombatStatsPanel', () => {
   const createMockCharacter = (overrides = {}): any => ({
     id: 'test-char',
     name: 'Test Character',
-    race: 'Human',
+    species: 'Human',
     class: 'Fighter',
     level: 1,
     alignment: 'neutral-good',

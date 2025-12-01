@@ -127,61 +127,6 @@ export const Step0Level: React.FC<StepProps> = ({ data, updateData, nextStep, ge
         </div>
       )}
 
-      {/* Edition Selector */}
-      <div className='max-w-2xl mx-auto'>
-        <div className='text-center mb-3'>
-          <h4 className='text-lg font-bold text-accent-yellow-light flex items-center justify-center gap-2'>
-            <BookOpen className='w-5 h-5' />
-            D&D Edition
-          </h4>
-          <p className='text-theme-tertiary text-sm mt-1'>Choose which edition rules to use</p>
-        </div>
-
-        <div className='grid grid-cols-2 gap-4'>
-          <button
-            onClick={() => updateData({ edition: '2014' as Edition })}
-            className={`p-4 rounded-lg border-2 transition-all ${
-              data.edition === '2014'
-                ? 'bg-accent-red border-red-400 shadow-lg shadow-red-500/25'
-                : 'bg-theme-tertiary border-theme-primary hover:bg-theme-quaternary'
-            }`}
-          >
-            <div className='text-center'>
-              <div className={`text-xl font-bold mb-2 ${data.edition === '2014' ? 'text-white' : 'text-accent-yellow-light'}`}>
-                2014 Rules
-              </div>
-              <p className={`text-sm ${data.edition === '2014' ? 'text-gray-200' : 'text-theme-tertiary'}`}>
-                Classic 5th Edition
-              </p>
-              <p className={`text-xs mt-2 ${data.edition === '2014' ? 'text-gray-300' : 'text-theme-disabled'}`}>
-                Original Player's Handbook rules
-              </p>
-            </div>
-          </button>
-
-          <button
-            onClick={() => updateData({ edition: '2024' as Edition })}
-            className={`p-4 rounded-lg border-2 transition-all ${
-              data.edition === '2024'
-                ? 'bg-accent-red border-red-400 shadow-lg shadow-red-500/25'
-                : 'bg-theme-tertiary border-theme-primary hover:bg-theme-quaternary'
-            }`}
-          >
-            <div className='text-center'>
-              <div className={`text-xl font-bold mb-2 ${data.edition === '2024' ? 'text-white' : 'text-accent-yellow-light'}`}>
-                2024 Rules
-              </div>
-              <p className={`text-sm ${data.edition === '2024' ? 'text-gray-200' : 'text-theme-tertiary'}`}>
-                Updated 5th Edition
-              </p>
-              <p className={`text-xs mt-2 ${data.edition === '2024' ? 'text-gray-300' : 'text-theme-disabled'}`}>
-                Revised rules and features
-              </p>
-            </div>
-          </button>
-        </div>
-      </div>
-
       <div className='flex justify-end'>
         <button
           onClick={nextStep}

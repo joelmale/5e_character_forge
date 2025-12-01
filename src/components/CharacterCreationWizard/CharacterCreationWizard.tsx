@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { WizardProps } from './types/wizard.types';
 import { useWizardState, useWizardNavigation } from './hooks';
 import { WizardHeader, WizardProgressBar, WizardStepContainer } from './components';
+import { getStepTitles } from './constants/wizard.constants';
 import { getAllSpecies } from '../../services/dataService';
 import SpeciesTraitModal from '../SpeciesTraitModal';
 import {
@@ -24,6 +25,7 @@ import { StepCumulativeASI } from './steps/StepCumulativeASI';
 
 export const CharacterCreationWizard: React.FC<WizardProps> = ({
   isOpen,
+  edition,
   onClose,
   onCharacterCreated
 }) => {
@@ -38,13 +40,16 @@ export const CharacterCreationWizard: React.FC<WizardProps> = ({
   } = useWizardState();
 
   const { nextStep, prevStep, skipToStep, getNextStepLabel } = useWizardNavigation(currentStep, setCurrentStep, creationData);
+  
+  // Get dynamic step titles based on edition
+  const stepTitles = getStepTitles(creationData.edition || edition || '2014');
 
   // Reset wizard when it opens
   useEffect(() => {
     if (isOpen) {
-      resetWizard();
+      resetWizard({ edition });
     }
-  }, [isOpen, resetWizard]);
+  }, [isOpen, resetWizard, edition]);
 
   // Racial trait modal state
   const [selectedTrait, setSelectedTrait] = useState<string | null>(null);
@@ -90,7 +95,7 @@ export const CharacterCreationWizard: React.FC<WizardProps> = ({
       onCharacterCreated();
 
       // Reset wizard state for next use
-      resetWizard();
+      resetWizard({ edition });
 
       // Close wizard
       onClose();
@@ -102,22 +107,47 @@ export const CharacterCreationWizard: React.FC<WizardProps> = ({
   const renderStep = () => {
     const commonProps = { data: creationData, updateData, nextStep, prevStep, stepIndex: currentStep, getNextStepLabel, openTraitModal };
 
-    switch (currentStep) {
-      case 0: return <Step0Level {...commonProps} />;
-      case 1: return <Step1Details {...commonProps} />;
-      case 2: return <Step2Species {...commonProps} />;
-      case 3: return <Step3Class {...commonProps} />;
-      case 4: return <Step4Abilities {...commonProps} />;
-      case 5: return <StepHighLevelSetup {...commonProps} />;
-      case 6: return <StepCumulativeASI {...commonProps} />;
-      case 7: return <Step3point5FightingStyle {...commonProps} />;
-      case 8: return <Step4Spells {...commonProps} />;
-      case 9: return <Step5point5Feats {...commonProps} />;
-      case 10: return <Step9Languages {...commonProps} />;
-      case 11: return <Step6Equipment {...commonProps} skipToStep={skipToStep} />;
-      case 12: return <Step7EquipmentBrowser {...commonProps} skipToStep={skipToStep} />;
-      case 13: return <Step8Traits {...commonProps} onSubmit={() => handleSubmit(creationData)} />;
-      default: return <div>Unknown step</div>;
+    // Dynamic Step Rendering based on Edition
+    // 2024 Order: Level -> Class -> Identity -> Species -> Abilities...
+    // 2014 Order: Level -> Identity -> Species -> Class -> Abilities...
+    
+    if (creationData.edition === '2024') {
+      switch (currentStep) {
+        case 0: return <Step0Level {...commonProps} />;
+        case 1: return <Step1Details {...commonProps} />; // Basic Identity first
+        case 2: return <Step2Species {...commonProps} />; // Species second
+        case 3: return <Step3Class {...commonProps} />; // Class third
+        case 4: return <Step4Abilities {...commonProps} />;
+        case 5: return <StepHighLevelSetup {...commonProps} />;
+        case 6: return <StepCumulativeASI {...commonProps} />;
+        case 7: return <Step3point5FightingStyle {...commonProps} />;
+        case 8: return <Step4Spells {...commonProps} />;
+        case 9: return <Step5point5Feats {...commonProps} />;
+        case 10: return <Step9Languages {...commonProps} />;
+        case 11: return <Step6Equipment {...commonProps} skipToStep={skipToStep} />;
+        case 12: return <Step7EquipmentBrowser {...commonProps} skipToStep={skipToStep} />;
+        case 13: return <Step8Traits {...commonProps} onSubmit={() => handleSubmit(creationData)} />;
+        default: return <div>Unknown step</div>;
+      }
+    } else {
+      // Legacy 2014 Order
+      switch (currentStep) {
+        case 0: return <Step0Level {...commonProps} />;
+        case 1: return <Step1Details {...commonProps} />;
+        case 2: return <Step2Species {...commonProps} />;
+        case 3: return <Step3Class {...commonProps} />;
+        case 4: return <Step4Abilities {...commonProps} />;
+        case 5: return <StepHighLevelSetup {...commonProps} />;
+        case 6: return <StepCumulativeASI {...commonProps} />;
+        case 7: return <Step3point5FightingStyle {...commonProps} />;
+        case 8: return <Step4Spells {...commonProps} />;
+        case 9: return <Step5point5Feats {...commonProps} />;
+        case 10: return <Step9Languages {...commonProps} />;
+        case 11: return <Step6Equipment {...commonProps} skipToStep={skipToStep} />;
+        case 12: return <Step7EquipmentBrowser {...commonProps} skipToStep={skipToStep} />;
+        case 13: return <Step8Traits {...commonProps} onSubmit={() => handleSubmit(creationData)} />;
+        default: return <div>Unknown step</div>;
+      }
     }
   };
 
@@ -129,8 +159,8 @@ export const CharacterCreationWizard: React.FC<WizardProps> = ({
       >
         {/* Fixed Header */}
         <div className="flex-shrink-0 p-6 md:p-8 pb-4">
-          <WizardHeader currentStep={currentStep} onClose={onClose} />
-          <WizardProgressBar currentStep={currentStep} />
+          <WizardHeader currentStep={currentStep} stepTitles={stepTitles} onClose={onClose} />
+          <WizardProgressBar currentStep={currentStep} stepTitles={stepTitles} />
         </div>
 
         {/* Error Display */}

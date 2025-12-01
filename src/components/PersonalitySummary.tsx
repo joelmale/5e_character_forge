@@ -1,8 +1,8 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { ArrowLeft, ArrowRight, Edit3, Sparkles, Heart, Shield, Zap, HelpCircle, Pencil } from 'lucide-react';
 import { CharacterProfile } from '../data/characterProfiles';
-import { loadClasses, getAllRaces, BACKGROUNDS, getModifier, getCantripsByClass, getLeveledSpellsByClass } from '../services/dataService';
-import { SpellSelectionData } from '../types/dnd';
+import { loadClasses, getAllSpecies, BACKGROUNDS, getModifier, getCantripsByClass, getLeveledSpellsByClass } from '../services/dataService';
+import { SpellSelectionData, Edition } from '../types/dnd';
 import { getSpellcastingType } from '../utils/spellUtils';
 import { assignAbilityScoresByClass } from '../utils/abilityScoreUtils';
 import SkillTooltip from './SkillTooltip';
@@ -13,7 +13,7 @@ import AbilityScoreEditModal from './AbilityScoreEditModal';
 interface PersonalitySummaryProps {
   profile: CharacterProfile;
   selectedClass?: string;
-  selectedRace?: string;
+  selectedSpecies?: string; // Renamed from selectedRace
   selectedBackground?: string;
   spellSelection?: SpellSelectionData;
   onSpellSelectionChange?: (selection: SpellSelectionData) => void;
@@ -23,12 +23,13 @@ interface PersonalitySummaryProps {
   onAbilitiesChange?: (abilities: Record<string, number>) => void;
   onContinue: () => void;
   onBack: () => void;
+  edition: Edition; // Added edition
 }
 
 const PersonalitySummary: React.FC<PersonalitySummaryProps> = ({
   profile,
   selectedClass,
-  selectedRace,
+  selectedSpecies, // Renamed from selectedRace
   selectedBackground,
   spellSelection,
   onSpellSelectionChange,
@@ -37,13 +38,14 @@ const PersonalitySummary: React.FC<PersonalitySummaryProps> = ({
   customAbilities,
   onAbilitiesChange,
   onContinue,
-  onBack
+  onBack,
+  edition // Added edition
 }) => {
   // Debug logging for initial props
   console.log('Debug info:', {
     profileName: profile.name,
     selectedClass,
-    selectedRace,
+    selectedSpecies,
     selectedBackground,
     spellSelection,
     customSkills,
@@ -55,7 +57,7 @@ const PersonalitySummary: React.FC<PersonalitySummaryProps> = ({
 
   // Editable state
   const [editingClass, setEditingClass] = useState(false);
-  const [editingRace, setEditingRace] = useState(false);
+  const [editingSpecies, setEditingSpecies] = useState(false); // Renamed from editingRace
   const [editingBackground, setEditingBackground] = useState(false);
   const [showArrayModal, setShowArrayModal] = useState(false);
   const [showSpellModal, setShowSpellModal] = useState(false);
@@ -63,12 +65,12 @@ const PersonalitySummary: React.FC<PersonalitySummaryProps> = ({
   const [showAbilityModal, setShowAbilityModal] = useState(false);
 
   const [currentClass, setCurrentClass] = useState(selectedClass || profile.recommendedClasses[0]?.class || '');
-  const [currentRace, setCurrentRace] = useState(selectedRace || profile.recommendedRaces[0]?.race || '');
+  const [currentSpecies, setCurrentSpecies] = useState(selectedSpecies || profile.recommendedRaces[0]?.race || ''); // Renamed from currentRace
   const [currentBackground, setCurrentBackground] = useState(selectedBackground || profile.recommendedBackgrounds[0]?.background || '');
 
   console.log('Current selections:', {
     currentClass,
-    currentRace,
+    currentSpecies,
     currentBackground
   });
 
@@ -80,17 +82,17 @@ const PersonalitySummary: React.FC<PersonalitySummaryProps> = ({
 
   // Calculate base abilities (separate from characterPreview so it can be used in modals)
   const baseAbilities = useMemo(() => {
-    const allClasses = loadClasses();
+    const allClasses = loadClasses(edition); // Pass edition
     const baseClassName = extractBaseName(currentClass);
     const selectedClassData = allClasses.find(c => c.name === baseClassName);
 
     // Use custom abilities if user edited them, otherwise assign based on class priorities
     return customAbilities || (selectedClassData ? assignAbilityScoresByClass(selectedClassData.slug) : { STR: 15, DEX: 14, CON: 13, INT: 12, WIS: 10, CHA: 8 });
-  }, [currentClass, customAbilities]);
+  }, [currentClass, customAbilities, edition]);
 
   // Calculate character preview
   const characterPreview = useMemo(() => {
-    const allClasses = loadClasses();
+    const allClasses = loadClasses(edition); // Pass edition
     const baseClassName = extractBaseName(currentClass);
     const selectedClassData = allClasses.find(c => c.name === baseClassName);
 
@@ -114,6 +116,7 @@ const PersonalitySummary: React.FC<PersonalitySummaryProps> = ({
       const classSkills = selectedClassData?.skill_proficiencies?.slice(0, numSkills) || [];
 
       // Get background skills
+      // Note: In a full implementation, we'd filter BACKGROUNDS by edition too, but here we just match by name
       const backgroundData = BACKGROUNDS.find(bg => bg.name === currentBackground);
       const backgroundSkills = backgroundData?.skill_proficiencies || [];
 
@@ -127,11 +130,11 @@ const PersonalitySummary: React.FC<PersonalitySummaryProps> = ({
       hitDie: selectedClassData?.hit_die || 8,
       armorClass: 10 + abilities.DEX.modifier // Base AC + Dex modifier
     };
-  }, [currentClass, currentBackground, customSkills, baseAbilities]);
+  }, [currentClass, currentBackground, customSkills, baseAbilities, edition]);
 
   // Compute spell information for display
   const spellInfo = useMemo(() => {
-    const allClasses = loadClasses();
+    const allClasses = loadClasses(edition); // Pass edition
     const extractBaseName = (fullName: string): string => {
       const parenIndex = fullName.indexOf(' (');
       return parenIndex > 0 ? fullName.substring(0, parenIndex) : fullName;
@@ -190,11 +193,11 @@ const PersonalitySummary: React.FC<PersonalitySummaryProps> = ({
       spellcastingType,
       classSlug: selectedClassData.slug
     };
-  }, [currentClass, spellSelection]);
+  }, [currentClass, spellSelection, edition]);
 
   // Get actual data for dropdowns
-  const availableClasses = loadClasses().map(cls => cls.name).sort();
-  const availableRaces = getAllRaces().map(race => race.name).sort();
+  const availableClasses = loadClasses(edition).map(cls => cls.name).sort();
+  const availableSpecies = getAllSpecies(edition).map(species => species.name).sort(); // Renamed from availableRaces
   const availableBackgrounds = ['Acolyte', 'Criminal', 'Entertainer', 'Folk Hero', 'Guild Artisan', 'Hermit', 'Noble', 'Outlander', 'Sage', 'Sailor', 'Soldier', 'Urchin'];
 
   const handleContinue = useCallback(() => {
@@ -273,34 +276,34 @@ const PersonalitySummary: React.FC<PersonalitySummaryProps> = ({
             </div>
           </div>
 
-          {/* Race Selection */}
+          {/* Species Selection */}
           <div className="bg-theme-secondary rounded-lg p-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-accent-blue-light">Race</h3>
+              <h3 className="text-lg font-semibold text-accent-blue-light">Species</h3>
               <button
-                onClick={() => setEditingRace(!editingRace)}
+                onClick={() => setEditingSpecies(!editingSpecies)}
                 className="text-theme-muted hover:text-white transition-colors"
               >
                 <Edit3 className="w-4 h-4" />
               </button>
             </div>
 
-            {editingRace ? (
+            {editingSpecies ? (
               <select
-                value={currentRace}
-                onChange={(e) => setCurrentRace(e.target.value)}
+                value={currentSpecies}
+                onChange={(e) => setCurrentSpecies(e.target.value)}
                 className="w-full p-2 bg-theme-tertiary border border-theme-primary rounded text-white"
               >
-                {availableRaces.map(race => (
-                  <option key={race} value={race}>{race}</option>
+                {availableSpecies.map(species => (
+                  <option key={species} value={species}>{species}</option>
                 ))}
               </select>
             ) : (
-              <div className="text-white font-medium">{currentRace}</div>
+              <div className="text-white font-medium">{currentSpecies}</div>
             )}
 
             <div className="mt-3 text-xs text-theme-muted">
-              {profile.recommendedRaces.find(r => r.race === currentRace)?.reason ||
+              {profile.recommendedRaces.find(r => r.race === currentSpecies)?.reason ||
                "Selected based on your personality preferences"}
             </div>
           </div>

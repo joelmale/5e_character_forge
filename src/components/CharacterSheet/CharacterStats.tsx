@@ -66,7 +66,7 @@ export const CharacterStats: React.FC<CharacterStatsProps> = ({
 
   // Calculate speed (most characters have 30 ft unless modified)
   const getSpeed = () => {
-    // TODO: This should be calculated based on race/class features
+    // TODO: This should be calculated based on species/class features
     // For now, return default speed
     return 30;
   };

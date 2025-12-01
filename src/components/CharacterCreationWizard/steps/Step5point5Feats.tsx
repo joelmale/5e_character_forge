@@ -33,7 +33,7 @@ export const Step5point5Feats: React.FC<StepProps> = ({ data, updateData, nextSt
   const [featChoiceModal, setFeatChoiceModal] = useState<{ isOpen: boolean; feat: any }>({ isOpen: false, feat: null });
 
   // Calculate how many feats the character can take
-  const maxFeats = calculateFeatAvailability(data.level);
+  const maxFeats = calculateFeatAvailability(data);
   const selectedFeats = data.selectedFeats || [];
 
   // Get all feats and their eligibility status
@@ -59,7 +59,7 @@ export const Step5point5Feats: React.FC<StepProps> = ({ data, updateData, nextSt
     if (lower.includes('wisdom')) return prerequisite.replace(' or higher', '+');
     if (lower.includes('charisma')) return prerequisite.replace(' or higher', '+');
 
-    // Races
+    // Species
     if (lower.includes('halfling')) return 'Halfling';
     if (lower.includes('dragonborn')) return 'Dragonborn';
     if (lower.includes('dwarf')) return 'Dwarf';

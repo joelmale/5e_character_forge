@@ -1,7 +1,10 @@
 [
   {
+    "slug": "acolyte",
     "name": "Acolyte",
-    "description": "You have spent your life in the service of a temple or other religious institution.",
+    "edition": "2014",
+    "description": "You have spent your life in the service of a temple or other religious institution. You are well versed in the teachings of your faith and have participated in its rites and ceremonies.",
+    "detailedDescription": "Acolytes are the lowest rank of religious hierarchy, but they are the ones who interact most directly with the common folk. They perform religious ceremonies, maintain temples, and provide spiritual guidance. Many acolytes are devout believers who have dedicated their lives to service, while others may be more pragmatic, viewing their position as a path to power or influence within their faith.",
     "skill_proficiencies": ["Insight", "Religion"],
     "languages": ["Two of your choice"],
     "equipment": ["Holy symbol", "Prayer book", "5 sticks of incense", "Vestments", "Common clothes", "15 gp"],
@@ -44,7 +47,27 @@
     "roleplaying_suggestions": "Temple acolytes are often devout followers who have dedicated their lives to service. They might be pious and reverent, or they could be cynical about their faith after years of service. Consider how your character's faith influences their worldview and interactions with others."
   },
   {
+    "slug": "acolyte-2024",
+    "name": "Acolyte",
+    "edition": "2024",
+    "description": "You devoted yourself to service in a temple, either nestled in a town or secluded in a sacred grove.",
+    "abilityScores": {
+      "choose": 2,
+      "from": ["INT", "WIS", "CHA"]
+    },
+    "originFeat": "magic-initiate",
+    "skill_proficiencies": ["Insight", "Religion"],
+    "tool_proficiencies": ["Calligrapher's Supplies"],
+    "equipment": ["Holy Symbol", "Calligrapher's Supplies", "Common Clothes", "8 gp"],
+    "personality_traits": [],
+    "ideals": [],
+    "bonds": [],
+    "flaws": []
+  },
+  {
+    "slug": "charlatan",
     "name": "Charlatan",
+    "edition": "2014",
     "description": "You have always been good at getting what you want by bending the truth and manipulating others.",
     "skill_proficiencies": ["Deception", "Sleight of Hand"],
     "languages": [],
@@ -88,7 +111,27 @@
     "roleplaying_suggestions": "Charlatans are smooth talkers and confidence artists who excel at deception and manipulation. They might be charming rogues who see the world as a game, or hardened survivors who learned early that trust is a weakness. Consider how your character justifies their cons - is it just for survival, or do they enjoy the thrill?"
   },
   {
+    "slug": "charlatan-2024",
+    "name": "Charlatan",
+    "edition": "2024",
+    "description": "You know how to read people and fine-tune your persona to get what you want.",
+    "abilityScores": {
+      "choose": 2,
+      "from": ["CHA", "DEX", "CON"]
+    },
+    "originFeat": "skilled",
+    "skill_proficiencies": ["Deception", "Sleight of Hand"],
+    "tool_proficiencies": ["Forgery Kit"],
+    "equipment": ["Fine Clothes", "Forgery Kit", "Costume", "15 gp"],
+    "personality_traits": [],
+    "ideals": [],
+    "bonds": [],
+    "flaws": []
+  },
+  {
+    "slug": "criminal",
     "name": "Criminal",
+    "edition": "2014",
     "description": "You are an experienced criminal with a history of breaking the law.",
     "skill_proficiencies": ["Deception", "Stealth"],
     "languages": [],
@@ -132,8 +175,29 @@
     "roleplaying_suggestions": "Criminals come from all walks of life and have committed various crimes. They might be hardened thugs, master thieves, or desperate survivors. Consider what drove your character to crime - poverty, revenge, thrill-seeking, or necessity? How do they feel about their criminal past?"
   },
   {
+    "slug": "criminal-2024",
+    "name": "Criminal",
+    "edition": "2024",
+    "description": "You survived by breaking the law, and you have the skills to show for it.",
+    "abilityScores": {
+      "choose": 2,
+      "from": ["DEX", "CON", "INT"]
+    },
+    "originFeat": "alert",
+    "skill_proficiencies": ["Sleight of Hand", "Stealth"],
+    "tool_proficiencies": ["Thieves' Tools"],
+    "equipment": ["Crowbar", "Daggers (2)", "Thieves' Tools", "Hooded Lantern", "Common Clothes", "16 gp"],
+    "personality_traits": [],
+    "ideals": [],
+    "bonds": [],
+    "flaws": []
+  },
+  {
+    "slug": "entertainer",
     "name": "Entertainer",
+    "edition": "2014",
     "description": "You thrive on the attention of others, and you are skilled at captivating an audience.",
+    "detailedDescription": "Entertainers are performers who travel the world sharing their art with audiences large and small. You might be an actor, dancer, musician, storyteller, or some other type of performer. Entertainers are natural leaders who draw people together and inspire them to great deeds. Your performances can bring joy to the downtrodden, rally crowds to action, or even demoralize enemies on the battlefield.",
     "skill_proficiencies": ["Acrobatics", "Performance"],
     "languages": [],
     "equipment": ["Musical instrument of your choice", "Favor of an admirer", "Costume", "15 gp"],
@@ -176,43 +240,141 @@
     "roleplaying_suggestions": "Entertainers are charismatic performers who live for the spotlight. They might be traveling bards, circus performers, actors, or musicians. Consider what type of entertainment your character specializes in and how their personality shines through in their performances."
   },
   {
+    "slug": "entertainer-2024",
+    "name": "Entertainer",
+    "edition": "2024",
+    "description": "You thrive on the attention of others, using your art to captivate and inspire.",
+    "abilityScores": {
+      "choose": 2,
+      "from": ["CHA", "DEX", "WIS"]
+    },
+    "originFeat": "musician",
+    "skill_proficiencies": ["Acrobatics", "Performance"],
+    "tool_proficiencies": ["Musical Instrument (one choice)"],
+    "equipment": ["Musical Instrument", "Costume", "Steel Mirror", "Traveler's Clothes", "8 gp"],
+    "personality_traits": [],
+    "ideals": [],
+    "bonds": [],
+    "flaws": []
+  },
+  {
+    "slug": "folk-hero",
     "name": "Folk Hero",
+    "edition": "2014",
     "description": "You are a champion of the common people, who look to you for guidance and protection.",
     "skill_proficiencies": ["Animal Handling", "Survival"],
     "languages": [],
     "equipment": ["Artisan's tools of your choice", "Shovel", "Iron pot", "Common clothes", "10 gp"],
     "feature": "Rustic Hospitality",
-    "feature_description": "Since you come from the ranks of the common folk, you fit in among them with ease. You can find a place to hide, rest, or recuperate among other commoners, unless you have shown yourself to be a danger to them. They will shield you from the law or anyone else searching for you, though they will not risk their lives for you."
+    "feature_description": "Since you come from the ranks of the common folk, you fit in among them with ease. You can find a place to hide, rest, or recuperate among other commoners, unless you have shown yourself to be a danger to them. They will shield you from the law or anyone else searching for you, though they will not risk their lives for you.",
+    "personality_traits": [],
+    "ideals": [],
+    "bonds": [],
+    "flaws": []
   },
   {
+    "slug": "guild-artisan",
     "name": "Guild Artisan",
+    "edition": "2014",
     "description": "You are a member of an artisan's guild, skilled in a particular craft.",
     "skill_proficiencies": ["Insight", "Persuasion"],
     "languages": ["One of your choice"],
     "equipment": ["Artisan's tools of your choice", "Letter of introduction from your guild", "Traveler's clothes", "15 gp"],
     "feature": "Guild Membership",
-    "feature_description": "As an established and respected member of a guild, you can rely on certain benefits that membership provides. Your fellow guild members will provide you with lodging and food if necessary, and pay for your funeral if needed. In some cities and towns, a guildhall offers a central place to meet other members of your profession, which can be a good place to meet potential patrons, allies, or hirelings."
+    "feature_description": "As an established and respected member of a guild, you can rely on certain benefits that membership provides. Your fellow guild members will provide you with lodging and food if necessary, and pay for your funeral if needed. In some cities and towns, a guildhall offers a central place to meet other members of your profession, which can be a good place to meet potential patrons, allies, or hirelings.",
+    "personality_traits": [],
+    "ideals": [],
+    "bonds": [],
+    "flaws": []
   },
   {
+    "slug": "guild-artisan-2024",
+    "name": "Artisan",
+    "edition": "2024",
+    "description": "You are a member of a community of crafters and merchants.",
+    "abilityScores": {
+      "choose": 2,
+      "from": ["STR", "DEX", "INT", "CHA"]
+    },
+    "originFeat": "crafter",
+    "skill_proficiencies": ["Investigation", "Persuasion"],
+    "tool_proficiencies": ["Artisan's Tools (one choice)"],
+    "equipment": ["Artisan's Tools", "Traveler's Clothes", "Letter of Introduction", "25 gp"],
+    "personality_traits": [],
+    "ideals": [],
+    "bonds": [],
+    "flaws": []
+  },
+  {
+    "slug": "hermit",
     "name": "Hermit",
+    "edition": "2014",
     "description": "You have lived a life of seclusion, either in a remote wilderness or in a monastery.",
     "skill_proficiencies": ["Medicine", "Religion"],
     "languages": ["One of your choice"],
     "equipment": ["Scroll case of notes from studies", "Winter blanket", "Common clothes", "Herbalism kit", "5 gp"],
     "feature": "Discovery",
-    "feature_description": "The quiet seclusion of your extended hermitage gave you access to a unique and powerful discovery. The exact nature of this revelation depends on the nature of your seclusion. It might be a great truth about the cosmos, the deities, the powerful beings of the outer planes, or the forces of nature. It could be a site that no one else has ever seen. You might have uncovered a fact that has long been forgotten, or unearthed some relic of the past that could rewrite history."
+    "feature_description": "The quiet seclusion of your extended hermitage gave you access to a unique and powerful discovery. The exact nature of this revelation depends on the nature of your seclusion. It might be a great truth about the cosmos, the deities, the powerful beings of the outer planes, or the forces of nature. It could be a site that no one else has ever seen. You might have uncovered a fact that has long been forgotten, or unearthed some relic of the past that could rewrite history.",
+    "personality_traits": [],
+    "ideals": [],
+    "bonds": [],
+    "flaws": []
   },
   {
+    "slug": "hermit-2024",
+    "name": "Hermit",
+    "edition": "2024",
+    "description": "You spent years in seclusion to seek understanding or safety.",
+    "abilityScores": {
+      "choose": 2,
+      "from": ["CON", "WIS", "CHA"]
+    },
+    "originFeat": "healer",
+    "skill_proficiencies": ["Medicine", "Religion"],
+    "tool_proficiencies": ["Herbalism Kit"],
+    "equipment": ["Herbalism Kit", "Quarterstaff", "Bedroll", "Book", "Oil (Lamp)", "Traveler's Clothes", "15 gp"],
+    "personality_traits": [],
+    "ideals": [],
+    "bonds": [],
+    "flaws": []
+  },
+  {
+    "slug": "noble",
     "name": "Noble",
+    "edition": "2014",
     "description": "You are a member of the upper class, with all the privileges and responsibilities that entails.",
     "skill_proficiencies": ["History", "Persuasion"],
     "languages": ["One of your choice"],
     "equipment": ["Fine clothes", "Signet ring", "Scroll of pedigree", "25 gp"],
     "feature": "Position of Privilege",
-    "feature_description": "Thanks to your noble birth, people are inclined to think the best of you. You are welcome in high society, and people assume you have the right to be wherever you are. The common folk make every effort to accommodate you and avoid your displeasure, and other people of high birth treat you as a member of the same social sphere. You can secure an audience with a local noble if you need to."
+    "feature_description": "Thanks to your noble birth, people are inclined to think the best of you. You are welcome in high society, and people assume you have the right to be wherever you are. The common folk make every effort to accommodate you and avoid your displeasure, and other people of high birth treat you as a member of the same social sphere. You can secure an audience with a local noble if you need to.",
+    "personality_traits": [],
+    "ideals": [],
+    "bonds": [],
+    "flaws": []
   },
   {
+    "slug": "noble-2024",
+    "name": "Noble",
+    "edition": "2024",
+    "description": "You were raised in a family of wealth, power, and privilege.",
+    "abilityScores": {
+      "choose": 2,
+      "from": ["STR", "INT", "CHA"]
+    },
+    "originFeat": "skilled",
+    "skill_proficiencies": ["History", "Persuasion"],
+    "tool_proficiencies": ["Gaming Set (one choice)"],
+    "equipment": ["Fine Clothes", "Signet Ring", "Gaming Set", "Perfume", "24 gp"],
+    "personality_traits": [],
+    "ideals": [],
+    "bonds": [],
+    "flaws": []
+  },
+  {
+    "slug": "outlander",
     "name": "Outlander",
+    "edition": "2014",
     "description": "You grew up in the wilds, far from civilization and its comforts.",
     "skill_proficiencies": ["Athletics", "Survival"],
     "languages": ["One of your choice"],
@@ -256,39 +418,153 @@
     "roleplaying_suggestions": "Outlanders are wilderness survivors who feel most at home in nature. They might be tribal warriors, nomadic hunters, or exiles from civilized society. Consider what drove your character from civilization - were they born in the wilds, or did they flee there seeking freedom?"
   },
   {
+    "slug": "outlander-2024",
+    "name": "Outlander",
+    "edition": "2024",
+    "description": "You grew up in the wilds, far from the comforts of civilization.",
+    "abilityScores": {
+      "choose": 2,
+      "from": ["STR", "CON", "WIS"]
+    },
+    "originFeat": "tough",
+    "skill_proficiencies": ["Athletics", "Survival"],
+    "tool_proficiencies": ["Musical Instrument (one choice)"],
+    "equipment": ["Quarterstaff", "Hunting Trap", "Traveler's Clothes", "Musical Instrument", "10 gp"],
+    "personality_traits": [],
+    "ideals": [],
+    "bonds": [],
+    "flaws": []
+  },
+  {
+    "slug": "sage",
     "name": "Sage",
+    "edition": "2014",
     "description": "You are a scholar, well-versed in ancient lore and forgotten secrets.",
     "skill_proficiencies": ["Arcana", "History"],
     "languages": [],
     "equipment": ["Bottle of ink", "Quill", "Small knife", "Letter from colleague", "Common clothes", "10 gp"],
     "feature": "Researcher",
-    "feature_description": "When you attempt to learn or recall a piece of lore, if you do not know that information, you often know where and from whom you can obtain it. Usually, this information comes from a library, scriptorium, university, or a sage or other learned person or creature. Your DM might rule that the knowledge you seek is secreted away in an almost inaccessible place, or that it simply cannot be found. Unearthing the deepest secrets of the multiverse can require an adventure or even a whole campaign."
+    "feature_description": "When you attempt to learn or recall a piece of lore, if you do not know that information, you often know where and from whom you can obtain it. Usually, this information comes from a library, scriptorium, university, or a sage or other learned person or creature. Your DM might rule that the knowledge you seek is secreted away in an almost inaccessible place, or that it simply cannot be found. Unearthing the deepest secrets of the multiverse can require an adventure or even a whole campaign.",
+    "personality_traits": [],
+    "ideals": [],
+    "bonds": [],
+    "flaws": []
   },
   {
+    "slug": "sage-2024",
+    "name": "Sage",
+    "edition": "2024",
+    "description": "You spent years learning the lore of the multiverse.",
+    "abilityScores": {
+      "choose": 2,
+      "from": ["CON", "INT", "WIS"]
+    },
+    "originFeat": "magic-initiate",
+    "skill_proficiencies": ["Arcana", "History"],
+    "tool_proficiencies": ["Calligrapher's Supplies"],
+    "equipment": ["Quarterstaff", "Calligrapher's Supplies", "Book (History)", "Parchment (8 sheets)", "Robes", "8 gp"],
+    "personality_traits": [],
+    "ideals": [],
+    "bonds": [],
+    "flaws": []
+  },
+  {
+    "slug": "sailor",
     "name": "Sailor",
+    "edition": "2014",
     "description": "You have spent your life on the open sea, and you are at home on any ship.",
     "skill_proficiencies": ["Athletics", "Perception"],
     "languages": [],
     "equipment": ["Belaying pin (club)", "50 feet of silk rope", "Lucky charm", "Common clothes", "10 gp"],
     "feature": "Bad Reputation",
-    "feature_description": "No matter where you go, people are afraid of you due to your reputation. When you are in a civilized settlement, you can get away with minor criminal offenses, such as refusing to pay for food at a tavern or breaking down doors at a local shop, since most people will not report your activity to the authorities."
+    "feature_description": "No matter where you go, people are afraid of you due to your reputation. When you are in a civilized settlement, you can get away with minor criminal offenses, such as refusing to pay for food at a tavern or breaking down doors at a local shop, since most people will not report your activity to the authorities.",
+    "personality_traits": [],
+    "ideals": [],
+    "bonds": [],
+    "flaws": []
   },
   {
+    "slug": "sailor-2024",
+    "name": "Sailor",
+    "edition": "2024",
+    "description": "You sailed on a seagoing vessel for years.",
+    "abilityScores": {
+      "choose": 2,
+      "from": ["STR", "DEX", "WIS"]
+    },
+    "originFeat": "tavern-brawler",
+    "skill_proficiencies": ["Acrobatics", "Perception"],
+    "tool_proficiencies": ["Navigator's Tools"],
+    "equipment": ["Club", "Navigator's Tools", "Silk Rope (50 feet)", "Traveler's Clothes", "10 gp"],
+    "personality_traits": [],
+    "ideals": [],
+    "bonds": [],
+    "flaws": []
+  },
+  {
+    "slug": "soldier",
     "name": "Soldier",
+    "edition": "2014",
     "description": "You are a trained warrior, experienced in combat and military tactics.",
     "skill_proficiencies": ["Athletics", "Intimidation"],
     "languages": [],
     "equipment": ["Insignia of rank", "Trophy from fallen enemy", "Bone dice or deck of cards", "Common clothes", "10 gp"],
     "feature": "Military Rank",
-    "feature_description": "You have a military rank from your career as a soldier. Soldiers loyal to your former military organization still recognize your authority and influence, and they defer to you if they are of a lower rank. You can invoke your rank to exert influence over other soldiers and requisition simple equipment or horses for temporary use. You can also usually gain access to friendly military encampments and fortresses where your rank is recognized."
+    "feature_description": "You have a military rank from your career as a soldier. Soldiers loyal to your former military organization still recognize your authority and influence, and they defer to you if they are of a lower rank. You can invoke your rank to exert influence over other soldiers and requisition simple equipment or horses for temporary use. You can also usually gain access to friendly military encampments and fortresses where your rank is recognized.",
+    "personality_traits": [],
+    "ideals": [],
+    "bonds": [],
+    "flaws": []
   },
   {
+    "slug": "soldier-2024",
+    "name": "Soldier",
+    "edition": "2024",
+    "description": "You began your career as a warrior.",
+    "abilityScores": {
+      "choose": 2,
+      "from": ["STR", "DEX", "CON"]
+    },
+    "originFeat": "savage-attacker",
+    "skill_proficiencies": ["Athletics", "Intimidation"],
+    "tool_proficiencies": ["Gaming Set (one choice)"],
+    "equipment": ["Spear", "Shortbow", "Arrows (20)", "Gaming Set", "Healer's Kit", "Traveler's Clothes", "14 gp"],
+    "personality_traits": [],
+    "ideals": [],
+    "bonds": [],
+    "flaws": []
+  },
+  {
+    "slug": "urchin",
     "name": "Urchin",
+    "edition": "2014",
     "description": "You grew up on the streets, fending for yourself in a harsh and unforgiving world.",
     "skill_proficiencies": ["Sleight of Hand", "Stealth"],
     "languages": [],
     "equipment": ["Small knife", "Map of your home city", "Pet mouse", "Token to remember your parents", "Common clothes", "10 gp"],
     "feature": "City Secrets",
-    "feature_description": "You know the secret patterns and flow to cities and can find passages through the urban sprawl that others would miss. When you are not in combat, you (and companions you lead) can travel between any two locations in the city twice as fast as your speed would normally allow."
+    "feature_description": "You know the secret patterns and flow to cities and can find passages through the urban sprawl that others would miss. When you are not in combat, you (and companions you lead) can travel between any two locations in the city twice as fast as your speed would normally allow.",
+    "personality_traits": [],
+    "ideals": [],
+    "bonds": [],
+    "flaws": []
+  },
+  {
+    "slug": "wayfarer-2024",
+    "name": "Wayfarer",
+    "edition": "2024",
+    "description": "You grew up wandering from place to place, whether by necessity or choice. (Replaces Urchin)",
+    "abilityScores": {
+      "choose": 2,
+      "from": ["DEX", "WIS", "CHA"]
+    },
+    "originFeat": "lucky",
+    "skill_proficiencies": ["Insight", "Stealth"],
+    "tool_proficiencies": ["Thieves' Tools"],
+    "equipment": ["Daggers (2)", "Thieves' Tools", "Gaming Set", "Map of a City", "Common Clothes", "10 gp"],
+    "personality_traits": [],
+    "ideals": [],
+    "bonds": [],
+    "flaws": []
   }
 ]

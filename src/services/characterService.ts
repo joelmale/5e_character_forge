@@ -48,9 +48,21 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
 
     const finalAbilities: Character['abilities'] = {} as Character['abilities'];
 
-    // 1. Calculate Abilities with Racial Bonuses
+    // 1. Calculate Abilities with Racial and Background Bonuses
     (Object.keys(data.abilities) as AbilityName[]).forEach((ability) => {
-        const rawScore = data.abilities[ability] + (speciesData.ability_bonuses[ability] || 0);
+        let totalBonus = 0;
+
+        // Species bonuses (2014) or traits (2024)
+        if (data.edition === '2014') {
+            totalBonus += speciesData.ability_bonuses?.[ability] || 0;
+        }
+
+        // Background bonuses (2024 only)
+        if (data.edition === '2024' && data.backgroundAbilityChoices?.bonuses) {
+            totalBonus += data.backgroundAbilityChoices.bonuses[ability] || 0;
+        }
+
+        const rawScore = data.abilities[ability] + totalBonus;
         const modifier = getModifier(rawScore);
         finalAbilities[ability] = { score: rawScore, modifier };
     });

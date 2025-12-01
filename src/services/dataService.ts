@@ -6,8 +6,7 @@ import srdSpellsMerged from '../data/srd/5e-SRD-Spells-Merged.json';
 import srdRaces2014 from '../data/srd/2014/5e-SRD-Races.json';
 import srdClasses2014 from '../data/srd/2014/5e-SRD-Classes.json';
 import srdClasses2024 from '../data/srd/2024/5e-SRD-Classes.json';
-import srdEquipment2014 from '../data/srd/2014/5e-SRD-Equipment.json';
-import srdEquipment2024 from '../data/srd/2024/5e-SRD-Equipment.json';
+import srdEquipment from '../data/equipment.json';
 // Sprint 5: Features, Subclasses, and Feats
 import srdFeatures2014 from '../data/srd/2014/5e-SRD-Features.json';
 import srdSubclasses2014 from '../data/srd/2014/5e-SRD-Subclasses.json';
@@ -29,6 +28,7 @@ import fightingStylesData from '../data/fightingStyles.json';
 import raceCategoriesData from '../data/raceCategories.json';
 import classCategoriesData from '../data/classCategories.json';
 import enhancedClassData from '../data/enhancedClassData.json';
+import enhancedSpeciesData from '../data/enhancedSpeciesData.json';
 import gameConstantsData from '../data/gameConstants.json';
 import levelConstantsData from '../data/levelConstants.json';
 import spellcastingTypesData from '../data/spellcastingTypes.json';
@@ -207,45 +207,9 @@ interface SRDClass {
 }
 
 // Equipment SRD Type Definitions
-interface SRDEquipment2014 {
-  index: string;
-  name: string;
-  equipment_category: { index: string; name: string };
-  cost: { quantity: number; unit: string };
-  weight: number;
-  url: string;
 
-  // Weapon fields
-  weapon_category?: string;
-  weapon_range?: string;
-  category_range?: string;
-  damage?: {
-    damage_dice: string;
-    damage_type: { index: string; name: string };
-  };
-  range?: { normal: number; long?: number };
-  properties?: Array<{ index: string; name: string }>;
-  throw_range?: { normal: number; long: number };
-  two_handed_damage?: {
-    damage_dice: string;
-    damage_type: { index: string; name: string };
-  };
 
-  // Armor fields
-  armor_category?: string;
-  armor_class?: { base: number; dex_bonus: boolean };
-  str_minimum?: number;
-  stealth_disadvantage?: boolean;
-
-  // Gear fields
-  desc?: string[];
-  gear_category?: string;
-  tool_category?: string;
-  contents?: Array<{ item: { index: string; name: string }; quantity: number }>;
-  capacity?: string;
-}
-
-interface SRDEquipment2024 {
+interface SRDEquipment {
   index: string;
   name: string;
   equipment_categories: Array<{ index: string; name: string }>;
@@ -284,6 +248,8 @@ interface SRDEquipment2024 {
   storage?: { index: string; name: string };
   quantity?: number;
 }
+
+
 
 // --- App Type Definitions (matching App.tsx) ---
 type SchoolName = 'Abjuration' | 'Conjuration' | 'Divination' | 'Enchantment' | 'Evocation' | 'Illusion' | 'Necromancy' | 'Transmutation';
@@ -613,69 +579,33 @@ export function transformClass(srdClass: SRDClass, year: number = 2014): Class {
   };
 }
 
-export function transformEquipment2014(srdEquip: SRDEquipment2014): Equipment {
-  return {
-    index: srdEquip.index, // Add missing index field
-    slug: srdEquip.index,
-    name: srdEquip.name,
-    year: 2014,
-    equipment_category: srdEquip.equipment_category.name,
-    cost: {
-      quantity: srdEquip.cost.quantity,
-      unit: srdEquip.cost.unit as 'cp' | 'sp' | 'gp' | 'pp',
-    },
-    weight: srdEquip.weight,
-    description: srdEquip.desc?.join('\n\n'),
 
-    // Weapon fields
-    weapon_category: srdEquip.weapon_category as 'Simple' | 'Martial' | undefined,
-    weapon_range: srdEquip.weapon_range as 'Melee' | 'Ranged' | undefined,
-    damage: srdEquip.damage ? {
-      damage_dice: srdEquip.damage.damage_dice,
-      damage_type: srdEquip.damage.damage_type.name,
-    } : undefined,
-    range: srdEquip.throw_range || srdEquip.range ? {
-      normal: srdEquip.throw_range?.normal || srdEquip.range?.normal || 5,
-      long: srdEquip.throw_range?.long || srdEquip.range?.long,
-    } : undefined,
-    properties: srdEquip.properties, // Keep as object array, not just names
-    two_handed_damage: srdEquip.two_handed_damage ? {
-      damage_dice: srdEquip.two_handed_damage.damage_dice,
-      damage_type: srdEquip.two_handed_damage.damage_type.name,
-    } : undefined,
-    mastery: undefined, // 2014 doesn't have mastery property
 
-    // Armor fields
-    armor_category: srdEquip.armor_category as 'Light' | 'Medium' | 'Heavy' | 'Shield' | undefined,
-    armor_class: srdEquip.armor_class,
-    str_minimum: srdEquip.str_minimum,
-    stealth_disadvantage: srdEquip.stealth_disadvantage,
-
-    // Gear fields
-    tool_category: srdEquip.tool_category,
-    gear_category: srdEquip.gear_category,
-    contents: srdEquip.contents
-      ?.filter(c => c && c.item && c.item.index && c.item.name)
-      .map(c => ({
-        item_index: c.item.index,
-        item_name: c.item.name,
-        quantity: c.quantity,
-      })),
-    capacity: srdEquip.capacity,
-  };
-}
-
-export function transformEquipment2024(srdEquip: SRDEquipment2024): Equipment {
+export function transformEquipment(srdEquip: SRDEquipment): Equipment {
   // For 2024, determine category from equipment_categories array
   let primaryCategory = 'Adventuring Gear';
   const hasWeaponCategory = srdEquip.equipment_categories.some(cat =>
     cat.name.toLowerCase().includes('weapon')
   );
+  const hasArmorCategory = srdEquip.equipment_categories.some(cat =>
+    cat.name.toLowerCase().includes('armor')
+  );
+
   if (hasWeaponCategory) {
     primaryCategory = 'Weapon';
+  } else if (hasArmorCategory) {
+    primaryCategory = 'Armor';
   } else {
     primaryCategory = srdEquip.equipment_categories[0]?.name || 'Adventuring Gear';
   }
+
+  // Determine if item is equipable (weapons, armor, clothing)
+  const isWeapon = primaryCategory === 'Weapon';
+  const isArmor = primaryCategory === 'Armor';
+  const isClothing = srdEquip.name.toLowerCase().includes('cloth') ||
+                    srdEquip.name.toLowerCase().includes('robe') ||
+                    (srdEquip.name.toLowerCase().includes('armor') && srdEquip.equipment_categories.some(cat => cat.name.toLowerCase().includes('armor')));
+  const equipable = isWeapon || isArmor || isClothing;
 
   // Determine weapon category from equipment_categories
   let weaponCategory: 'Simple' | 'Martial' | undefined;
@@ -694,6 +624,7 @@ export function transformEquipment2024(srdEquip: SRDEquipment2024): Equipment {
     name: srdEquip.name,
     year: 2024,
     equipment_category: primaryCategory,
+    equipable,
     cost: {
       quantity: srdEquip.cost.quantity,
       unit: srdEquip.cost.unit as 'cp' | 'sp' | 'gp' | 'pp',
@@ -761,7 +692,17 @@ export const getLeveledSpellsByClass = (classSlug: string, level: number = 1): A
 
 export function loadSpecies(): Species[] {
   // Return comprehensive species database from JSON
-  return (racesData as { races: Species[] }).races;
+  const baseSpecies = (racesData as { races: any[] }).races.map(r => ({
+    ...r,
+    edition: r.edition || '2014', // Ensure edition is always set, default to 2014
+    slug: r.slug || r.name.toLowerCase().replace(/\s+/g, '-') // Ensure slug exists
+  })) as Species[];
+
+  // Merge enhanced species data
+  return baseSpecies.map(species => {
+    const enhanced = getEnhancedSpeciesData(species.slug);
+    return enhanced ? { ...species, ...enhanced } : species;
+  });
 }
 
 // Legacy function for backward compatibility - returns SRD species only
@@ -771,8 +712,22 @@ export function loadSRDSpecies(): Species[] {
 }
 
 // Get all species from categories (flattened)
-export function getAllSpecies(): Species[] {
-  return SPECIES_CATEGORIES.flatMap(category => category.species);
+export function getAllSpecies(edition?: Edition): Species[] {
+  let allSpecies = SPECIES_CATEGORIES.flatMap(category => category.species);
+
+  // Filter by edition if specified
+  if (edition) {
+    allSpecies = allSpecies.filter(species => species.edition === edition);
+
+    // For 2024 edition, filter out "Half-Elf" and "Half-Orc"
+    if (edition === '2024') {
+      allSpecies = allSpecies.filter(species =>
+        species.slug !== 'half-elf' && species.slug !== 'half-orc'
+      );
+    }
+  }
+
+  return allSpecies;
 }
 
 // Backwards compatibility aliases (deprecated)
@@ -789,18 +744,22 @@ export function loadClasses(edition?: Edition): Class[] {
 
   const allClasses = [...classes2014, ...classes2024];
 
+  // Merge enhanced class data
+  const classesWithEnhancedData = allClasses.map(cls => {
+    const enhanced = getEnhancedClassData(cls.slug);
+    return enhanced ? { ...cls, ...enhanced } : cls;
+  });
+
   // Filter by edition if specified
   if (edition) {
-    return allClasses.filter(cls => cls.edition === edition);
+    return classesWithEnhancedData.filter(cls => cls.edition === edition);
   }
 
-  return allClasses;
+  return classesWithEnhancedData;
 }
 
 export function loadEquipment(): Equipment[] {
-  const equipment2014 = (srdEquipment2014 as SRDEquipment2014[]).map(eq => transformEquipment2014(eq));
-  const equipment2024 = (srdEquipment2024 as SRDEquipment2024[]).map(eq => transformEquipment2024(eq));
-  return [...equipment2014, ...equipment2024];
+  return (srdEquipment as SRDEquipment[]).map(eq => transformEquipment(eq));
 }
 
 // Feature interfaces
@@ -933,7 +892,7 @@ export function loadCombatActions(): CombatActionsData {
 export const COMBAT_ACTIONS = loadCombatActions();
 
 // Export raw data for reference
-export { srdSpellsMerged, srdRaces2014, srdClasses2014, srdEquipment2014, srdEquipment2024, srdFeatures2014, srdSubclasses2014 };
+export { srdSpellsMerged, srdRaces2014, srdClasses2014, srdEquipment, srdFeatures2014, srdSubclasses2014 };
 
 
 import { SPELL_SLOTS_BY_CLASS } from '../data/spellSlots';
@@ -1017,6 +976,11 @@ interface ClassCategoryData {
 // Helper function to get enhanced class data
 export function getEnhancedClassData(classSlug: string): Partial<Class> | undefined {
   return (enhancedClassData as EnhancedClassData)[classSlug];
+}
+
+// Helper function to get enhanced species data
+export function getEnhancedSpeciesData(speciesSlug: string): Partial<Species> | undefined {
+  return (enhancedSpeciesData as any)[speciesSlug];
 }
 
 // Enhanced class categories with rich data - filtered by edition

@@ -12,9 +12,9 @@ export const useWizardState = () => {
     setCreationData(prev => ({ ...prev, ...updates }));
   }, []);
 
-  const resetWizard = useCallback(() => {
+  const resetWizard = useCallback((initialData?: Partial<CharacterCreationData>) => {
     setCurrentStep(0);
-    setCreationData(initialCreationData);
+    setCreationData({ ...initialCreationData, ...initialData });
     setIsLoading(false);
     setError(null);
   }, []);

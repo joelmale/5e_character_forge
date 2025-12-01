@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { WeaponOption } from '../types/widgets';
+import masteryData from '../data/srd/2024/5e-SRD-Weapon-Mastery-Properties.json';
 
 interface WeaponMasteryTooltipProps {
   weapon: WeaponOption;
@@ -14,16 +15,8 @@ interface WeaponMasteryProperty {
 
 // Load mastery properties data
 const loadWeaponMasteryProperties = (): WeaponMasteryProperty[] => {
-  try {
-    // Import the mastery properties data
-    const masteryData = require('../data/srd/2024/5e-SRD-Weapon-Mastery-Properties.json');
-    return masteryData as WeaponMasteryProperty[];
-  } catch (error) {
-    console.warn('Failed to load weapon mastery properties:', error);
-    return [];
-  }
+  return masteryData as WeaponMasteryProperty[];
 };
-
 const WeaponMasteryTooltip: React.FC<WeaponMasteryTooltipProps> = ({ weapon, children }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [position, setPosition] = useState({ top: 0, left: 0 });

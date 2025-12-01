@@ -18,16 +18,19 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
     selectedSkills: data.selectedSkills
   });
 
+
   const speciesData = getAllSpecies().find(s => s.slug === data.speciesSlug);
   const classData = loadClasses().find(c => c.slug === data.classSlug);
+  const backgroundData = BACKGROUNDS.find(bg => bg.slug === data.background); // Fetch background data here
 
   console.log('🔍 [CharacterCreation] Data lookup results:', {
     speciesData: speciesData ? { name: speciesData.name, slug: speciesData.slug } : null,
-    classData: classData ? { name: classData.name, slug: classData.slug } : null
+    classData: classData ? { name: classData.name, slug: classData.slug } : null,
+    backgroundData: backgroundData ? { name: backgroundData.name, slug: backgroundData.slug } : null,
   });
 
-  if (!speciesData || !classData) {
-    console.error('❌ [CharacterCreation] Missing race or class data - throwing error');
+  if (!speciesData || !classData || !backgroundData) {
+    console.error('❌ [CharacterCreation] Missing species, class, or background data - throwing error');
     throw new Error("Incomplete creation data.");
   }
 
@@ -35,9 +38,21 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
 
   const finalAbilities: Character['abilities'] = {} as Character['abilities'];
 
-  // 1. Calculate Abilities with Racial Bonuses and ASI increases
+  // 1. Calculate Abilities with Bonuses
   (Object.keys(data.abilities) as AbilityName[]).forEach((ability) => {
-    let rawScore = data.abilities[ability] + (speciesData.ability_bonuses[ability] || 0);
+    let rawScore = data.abilities[ability];
+
+    if (data.edition === '2014') {
+      // 2014: Apply Species Ability Bonuses
+      rawScore += (speciesData.ability_bonuses?.[ability] || 0);
+    } else if (data.edition === '2024') {
+      // 2024: Apply Background Ability Bonuses
+      // Fixed bonuses first
+      rawScore += (backgroundData.abilityScores?.fixed?.[ability] || 0);
+      // Then chosen options (assuming `data.abilities` already includes chosen options from wizard step)
+      // This part might need further refinement based on how the wizard handles chosen background ASIs
+      // For now, we assume rawScore already contains the chosen +1/+2
+    }
 
     // Apply cumulative ASI increases for high-level characters
     if (data.cumulativeASI) {
@@ -52,6 +67,7 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
     finalAbilities[ability] = { score: rawScore, modifier };
   });
 
+
   const level = data.level;
   const pb = PROFICIENCY_BONUSES[level - 1] || 2;
 
@@ -64,14 +80,18 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
     if (data.hpCalculationMethod === 'rolled' && data.rolledHP) {
       hitDieValue = data.rolledHP;
     } else {
+
       // Default to max for level 1
       hitDieValue = classData.hit_die;
     }
+
     maxHitPoints = hitDieValue + finalAbilities.CON.modifier;
   } else if (data.highLevelSetup) {
+
     // Use high-level setup HP if available
     maxHitPoints = data.highLevelSetup.totalHP;
   } else {
+
     // Fallback: Multi-level calculation using average HP
     const conModifier = finalAbilities.CON.modifier;
     const hitDie = classData.hit_die;
@@ -86,11 +106,11 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
     maxHitPoints = totalHP;
   }
 
+
   // Add racial bonuses (like Dwarf toughness)
   maxHitPoints += (speciesData.slug === 'dwarf' ? level : 0);
 
   // 3. Calculate Skills (from selected skills + background skills + expertise)
-  const backgroundData = BACKGROUNDS.find(bg => bg.name === data.background);
   const backgroundSkills = backgroundData?.skill_proficiencies || [];
   const allProficientSkills = [...data.selectedSkills, ...backgroundSkills.map(s => s as SkillName)];
 
@@ -107,11 +127,14 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
       skillBonus = hasExpertise ? (pb * 2) : pb;
     }
 
+
     finalSkills[skillName] = {
       proficient: isProficient,
       value: modifier + skillBonus,
     };
+
   });
+
 
   // 3.5. Calculate Inventory from Equipment Choices
   const inventory: Character['inventory'] = [];
@@ -132,17 +155,61 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
             if (existingItem) {
               existingItem.quantity += result.quantity;
             } else {
+
               inventory.push({
                 equipmentSlug: result.equipmentSlug,
                 quantity: result.quantity,
                 equipped: false, // Will be equipped manually by player
               });
+
             }
+
           });
+
         });
+
       }
+
+    });
+
+  }
+
+  // Add background equipment
+  if (backgroundData?.equipment) {
+    const backgroundEquipment = Array.isArray(backgroundData.equipment)
+      ? backgroundData.equipment
+      : [backgroundData.equipment];
+    
+    backgroundEquipment.forEach(itemName => {
+      // Try to match the background equipment name to equipment database
+      const results = addItemToInventoryByName(itemName, 1);
+      
+      // Process each result (can be multiple if pack expanded)
+      results.forEach(result => {
+          // Check if item already exists in inventory
+          const existingItem = inventory.find(inv => inv.equipmentSlug === result.equipmentSlug);
+          if (existingItem) {
+            existingItem.quantity += result.quantity;
+          } else {
+            inventory.push({
+              equipmentSlug: result.equipmentSlug,
+              quantity: result.quantity,
+              equipped: false,
+            });
+          }      });
     });
   }
+
+  // Add trinket to inventory
+  if (data.selectedTrinket) {
+    inventory.push({
+      equipmentSlug: `trinket-${data.selectedTrinket.roll}`,
+      quantity: 1,
+      equipped: false,
+      trinket: data.selectedTrinket,
+    });
+  }
+
 
   // Add custom starting inventory from equipment browser
   if (data.startingInventory) {
@@ -152,14 +219,19 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
       if (existingItem) {
         existingItem.quantity += item.quantity;
       } else {
+
         inventory.push({
           equipmentSlug: item.equipmentSlug,
           quantity: item.quantity,
           equipped: item.equipped || false,
         });
+
       }
+
     });
+
   }
+
 
   // 4. Calculate Spellcasting Stats (if applicable)
   let spellcastingData: Character['spellcasting'] = undefined;
@@ -174,6 +246,7 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
     );
   }
 
+
   // 5. Calculate Armor Class (simple calculation)
   const armorClass = BASE_ARMOR_CLASS + finalAbilities.DEX.modifier;
 
@@ -187,9 +260,14 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
     bonds: data.bonds || '',
     flaws: data.flaws || '',
     classFeatures: classData.class_features || [],
-    speciesTraits: speciesData.species_traits || [],
-    musicalInstrumentProficiencies: [],
+    speciesTraits: (speciesData as any).traits || speciesData.species_traits || [],
+    backgroundFeatures: backgroundData ? [{
+      name: (backgroundData as any).feature || 'Background Feature',
+      description: (backgroundData as any).feature_description || 'A feature from your background.'
+    }] : [],
+    musicalInstrumentProficiencies: data.selectedMusicalInstruments || [],
   };
+
 
   // 8. Calculate SRD Features (from the original implementation)
   const srdFeatures = {
@@ -197,9 +275,31 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
     subclassFeatures: [],
   };
 
+
   // 9. Create final character object
   // Collect all feats (level 1 + cumulative ASI feats)
   const allFeats = [...(data.selectedFeats || [])];
+  
+  // Add 2024 Background Origin Feat
+  if (data.edition === '2024' && backgroundData?.originFeat) {
+    allFeats.push(backgroundData.originFeat);
+  }
+
+   // Add 2024 Human Bonus Origin Feat
+   if (data.edition === '2024' && data.humanOriginFeat) {
+     allFeats.push(data.humanOriginFeat);
+   }
+
+  // Add 2024 Species Feat
+  if (data.edition === '2024' && data.speciesFeat) {
+    allFeats.push(data.speciesFeat);
+  }
+
+  // Add 2024 Human Versatile extra feat
+  if (data.edition === '2024' && data.speciesSlug === 'human-2024' && data.humanVersatileFeat) {
+    allFeats.push(data.humanVersatileFeat);
+  }
+
   if (data.cumulativeASI) {
     data.cumulativeASI.forEach(asiChoice => {
       if (asiChoice.type === 'feat' && asiChoice.featSlug) {
@@ -207,6 +307,7 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
       }
     });
   }
+
 
   const character: Character = {
     id: '', // Will be set when saving
@@ -227,6 +328,7 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
       max: level,
       dieType: getHitDieForClass(data.classSlug),
     },
+
     speed: 30, // Default speed, would need race-specific logic
     initiative,
     abilities: finalAbilities,
@@ -248,12 +350,14 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
      primalOrder: data.primalOrder,
      fightingStyle: data.fightingStyle,
      eldritchInvocations: data.eldritchInvocations,
+     originFeat: backgroundData?.originFeat, // 2024 Origin Feat reference
     currency: {
       cp: 0,
       sp: 0,
       gp: 0,
       pp: 0,
     },
+
     equippedArmor: undefined,
     equippedWeapons: [],
     temporaryHitPoints: 0,
@@ -262,6 +366,7 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
+
 
   return character;
 };

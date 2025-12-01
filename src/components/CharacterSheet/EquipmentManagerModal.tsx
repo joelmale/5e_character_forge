@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef } from 'react';
+import React, { useState, useMemo } from 'react';
 import { X, Search, Package, Sword, Shield, Wrench, Plus, Minus } from 'lucide-react';
 import { Character, Equipment } from '../../types/dnd';
 import { loadEquipment } from '../../services/dataService';
@@ -137,7 +137,7 @@ export const EquipmentManagerModal: React.FC<EquipmentManagerModalProps> = ({
       { equipmentSlug: 'signal-whistle', quantity: 1 }
     ],
     "Cheap Tricks Pack": [
-      { equipmentSlug: 'ball-bearings-bag-of-1000', quantity: 1 },
+      { equipmentSlug: 'ball-bearings', quantity: 1 },
       { equipmentSlug: 'caltrops', quantity: 20 }
     ],
     "Wilderness Survivor Kit": [

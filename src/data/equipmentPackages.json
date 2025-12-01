@@ -5,7 +5,7 @@
     "startingGold": 16,
     "items": [
       { "name": "Backpack", "slug": "backpack", "quantity": 1, "equipped": false },
-      { "name": "Ball bearings (1,000)", "slug": "ball-bearings-bag-of-1000", "quantity": 1, "equipped": false },
+      { "name": "Ball bearings (1,000)", "slug": "ball-bearings", "quantity": 1, "equipped": false },
       { "name": "String (10 feet)", "slug": "string", "quantity": 1, "equipped": false },
       { "name": "Bell", "slug": "bell", "quantity": 1, "equipped": false },
       { "name": "Candles", "slug": "candle", "quantity": 5, "equipped": false },

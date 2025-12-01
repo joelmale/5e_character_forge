@@ -5,7 +5,7 @@ import { generateName, generateNames, getAvailableRaces, GeneratedName } from '.
 interface NameGeneratorModalProps {
   isOpen: boolean;
   onClose: () => void;
-  currentRace?: string;
+  currentSpecies?: string; // Renamed from currentRace
   currentGender?: 'male' | 'female' | 'any';
   onNameSelect: (name: string) => void;
 }
@@ -18,7 +18,7 @@ interface NameHistoryItem extends GeneratedName {
 const NameGeneratorModal: React.FC<NameGeneratorModalProps> = ({
   isOpen,
   onClose,
-  currentRace,
+  currentSpecies, // Renamed from currentRace
   currentGender = 'any',
   onNameSelect
 }) => {
@@ -26,13 +26,13 @@ const NameGeneratorModal: React.FC<NameGeneratorModalProps> = ({
   const [nameOptions, setNameOptions] = useState<GeneratedName[]>([]);
   const [nameHistory, setNameHistory] = useState<NameHistoryItem[]>([]);
   const [favorites, setFavorites] = useState<NameHistoryItem[]>([]);
-  const [selectedRace, setSelectedRace] = useState<string>(currentRace || '');
+  const [selectedSpecies, setSelectedSpecies] = useState<string>(currentSpecies || ''); // Renamed from selectedRace
   const [selectedGender, setSelectedGender] = useState<'male' | 'female' | 'any'>(currentGender);
   const [showHistory, setShowHistory] = useState(false);
   const [showFavorites, setShowFavorites] = useState(false);
   const [showMeaning, setShowMeaning] = useState(false);
 
-  const availableRaces = getAvailableRaces();
+  const availableSpecies = getAvailableRaces(); // Variable renamed, function import kept for now
 
   const loadSavedData = () => {
     try {
@@ -64,7 +64,7 @@ const NameGeneratorModal: React.FC<NameGeneratorModalProps> = ({
 
   const generateNewName = useCallback(() => {
     const name = generateName({
-      race: selectedRace || undefined,
+      race: selectedSpecies || undefined, // Update property name if generateName supports it, otherwise map
       gender: selectedGender,
       includeMeaning: true,
       includePronunciation: true
@@ -86,13 +86,13 @@ const NameGeneratorModal: React.FC<NameGeneratorModalProps> = ({
     const newHistory = [historyItem, ...nameHistory];
     setNameHistory(newHistory);
     saveHistory(newHistory);
-  }, [selectedRace, selectedGender, nameHistory]);
+  }, [selectedSpecies, selectedGender, nameHistory]);
 
   useEffect(() => {
     if (isOpen) {
       // Generate initial name when modal opens
       const name = generateName({
-        race: selectedRace || undefined,
+        race: selectedSpecies || undefined, // Update property name
         gender: selectedGender,
         includeMeaning: true,
         includePronunciation: true
@@ -117,7 +117,7 @@ const NameGeneratorModal: React.FC<NameGeneratorModalProps> = ({
 
       loadSavedData();
     }
-  }, [isOpen, selectedRace, selectedGender, nameHistory]);
+  }, [isOpen, selectedSpecies, selectedGender, nameHistory]);
 
   /**
    * Save name generator favorites to localStorage
@@ -135,7 +135,7 @@ const NameGeneratorModal: React.FC<NameGeneratorModalProps> = ({
 
   const generateNameOptions = () => {
     const options = generateNames(6, {
-      race: selectedRace || undefined,
+      race: selectedSpecies || undefined, // Update property name
       gender: selectedGender,
       includeMeaning: true
     });
@@ -188,14 +188,14 @@ const NameGeneratorModal: React.FC<NameGeneratorModalProps> = ({
         {/* Controls */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <div>
-            <label className="block text-sm font-medium text-theme-tertiary mb-2">Race</label>
+            <label className="block text-sm font-medium text-theme-tertiary mb-2">Species</label>
             <select
-              value={selectedRace}
-              onChange={(e) => setSelectedRace(e.target.value)}
+              value={selectedSpecies}
+              onChange={(e) => setSelectedSpecies(e.target.value)}
               className="w-full p-2 bg-theme-tertiary text-theme-primary rounded border border-theme-primary"
             >
-              <option value="">Any Race</option>
-              {availableRaces.map((race: string) => (
+              <option value="">Any Species</option>
+              {availableSpecies.map((race: string) => (
                 <option key={race} value={race}>{race}</option>
               ))}
             </select>
@@ -274,7 +274,7 @@ const NameGeneratorModal: React.FC<NameGeneratorModalProps> = ({
             </div>
 
             <div className="text-sm text-theme-tertiary space-y-1">
-              {currentName.race && <p><span className="font-medium">Race:</span> {currentName.race}</p>}
+              {currentName.race && <p><span className="font-medium">Species:</span> {currentName.race}</p>}
               {currentName.gender && <p><span className="font-medium">Gender:</span> {currentName.gender}</p>}
               {currentName.pronunciation && (
                 <p><span className="font-medium">Pronunciation:</span> {currentName.pronunciation}</p>
