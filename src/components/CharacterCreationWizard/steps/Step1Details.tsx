@@ -55,6 +55,13 @@ export const Step1Details: React.FC<StepProps> = ({ data, updateData, nextStep, 
 
   const selectedAlignmentData = ALIGNMENTS_DATA.find(a => a.name === data.alignment);
   const selectedBackground = BACKGROUNDS.find((bg: any) => bg.slug === data.background);
+  const backgroundDescription = selectedBackground
+    ? (selectedBackground as any).details
+      || (selectedBackground as any).detailedDescription
+      || selectedBackground.description
+      || ''
+    : '';
+  const isLongDescription = backgroundDescription.length > 220;
 
   // Validation hook
   const { canProceed, missingItems, nextAction } = useStepValidation(1, data);
@@ -201,10 +208,10 @@ export const Step1Details: React.FC<StepProps> = ({ data, updateData, nextStep, 
           <div>
             <h4 className="text-lg font-bold text-accent-yellow-light">{selectedBackground.name}</h4>
             <div className="text-sm text-theme-tertiary mt-2">
-              <p className={showDetailedDescription ? '' : 'line-clamp-2'}>
-                {(selectedBackground as any).detailedDescription || selectedBackground.description}
+              <p className={isLongDescription && !showDetailedDescription ? 'line-clamp-2' : ''}>
+                {backgroundDescription}
               </p>
-              {((selectedBackground as any).detailedDescription || selectedBackground.description.length > 100) && (
+              {isLongDescription && (
                 <button
                   onClick={() => setShowDetailedDescription(!showDetailedDescription)}
                   className="text-accent-blue-light hover:text-blue-300 text-xs mt-1 underline"
@@ -213,12 +220,6 @@ export const Step1Details: React.FC<StepProps> = ({ data, updateData, nextStep, 
                 </button>
               )}
             </div>
-          </div>
-
-          {/* Feature */}
-          <div className="border-t border-theme-primary pt-3">
-            <h5 className="text-sm font-semibold text-yellow-200 mb-2">Background Feature: {selectedBackground.feature}</h5>
-            <p className="text-xs text-theme-tertiary">{selectedBackground.feature_description}</p>
           </div>
 
           {/* 2024 Origin Feat */}
@@ -245,6 +246,20 @@ export const Step1Details: React.FC<StepProps> = ({ data, updateData, nextStep, 
             </div>
           </div>
 
+          {/* Tool Proficiencies */}
+          {(selectedBackground as any).tool_proficiencies && (selectedBackground as any).tool_proficiencies.length > 0 && (
+            <div className="border-t border-theme-primary pt-3">
+              <h5 className="text-sm font-semibold text-yellow-200 mb-2">Tool Proficiencies</h5>
+              <div className="flex flex-wrap gap-2">
+                {(selectedBackground as any).tool_proficiencies.map((tool: string) => (
+                  <span key={tool} className="px-2 py-1 bg-purple-700 text-white text-xs rounded">
+                    {tool}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Languages */}
           {selectedBackground.languages && selectedBackground.languages.length > 0 && (
             <div className="border-t border-theme-primary pt-3">
@@ -260,17 +275,32 @@ export const Step1Details: React.FC<StepProps> = ({ data, updateData, nextStep, 
           )}
 
           {/* Equipment */}
-          <div className="border-t border-theme-primary pt-3">
-            <h5 className="text-sm font-semibold text-yellow-200 mb-2">Starting Equipment</h5>
-            <ul className="text-xs text-theme-tertiary space-y-1">
-              {selectedBackground.equipment.map(item => (
-                <li key={item} className="flex items-start">
-                  <span className="text-accent-yellow-light mr-2">•</span>
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
+          {/* Equipment Options */}
+          {(selectedBackground as any).equipmentOptions && (selectedBackground as any).equipmentOptions.length > 0 && (
+            <div className="border-t border-theme-primary pt-3 space-y-3">
+              <h5 className="text-sm font-semibold text-yellow-200">Starting Equipment</h5>
+              <div className="text-xs text-theme-tertiary space-y-2">
+                {(selectedBackground as any).equipmentOptions.map((opt: any) => (
+                  <div key={opt.label} className="bg-theme-quaternary/40 border border-theme-primary rounded p-2">
+                    <div className="text-theme-tertiary font-semibold mb-1">Option {opt.label}</div>
+                    {opt.items && (
+                      <ul className="space-y-1">
+                        {opt.items.map((item: string) => (
+                          <li key={item} className="flex items-start">
+                            <span className="text-accent-yellow-light mr-2">•</span>
+                            <span>{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                    {typeof opt.gold === 'number' && (
+                      <div className="text-accent-yellow-light">Gold: {opt.gold} gp</div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
 

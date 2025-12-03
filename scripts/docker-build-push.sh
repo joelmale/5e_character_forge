@@ -158,7 +158,7 @@ get_size() {
 # Try to get sizes from local images first (most reliable)
 if docker images $DOCKER_IMAGE --format "{{.Size}}" 2>/dev/null | head -1 | grep -q .; then
     log "📦 Using local image sizes..."
-    docker images $DOCKER_IMAGE --format "table {{.Repository}}:{{.Tag}}\t{{.Size}}\t{{.Architecture}}"
+docker images $DOCKER_IMAGE --format "table {{.Repository}}:{{.Tag}}\t{{.Size}}"
 else
     log "🔍 Inspecting registry images..."
 
