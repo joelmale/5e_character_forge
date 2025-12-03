@@ -60,7 +60,7 @@ export const DiceRollerModal: React.FC<DiceRollerModalProps> = ({
     if (isOpen && !diceBoxInstanceRef.current) {
       const initDiceBox = async () => {
         try {
-          console.log('🎲 [DiceRollerModal] Initializing DiceBox with v1.1.0+ API...');
+        if (import.meta.env.DEV) console.log('🎲 [DiceRollerModal] Initializing DiceBox with v1.1.0+ API...');
 
           // Simplified config matching DiceBox3D
           const box = new DiceBox({
@@ -80,9 +80,9 @@ export const DiceRollerModal: React.FC<DiceRollerModalProps> = ({
             scale: 6
           } as any);
 
-          console.log('🎲 [DiceRollerModal] DiceBox instance created, calling init()...');
+        if (import.meta.env.DEV) console.log('🎲 [DiceRollerModal] DiceBox instance created, calling init()...');
           await box.init();
-          console.log('🎲 [DiceRollerModal] DiceBox initialized successfully!');
+        if (import.meta.env.DEV) console.log('🎲 [DiceRollerModal] DiceBox initialized successfully!');
 
           // Ensure canvas is visible and sized properly
           setTimeout(() => {
@@ -90,7 +90,7 @@ export const DiceRollerModal: React.FC<DiceRollerModalProps> = ({
             if (container) {
               const canvas = container.querySelector('canvas');
               if (canvas) {
-                console.log('✅ [DiceRollerModal] Canvas ready');
+                if (import.meta.env.DEV) console.log('✅ [DiceRollerModal] Canvas ready');
               } else {
                 console.warn('⚠️ [DiceRollerModal] Canvas not found');
               }
@@ -119,7 +119,7 @@ export const DiceRollerModal: React.FC<DiceRollerModalProps> = ({
 
           diceBoxInstanceRef.current = box;
           setDiceBoxReady(true);
-          console.log('🎲 [DiceRollerModal] DiceBox ready state set to true');
+        if (import.meta.env.DEV) console.log('🎲 [DiceRollerModal] DiceBox ready state set to true');
         } catch (error) {
           console.error('❌ [DiceRollerModal] Failed to initialize dice box:', error);
           setDiceBoxReady(false);
@@ -132,7 +132,7 @@ export const DiceRollerModal: React.FC<DiceRollerModalProps> = ({
     // Cleanup
     return () => {
       if (!isOpen && diceBoxInstanceRef.current) {
-        console.log('🎲 [DiceRollerModal] Cleaning up DiceBox instance');
+        if (import.meta.env.DEV) console.log('🎲 [DiceRollerModal] Cleaning up DiceBox instance');
         diceBoxInstanceRef.current.clear();
         diceBoxInstanceRef.current = null;
         setDiceBoxReady(false);
@@ -207,7 +207,7 @@ export const DiceRollerModal: React.FC<DiceRollerModalProps> = ({
       // Play dice sound when roll starts
       diceSounds.playRollSound(totalDice);
 
-      console.log('🎲 [DiceRollerModal] Rolling with pre-calculated values:', allValues);
+      if (import.meta.env.DEV) console.log('🎲 [DiceRollerModal] Rolling with pre-calculated values:', allValues);
 
       // Roll all dice with fixed values
       await diceBoxInstanceRef.current.roll(rollNotations, { values: allValues });

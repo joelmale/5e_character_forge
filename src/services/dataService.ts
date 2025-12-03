@@ -19,25 +19,26 @@ import featsData from '../data/feats.json';
 import alignmentsData from '../data/alignments.json';
 import backgroundsData from '../data/backgrounds.json';
 import equipmentPackagesData from '../data/equipmentPackages.json';
-import racesData from '../data/races.json';
+import speciesData from '../data/species.json';
 import { quickStartEquipmentPresets } from '../data/quickStartEquipment';
 import startingWealthData from '../data/startingWealth.json';
 import newPlayerShopData from '../data/newPlayerShop.json';
 import { ClassWealthRule, ShopItem, QuickStartPresets } from '../types/equipment';
 import fightingStylesData from '../data/fightingStyles.json';
-import raceCategoriesData from '../data/raceCategories.json';
+import speciesCategoriesData from '../data/speciesCategories.json';
 import classCategoriesData from '../data/classCategories.json';
 import enhancedClassData from '../data/enhancedClassData.json';
 import enhancedSpeciesData from '../data/enhancedSpeciesData.json';
 import gameConstantsData from '../data/gameConstants.json';
 import levelConstantsData from '../data/levelConstants.json';
 import spellcastingTypesData from '../data/spellcastingTypes.json';
-import racialLanguagesData from '../data/racialLanguages.json';
+import speciesLanguagesData from '../data/speciesLanguages.json';
 import backgroundDefaultsData from '../data/backgroundDefaults.json';
 import combatActionsData from '../data/combatActions.json';
 import { generateName } from '../utils/nameGenerator';
 import { AbilityName, Species, Class, Equipment, Feature, Subclass, Feat, SpeciesCategory, ClassCategory, EquipmentPackage, EquipmentChoice, EquipmentItem, EquippedItem, SpellcastingType, SkillName, Monster, MonsterType, Edition } from '../types/dnd';
 import { Level1Feature } from '../types/widgets';
+import { getSelectableLanguages } from '../data/languages';
 
 // Local type definitions for dataService
 interface Alignment {
@@ -692,7 +693,7 @@ export const getLeveledSpellsByClass = (classSlug: string, level: number = 1): A
 
 export function loadSpecies(): Species[] {
   // Return comprehensive species database from JSON
-  const baseSpecies = (racesData as { races: any[] }).races.map(r => ({
+  const baseSpecies = (speciesData as { species: any[] }).species.map(r => ({
     ...r,
     edition: r.edition || '2014', // Ensure edition is always set, default to 2014
     slug: r.slug || r.name.toLowerCase().replace(/\s+/g, '-') // Ensure slug exists
@@ -700,7 +701,10 @@ export function loadSpecies(): Species[] {
 
   // Merge enhanced species data
   return baseSpecies.map(species => {
-    const enhanced = getEnhancedSpeciesData(species.slug);
+    const baseSlug = species.slug.replace(/-2024$/, '').replace(/-2014$/, '');
+    const enhanced =
+      getEnhancedSpeciesData(species.slug) ||
+      getEnhancedSpeciesData(baseSlug);
     return enhanced ? { ...species, ...enhanced } : species;
   });
 }
@@ -829,7 +833,18 @@ export function loadSubclasses(): Subclass[] {
   const subclasses2018 = (srdSubclasses2018 as SRDSubclass[]).map(sc => transformSubclass(sc));
   const subclasses2020 = (srdSubclasses2020 as SRDSubclass[]).map(sc => transformSubclass(sc));
   const subclasses2020egtw = (srdSubclasses2020egtw as SRDSubclass[]).map(sc => transformSubclass(sc));
-  return [...subclasses2014, ...subclasses2018, ...subclasses2020, ...subclasses2020egtw];
+
+  const allSubclasses = [...subclasses2014, ...subclasses2018, ...subclasses2020, ...subclasses2020egtw];
+
+  // Merge enhanced subclass data
+  const subclassesWithEnhancedData = allSubclasses.map(subclass => {
+    // Create the lookup key in the format "class-subclass"
+    const lookupKey = `${subclass.class}-${subclass.slug}`;
+    const enhanced = getEnhancedSubclassData(lookupKey);
+    return enhanced ? { ...subclass, ...enhanced } : subclass;
+  });
+
+  return subclassesWithEnhancedData;
 }
 
 // Load all feats (merge SRD + custom feats)
@@ -931,31 +946,68 @@ export const BACKGROUNDS: Background[] = backgroundsData;
 // Load species from JSON data
 const COMPREHENSIVE_SPECIES: Species[] = loadSpecies();
 
+/**
+ * Build an alias map from legacy slugs to canonical species slugs.
+ * Includes self-maps so resolveSpeciesSlug always returns a valid slug.
+ */
+const buildSpeciesAliasMap = (speciesList: Species[]): Record<string, string> => {
+  return speciesList.reduce((map, species) => {
+    map[species.slug] = species.slug;
+    (species.legacySlugs || []).forEach(oldSlug => {
+      map[oldSlug] = species.slug;
+    });
+    (species.slugAliases || []).forEach(alias => {
+      map[alias] = species.slug;
+    });
+    return map;
+  }, {} as Record<string, string>);
+};
+
+/** Maps legacy/alias slugs to canonical species slugs. */
+export const SPECIES_ALIAS_MAP = buildSpeciesAliasMap(COMPREHENSIVE_SPECIES);
+
+/**
+ * Normalize a species slug to its canonical value, preserving unknown slugs as-is.
+ * @param slug raw species slug (possibly legacy)
+ */
+export const resolveSpeciesSlug = (slug: string): string => {
+  if (!slug) return slug;
+  return SPECIES_ALIAS_MAP[slug] || SPECIES_ALIAS_MAP[slug.toLowerCase()] || slug;
+};
+
 interface SpeciesCategoryData {
   name: string;
   icon: string;
   description: string;
   filterCriteria: {
-    source?: string;
-    sources?: string[];
-    slugs?: string[];
+    core?: boolean;
+    expanded?: boolean;
+    tags?: string[];
   };
 }
 
-export const SPECIES_CATEGORIES: SpeciesCategory[] = raceCategoriesData.map((category: SpeciesCategoryData) => ({
-  name: category.name,
-  icon: category.icon,
-  description: category.description,
-  species: category.filterCriteria.source
-    ? COMPREHENSIVE_SPECIES.filter(species => species.source === category.filterCriteria.source)
-    : category.filterCriteria.sources
-    ? COMPREHENSIVE_SPECIES.filter(species => category.filterCriteria.sources?.includes(species.source))
-    : category.filterCriteria.slugs
-    ? COMPREHENSIVE_SPECIES.filter(species =>
-        ['VGtM'].includes(species.source) && category.filterCriteria.slugs?.includes(species.slug)
-      )
-    : []
-}));
+export const SPECIES_CATEGORIES: SpeciesCategory[] = speciesCategoriesData.map((category: SpeciesCategoryData) => {
+  const { core, expanded, tags } = category.filterCriteria;
+
+  const filteredSpecies = COMPREHENSIVE_SPECIES.filter(species => {
+    const matchesCore = core !== undefined ? species.core === core : true;
+    const matchesExpanded = expanded !== undefined ? species.expanded === expanded : true;
+    const matchesTags = tags && tags.length ? (species.tags || []).some(tag => tags.includes(tag)) : true;
+    return matchesCore && matchesExpanded && matchesTags;
+  });
+
+  // Debug logging for category construction
+  if (filteredSpecies.length === 0) {
+    console.warn(`Category "${category.name}" has no species after filtering. Check filter criteria:`, category.filterCriteria);
+  }
+
+  return {
+    name: category.name,
+    icon: category.icon,
+    description: category.description,
+    species: filteredSpecies
+  };
+});
 
 // Backwards compatibility (deprecated)
 /** @deprecated Use SPECIES_CATEGORIES instead */
@@ -976,6 +1028,11 @@ interface ClassCategoryData {
 // Helper function to get enhanced class data
 export function getEnhancedClassData(classSlug: string): Partial<Class> | undefined {
   return (enhancedClassData as EnhancedClassData)[classSlug];
+}
+
+export function getEnhancedSubclassData(subclassSlug: string): Partial<Subclass> | undefined {
+  // Enhanced data uses format like "rogue-phantom" for subclass slugs
+  return (enhancedClassData as EnhancedClassData)[subclassSlug];
 }
 
 // Helper function to get enhanced species data
@@ -1012,7 +1069,9 @@ export { SPELL_SLOTS_BY_CLASS, cantripsData as CANTRIPS_KNOWN_BY_CLASS };
 
 // New JSON data exports
 export const SPELLCASTING_TYPE_MAP = spellcastingTypesData.SPELLCASTING_TYPE_MAP;
-export const RACIAL_LANGUAGE_MAP = racialLanguagesData.RACIAL_LANGUAGE_MAP;
+export const SPECIES_LANGUAGE_MAP = speciesLanguagesData.SPECIES_LANGUAGE_MAP;
+/** @deprecated Use SPECIES_LANGUAGE_MAP instead. */
+export const RACIAL_LANGUAGE_MAP = SPECIES_LANGUAGE_MAP;
 export const BACKGROUND_DEFAULTS = backgroundDefaultsData.BACKGROUND_DEFAULTS;
 
 // --- Randomization Utilities ---
@@ -1043,14 +1102,49 @@ export const randomizeLevel = (): number => {
 };
 
 /**
- * Randomize character identity (name, alignment, background)
+ * Randomize character identity (alignment, background).
+ * Name generation is handled in the final step where class/species context exists.
  */
-export const randomizeIdentity = (species?: string): { name: string; alignment: string; background: string } => {
+export const randomizeIdentity = (species?: string): { name?: string; alignment: string; background: string; backgroundSlug?: string } => {
+  const background = getRandomElement(BACKGROUNDS);
   return {
-    name: species ? generateSpeciesSpecificName(species) : generateRandomName(),
+    name: species ? generateSpeciesSpecificName(species) : undefined,
     alignment: getRandomElement(ALIGNMENTS),
-    background: getRandomElement(BACKGROUNDS).name
+    background: background.name,
+    backgroundSlug: background.slug
   };
+};
+
+/**
+ * Randomize Background ASI selections for 2024 origins.
+ */
+export const randomizeBackgroundAbilityChoices = (
+  backgroundSlug: string,
+  edition: Edition
+): { method: '2/1' | '1/1/1'; bonuses: Partial<Record<AbilityName, number>> } | undefined => {
+  if (edition !== '2024') return undefined;
+  const background = BACKGROUNDS.find(bg => bg.slug === backgroundSlug || bg.name === backgroundSlug) as any;
+  const abilityScores = background?.abilityScores;
+  if (!abilityScores?.from?.length) return undefined;
+
+  const availableOptions = [...abilityScores.from] as AbilityName[];
+  const canUseTriple = availableOptions.length >= 3;
+  const method: '2/1' | '1/1/1' = canUseTriple && Math.random() > 0.5 ? '1/1/1' : '2/1';
+  const bonuses: Partial<Record<AbilityName, number>> = {};
+  const shuffled = [...availableOptions].sort(() => Math.random() - 0.5);
+
+  if (method === '2/1') {
+    const plusTwo = shuffled[0];
+    const plusOne = shuffled.find(ability => ability !== plusTwo);
+    if (plusTwo) bonuses[plusTwo] = 2;
+    if (plusOne) bonuses[plusOne] = 1;
+  } else {
+    shuffled.slice(0, Math.min(3, availableOptions.length)).forEach(ability => {
+      bonuses[ability] = 1;
+    });
+  }
+
+  return { method, bonuses };
 };
 
 /**
@@ -1233,61 +1327,122 @@ export const randomizeEquipmentChoices = (classSlug: string): EquipmentChoice[] 
 };
 
 /**
- * Randomize additional equipment
+ * Randomize starting equipment with background/class-aware logic.
  */
-export const randomizeAdditionalEquipment = (): EquippedItem[] => {
-  // For now, return empty array - could add random starting items
-  return [];
+export const randomizeStartingEquipment = (
+  classSlug: string,
+  backgroundSlug: string,
+  edition: Edition
+): {
+  equipmentChoices: EquipmentChoice[];
+  startingInventory: EquippedItem[];
+  equipmentChoice?: 'background' | 'gold';
+  equipmentGold?: number;
+} => {
+  const equipmentChoices = randomizeEquipmentChoices(classSlug);
+  const background = BACKGROUNDS.find(bg => bg.slug === backgroundSlug || bg.name === backgroundSlug);
+  const backgroundName = background?.name || backgroundSlug;
+  const equipmentData = loadEquipment();
+
+  const findEquipmentSlug = (itemName: string): string => {
+    const normalized = itemName.trim().toLowerCase();
+    const equipmentMatch = equipmentData.find(eq => eq.name.toLowerCase() === normalized);
+    if (equipmentMatch) return equipmentMatch.slug;
+
+    const packageMatch = EQUIPMENT_PACKAGES.flatMap(pkg => pkg.items)
+      .find(item => item.name.toLowerCase() === normalized);
+    if (packageMatch?.slug) return packageMatch.slug;
+
+    return `custom-${normalized.replace(/[^a-z0-9]+/g, '-')}`;
+  };
+
+  const quickStartPresets = loadQuickStartEquipment();
+  const baseClassSlug = classSlug.split('-')[0];
+  const classPreset = quickStartPresets.classes[baseClassSlug] || quickStartPresets.classes[classSlug];
+  const normalizedBgName = backgroundName.toLowerCase().replace(/\s+/g, '_').replace(/['"]/g, '');
+  const backgroundPreset = quickStartPresets.backgrounds[normalizedBgName];
+
+  const mergedQuickStartItems = [
+    ...(classPreset?.items || []),
+    ...(backgroundPreset?.items || [])
+  ];
+
+  const mergedInventory: EquippedItem[] = mergedQuickStartItems.reduce<EquippedItem[]>((acc, item) => {
+    const existing = acc.find(i => i.equipmentSlug === item.equipmentSlug && !!i.equipped === !!item.equipped);
+    if (existing) {
+      existing.quantity += item.quantity;
+    } else {
+      acc.push({
+        equipmentSlug: item.equipmentSlug,
+        quantity: item.quantity,
+        equipped: item.equipped || false
+      });
+    }
+    return acc;
+  }, []);
+
+  let startingInventory: EquippedItem[] = mergedInventory;
+  let equipmentChoice: 'background' | 'gold' | undefined;
+  let equipmentGold: number | undefined;
+
+  if (edition === '2024' && background?.equipment?.length) {
+    equipmentChoice = 'background';
+    startingInventory = background.equipment.map(itemName => ({
+      equipmentSlug: findEquipmentSlug(itemName),
+      quantity: 1,
+      equipped: false
+    }));
+  } else if (edition === '2024') {
+    equipmentChoice = 'background';
+  }
+
+  return { equipmentChoices, startingInventory, equipmentChoice, equipmentGold };
 };
 
 /**
  * Randomize language selection
  */
-export const randomizeLanguages = (raceSlug: string, background: string): string[] => {
-  // For now, return basic languages - can be enhanced later
-  const languages = new Set<string>();
+export const randomizeLanguages = (
+  speciesSlug: string,
+  backgroundSlug: string,
+  edition: Edition = '2014',
+  abilities?: Record<AbilityName, number>
+): string[] => {
+  const selected: string[] = [];
+  const autoLanguages = new Set<string>();
+  autoLanguages.add('Common');
 
-  // Always include Common
-  languages.add('Common');
+  const speciesLanguages = SPECIES_LANGUAGE_MAP[speciesSlug] || SPECIES_LANGUAGE_MAP[`${speciesSlug}-${edition}`] || [];
+  speciesLanguages.forEach(lang => autoLanguages.add(lang));
 
-  // Add basic racial languages
-  const racialLanguageMap: Record<string, string[]> = {
-    'dwarf': ['Dwarvish'],
-    'elf': ['Elvish'],
-    'gnome': ['Gnomish'],
-    'halfling': ['Halfling'],
-    'half-orc': ['Orc'],
-    'dragonborn': ['Draconic'],
-    'tiefling': ['Infernal']
-  };
+  const background = BACKGROUNDS.find(bg => bg.slug === backgroundSlug || bg.name === backgroundSlug);
+  let optionalChoices = 0;
 
-  const racialLanguages = racialLanguageMap[raceSlug] || [];
-  racialLanguages.forEach(lang => languages.add(lang));
+  if (background?.languages?.length) {
+    background.languages.forEach(lang => {
+      const normalized = lang.toLowerCase();
+      if (normalized.includes('two') && normalized.includes('choice')) {
+        optionalChoices += 2;
+      } else if (normalized.includes('one') && normalized.includes('choice')) {
+        optionalChoices += 1;
+      } else {
+        autoLanguages.add(lang);
+      }
+    });
+  }
 
-  // Add background languages (simplified)
-  const backgroundLanguages: Record<string, string[]> = {
-    'Sage': ['Two additional languages of your choice'],
-    'Soldier': [],
-    'Sailor': [],
-    'Criminal': ['Thieves\' Cant'],
-    'Entertainer': [],
-    'Guild Artisan': ['One additional language of your choice'],
-    'Noble': ['One additional language of your choice'],
-    'Outlander': ['One additional language of your choice'],
-    'Hermit': ['One additional language of your choice'],
-    'Folk Hero': [],
-    'Acolyte': ['Two additional languages of your choice'],
-    'Charlatan': []
-  };
+  const intelligenceScore = abilities?.INT;
+  const maxLanguages = intelligenceScore !== undefined ? 1 + Math.max(0, getModifier(intelligenceScore)) : 1;
+  const selectionSlots = maxLanguages + (edition === '2024' ? 0 : optionalChoices);
 
-  const bgLanguages = backgroundLanguages[background] || [];
-  bgLanguages.forEach(lang => {
-    if (!lang.includes('additional') && !lang.includes('choice')) {
-      languages.add(lang);
-    }
-  });
+  const pool = getSelectableLanguages(edition, ['standard', 'rare'])
+    .map(lang => lang.name)
+    .filter(name => !autoLanguages.has(name));
 
-  return Array.from(languages).sort();
+  const shuffledPool = pool.sort(() => Math.random() - 0.5);
+  selected.push(...shuffledPool.slice(0, Math.min(selectionSlots, shuffledPool.length)));
+
+  return selected;
 };
 
 /**
@@ -1398,7 +1553,8 @@ export const randomizePersonality = (): { personality: string; ideals: string; b
  * Extract proficiencies from species data
  */
 export const getSpeciesProficiencies = (speciesSlug: string): { armor?: string[]; weapons?: string[]; tools?: string[] } => {
-  const species = loadSpecies().find(s => s.slug === speciesSlug);
+  const canonicalSlug = resolveSpeciesSlug(speciesSlug);
+  const species = loadSpecies().find(s => s.slug === canonicalSlug);
   if (!species) return { armor: [], weapons: [], tools: [] };
 
   const proficiencies: { armor?: string[]; weapons?: string[]; tools?: string[] } = {
@@ -1666,4 +1822,3 @@ export function loadNewPlayerShop(): ShopItem[] {
  * Monster database constant (334 SRD monsters)
  */
 export const MONSTER_DATABASE = loadMonsters();
-

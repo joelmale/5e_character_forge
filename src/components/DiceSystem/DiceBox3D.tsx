@@ -38,7 +38,7 @@ export const DiceBox3D: React.FC<DiceBox3DProps> = ({
         canvas.width = width;
         canvas.height = height;
 
-        console.log('🎲 [DiceBox3D] Canvas sized to:', canvas.width, 'x', canvas.height);
+        if (import.meta.env.DEV) console.log('🎲 [DiceBox3D] Canvas sized to:', canvas.width, 'x', canvas.height);
       }
     }
   };
@@ -50,7 +50,7 @@ export const DiceBox3D: React.FC<DiceBox3DProps> = ({
     }
 
     try {
-      console.log('🎲 [DiceBox3D] Initializing DiceBox with v1.1.0+ API...');
+      if (import.meta.env.DEV) console.log('🎲 [DiceBox3D] Initializing DiceBox with v1.1.0+ API...');
       const diceBox = new DiceBox({
         container: '#dice-box',
         assetPath: '/assets/dice-box/',
@@ -69,7 +69,7 @@ export const DiceBox3D: React.FC<DiceBox3DProps> = ({
       } as any);
 
       await diceBox.init();
-      console.log('🎲 [DiceBox3D] DiceBox initialized successfully');
+      if (import.meta.env.DEV) console.log('🎲 [DiceBox3D] DiceBox initialized successfully');
 
       // Ensure canvas is visible and sized properly
       setTimeout(() => {
@@ -80,7 +80,7 @@ export const DiceBox3D: React.FC<DiceBox3DProps> = ({
       setIsInitialized(true);
 
       diceBox.onRollComplete = (results) => {
-        console.log('Roll completed:', results);
+        if (import.meta.env.DEV) console.log('Roll completed:', results);
         if (onRollComplete) {
           onRollComplete();
         }
@@ -94,15 +94,17 @@ export const DiceBox3D: React.FC<DiceBox3DProps> = ({
 
   // Handle dice rolls
   useEffect(() => {
-    console.log('🎲 [DiceBox3D] useEffect triggered, latestRoll:', latestRoll);
-    console.log('🎲 [DiceBox3D] lastRollIdRef.current:', lastRollIdRef.current);
+    if (import.meta.env.DEV) {
+      console.log('🎲 [DiceBox3D] useEffect triggered, latestRoll:', latestRoll);
+      console.log('🎲 [DiceBox3D] lastRollIdRef.current:', lastRollIdRef.current);
+    }
 
     if (!latestRoll || lastRollIdRef.current === latestRoll.id) {
-      console.log('🎲 [DiceBox3D] Skipping roll - no latestRoll or duplicate ID');
+      if (import.meta.env.DEV) console.log('🎲 [DiceBox3D] Skipping roll - no latestRoll or duplicate ID');
       return;
     }
 
-    console.log('🎲 [DiceBox3D] Starting roll for:', latestRoll.label, latestRoll.notation);
+    if (import.meta.env.DEV) console.log('🎲 [DiceBox3D] Starting roll for:', latestRoll.label, latestRoll.notation);
 
     const performRoll = async () => {
       // Initialize DiceBox if needed
@@ -122,14 +124,14 @@ export const DiceBox3D: React.FC<DiceBox3DProps> = ({
          // For complex rolls (advantage/disadvantage), use the pool info
          const pool = latestRoll.pools[0];
          diceNotation = `${pool.count}d${pool.sides}`;
-         console.log('🎲 [DiceBox3D] Complex roll - using notation:', diceNotation);
+         if (import.meta.env.DEV) console.log('🎲 [DiceBox3D] Complex roll - using notation:', diceNotation);
        } else {
          // For simple rolls, strip modifiers
          diceNotation = latestRoll.notation.replace(/[+-]\d+$/, '').trim();
-         console.log('🎲 [DiceBox3D] Simple roll - using notation:', diceNotation);
+         if (import.meta.env.DEV) console.log('🎲 [DiceBox3D] Simple roll - using notation:', diceNotation);
        }
 
-       console.log('🎲 [DiceBox3D] Original notation:', latestRoll.notation, 'Final notation:', diceNotation);
+       if (import.meta.env.DEV) console.log('🎲 [DiceBox3D] Original notation:', latestRoll.notation, 'Final notation:', diceNotation);
 
        // Clear previous dice first
        await diceBoxRef.current.clear();
@@ -138,15 +140,15 @@ export const DiceBox3D: React.FC<DiceBox3DProps> = ({
        setDiceVisible(true);
        ensureCanvasVisible();
 
-       console.log('🎲 [DiceBox3D] Rolling dice randomly');
+       if (import.meta.env.DEV) console.log('🎲 [DiceBox3D] Rolling dice randomly');
 
        diceBoxRef.current.roll(diceNotation)
          .then(results => {
-           console.log('🎲 [DiceBox3D] Dice roll succeeded with results:', results);
+           if (import.meta.env.DEV) console.log('🎲 [DiceBox3D] Dice roll succeeded with results:', results);
 
            // Extract the actual dice values from DiceBox results
            const diceValues = results.map(result => result.value);
-           console.log('🎲 [DiceBox3D] Extracted dice values:', diceValues);
+           if (import.meta.env.DEV) console.log('🎲 [DiceBox3D] Extracted dice values:', diceValues);
 
             // Calculate the total based on roll type
             let actualTotal: number;
@@ -167,7 +169,7 @@ export const DiceBox3D: React.FC<DiceBox3DProps> = ({
              actualTotal = diceValues[0] + latestRoll.modifier;
            }
 
-           console.log('🎲 [DiceBox3D] Calculated total:', actualTotal);
+           if (import.meta.env.DEV) console.log('🎲 [DiceBox3D] Calculated total:', actualTotal);
 
            // Update the roll with real results
            if (onRollResults) {

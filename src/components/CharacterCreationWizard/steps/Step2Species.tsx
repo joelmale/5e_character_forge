@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { ChevronUp, ChevronDown, XCircle, Shuffle, ArrowLeft, ArrowRight } from 'lucide-react';
 import { StepProps } from '../types/wizard.types';
 import { getAllSpecies, SPECIES_CATEGORIES, randomizeSpecies } from '../../../services/dataService';
@@ -21,13 +21,30 @@ const RandomizeButton: React.FC<RandomizeButtonProps> = ({ onClick, title }) => 
 );
 
 export const Step2Species: React.FC<StepProps> = ({ data, updateData, nextStep, prevStep, getNextStepLabel, openTraitModal }) => {
-  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set(['Core Species']));
+  // Start with all categories expanded so users can see available species
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
   const [showSpeciesInfo, setShowSpeciesInfo] = useState(true);
 
   const selectedSpecies = getAllSpecies().find(s => s.slug === data.speciesSlug);
 
   // Validation hook
   const { canProceed, missingItems, nextAction } = useStepValidation(2, data);
+
+  // Expand all categories by default so users can see available species
+  useEffect(() => {
+    const allCategoryNames = SPECIES_CATEGORIES.map(cat => cat.name);
+    setExpandedCategories(new Set(allCategoryNames));
+
+    // Debug logging to identify category issues (dev only)
+    if (import.meta.env.DEV) {
+      console.log('Species Categories Debug:');
+      SPECIES_CATEGORIES.forEach(category => {
+        const totalSpecies = category.species.length;
+        const editionFiltered = category.species.filter(s => s.edition === data.edition || (data.edition === '2024' && s.edition === '2014')).length;
+        console.log(`${category.name}: ${editionFiltered}/${totalSpecies} species for ${data.edition} edition`);
+      });
+    }
+  }, [data.edition]);
 
   const isStepComplete = () => {
     if (!data.speciesSlug) return false;
@@ -100,7 +117,9 @@ export const Step2Species: React.FC<StepProps> = ({ data, updateData, nextStep, 
               <div className='flex items-center gap-3'>
                 <span className='text-2xl'>{category.icon}</span>
                 <div className='text-left'>
-                  <div className='font-bold text-accent-yellow-light text-lg'>{category.name}</div>
+                  <div className='font-bold text-accent-yellow-light text-lg'>
+                    {category.name} ({category.species.filter(s => s.edition === data.edition || (data.edition === '2024' && s.edition === '2014')).length})
+                  </div>
                   <div className='text-xs text-theme-muted'>{category.description}</div>
                 </div>
               </div>
@@ -114,10 +133,10 @@ export const Step2Species: React.FC<StepProps> = ({ data, updateData, nextStep, 
             {/* Category Species */}
             {expandedCategories.has(category.name) && (
               <div className='p-4 bg-theme-secondary/50 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3'>
-                {category.species.filter(s => s.edition === data.edition).map(species => ( // Filter by edition
+                {category.species.filter(s => s.edition === data.edition || (data.edition === '2024' && s.edition === '2014')).map(species => ( // Filter by edition
                   <button
                     key={species.slug}
-                    onClick={() => updateData({ speciesSlug: species.slug })}
+                    onClick={() => updateData({ speciesSlug: species.slug, selectedLineage: undefined })}
                     className={`p-3 rounded-lg text-left border-2 transition-all ${
                       data.speciesSlug === species.slug
                         ? 'bg-accent-red-darker border-red-500 shadow-md'
@@ -190,7 +209,15 @@ export const Step2Species: React.FC<StepProps> = ({ data, updateData, nextStep, 
                  <h5 className="font-semibold text-accent-blue-light mb-2">Choose Lineage:</h5>
                  <div className="space-y-2">
                    {Object.entries((selectedSpecies as any).lineages).map(([lineageName, lineageData]) => (
-                     <div key={lineageName} className="border border-theme-primary rounded p-3">
+                     <button
+                       key={lineageName}
+                       className={`w-full text-left border rounded p-3 transition-all ${
+                         data.selectedLineage === lineageName
+                           ? 'border-accent-blue-light bg-theme-quaternary'
+                           : 'border-theme-primary bg-theme-secondary/30 hover:bg-theme-quaternary/40'
+                       }`}
+                       onClick={() => updateData({ selectedLineage: lineageName })}
+                     >
                        <h6 className="font-medium text-theme-primary mb-1">{lineageName}</h6>
                        {(lineageData as any).traits && (
                          <div className="text-xs text-theme-muted mb-1">
@@ -202,7 +229,7 @@ export const Step2Species: React.FC<StepProps> = ({ data, updateData, nextStep, 
                            <strong>Spells:</strong> {(lineageData as any).spells.join(', ')}
                          </div>
                        )}
-                     </div>
+                     </button>
                    ))}
                  </div>
                </div>

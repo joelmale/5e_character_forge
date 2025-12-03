@@ -7483,26 +7483,26 @@
     "weight": 1,
     "quantity": 50,
     "description": "Ammunition for blowguns. Each needle deals 1 piercing damage."
+  },
+  {
+    "index": "abacus",
+    "name": "Abacus",
+    "equipment_categories": [
+      {
+        "index": "adventuring-gear",
+        "name": "Adventuring Gear",
+        "url": "/api/2024/equipment-categories/adventuring-gear"
+      }
+    ],
+    "cost": {
+      "quantity": 2,
+      "unit": "gp"
     },
-   {
-     "index": "abacus",
-     "name": "Abacus",
-     "equipment_categories": [
-       {
-         "index": "adventuring-gear",
-         "name": "Adventuring Gear",
-         "url": "/api/2024/equipment-categories/adventuring-gear"
-       }
-     ],
-     "cost": {
-       "quantity": 2,
-       "unit": "gp"
-     },
-     "weight": 2,
-     "description": "A calculating tool that helps with mathematical computations. Useful for merchants, scholars, and anyone dealing with numbers."
-   },
-   {
-     "index": "horse",
+    "weight": 2,
+    "description": "A calculating tool that helps with mathematical computations. Useful for merchants, scholars, and anyone dealing with numbers."
+  },
+  {
+    "index": "horse",
     "name": "Horse",
     "equipment_categories": [
       {
@@ -7636,5 +7636,24 @@
     },
     "weight": 3,
     "description": "Everyday clothing suitable for common folk."
+  },
+  {
+    "slug": "hooded-lantern",
+    "name": "Hooded Lantern",
+    "category": "Adventuring Gear",
+    "type": "Adventuring Gear",
+    "cost": {
+      "quantity": 5,
+      "unit": "gp"
+    },
+    "weight": 2,
+    "description": "A hooded lantern sheds bright light in a 30-foot radius and dim light for an additional 30 feet. You can lower the hood to reduce the light to dim light in a 5-foot radius.",
+    "source": "PHB",
+    "equipment_categories": [
+      {
+        "name": "Adventuring Gear"
+      }
+    ],
+    "gear_category": "Standard Gear"
   }
 ]

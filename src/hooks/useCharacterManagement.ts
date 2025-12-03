@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Character } from '../types/dnd';
 import { getAllCharacters, addCharacter, deleteCharacter, updateCharacter } from '../services/dbService';
 import { refreshCharacterResources } from '../services/characterService';
@@ -64,13 +64,18 @@ export function useCharacterManagement() {
     loadCharacters();
   }, [loadCharacters]);
 
-  return {
-    characters,
-    loading,
-    error,
-    loadCharacters,
-    createCharacter,
-    removeCharacter,
-    updateCharacter: updateCharacterData,
-  };
+  // Memoize the returned object to prevent unnecessary re-renders
+  // of components consuming this context
+  return useMemo(
+    () => ({
+      characters,
+      loading,
+      error,
+      loadCharacters,
+      createCharacter,
+      removeCharacter,
+      updateCharacter: updateCharacterData,
+    }),
+    [characters, loading, error, loadCharacters, createCharacter, removeCharacter, updateCharacterData]
+  );
 }

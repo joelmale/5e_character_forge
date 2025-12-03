@@ -5,10 +5,10 @@ import { BACKGROUNDS, randomizeLanguages } from '../../../services/dataService';
 import {
   getMaxLanguages,
   parseBackgroundLanguageChoices,
-  getRacialLanguages,
+  getSpeciesLanguages,
   getClassLanguages
 } from '../../../utils/languageUtils';
-import { getLanguagesByCategory } from '../../../data/languages';
+import { getLanguagesByCategory, getSelectableLanguages } from '../../../data/languages';
 
 const RandomizeButton: React.FC<{ onClick: () => void; title?: string; className?: string }> = ({
   onClick,
@@ -35,14 +35,15 @@ export const Step9Languages: React.FC<StepProps> = ({ data, updateData, nextStep
   const autoLanguages = new Set<string>();
   autoLanguages.add('Common'); // Always included
 
-  // Add racial languages
-  getRacialLanguages(data.speciesSlug).forEach((lang: string) => autoLanguages.add(lang));
+  // Add species languages
+  getSpeciesLanguages(data.speciesSlug).forEach((lang: string) => autoLanguages.add(lang));
 
-  // Add class languages
-  getClassLanguages(data.classSlug).forEach((lang: string) => autoLanguages.add(lang));
+  // Add class languages (secret languages displayed as badges)
+  const classLangs = getClassLanguages(data.classSlug);
+  classLangs.forEach((lang: string) => autoLanguages.add(lang));
 
   // Get background language choices (2024 backgrounds don't grant languages)
-  const background = BACKGROUNDS.find(bg => bg.name === data.background);
+  const background = BACKGROUNDS.find(bg => bg.slug === data.background || bg.name === data.background);
   const backgroundChoices = (data.edition === '2024')
     ? { direct: [], choices: 0 }
     : background ? parseBackgroundLanguageChoices(background.languages || []) : { direct: [], choices: 0 };
@@ -80,12 +81,17 @@ export const Step9Languages: React.FC<StepProps> = ({ data, updateData, nextStep
   // Validation for required background language selections
   const hasRequiredBackgroundSelections = data.edition === '2024' || selectedLanguages.length >= backgroundChoices.choices;
 
-  const languageCategories = [
-    { name: 'Standard' as const, icon: '🏛️', description: 'Common languages of major civilizations' },
-    { name: 'Exotic' as const, icon: '✨', description: 'Rare and mystical languages' },
-    { name: 'Secret' as const, icon: '🔒', description: 'Hidden languages of specific groups' },
-    { name: 'Dialect' as const, icon: '💬', description: 'Specialized dialects and elemental tongues' }
-  ];
+  const languageCategories = data.edition === '2024'
+    ? [
+        { name: 'Standard' as const, icon: '🏛️', description: 'PHB 2024 standard languages' },
+        { name: 'Rare' as const, icon: '✨', description: 'PHB 2024 rare languages' }
+      ]
+    : [
+        { name: 'Standard' as const, icon: '🏛️', description: 'Common languages of major civilizations' },
+        { name: 'Exotic' as const, icon: '✨', description: 'Rare and mystical languages' },
+        { name: 'Secret' as const, icon: '🔒', description: 'Hidden languages of specific groups' },
+        { name: 'Dialect' as const, icon: '💬', description: 'Specialized dialects and elemental tongues' }
+      ];
 
   return (
     <div className='space-y-6'>
@@ -93,7 +99,7 @@ export const Step9Languages: React.FC<StepProps> = ({ data, updateData, nextStep
         <h3 className='text-xl font-bold text-red-300'>Select Languages</h3>
         <RandomizeButton
           onClick={() => {
-            const languages = randomizeLanguages(data.speciesSlug, data.background);
+            const languages = randomizeLanguages(data.speciesSlug, data.background, data.edition, data.abilities);
             updateData({ knownLanguages: languages });
           }}
           title="Randomize language selection"
@@ -132,11 +138,17 @@ export const Step9Languages: React.FC<StepProps> = ({ data, updateData, nextStep
           These languages are automatically known based on your species, class, and background choices.
         </p>
         <div className="flex flex-wrap gap-2">
-          {Array.from(autoLanguages).sort().map(language => (
-            <span key={language} className="px-3 py-1 bg-accent-blue-darker text-blue-100 rounded-full text-sm">
-              {language}
-            </span>
-          ))}
+          {Array.from(autoLanguages).sort().map(language => {
+            const isSecret = language === "Thieves' Cant" || language === 'Druidic';
+            return (
+              <span
+                key={language}
+                className={`px-3 py-1 rounded-full text-sm ${isSecret ? 'bg-accent-purple text-white border border-purple-400' : 'bg-accent-blue-darker text-blue-100'}`}
+              >
+                {language}{isSecret ? ' (secret)' : ''}
+              </span>
+            );
+          })}
         </div>
       </div>
 
@@ -163,7 +175,9 @@ export const Step9Languages: React.FC<StepProps> = ({ data, updateData, nextStep
         </p>
 
         {languageCategories.map(category => {
-          const categoryLanguages = getLanguagesByCategory(category.name);
+          const categoryLanguages = data.edition === '2024'
+            ? getSelectableLanguages('2024', category.name === 'Rare' ? ['rare'] : ['standard'])
+            : getLanguagesByCategory(category.name);
           const availableInCategory = categoryLanguages.filter(lang =>
             !autoLanguages.has(lang.name) && !selectedLanguages.includes(lang.name)
           );

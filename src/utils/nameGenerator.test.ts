@@ -7,6 +7,7 @@ import {
   getNameStats,
   NameOptions
 } from './nameGenerator';
+import nameData from '../data/nameData.json';
 
 describe('Name Generator', () => {
   beforeEach(() => {
@@ -61,8 +62,9 @@ describe('Name Generator', () => {
       const shortName = generateName({ length: 'short' });
       const longName = generateName({ length: 'long' });
 
-      expect(shortName.name.length).toBeLessThanOrEqual(10);
-      expect(longName.name.length).toBeGreaterThanOrEqual(8);
+      // Length preferences mainly affect fantasy syllable names, but race names with epithets/places can be longer
+      expect(shortName.name.length).toBeLessThanOrEqual(15);
+      expect(longName.name.length).toBeGreaterThanOrEqual(6);
     });
 
     it('should handle all race types', () => {
@@ -245,9 +247,14 @@ describe('Name Generator', () => {
       expect(tieflingName.race).toBe('Tiefling');
       expect(halfOrcName.race).toBe('Half-Orc');
 
-      // These races typically don't have surnames
-      expect(tieflingName.name.split(' ')).toHaveLength(1);
-      expect(halfOrcName.name.split(' ')).toHaveLength(1);
+      // These races typically don't have surnames, but may generate epithets
+      // Allow 1-3 words (first name only, or first name + epithet)
+      const tieflingWords = tieflingName.name.split(' ');
+      const halfOrcWords = halfOrcName.name.split(' ');
+      expect(tieflingWords.length).toBeGreaterThanOrEqual(1);
+      expect(tieflingWords.length).toBeLessThanOrEqual(3);
+      expect(halfOrcWords.length).toBeGreaterThanOrEqual(1);
+      expect(halfOrcWords.length).toBeLessThanOrEqual(3);
     });
 
     it('should handle race variations', () => {
@@ -263,16 +270,103 @@ describe('Name Generator', () => {
   describe('Performance', () => {
     it('should generate names quickly', () => {
       const startTime = Date.now();
-
-      for (let i = 0; i < 100; i++) {
-        generateName();
-      }
-
+      generateNames(100);
       const endTime = Date.now();
-      const duration = endTime - startTime;
+      expect(endTime - startTime).toBeLessThan(100); // Should be very fast
+    });
 
-      // Should complete 100 generations in reasonable time
-      expect(duration).toBeLessThan(1000); // Less than 1 second
+    it('should generate place names with race-specific suffixes', () => {
+      // Test that place names can be generated (may not happen on every generation due to randomization)
+      const names = generateNames(50, { race: 'Elf' }); // Generate more names to increase chance
+      const placeNames = names.filter(name => name.name.includes('of '));
+
+      // At least some names should contain place names (with 50 attempts, should be very likely)
+      expect(placeNames.length).toBeGreaterThan(0);
+
+      // Check that place names use appropriate suffixes for the race
+      placeNames.forEach(name => {
+        const placePart = name.name.split('of ')[1];
+        expect(placePart).toBeDefined();
+        // Should end with a valid suffix
+        expect(placePart).toMatch(/(ford|shire|ton|ham|dale|wood|field|brook|veil|glade|mere|falls|haven|spire|hold|forge|deep|delve|mine|mountain|bottom|hollow|hill|burrow|garden)$/);
+      });
+    });
+
+    it('should generate epithets with class-based flavor', () => {
+      // Generate many names to ensure we get epithet patterns
+      const paladinNames = generateNames(50, { race: 'Human', classSlug: 'paladin' });
+      const rogueNames = generateNames(50, { race: 'Human', classSlug: 'rogue' });
+      const wizardNames = generateNames(50, { race: 'Human', classSlug: 'wizard' });
+
+      // Find names that have epithets (contain " the " followed by a single word)
+      const paladinEpithets = paladinNames.filter(name => {
+        const parts = name.name.split(' the ');
+        return parts.length > 1 && parts[parts.length - 1].split(' ').length === 1;
+      });
+      const rogueEpithets = rogueNames.filter(name => {
+        const parts = name.name.split(' the ');
+        return parts.length > 1 && parts[parts.length - 1].split(' ').length === 1;
+      });
+      const wizardEpithets = wizardNames.filter(name => {
+        const parts = name.name.split(' the ');
+        return parts.length > 1 && parts[parts.length - 1].split(' ').length === 1;
+      });
+
+      // Should have at least some epithet names
+      expect(paladinEpithets.length).toBeGreaterThan(0);
+      expect(rogueEpithets.length).toBeGreaterThan(0);
+      expect(wizardEpithets.length).toBeGreaterThan(0);
+
+      // Check that epithets are from appropriate categories
+      paladinEpithets.forEach(name => {
+        const parts = name.name.split(' the ');
+        const epithet = parts[parts.length - 1];
+        expect(['Brave', 'Mighty', 'Valiant', 'Noble', 'True', 'Just', 'Wise', 'Pure', 'Honorable', 'Steadfast']).toContain(epithet);
+      });
+
+      // Check that rogue epithets are from mysterious category
+      rogueEpithets.forEach(name => {
+        const parts = name.name.split(' the ');
+        const epithet = parts[parts.length - 1];
+        expect(['Shadow', 'Silent', 'Hidden', 'Whisper', 'Veiled', 'Enigmatic', 'Arcane', 'Cryptic']).toContain(epithet);
+      });
+
+      // Check that wizard epithets are from magical category
+      wizardEpithets.forEach(name => {
+        const parts = name.name.split(' the ');
+        const epithet = parts[parts.length - 1];
+        expect(['Arcane', 'Mystic', 'Enchanted', 'Spellbound', 'Illuminated', 'Channeler']).toContain(epithet);
+      });
+    });
+
+    it('should not have duplicate names in race data', () => {
+      const races = getAvailableRaces();
+      races.forEach(race => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const speciesData = (nameData as any).species || (nameData as any).races;
+        const raceData = speciesData[race as keyof typeof speciesData];
+        if (raceData.male) {
+          const uniqueMale = new Set(raceData.male);
+          if (uniqueMale.size !== raceData.male.length) {
+            console.log(`Race ${race} has ${raceData.male.length} male names but only ${uniqueMale.size} are unique`);
+          }
+          expect(uniqueMale.size, `Race ${race} male names`).toBe(raceData.male.length);
+        }
+        if (raceData.female) {
+          const uniqueFemale = new Set(raceData.female);
+          if (uniqueFemale.size !== raceData.female.length) {
+            console.log(`Race ${race} has ${raceData.female.length} female names but only ${uniqueFemale.size} are unique`);
+          }
+          expect(uniqueFemale.size, `Race ${race} female names`).toBe(raceData.female.length);
+        }
+        if (raceData.surnames) {
+          const uniqueSurnames = new Set(raceData.surnames);
+          if (uniqueSurnames.size !== raceData.surnames.length) {
+            console.log(`Race ${race} has ${raceData.surnames.length} surnames but only ${uniqueSurnames.size} are unique`);
+          }
+          expect(uniqueSurnames.size, `Race ${race} surnames`).toBe(raceData.surnames.length);
+        }
+      });
     });
 
     it('should cache improve performance for repeated requests', () => {

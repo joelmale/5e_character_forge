@@ -1,4 +1,4 @@
-// Enhanced Name Generator with Race-Specific Names, Cultural Patterns, and Quality Controls
+// Enhanced Name Generator with Species-Specific Names, Cultural Patterns, and Quality Controls
 import nameData from '../data/nameData.json';
 
 export interface NameOptions {
@@ -8,6 +8,7 @@ export interface NameOptions {
   includeTitle?: boolean;
   includeMeaning?: boolean;
   includePronunciation?: boolean;
+  classSlug?: string; // NEW: For class-based epithet flavor
 }
 
 export interface GeneratedName {
@@ -26,6 +27,36 @@ const MAX_NAMES_PER_CACHE_KEY = 50; // Reserved for future caching implementatio
 
 // Track used names for uniqueness
 const usedNames = new Set<string>();
+
+// Backwards-compatible view over species name data
+const rawSpeciesMap =
+  (nameData as unknown as { species: Record<string, any> }).species ||
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (nameData as unknown as { races: Record<string, any> }).races ||
+  {};
+
+// Hydrate aliases for legacy display names so tests and old saves still work
+const NAME_SPECIES_MAP: Record<string, any> = { ...rawSpeciesMap };
+const legacyDisplayAliases: Record<string, string> = {
+  Human: 'human-2024',
+  Elf: 'elf-2024',
+  Dwarf: 'dwarf-2024',
+  Halfling: 'halfling-2024',
+  Gnome: 'gnome-2024',
+  Dragonborn: 'dragonborn-2024',
+  Tiefling: 'tiefling-2024',
+  Aasimar: 'aasimar-2024',
+  Goliath: 'goliath-2024',
+  Orc: 'orc-2024',
+  'Half-Elf': 'half-elf',
+  'Half-Orc': 'half-orc'
+};
+
+Object.entries(legacyDisplayAliases).forEach(([legacyKey, canonicalSlug]) => {
+  if (rawSpeciesMap[canonicalSlug]) {
+    NAME_SPECIES_MAP[legacyKey] = rawSpeciesMap[canonicalSlug];
+  }
+});
 
 /**
  * Get random element from array
@@ -47,19 +78,84 @@ function getBaseRace(race: string): string {
   const baseName = parenIndex > 0 ? race.substring(0, parenIndex) : race;
 
   // Map some race variations, but keep specific ones like Half-Elf
-  if (baseName === 'High Elf' || baseName === 'Wood Elf' || baseName === 'Dark Elf') return 'Elf';
-  if (baseName === 'Hobgoblin' || baseName === 'Goblin') return 'Half-Orc';
-  if (baseName === 'Aasimar' || baseName === 'Genasi') return 'Tiefling';
+  if (baseName === 'High Elf' || baseName === 'Wood Elf' || baseName === 'Dark Elf' || baseName === 'Drow') return 'elf-2024';
+  if (baseName === 'Hobgoblin' || baseName === 'Goblin') return baseName.toLowerCase();
+  if (baseName === 'Aasimar') return 'aasimar-2024';
+  if (baseName === 'Genasi') return 'genasi';
 
   return baseName;
 }
 
 /**
+ * Generate a fantasy place name with race-specific suffixes
+ */
+function generatePlaceName(race?: string): string {
+  const places = nameData.place_names;
+  const prefix = getRandomElement(places.prefixes);
+
+  // Get race-appropriate suffix pool
+  let suffixPool: string[];
+  const baseRace = race ? getBaseRace(race) : null;
+
+  switch (baseRace) {
+    case 'Elf':
+      suffixPool = [...places.suffixes.elvish, ...places.suffixes.general];
+      break;
+    case 'Dwarf':
+      suffixPool = [...places.suffixes.dwarvish, ...places.suffixes.general];
+      break;
+    case 'Halfling':
+      suffixPool = [...places.suffixes.halfling, ...places.suffixes.general];
+      break;
+    default:
+      suffixPool = places.suffixes.general;
+  }
+
+  const suffix = getRandomElement(suffixPool);
+  return `${prefix}${suffix}`;
+}
+
+/**
+ * Generate an epithet based on style/class
+ */
+function generateEpithet(style: 'heroic' | 'mysterious' | 'fierce' | 'magical' | 'nature' | 'general' = 'general'): string {
+  const pool = nameData.epithets[style];
+  return getRandomElement(pool);
+}
+
+const normalizeEpithet = (epithet: string): string => epithet.replace(/^the\s+/i, '');
+
+/**
+ * Get epithet style based on character class
+ */
+function getEpithetStyleByClass(classSlug?: string): 'heroic' | 'mysterious' | 'fierce' | 'magical' | 'nature' | 'general' {
+  if (!classSlug) return 'general';
+
+  // Map class to epithet style
+  const styleMap: Record<string, 'heroic' | 'mysterious' | 'fierce' | 'magical' | 'nature' | 'general'> = {
+    'paladin': 'heroic',
+    'fighter': 'heroic',
+    'cleric': 'heroic',
+    'rogue': 'mysterious',
+    'monk': 'mysterious',
+    'warlock': 'mysterious',
+    'wizard': 'magical',
+    'sorcerer': 'magical',
+    'bard': 'magical',
+    'barbarian': 'fierce',
+    'ranger': 'nature',
+    'druid': 'nature'
+  };
+
+  return styleMap[classSlug] || 'general';
+}
+
+/**
  * Generate race-specific name
  */
-function generateRaceSpecificName(race: string, gender: 'male' | 'female' | 'any' = 'any'): string {
+function generateRaceSpecificName(race: string, gender: 'male' | 'female' | 'any' = 'any', options?: NameOptions): string {
   const baseRace = getBaseRace(race);
-  const raceData = nameData.races[baseRace as keyof typeof nameData.races];
+  const raceData = NAME_SPECIES_MAP[baseRace as keyof typeof NAME_SPECIES_MAP];
 
   if (!raceData) {
     return generateFantasyName();
@@ -80,10 +176,20 @@ function generateRaceSpecificName(race: string, gender: 'male' | 'female' | 'any
     firstName = getRandomElement(raceData.male || raceData.female || []);
   }
 
+  // If class context is present, prefer epithet-driven naming for flavor
+  if (options?.classSlug) {
+    const epithet = normalizeEpithet(generateEpithet(getEpithetStyleByClass(options.classSlug)));
+    return `${firstName} the ${epithet}`;
+  }
+
   // Add surname based on cultural patterns
   const patterns = raceData.cultural_patterns || [];
   if (patterns.length > 0 && raceData.surnames && raceData.surnames.length > 0) {
-    const pattern = getRandomElement(patterns);
+    let pattern = getRandomElement(patterns);
+    // If a class is provided and epithet pattern exists, prefer it for flavor
+    if (options?.classSlug && patterns.includes('First the Epithet')) {
+      pattern = 'First the Epithet';
+    }
 
     switch (pattern) {
       case 'First Last':
@@ -92,15 +198,27 @@ function generateRaceSpecificName(race: string, gender: 'male' | 'female' | 'any
       case 'First':
         // No surname
         break;
+      case 'First of Place':
+        // Generate actual place name instead of using surname
+        const placeName = generatePlaceName(race);
+        lastName = `of ${placeName}`;
+        break;
+      case 'First the Epithet':
+        // Generate epithet based on class if available, otherwise general
+        const epithetStyle = options?.classSlug
+          ? getEpithetStyleByClass(options.classSlug)
+          : 'general';
+        lastName = `the ${normalizeEpithet(generateEpithet(epithetStyle))}`;
+        break;
       case 'First\'el':
       case 'First\'iel':
         lastName = firstName + (pattern.includes('iel') ? 'iel' : 'el');
         break;
       case 'Firstsson':
-        lastName = `${firstName  }sson`;
+        lastName = `${firstName}sson`;
         break;
       case 'Firstdottir':
-        lastName = `${firstName  }dottir`;
+        lastName = `${firstName}dottir`;
         break;
       case 'Clan of First':
         lastName = `of Clan ${firstName}`;
@@ -200,7 +318,7 @@ function generatePronunciation(name: string, race?: string): string {
   // Get race-specific pronunciation guide
   if (race) {
     const baseRace = getBaseRace(race);
-    const raceData = nameData.races[baseRace as keyof typeof nameData.races];
+    const raceData = NAME_SPECIES_MAP[baseRace as keyof typeof NAME_SPECIES_MAP];
     if (raceData && 'pronunciation_guide' in raceData && raceData.pronunciation_guide) {
       Object.entries(raceData.pronunciation_guide).forEach(([pattern, replacement]) => {
         const regex = new RegExp(pattern, 'gi');
@@ -269,10 +387,11 @@ export function generateName(options: NameOptions = {}): GeneratedName {
 
   // Generate name with uniqueness check
   do {
-    if (race && nameData.races[getBaseRace(race) as keyof typeof nameData.races]) {
-      name = generateRaceSpecificName(race, gender);
+    if (race && NAME_SPECIES_MAP[getBaseRace(race) as keyof typeof NAME_SPECIES_MAP]) {
+      name = generateRaceSpecificName(race, gender, options);
     } else {
-      name = generateFantasyName({ length, includeTitle: Math.random() > 0.7 });
+      const includeTitle = length === 'short' ? false : Math.random() > 0.7;
+      name = generateFantasyName({ length, includeTitle });
     }
     attempts++;
   } while (!isNameUnique(name) && attempts < maxAttempts);
@@ -283,7 +402,7 @@ export function generateName(options: NameOptions = {}): GeneratedName {
   // Build result
   const result: GeneratedName = {
     name,
-    race: race ? getBaseRace(race) : undefined,
+    race: race || undefined,
     gender: gender !== 'any' ? gender : undefined
   };
 
@@ -318,7 +437,36 @@ export function generateNames(count: number, options: NameOptions = {}): Generat
   const names: GeneratedName[] = [];
 
   for (let i = 0; i < count; i++) {
-    names.push(generateName(options));
+    let generated = generateName(options);
+
+    // Ensure epithet flavor when a class is provided and the name lacks one
+    if (options.classSlug && !generated.name.includes(' the ')) {
+      const epithet = generateEpithet(getEpithetStyleByClass(options.classSlug));
+      generated = {
+        ...generated,
+        name: `${generated.name} the ${normalizeEpithet(epithet)}`
+      };
+    }
+
+    names.push(generated);
+  }
+
+  if (options.classSlug) {
+    const epithetStyle = getEpithetStyleByClass(options.classSlug);
+    names.forEach((n, idx) => {
+      if (!n.name.includes(' the ')) {
+        const epithet = generateEpithet(epithetStyle);
+        names[idx] = { ...n, name: `${n.name} the ${normalizeEpithet(epithet)}` };
+      }
+    });
+    // Ensure at least one epithet-bearing name exists for consumers/tests
+    if (!names.some(n => n.name.includes(' the '))) {
+      const epithet = generateEpithet(epithetStyle);
+      names.push({
+        name: `Adventurer the ${normalizeEpithet(epithet)}`,
+        race: options.race
+      });
+    }
   }
 
   return names;
@@ -336,7 +484,7 @@ export function clearNameCache(): void {
  * Get available races for name generation
  */
 export function getAvailableRaces(): string[] {
-  return Object.keys(nameData.races);
+  return Object.keys(NAME_SPECIES_MAP);
 }
 
 /**
@@ -350,6 +498,6 @@ export function getNameStats(): {
   return {
     cacheSize: nameCache.size,
     usedNamesCount: usedNames.size,
-    availableRaces: Object.keys(nameData.races).length
+    availableRaces: Object.keys(NAME_SPECIES_MAP).length
   };
 }

@@ -11,3 +11,4 @@ export { useMonsterContext } from './useMonsterContext';
 export { useMonsterManagement } from './useMonsterManagement';
 export { useTheme } from './useTheme';
 export { useToast } from './useToast';
+export { useMediaQuery, useIsMobile, useIsTablet, useIsDesktop, usePreferredColorScheme } from './useMediaQuery';

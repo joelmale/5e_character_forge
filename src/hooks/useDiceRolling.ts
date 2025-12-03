@@ -13,14 +13,16 @@ export function useDiceRolling() {
   }, []);
 
   const rollDice = useCallback((roll: DiceRoll) => {
-    console.error('🎲 [DICE PROCESSING] Processing dice roll:', roll.label, roll.notation);
-    console.error('🎲 [DICE PROCESSING] Call stack:', new Error().stack);
+    if (import.meta.env.DEV) {
+      console.log('🎲 [DICE PROCESSING] Processing dice roll:', roll.label, roll.notation);
+      console.log('🎲 [DICE PROCESSING] Call stack:', new Error().stack);
+    }
 
     // Add to history
     const updatedHistory = addRollToHistory(roll);
     setRollHistory(updatedHistory);
     setLatestRoll(roll);
-    console.error('🎲 [DICE PROCESSING] latestRoll set to:', roll);
+    if (import.meta.env.DEV) console.log('🎲 [DICE PROCESSING] latestRoll set to:', roll);
 
     // Play sounds
     diceSounds.playRollSound(roll.diceResults.length);
@@ -57,10 +59,10 @@ export function useDiceRolling() {
 
           // Trigger fanfare if critical detected
           if (critical === 'success') {
-            console.log('🎲 [CRITICAL] Natural 20 detected! Playing success fanfare');
+            if (import.meta.env.DEV) console.log('🎲 [CRITICAL] Natural 20 detected! Playing success fanfare');
             setTimeout(() => diceSounds.playCritSuccessSound(), 300);
           } else if (critical === 'failure') {
-            console.log('🎲 [CRITICAL] Natural 1 detected! Playing failure fanfare');
+            if (import.meta.env.DEV) console.log('🎲 [CRITICAL] Natural 1 detected! Playing failure fanfare');
             setTimeout(() => diceSounds.playCritFailureSound(), 300);
           }
 
@@ -70,7 +72,7 @@ export function useDiceRolling() {
             total: realTotal !== undefined ? realTotal : realDiceResults.reduce((sum, val) => sum + val, 0) + roll.modifier,
             critical // ✓ NOW SET WITH REAL VALUES
           };
-          console.log('🎲 [ROLL UPDATE] Updated roll with real results:', updatedRoll);
+          if (import.meta.env.DEV) console.log('🎲 [ROLL UPDATE] Updated roll with real results:', updatedRoll);
           return updatedRoll;
         }
         return roll;
@@ -103,7 +105,7 @@ export function useDiceRolling() {
           total: realTotal !== undefined ? realTotal : realDiceResults.reduce((sum, val) => sum + val, 0) + prevLatest.modifier,
           critical // ✓ NOW SET WITH REAL VALUES
         };
-        console.log('🎲 [ROLL UPDATE] Updated latestRoll with real results:', updatedRoll);
+        if (import.meta.env.DEV) console.log('🎲 [ROLL UPDATE] Updated latestRoll with real results:', updatedRoll);
         return updatedRoll;
       }
       return prevLatest;

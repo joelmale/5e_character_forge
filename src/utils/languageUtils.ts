@@ -1,7 +1,6 @@
 import { LANGUAGES } from '../data/languages';
-import { getAllSpecies, BACKGROUNDS, getModifier } from '../services/dataService';
+import { getAllSpecies, BACKGROUNDS, getModifier, SPECIES_LANGUAGE_MAP } from '../services/dataService';
 import { CharacterCreationData } from '../types/dnd';
-import racialLanguagesData from '../data/racialLanguages.json';
 
 export const calculateKnownLanguages = (data: CharacterCreationData): string[] => {
   const languages = new Set<string>();
@@ -10,7 +9,7 @@ export const calculateKnownLanguages = (data: CharacterCreationData): string[] =
   languages.add('Common');
 
   // Add species languages
-  const speciesLanguages = getRacialLanguages(data.speciesSlug);
+  const speciesLanguages = getSpeciesLanguages(data.speciesSlug);
   speciesLanguages.forEach(lang => languages.add(lang));
 
   // Add background languages
@@ -29,14 +28,17 @@ export const calculateKnownLanguages = (data: CharacterCreationData): string[] =
   return Array.from(languages).sort();
 };
 
-export const getRacialLanguages = (speciesSlug: string): string[] => {
+export const getSpeciesLanguages = (speciesSlug: string): string[] => {
   const allSpecies = getAllSpecies();
   const species = allSpecies.find(s => s.slug === speciesSlug);
 
   if (!species) return [];
 
-  return (racialLanguagesData.RACIAL_LANGUAGE_MAP as Record<string, string[]>)[speciesSlug] || [];
+  return (SPECIES_LANGUAGE_MAP as Record<string, string[]>)[speciesSlug] || [];
 };
+
+/** @deprecated Use getSpeciesLanguages */
+export const getRacialLanguages = getSpeciesLanguages;
 
 export const getBackgroundLanguages = (backgroundName: string): string[] => {
   const background = BACKGROUNDS.find(bg => bg.name === backgroundName);

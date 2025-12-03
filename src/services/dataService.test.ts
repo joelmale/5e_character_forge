@@ -10,7 +10,11 @@ import {
   loadRaces,
   loadClasses,
   SPELL_DATABASE,
+  resolveSpeciesSlug,
+  SPECIES_CATEGORIES,
+  SPECIES_LANGUAGE_MAP
 } from '../services/dataService';
+import nameData from '../data/nameData.json';
 
 describe('Data Service Functions', () => {
   describe('getHitDieForClass', () => {
@@ -112,6 +116,29 @@ describe('Data Service Functions', () => {
       expect(classes[0]).toHaveProperty('slug');
       expect(classes[0]).toHaveProperty('name');
       expect(classes[0]).toHaveProperty('hit_die');
+    });
+
+    it('should resolve legacy species slugs to canonical', () => {
+      expect(resolveSpeciesSlug('mountain-dwarf')).toBe('dwarf-2024');
+      expect(resolveSpeciesSlug('human')).toBe('human-2024');
+    });
+
+    it('should provide core and expanded categories', () => {
+      expect(SPECIES_CATEGORIES.length).toBe(2);
+      const coreCat = SPECIES_CATEGORIES.find(c => c.name.includes('Core'));
+      const expandedCat = SPECIES_CATEGORIES.find(c => c.name.includes('Expanded'));
+      expect(coreCat).toBeDefined();
+      expect(expandedCat).toBeDefined();
+      expect(coreCat?.species.every(s => s.core)).toBe(true);
+      expect(expandedCat?.species.every(s => s.expanded)).toBe(true);
+    });
+
+    it('should have names and languages for canonical species', () => {
+      const required = ['human-2024','elf-2024','dwarf-2024','halfling-2024','gnome-2024','dragonborn-2024','orc-2024','tiefling-2024','aasimar-2024','goliath-2024'];
+      required.forEach(slug => {
+        expect((nameData as any).species[slug]).toBeDefined();
+        expect(SPECIES_LANGUAGE_MAP[slug]).toBeDefined();
+      });
     });
   });
 });

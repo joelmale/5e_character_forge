@@ -1452,5 +1452,50 @@
       "Cast the 1st-level spell once per long rest"
     ],
     "description": "Choose a class: bard, cleric, druid, sorcerer, warlock, or wizard. You learn two cantrips of your choice from that class's spell list.\n\nIn addition, choose one 1st-level spell from that same list. You learn that spell and can cast it at its lowest level. Once you cast it, you must finish a long rest before you can cast it again using this feat.\n\nYour spellcasting ability for these spells depends on the class you chose: Charisma for bard, sorcerer, or warlock; Wisdom for cleric or druid; or Intelligence for wizard."
+  },
+  {
+    "slug": "relentless-endurance",
+    "name": "Relentless Endurance",
+    "source": "species",
+    "year": 2014,
+    "category": "species",
+    "prerequisite": "Half-Orc",
+    "prerequisites": {
+      "level": 1
+    },
+    "benefits": [
+      "When reduced to 0 hit points but not killed outright, drop to 1 hit point instead"
+    ],
+    "description": "When you are reduced to 0 hit points but not killed outright, you can drop to 1 hit point instead. You can't use this feature again until you finish a long rest."
+  },
+  {
+    "slug": "magic-resistance",
+    "name": "Magic Resistance",
+    "source": "species",
+    "year": 2014,
+    "category": "species",
+    "prerequisite": "Yuan-ti Pureblood",
+    "prerequisites": {
+      "level": 1
+    },
+    "benefits": [
+      "Advantage on saving throws against spells and other magical effects"
+    ],
+    "description": "You have advantage on saving throws against spells and other magical effects."
+  },
+  {
+    "slug": "poison-immunity",
+    "name": "Poison Immunity",
+    "source": "species",
+    "year": 2014,
+    "category": "species",
+    "prerequisite": "Yuan-ti Pureblood",
+    "prerequisites": {
+      "level": 1
+    },
+    "benefits": [
+      "Immunity to poison damage and the poisoned condition"
+    ],
+    "description": "You are immune to poison damage and the poisoned condition."
   }
 ]

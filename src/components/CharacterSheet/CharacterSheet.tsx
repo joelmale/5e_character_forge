@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { CharacterSheetProps } from '../../types/components';
-import { useLayout } from '../../context';
+import { useLayout, useIsMobile } from '../../hooks';
 import { ModernStackedLayout, ClassicDndLayout, MobileLayout, PaperSheetLayout } from './layouts';
 
 /**
@@ -11,20 +11,8 @@ import { ModernStackedLayout, ClassicDndLayout, MobileLayout, PaperSheetLayout }
  * - User preference (desktop can choose between layouts)
  */
 export const CharacterSheet: React.FC<CharacterSheetProps> = (props) => {
-  console.log('📄 [CHARACTER SHEET] CharacterSheet component rendered for:', props.character.name);
-
   const { layoutMode } = useLayout();
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 1024);
-    };
-
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
+  const isMobile = useIsMobile();
 
   // Mobile always uses ModernStackedLayout
   if (isMobile) {

@@ -464,9 +464,9 @@ export const Step3Class: React.FC<StepProps> = ({ data, updateData, nextStep, pr
                 <>
                   {/* All classes now use modal with detailed subclass information */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {availableSubclasses.map(subclass => (
+                    {availableSubclasses.map((subclass, index) => (
                       <button
-                        key={subclass.slug}
+                        key={`${subclass.slug}-${index}`}
                         onClick={() => setShowSubclassModal(true)}
                         className={`p-3 rounded-lg text-left border-2 transition-all ${
                           data.subclassSlug === subclass.slug
@@ -497,8 +497,8 @@ export const Step3Class: React.FC<StepProps> = ({ data, updateData, nextStep, pr
                  </div>
                  <p className="mb-3">Characters choose their subclass specialization at level 3. This character will need to select a subclass when they reach level 3.</p>
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                   {availableSubclasses.map(subclass => (
-                     <div key={subclass.slug} className="p-2 bg-theme-secondary/50 rounded border border-theme-secondary">
+                    {availableSubclasses.map((subclass, index) => (
+                      <div key={`${subclass.slug}-${index}`} className="p-2 bg-theme-secondary/50 rounded border border-theme-secondary">
                        <p className="text-xs font-semibold text-theme-tertiary">{subclass.name}</p>
                        <p className="text-xs text-theme-disabled mt-1">{subclass.subclassFlavor}</p>
                      </div>

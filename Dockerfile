@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1
 # Multi-stage Docker build optimized for speed
 # - Uses BuildKit cache mounts for npm and Vite
 # - Copies files in layers for better caching

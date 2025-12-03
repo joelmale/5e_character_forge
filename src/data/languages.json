@@ -4,70 +4,90 @@
     "category": "Standard",
     "typicalSpeakers": "Humans, Most Civilized Peoples",
     "description": "The common tongue of most humanoid civilizations",
-    "implementationNotes": "Auto-Include: Every character knows this language."
+    "implementationNotes": "Auto-Include: Every character knows this language.",
+    "edition": "both",
+    "rarity": "standard"
   },
   {
     "name": "Dwarvish",
     "category": "Standard",
     "typicalSpeakers": "Dwarves",
     "description": "The ancient language of dwarves",
-    "implementationNotes": "Racial Default/Choice Pool: Known automatically by Dwarves."
+    "implementationNotes": "Racial Default/Choice Pool: Known automatically by Dwarves.",
+    "edition": "both",
+    "rarity": "standard"
   },
   {
     "name": "Elvish",
     "category": "Standard",
     "typicalSpeakers": "Elves",
     "description": "The melodic language of elves",
-    "implementationNotes": "Racial Default/Choice Pool: Known automatically by Elves."
+    "implementationNotes": "Racial Default/Choice Pool: Known automatically by Elves.",
+    "edition": "both",
+    "rarity": "standard"
   },
   {
     "name": "Giant",
     "category": "Standard",
     "typicalSpeakers": "Ogres, Trolls, Giants",
     "description": "The booming language of giants and their kin",
-    "implementationNotes": "Choice Pool."
+    "implementationNotes": "Choice Pool.",
+    "edition": "both",
+    "rarity": "standard"
   },
   {
     "name": "Gnomish",
     "category": "Standard",
     "typicalSpeakers": "Gnomes",
     "description": "The intricate language of gnomes",
-    "implementationNotes": "Racial Default/Choice Pool: Known automatically by Gnomes."
+    "implementationNotes": "Racial Default/Choice Pool: Known automatically by Gnomes.",
+    "edition": "both",
+    "rarity": "standard"
   },
   {
     "name": "Goblin",
     "category": "Standard",
     "typicalSpeakers": "Goblins, Hobgoblins, Bugbears",
     "description": "The guttural language of goblinoids",
-    "implementationNotes": "Choice Pool."
+    "implementationNotes": "Choice Pool.",
+    "edition": "both",
+    "rarity": "standard"
   },
   {
     "name": "Halfling",
     "category": "Standard",
     "typicalSpeakers": "Halflings",
     "description": "The cheerful language of halflings",
-    "implementationNotes": "Racial Default/Choice Pool: Known automatically by Halflings."
+    "implementationNotes": "Racial Default/Choice Pool: Known automatically by Halflings.",
+    "edition": "both",
+    "rarity": "standard"
   },
   {
     "name": "Orc",
     "category": "Standard",
     "typicalSpeakers": "Orcs",
     "description": "The harsh language of orcs",
-    "implementationNotes": "Racial Default/Choice Pool: Known automatically by Half-Orcs."
+    "implementationNotes": "Racial Default/Choice Pool: Known automatically by Half-Orcs.",
+    "edition": "both",
+    "rarity": "standard"
   },
   {
     "name": "Aarakocra",
     "category": "Standard",
     "typicalSpeakers": "Aarakocra",
     "description": "The avian language of aarakocra",
-    "implementationNotes": "Racial Default/Choice Pool: Known automatically by Aarakocra. Includes a dialect of Auran (Primordial)."
+    "implementationNotes": "Racial Default/Choice Pool: Known automatically by Aarakocra. Includes a dialect of Auran (Primordial).",
+    "edition": "2014",
+    "rarity": "rare"
   },
   {
     "name": "Gith",
     "category": "Standard",
     "typicalSpeakers": "Githyanki, Githzerai",
     "description": "The disciplined language of the gith",
-    "implementationNotes": "Racial Default/Choice Pool: Known automatically by Gith."
+    "implementationNotes": "Racial Default/Choice Pool: Known automatically by Gith.",
+    "edition": "both",
+    "rarity": "rare"
   },
   {
     "name": "Sahuagin",
@@ -88,21 +108,27 @@
     "category": "Exotic",
     "typicalSpeakers": "Demons",
     "description": "The infernal language of demons",
-    "implementationNotes": "Exotic Choice Pool."
+    "implementationNotes": "Exotic Choice Pool.",
+    "edition": "both",
+    "rarity": "rare"
   },
   {
     "name": "Celestial",
     "category": "Exotic",
     "typicalSpeakers": "Celestials (Angels)",
     "description": "The divine language of celestial beings",
-    "implementationNotes": "Exotic Choice Pool."
+    "implementationNotes": "Exotic Choice Pool.",
+    "edition": "both",
+    "rarity": "standard"
   },
   {
     "name": "Draconic",
     "category": "Exotic",
     "typicalSpeakers": "Dragons, Dragonborn, Kobolds",
     "description": "The ancient language of dragons",
-    "implementationNotes": "Racial Default/Exotic Choice Pool: Known automatically by Dragonborn."
+    "implementationNotes": "Racial Default/Exotic Choice Pool: Known automatically by Dragonborn.",
+    "edition": "both",
+    "rarity": "standard"
   },
   {
     "name": "Deep Speech",
@@ -116,28 +142,36 @@
     "category": "Exotic",
     "typicalSpeakers": "Devils, Tieflings",
     "description": "The diabolic language of devils",
-    "implementationNotes": "Racial Default/Exotic Choice Pool: Often known automatically by Tieflings."
+    "implementationNotes": "Racial Default/Exotic Choice Pool: Often known automatically by Tieflings.",
+    "edition": "both",
+    "rarity": "standard"
   },
   {
     "name": "Primordial",
     "category": "Exotic",
     "typicalSpeakers": "Elementals",
     "description": "The elemental language of primordial beings",
-    "implementationNotes": "Exotic Choice Pool: Note: Knowing this allows understanding of all four elemental dialects (Auran, Aquan, Ignan, Terran)."
+    "implementationNotes": "Exotic Choice Pool: Note: Knowing this allows understanding of all four elemental dialects (Auran, Aquan, Ignan, Terran).",
+    "edition": "both",
+    "rarity": "rare"
   },
   {
     "name": "Sylvan",
     "category": "Exotic",
     "typicalSpeakers": "Fey Creatures",
     "description": "The mystical language of fey beings",
-    "implementationNotes": "Exotic Choice Pool."
+    "implementationNotes": "Exotic Choice Pool.",
+    "edition": "both",
+    "rarity": "rare"
   },
   {
     "name": "Undercommon",
     "category": "Exotic",
     "typicalSpeakers": "Drow, Kuo-Toa, Underdark Residents",
     "description": "The subterranean language of the Underdark",
-    "implementationNotes": "Exotic Choice Pool."
+    "implementationNotes": "Exotic Choice Pool.",
+    "edition": "both",
+    "rarity": "rare"
   },
   {
     "name": "Blink Dog",
@@ -235,13 +269,17 @@
     "category": "Secret",
     "typicalSpeakers": "Rogues",
     "description": "The secret language of thieves and criminals",
-    "implementationNotes": "Auto-Include (Class): Rogue Level 1 feature."
+    "implementationNotes": "Auto-Include (Class): Rogue Level 1 feature.",
+    "edition": "both",
+    "rarity": "secret"
   },
   {
     "name": "Druidic",
     "category": "Secret",
     "typicalSpeakers": "Druids",
     "description": "The secret language of druids and nature",
-    "implementationNotes": "Auto-Include (Class): Druid Level 1 feature."
+    "implementationNotes": "Auto-Include (Class): Druid Level 1 feature.",
+    "edition": "both",
+    "rarity": "secret"
   }
 ]

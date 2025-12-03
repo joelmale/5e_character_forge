@@ -64,12 +64,12 @@ const openDB = (): Promise<IDBDatabase> => {
         getAllRequest.onsuccess = () => {
           const characters = getAllRequest.result as Character[];
 
-          console.log(`🔄 [DB Migration] Migrating ${characters.length} characters to version 3`);
+          if (import.meta.env.DEV) console.log(`🔄 [DB Migration] Migrating ${characters.length} characters to version 3`);
 
           characters.forEach((character) => {
             // Only migrate if edition field is missing
             if (!character.edition) {
-              console.log(`  ✏️ Adding edition field to character: ${character.name}`);
+              if (import.meta.env.DEV) console.log(`  ✏️ Adding edition field to character: ${character.name}`);
 
               // Default to 2014 edition for existing characters
               // (they were created under 2014 rules)
@@ -80,7 +80,7 @@ const openDB = (): Promise<IDBDatabase> => {
             }
           });
 
-          console.log('✅ [DB Migration] Edition field migration complete');
+          if (import.meta.env.DEV) console.log('✅ [DB Migration] Edition field migration complete');
         };
 
         getAllRequest.onerror = () => {
@@ -97,18 +97,18 @@ const openDB = (): Promise<IDBDatabase> => {
         getAllRequest.onsuccess = () => {
           const characters = getAllRequest.result as Character[];
 
-          console.log(`🔄 [DB Migration] Migrating ${characters.length} characters to version 4 (resources)`);
+          if (import.meta.env.DEV) console.log(`🔄 [DB Migration] Migrating ${characters.length} characters to version 4 (resources)`);
 
           characters.forEach((character) => {
             // Initialize or update resources for existing characters
             if (!character.resources || character.resources.length === 0) {
-              console.log(`  ✏️ Adding resources to character: ${character.name}`);
+              if (import.meta.env.DEV) console.log(`  ✏️ Adding resources to character: ${character.name}`);
               character.resources = initializeCharacterResources(character);
               characterStore.put(character);
             }
           });
 
-          console.log('✅ [DB Migration] Resources migration complete');
+          if (import.meta.env.DEV) console.log('✅ [DB Migration] Resources migration complete');
         };
 
         getAllRequest.onerror = () => {
@@ -125,12 +125,12 @@ const openDB = (): Promise<IDBDatabase> => {
         getAllRequest.onsuccess = () => {
           const characters = getAllRequest.result as any[]; // Use any[] to handle legacy data
 
-          console.log(`🔄 [DB Migration] Migrating ${characters.length} characters to version 5 (race → species)`);
+          if (import.meta.env.DEV) console.log(`🔄 [DB Migration] Migrating ${characters.length} characters to version 5 (race → species)`);
 
           characters.forEach((character) => {
             // Check if character has race field but not species field
             if (character.race && !character.species) {
-              console.log(`  ✏️ Renaming race to species for character: ${character.name}`);
+              if (import.meta.env.DEV) console.log(`  ✏️ Renaming race to species for character: ${character.name}`);
 
               // Rename race field to species
               character.species = character.race;
@@ -141,7 +141,7 @@ const openDB = (): Promise<IDBDatabase> => {
             }
           });
 
-          console.log('✅ [DB Migration] Race to species migration complete');
+          if (import.meta.env.DEV) console.log('✅ [DB Migration] Race to species migration complete');
         };
 
         getAllRequest.onerror = () => {
@@ -158,12 +158,12 @@ const openDB = (): Promise<IDBDatabase> => {
         getAllRequest.onsuccess = () => {
           const characters = getAllRequest.result as any[]; // Use any[] to handle legacy data
 
-          console.log(`🔄 [DB Migration] Migrating ${characters.length} characters to version 6 (add musical instruments)`);
+          if (import.meta.env.DEV) console.log(`🔄 [DB Migration] Migrating ${characters.length} characters to version 6 (add musical instruments)`);
 
           characters.forEach((character) => {
             // Initialize musical instrument proficiencies for bards
             if (character.class === 'Bard' && !character.featuresAndTraits?.musicalInstrumentProficiencies) {
-              console.log(`  ✏️ Adding musical instrument proficiencies for bard: ${character.name}`);
+              if (import.meta.env.DEV) console.log(`  ✏️ Adding musical instrument proficiencies for bard: ${character.name}`);
 
               // Initialize empty array for musical instruments
               // (Existing bards will need to re-select their instruments)
@@ -186,7 +186,7 @@ const openDB = (): Promise<IDBDatabase> => {
             }
           });
 
-          console.log('✅ [DB Migration] Musical instruments migration complete');
+          if (import.meta.env.DEV) console.log('✅ [DB Migration] Musical instruments migration complete');
         };
 
         getAllRequest.onerror = () => {
@@ -203,21 +203,21 @@ const openDB = (): Promise<IDBDatabase> => {
         getAllRequest.onsuccess = () => {
           const characters = getAllRequest.result as any[];
 
-          console.log(`🔄 [DB Migration] Migrating ${characters.length} characters to version 7 (edition field)`);
+          if (import.meta.env.DEV) console.log(`🔄 [DB Migration] Migrating ${characters.length} characters to version 7 (edition field)`);
 
           characters.forEach((character) => {
             let updated = false;
             
             // Ensure edition is set
             if (!character.edition) {
-              console.log(`  ✏️ Setting edition to '2014' for character: ${character.name}`);
+              if (import.meta.env.DEV) console.log(`  ✏️ Setting edition to '2014' for character: ${character.name}`);
               character.edition = '2014';
               updated = true;
             }
             
             // Ensure species is set (legacy 'race' fallback)
             if (!character.species && character.race) {
-               console.log(`  ✏️ Migrating 'race' to 'species' for character: ${character.name}`);
+               if (import.meta.env.DEV) console.log(`  ✏️ Migrating 'race' to 'species' for character: ${character.name}`);
                character.species = character.race;
                // We keep 'race' for now as per plan to prevent breakage, but strictly use species in 2024 logic
                updated = true;
@@ -228,7 +228,7 @@ const openDB = (): Promise<IDBDatabase> => {
             }
           });
 
-          console.log('✅ [DB Migration] Version 7 migration complete');
+          if (import.meta.env.DEV) console.log('✅ [DB Migration] Version 7 migration complete');
         };
         
         getAllRequest.onerror = () => {
@@ -274,7 +274,7 @@ export const getAllCharacters = async (): Promise<Character[]> => {
 };
 
 export const addCharacter = async (character: Character): Promise<string> => {
-  console.log('💾 [DB] Adding character:', {
+  if (import.meta.env.DEV) console.log('💾 [DB] Adding character:', {
     id: character.id,
     name: character.name,
     species: character.species,
@@ -293,7 +293,7 @@ export const addCharacter = async (character: Character): Promise<string> => {
       reject(request.error);
     };
     request.onsuccess = () => {
-      console.log('✅ [DB] Character added successfully');
+      if (import.meta.env.DEV) console.log('✅ [DB] Character added successfully');
       resolve(character.id);
     };
   });

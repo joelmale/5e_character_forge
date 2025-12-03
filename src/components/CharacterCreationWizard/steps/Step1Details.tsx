@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
-import { XCircle, Shuffle, Volume2, Heart, History, BookOpen, ArrowLeft, ArrowRight } from 'lucide-react';
+import { XCircle, ArrowLeft, Shuffle } from 'lucide-react';
 import { StepProps } from '../types/wizard.types';
-import { ALIGNMENTS_DATA, BACKGROUNDS, ALIGNMENTS, randomizeIdentity, randomizeSpecies, randomizeClassAndSkills, randomizeFightingStyle, randomizeSpells, randomizeAbilities, randomizeFeats, randomizeEquipmentChoices, randomizeAdditionalEquipment, randomizeLanguages, randomizePersonality, FEAT_DATABASE } from '../../../services/dataService';
-import { generateName, generateNames, GeneratedName } from '../../../utils/nameGenerator';
-import { BackgroundASIWidget, FeatDetailsModal, SkillModal, SmartNavigationButton } from '../components';
+import { ALIGNMENTS_DATA, BACKGROUNDS, ALIGNMENTS, randomizeIdentity, randomizeSpecies, randomizeClassAndSkills, randomizeFightingStyle, randomizeSpells, randomizeAbilities, randomizeFeats, randomizeLanguages, randomizePersonality, randomizeStartingEquipment, randomizeBackgroundAbilityChoices } from '../../../services/dataService';
+import { generateName } from '../../../utils/nameGenerator';
+
+import { BackgroundASIWidget, SmartNavigationButton } from '../components';
 import { useStepValidation } from '../hooks';
+import { useToast } from '../../../hooks';
+import Toast from '../../Toast';
 
 interface RandomizeButtonProps {
   onClick: () => void;
@@ -42,25 +45,13 @@ const RandomizeAllButton: React.FC<RandomizeAllButtonProps> = ({
   );
 };
 
-interface NameHistoryItem extends GeneratedName {
-  timestamp: number;
-  isFavorite: boolean;
-}
+
 
 export const Step1Details: React.FC<StepProps> = ({ data, updateData, nextStep, prevStep, getNextStepLabel }) => {
   const [showAlignmentInfo, setShowAlignmentInfo] = useState(true);
   const [showBackgroundInfo, setShowBackgroundInfo] = useState(true);
-  const [showNameGenerator, setShowNameGenerator] = useState(false);
-  const [currentGeneratedName, setCurrentGeneratedName] = useState<GeneratedName | null>(null);
-  const [nameOptions, setNameOptions] = useState<GeneratedName[]>([]);
-  const [nameHistory, setNameHistory] = useState<NameHistoryItem[]>([]);
-  const [favorites, setFavorites] = useState<NameHistoryItem[]>([]);
-  const [showHistory, setShowHistory] = useState(false);
-  const [showFavorites, setShowFavorites] = useState(false);
-  const [showMeaning, setShowMeaning] = useState(false);
-  const [viewingFeat, setViewingFeat] = useState<string | null>(null);
-  const [viewingSkill, setViewingSkill] = useState<string | null>(null);
   const [showDetailedDescription, setShowDetailedDescription] = useState(false);
+  const { toasts, showSuccess, removeToast } = useToast();
 
   const selectedAlignmentData = ALIGNMENTS_DATA.find(a => a.name === data.alignment);
   const selectedBackground = BACKGROUNDS.find((bg: any) => bg.slug === data.background);
@@ -68,91 +59,7 @@ export const Step1Details: React.FC<StepProps> = ({ data, updateData, nextStep, 
   // Validation hook
   const { canProceed, missingItems, nextAction } = useStepValidation(1, data);
 
-  // Name generator functions
-  const generateNewName = () => {
-    const name = generateName({
-      race: data.speciesSlug,
-      includeMeaning: true,
-      includePronunciation: true
-    });
-    setCurrentGeneratedName(name);
 
-    // Add to history
-    const historyItem: NameHistoryItem = {
-      name: name.name,
-      meaning: name.meaning,
-      pronunciation: name.pronunciation,
-      gender: name.gender,
-      race: name.race,
-      timestamp: Date.now(),
-      isFavorite: false
-    };
-
-    const newHistory = [historyItem, ...nameHistory.slice(0, 49)]; // Keep last 50
-    setNameHistory(newHistory);
-    localStorage.setItem('nameGenerator_history', JSON.stringify(newHistory));
-  };
-
-  const generateNameOptions = () => {
-    const options = generateNames(6, {
-      race: data.speciesSlug,
-      includeMeaning: true
-    });
-    setNameOptions(options);
-  };
-
-  const selectGeneratedName = (name: string) => {
-    updateData({ name });
-    setShowNameGenerator(false);
-  };
-
-  /**
-   * Toggle favorite status for a name
-   * NOTE: Uses localStorage which CodeQL flags as "clear text storage of sensitive information"
-   * This is safe because:
-   * - Stores user-generated fantasy character names only
-   * - No passwords, tokens, personal data, or sensitive information
-   * - localStorage is standard for user preferences in web apps
-   */
-  const toggleFavorite = (nameItem: NameHistoryItem) => {
-    const isFavorite = favorites.some(fav => fav.name === nameItem.name);
-
-    if (isFavorite) {
-      const newFavorites = favorites.filter(fav => fav.name !== nameItem.name);
-      setFavorites(newFavorites);
-      localStorage.setItem('nameGenerator_favorites', JSON.stringify(newFavorites));
-    } else {
-      const newFavorites = [...favorites, { ...nameItem, isFavorite: true }];
-      setFavorites(newFavorites);
-      localStorage.setItem('nameGenerator_favorites', JSON.stringify(newFavorites));
-    }
-  };
-
-  const speakName = (name: string) => {
-    if ('speechSynthesis' in window) {
-      const utterance = new SpeechSynthesisUtterance(name);
-      utterance.rate = 0.8;
-      utterance.pitch = 1;
-      window.speechSynthesis.speak(utterance);
-    }
-  };
-
-  // Load saved data on mount
-  React.useEffect(() => {
-    try {
-      const savedHistory = localStorage.getItem('nameGenerator_history');
-      const savedFavorites = localStorage.getItem('nameGenerator_favorites');
-
-      if (savedHistory) {
-        setNameHistory(JSON.parse(savedHistory));
-      }
-      if (savedFavorites) {
-        setFavorites(JSON.parse(savedFavorites));
-      }
-    } catch {
-      // Ignore errors loading saved data - will use defaults
-    }
-  }, []);
 
   return (
     <div className='space-y-4'>
@@ -161,10 +68,10 @@ export const Step1Details: React.FC<StepProps> = ({ data, updateData, nextStep, 
         <div className='flex gap-2'>
           <RandomizeButton
             onClick={() => {
-              const identity = randomizeIdentity();
-              updateData(identity);
+              const { alignment, background } = randomizeIdentity();
+              updateData({ alignment, background });
             }}
-            title="Randomize name, alignment, and background"
+            title="Randomize alignment and background"
           />
             <RandomizeAllButton
               onClick={() => {
@@ -172,51 +79,45 @@ export const Step1Details: React.FC<StepProps> = ({ data, updateData, nextStep, 
                 const level = data.level;
                 const species = randomizeSpecies();
                 const identity = randomizeIdentity(species);
+                const backgroundSlug = identity.backgroundSlug || identity.background;
                 const classAndSkills = randomizeClassAndSkills();
                 const fightingStyle = randomizeFightingStyle(classAndSkills.classSlug);
                 const spells = randomizeSpells(classAndSkills.classSlug, level);
                 const abilities = randomizeAbilities();
                 const feats = randomizeFeats();
-                const equipmentChoices = randomizeEquipmentChoices(classAndSkills.classSlug);
-                const additionalEquipment = randomizeAdditionalEquipment();
-                const languages = randomizeLanguages(species, identity.background);
+                const backgroundASI = randomizeBackgroundAbilityChoices(backgroundSlug, data.edition);
+                const equipment = randomizeStartingEquipment(classAndSkills.classSlug, backgroundSlug, data.edition);
+                const languages = randomizeLanguages(species, backgroundSlug, data.edition, abilities.abilities);
                 const personality = randomizePersonality();
+                const generatedName = generateName({
+                  race: species,
+                  classSlug: classAndSkills.classSlug
+                }).name;
 
                 updateData({
-                  ...identity,
+                  alignment: identity.alignment,
+                  background: backgroundSlug,
+                  name: generatedName,
                   speciesSlug: species,
                   ...classAndSkills,
                   selectedFightingStyle: fightingStyle,
                   spellSelection: spells,
                   ...abilities,
+                  backgroundAbilityChoices: backgroundASI,
                   selectedFeats: feats,
-                  equipmentChoices,
-                  startingInventory: additionalEquipment,
+                  equipmentChoices: equipment.equipmentChoices,
+                  equipmentChoice: equipment.equipmentChoice,
+                  equipmentGold: equipment.equipmentGold,
+                  startingInventory: equipment.startingInventory,
                   knownLanguages: languages,
                   ...personality
                 });
+                showSuccess('Character fully randomized (background ASI, gear, languages, spells, and stats).');
               }}
             />
         </div>
       </div>
-
-      <div className="flex gap-2">
-        <input
-          type="text"
-          placeholder="Character Name (e.g., Elara Windwalker)"
-          value={data.name}
-          onChange={(e) => updateData({ name: e.target.value })}
-          className="flex-1 p-3 bg-theme-tertiary text-white rounded-lg focus:ring-red-500 focus:border-red-500"
-        />
-        <button
-          onClick={() => setShowNameGenerator(true)}
-          className="px-4 py-3 bg-accent-purple hover:bg-accent-purple-light text-white rounded-lg transition-colors flex items-center gap-2"
-          title="Open Name Generator"
-        >
-          <BookOpen className="w-4 h-4" />
-          Generate
-        </button>
-      </div>
+      
 
       <div>
         <label className="block text-sm font-medium text-theme-tertiary mb-2">Alignment</label>
@@ -323,16 +224,9 @@ export const Step1Details: React.FC<StepProps> = ({ data, updateData, nextStep, 
           {/* 2024 Origin Feat */}
           {(selectedBackground as any).edition === '2024' && (selectedBackground as any).originFeat && (
             <div className="border-t border-theme-primary pt-3">
-              <div className="flex items-center gap-2 mb-2">
-                <h5 className="text-sm font-semibold text-yellow-200">Origin Feat: {(selectedBackground as any).originFeat}</h5>
-                <button
-                  onClick={() => setViewingFeat((selectedBackground as any).originFeat)}
-                  className="text-accent-blue-light hover:text-blue-300"
-                  title="View Feat Details"
-                >
-                  <BookOpen className="w-4 h-4" />
-                </button>
-              </div>
+               <div className="flex items-center gap-2 mb-2">
+                 <h5 className="text-sm font-semibold text-yellow-200">Origin Feat: {(selectedBackground as any).originFeat}</h5>
+               </div>
               <p className="text-xs text-theme-tertiary">
                 This feat is granted at 1st level by your background.
               </p>
@@ -343,16 +237,11 @@ export const Step1Details: React.FC<StepProps> = ({ data, updateData, nextStep, 
           <div className="border-t border-theme-primary pt-3">
             <h5 className="text-sm font-semibold text-yellow-200 mb-2">Skill Proficiencies</h5>
             <div className="flex flex-wrap gap-2">
-              {selectedBackground.skill_proficiencies.map(skill => (
-                <button
-                  key={skill}
-                  onClick={() => setViewingSkill(skill)}
-                  className="px-2 py-1 bg-blue-700 hover:bg-blue-600 text-white text-xs rounded transition-colors cursor-pointer"
-                  title={`Click for ${skill} details`}
-                >
-                  {skill}
-                </button>
-              ))}
+               {selectedBackground.skill_proficiencies.map(skill => (
+                 <span key={skill} className="px-2 py-1 bg-blue-700 text-white text-xs rounded">
+                   {skill}
+                 </span>
+               ))}
             </div>
           </div>
 
@@ -385,200 +274,6 @@ export const Step1Details: React.FC<StepProps> = ({ data, updateData, nextStep, 
         </div>
       )}
 
-      {/* Name Generator Modal */}
-      {showNameGenerator && (
-        <div className="fixed inset-0 backdrop-blur-md flex items-center justify-center z-50">
-          <div className="bg-theme-secondary rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-2xl font-bold text-white">Name Generator</h3>
-              <button
-                onClick={() => setShowNameGenerator(false)}
-                className="text-theme-muted hover:text-white transition-colors"
-              >
-                <XCircle className="w-6 h-6" />
-              </button>
-            </div>
-
-            <div className="flex gap-2 mb-6">
-              <button
-                onClick={generateNewName}
-                className="flex-1 bg-accent-blue hover:bg-accent-blue-light text-white px-4 py-2 rounded flex items-center justify-center gap-2 transition-colors"
-              >
-                <Shuffle className="w-4 h-4" />
-                Generate Name
-              </button>
-              <button
-                onClick={generateNameOptions}
-                className="bg-accent-purple hover:bg-accent-purple-light text-white px-4 py-2 rounded flex items-center justify-center gap-2 transition-colors"
-                title="Generate multiple options"
-              >
-                <BookOpen className="w-4 h-4" />
-                Options
-              </button>
-            </div>
-
-            {/* Current Generated Name */}
-            {currentGeneratedName && (
-              <div className="bg-theme-tertiary rounded-lg p-4 mb-6">
-                <div className="flex items-center justify-between mb-2">
-                  <h4 className="text-xl font-bold text-white">{currentGeneratedName.name}</h4>
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => speakName(currentGeneratedName.name)}
-                      className="p-2 text-theme-muted hover:text-white transition-colors"
-                      title="Pronounce name"
-                    >
-                      <Volume2 className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => toggleFavorite({
-                        name: currentGeneratedName.name,
-                        meaning: currentGeneratedName.meaning,
-                        pronunciation: currentGeneratedName.pronunciation,
-                        gender: currentGeneratedName.gender,
-                        race: currentGeneratedName.race,
-                        timestamp: Date.now(),
-                        isFavorite: false
-                      })}
-                      className={`p-2 transition-colors ${
-                        favorites.some(fav => fav.name === currentGeneratedName.name)
-                          ? 'text-accent-red-light hover:text-red-300'
-                          : 'text-theme-muted hover:text-white'
-                      }`}
-                      title="Add to favorites"
-                    >
-                      <Heart className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => selectGeneratedName(currentGeneratedName.name)}
-                      className="bg-accent-green hover:bg-accent-green text-white px-4 py-1 rounded text-sm transition-colors"
-                    >
-                      Select
-                    </button>
-                  </div>
-                </div>
-
-                <div className="text-sm text-theme-tertiary space-y-1">
-                  {currentGeneratedName.race && <p><span className="font-medium">Race:</span> {currentGeneratedName.race}</p>}
-                  {currentGeneratedName.pronunciation && (
-                    <p><span className="font-medium">Pronunciation:</span> {currentGeneratedName.pronunciation}</p>
-                  )}
-                  {currentGeneratedName.meaning && showMeaning && (
-                    <p><span className="font-medium">Meaning:</span> {currentGeneratedName.meaning}</p>
-                  )}
-                </div>
-
-                {currentGeneratedName.meaning && (
-                  <button
-                    onClick={() => setShowMeaning(!showMeaning)}
-                    className="text-xs text-accent-blue-light hover:text-blue-300 mt-2"
-                  >
-                    {showMeaning ? 'Hide meaning' : 'Show meaning'}
-                  </button>
-                )}
-              </div>
-            )}
-
-            {/* Name Options */}
-            {nameOptions.length > 0 && (
-              <div className="mb-6">
-                <h4 className="text-lg font-bold text-white mb-3">Name Options</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {nameOptions.map((name, index) => (
-                    <div key={index} className="bg-theme-tertiary rounded p-3">
-                      <div className="flex items-center justify-between">
-                        <span className="text-white font-medium">{name.name}</span>
-                        <div className="flex items-center gap-1">
-                          <button
-                            onClick={() => speakName(name.name)}
-                            className="p-1 text-theme-muted hover:text-white transition-colors"
-                          >
-                            <Volume2 className="w-3 h-3" />
-                          </button>
-                          <button
-                            onClick={() => selectGeneratedName(name.name)}
-                            className="bg-accent-green hover:bg-accent-green text-white px-3 py-1 rounded text-xs transition-colors"
-                          >
-                            Select
-                          </button>
-                        </div>
-                      </div>
-                      {name.meaning && (
-                        <p className="text-xs text-theme-muted mt-1">{name.meaning}</p>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* History and Favorites Tabs */}
-            <div className="flex border-b border-theme-primary mb-4">
-              <button
-                onClick={() => { setShowHistory(true); setShowFavorites(false); }}
-                className={`px-4 py-2 text-sm font-medium transition-colors ${
-                  showHistory ? 'text-white border-b-2 border-blue-500' : 'text-theme-muted hover:text-white'
-                }`}
-              >
-                <History className="w-4 h-4 inline mr-2" />
-                History ({nameHistory.length})
-              </button>
-              <button
-                onClick={() => { setShowFavorites(true); setShowHistory(false); }}
-                className={`px-4 py-2 text-sm font-medium transition-colors ${
-                  showFavorites ? 'text-white border-b-2 border-red-500' : 'text-theme-muted hover:text-white'
-                }`}
-              >
-                <Heart className="w-4 h-4 inline mr-2" />
-                Favorites ({favorites.length})
-              </button>
-            </div>
-
-            {/* History/Favorites List */}
-            {(showHistory || showFavorites) && (
-              <div className="max-h-60 overflow-y-auto">
-                {(showHistory ? nameHistory : favorites).map((item, index) => (
-                  <div key={index} className="flex items-center justify-between py-2 border-b border-theme-secondary">
-                    <div className="flex-1">
-                      <span className="text-white">{item.name}</span>
-                      {item.meaning && (
-                        <span className="text-xs text-theme-muted ml-2">({item.meaning})</span>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => speakName(item.name)}
-                        className="p-1 text-theme-muted hover:text-white transition-colors"
-                      >
-                        <Volume2 className="w-3 h-3" />
-                      </button>
-                      {!showFavorites && (
-                        <button
-                          onClick={() => toggleFavorite(item)}
-                          className={`p-1 transition-colors ${
-                            favorites.some(fav => fav.name === item.name)
-                              ? 'text-accent-red-light hover:text-red-300'
-                              : 'text-theme-muted hover:text-white'
-                          }`}
-                        >
-                          <Heart className="w-3 h-3" />
-                        </button>
-                      )}
-                      <button
-                        onClick={() => selectGeneratedName(item.name)}
-                        className="bg-accent-green hover:bg-accent-green text-white px-3 py-1 rounded text-xs transition-colors"
-                      >
-                        Select
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
       <div className='flex justify-between'>
         <button
           onClick={prevStep}
@@ -598,19 +293,16 @@ export const Step1Details: React.FC<StepProps> = ({ data, updateData, nextStep, 
         </SmartNavigationButton>
       </div>
 
-      {/* Feat Details Modal */}
-      <FeatDetailsModal
-        feat={viewingFeat ? FEAT_DATABASE.find(f => f.slug === viewingFeat) || null : null}
-        isOpen={viewingFeat !== null}
-        onClose={() => setViewingFeat(null)}
-      />
+      {toasts.map(toast => (
+        <Toast
+          key={toast.id}
+          message={toast.message}
+          type={toast.type}
+          duration={toast.duration}
+          onClose={() => removeToast(toast.id)}
+        />
+      ))}
 
-      {/* Skill Details Modal */}
-      <SkillModal
-        skill={viewingSkill || ''}
-        isOpen={viewingSkill !== null}
-        onClose={() => setViewingSkill(null)}
-      />
     </div>
   );
 };

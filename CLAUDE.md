@@ -387,6 +387,49 @@ The application now fully supports D&D 2024 Player's Handbook rules with compreh
 - **UI Functionality**: Dynamic feat selection and validation working
 - **Character Creation**: End-to-end flows tested for both editions
 
+### Advanced Name Generator System
+
+The application features an intelligent fantasy name generator with race-specific patterns and class-based flavor:
+
+#### **Core Features**
+- **Race-Specific Names**: Authentic names for all 11 D&D races (Human, Elf, Dwarf, Halfling, etc.)
+- **Cultural Patterns**: Multiple naming conventions per race ("First Last", "First of Place", "First the Epithet")
+- **True Place Names**: Generated locations like "Greenshire", "Ironforge" with race-appropriate suffixes
+- **Class-Based Epithets**: Personality-driven titles ("the Brave" for Paladins, "the Shadow" for Rogues)
+- **50/50 Distribution**: Balanced mix of standard surnames and epithets
+
+#### **Technical Implementation**
+- **Data-Driven**: All names, patterns, and epithets stored in `nameData.json`
+- **Race-Specific Suffixes**: Elves get "-veil", "-glade"; Dwarves get "-hold", "-forge"
+- **Class Mapping**: 13 classes mapped to 6 epithet categories (heroic, mysterious, fierce, magical, nature, general)
+- **UI Integration**: Moved to Step8Traits (after class selection) for class-aware naming
+
+#### **Epithet Categories**
+```json
+"epithets": {
+  "heroic": ["the Brave", "the Mighty", "the Valiant", "the Noble", "the True"],
+  "mysterious": ["the Shadow", "the Silent", "the Hidden", "the Whisper", "the Veiled"],
+  "fierce": ["the Fierce", "the Savage", "the Wild", "the Untamed", "the Relentless"],
+  "magical": ["the Arcane", "the Mystic", "the Enchanted", "the Spellbound"],
+  "nature": ["of the Wild", "of the Forest", "Oakbreaker", "the Ancient", "the Primal"],
+  "general": ["the Swift", "the Strong", "the Keen", "the Bold", "the Clever"]
+}
+```
+
+#### **Class to Epithet Mapping**
+- **Heroic**: Paladin, Fighter, Cleric
+- **Mysterious**: Rogue, Monk, Warlock
+- **Fierce**: Barbarian
+- **Magical**: Wizard, Sorcerer, Bard
+- **Nature**: Ranger, Druid
+- **General**: All others
+
+#### **Files**
+- **Generator Logic**: `/src/utils/nameGenerator.ts`
+- **Data**: `/src/data/nameData.json`
+- **UI**: `/src/components/CharacterCreationWizard/steps/Step8Traits.tsx`
+- **Tests**: `/src/utils/nameGenerator.test.ts`
+
 ### Equipment System
 
 **Equipped Item Flow:**

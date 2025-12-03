@@ -4,7 +4,7 @@ import { loadSpecies } from '../services/dataService';
 describe('Species Data Loading', () => {
   it('should load all species from JSON', () => {
     const species = loadSpecies();
-    expect(species.length).toBeGreaterThanOrEqual(32); // Allow for additional 2024 variants
+    expect(species.length).toBeGreaterThanOrEqual(20); // Allow for consolidated canonical species plus expanded options
   });
 
   it('should have valid species data structure', () => {
@@ -31,15 +31,22 @@ describe('Species Data Loading', () => {
     const species = loadSpecies();
     const speciesSlugs = species.map(s => s.slug);
 
-    // Test some key races
-    expect(speciesSlugs).toContain('human');
-    expect(speciesSlugs).toContain('wood-elf');
-    expect(speciesSlugs).toContain('mountain-dwarf');
-    expect(speciesSlugs).toContain('dragonborn');
-    expect(speciesSlugs).toContain('tiefling');
-    expect(speciesSlugs).toContain('aasimar');
+    // Core 2024
+    expect(speciesSlugs).toContain('human-2024');
+    expect(speciesSlugs).toContain('elf-2024');
+    expect(speciesSlugs).toContain('dwarf-2024');
+    expect(speciesSlugs).toContain('halfling-2024');
+    expect(speciesSlugs).toContain('gnome-2024');
+    expect(speciesSlugs).toContain('dragonborn-2024');
+    expect(speciesSlugs).toContain('tiefling-2024');
+    expect(speciesSlugs).toContain('aasimar-2024');
+    expect(speciesSlugs).toContain('goliath-2024');
+    expect(speciesSlugs).toContain('orc-2024');
+
+    // Expanded / legacy
+    expect(speciesSlugs).toContain('half-elf');
+    expect(speciesSlugs).toContain('half-orc');
     expect(speciesSlugs).toContain('firbolg');
-    expect(speciesSlugs).toContain('goliath');
     expect(speciesSlugs).toContain('kenku');
     expect(speciesSlugs).toContain('tabaxi');
     expect(speciesSlugs).toContain('triton');
@@ -47,40 +54,31 @@ describe('Species Data Loading', () => {
     expect(speciesSlugs).toContain('goblin');
     expect(speciesSlugs).toContain('hobgoblin');
     expect(speciesSlugs).toContain('kobold');
-    expect(speciesSlugs).toContain('orc');
     expect(speciesSlugs).toContain('yuan-ti-pureblood');
     expect(speciesSlugs).toContain('fairy');
     expect(speciesSlugs).toContain('harengon');
     expect(speciesSlugs).toContain('loxodon');
     expect(speciesSlugs).toContain('owlin');
     expect(speciesSlugs).toContain('githyanki');
-    expect(speciesSlugs).toContain('fire-genasi');
+    expect(speciesSlugs).toContain('genasi');
   });
 
   it('should have correct ability bonuses for human', () => {
     const species = loadSpecies();
-    const human = species.find(s => s.slug === 'human');
+    const human = species.find(s => s.slug === 'human-2024');
     expect(human).toBeDefined();
-    expect(human?.ability_bonuses).toEqual({
-      STR: 1,
-      DEX: 1,
-      CON: 1,
-      INT: 1,
-      WIS: 1,
-      CHA: 1
-    });
+    expect(human?.ability_bonuses).toEqual({});
   });
 
-  it('should have correct data for wood elf', () => {
+  it('should have correct data for elf', () => {
     const species = loadSpecies();
-    const woodElf = species.find(s => s.slug === 'wood-elf');
-    expect(woodElf).toBeDefined();
-    expect(woodElf?.name).toBe('Wood Elf');
-    expect(woodElf?.source).toBe('PHB');
-    expect(woodElf?.speed).toBe(30);
-    expect(woodElf?.ability_bonuses).toEqual({ DEX: 2, WIS: 1 });
-    expect(woodElf?.species_traits).toContain('Mask of the Wild');
-    expect(woodElf?.typicalRoles).toContain('Ranger');
+    const elf = species.find(s => s.slug === 'elf-2024');
+    expect(elf).toBeDefined();
+    expect(elf?.name).toBe('Elf');
+    expect(elf?.core).toBe(true);
+    expect(elf?.speed).toBeGreaterThanOrEqual(30);
+    expect(elf?.ability_bonuses).toEqual({});
+    expect(elf?.species_traits).toContain('Darkvision');
   });
 
   it('should have valid speed values', () => {

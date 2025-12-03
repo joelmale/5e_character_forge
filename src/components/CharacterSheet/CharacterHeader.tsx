@@ -38,6 +38,11 @@ export const CharacterHeader: React.FC<CharacterHeaderProps> = ({
           </h1>
           <div className="text-sm text-theme-tertiary">
             {character.species} {character.class} • Level {character.level}
+            {character.selectedLineage && (
+              <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full bg-accent-blue-darker text-xs font-semibold text-blue-100 border border-accent-blue-dark">
+                {character.selectedLineage}
+              </span>
+            )}
           </div>
         </div>
 
@@ -46,14 +51,8 @@ export const CharacterHeader: React.FC<CharacterHeaderProps> = ({
            <div className="flex flex-col items-center gap-1" style={{ paddingRight: '160px' }}>
               <button
                 onClick={() => {
-                  console.log('🎲 [CharacterHeader] Dice Rolling Tray button clicked');
-                  console.log('🎲 [CharacterHeader] onOpenDiceTray function:', onOpenDiceTray);
                   if (onOpenDiceTray) {
-                    console.log('🎲 [CharacterHeader] Calling onOpenDiceTray...');
                     onOpenDiceTray();
-                    console.log('🎲 [CharacterHeader] onOpenDiceTray called successfully');
-                  } else {
-                    console.error('❌ [CharacterHeader] onOpenDiceTray is undefined!');
                   }
                 }}
                 className="px-3 py-2 bg-indigo-600 hover:bg-indigo-500 rounded-lg transition-colors flex items-center gap-2 text-sm font-medium"
@@ -95,7 +94,6 @@ export const CharacterHeader: React.FC<CharacterHeaderProps> = ({
              </button>
                <button
                  onClick={() => {
-                   console.log('🏠 [LONG REST] Long rest button clicked for character:', character.id);
                    onLongRest(character.id);
                  }}
                  className="px-2 py-2 bg-accent-green hover:bg-accent-green rounded-lg transition-colors flex items-center justify-center"

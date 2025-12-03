@@ -247,20 +247,34 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
   }
 
 
-  // 5. Calculate Armor Class (simple calculation)
+  // 5. Apply lineage effects (traits/spells/speed overrides)
+  const lineageData = data.selectedLineage && (speciesData as any).lineages
+    ? (speciesData as any).lineages[data.selectedLineage]
+    : undefined;
+
+  const mergedTraits = [
+    ...((speciesData as any).traits || speciesData.species_traits || []),
+    ...(lineageData?.traits || [])
+  ];
+
+  // Future: apply lineage spells if we surface them in spell lists
+
+  const effectiveSpeed = lineageData?.baseSpeed || (speciesData as any).baseSpeed || speciesData.speed || 30;
+
+  // 6. Calculate Armor Class (simple calculation)
   const armorClass = BASE_ARMOR_CLASS + finalAbilities.DEX.modifier;
 
-  // 6. Calculate Initiative
+  // 7. Calculate Initiative
   const initiative = finalAbilities.DEX.modifier;
 
-  // 7. Load Features and Traits
+  // 8. Load Features and Traits
   const featuresAndTraits: Character['featuresAndTraits'] = {
     personality: data.personality || '',
     ideals: data.ideals || '',
     bonds: data.bonds || '',
     flaws: data.flaws || '',
     classFeatures: classData.class_features || [],
-    speciesTraits: (speciesData as any).traits || speciesData.species_traits || [],
+    speciesTraits: mergedTraits,
     backgroundFeatures: backgroundData ? [{
       name: (backgroundData as any).feature || 'Background Feature',
       description: (backgroundData as any).feature_description || 'A feature from your background.'
@@ -269,14 +283,14 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
   };
 
 
-  // 8. Calculate SRD Features (from the original implementation)
+  // 9. Calculate SRD Features (from the original implementation)
   const srdFeatures = {
     classFeatures: [], // Would need to be populated from SRD data
     subclassFeatures: [],
   };
 
 
-  // 9. Create final character object
+  // 10. Create final character object
   // Collect all feats (level 1 + cumulative ASI feats)
   const allFeats = [...(data.selectedFeats || [])];
   
@@ -329,7 +343,7 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
       dieType: getHitDieForClass(data.classSlug),
     },
 
-    speed: 30, // Default speed, would need race-specific logic
+    speed: effectiveSpeed,
     initiative,
     abilities: finalAbilities,
     skills: finalSkills,

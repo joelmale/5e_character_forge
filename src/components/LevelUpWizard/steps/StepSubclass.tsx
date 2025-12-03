@@ -66,7 +66,7 @@ export const StepSubclass: React.FC<StepSubclassProps> = ({
             <div className="flex items-start justify-between">
               <div className="flex-1">
                 <h4 className="font-semibold text-accent-gold mb-1">{subclass.name}</h4>
-                <p className="text-sm text-[#992600]">{subclass.detailedDescription || subclass.desc.join(' ')}</p>
+                <p className="text-sm text-[#992600]">{subclass.description || subclass.detailedDescription || subclass.desc.join(' ')}</p>
               </div>
               <div className={`flex-shrink-0 ml-4 w-5 h-5 rounded-full border-2 flex items-center justify-center ${
                 selectedSubclass === subclass.slug ? 'border-accent-gold bg-accent-gold' : 'border-theme-border'

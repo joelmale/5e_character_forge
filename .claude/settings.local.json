@@ -37,7 +37,9 @@
       "Bash(npm test:*)",
       "Bash(npx tsc:*)",
       "Bash(npm audit:*)",
-      "Bash(npm run lint:*)"
+      "Bash(npm run lint:*)",
+      "Bash(cloc:*)",
+      "Bash(wc:*)"
     ],
     "deny": [],
     "ask": [],

@@ -2,6 +2,7 @@ import { Character, CharacterCreationData, AbilityName, SkillName, EquippedItem 
 import { calculateKnownLanguages } from '../utils/languageUtils';
 import { initializeSpellcasting } from '../utils/spellcastingInit';
 import { generateUUID } from '../services/diceService';
+import { processEquipment } from '../utils/equipmentProcessor';
 import {
   getAllSpecies,
   loadClasses,
@@ -11,12 +12,20 @@ import {
   SKILL_TO_ABILITY,
   ALL_SKILLS,
   BACKGROUNDS,
-  EQUIPMENT_PACKAGES,
   getFeaturesByClass,
   getFeaturesBySubclass,
   getHitDieForClass,
 } from '../services/dataService';
-import { BASE_ARMOR_CLASS, SHIELD_AC_BONUS, MAX_DEX_BONUS_MEDIUM_ARMOR } from '../constants/combat';
+import {
+  BASE_ARMOR_CLASS,
+  ARMOR_CATEGORIES,
+  calculateArmorClassByCategory,
+  DEFAULT_WALKING_SPEED,
+  DEFAULT_STARTING_CURRENCY,
+  DEFAULT_CHARACTER_NAME,
+  LEVEL_1_PROFICIENCY_BONUS,
+} from '../constants/combat';
+import type { ArmorCategory } from '../constants/combat';
 
 export const calculateCharacterStats = (data: CharacterCreationData): Character => {
   const speciesData = getAllSpecies().find(s => s.slug === data.speciesSlug);
@@ -36,7 +45,7 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
   });
 
   const level = data.level;
-  const pb = PROFICIENCY_BONUSES[level - 1] || 2;
+  const pb = PROFICIENCY_BONUSES[level - 1] || LEVEL_1_PROFICIENCY_BONUS;
 
   // 2. Calculate Hit Points (Based on chosen method)
   let hitDieValue: number;
@@ -46,7 +55,9 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
     // Default to max for level 1
     hitDieValue = classData.hit_die;
   }
-  const maxHitPoints = hitDieValue + finalAbilities.CON.modifier + (speciesData.slug === 'dwarf' ? level : 0);
+  // Calculate HP with species bonuses (data-driven)
+  const hpBonus = (speciesData.mechanicalBonuses?.hpPerLevel || 0) * level;
+  const maxHitPoints = hitDieValue + finalAbilities.CON.modifier + hpBonus;
 
   // 3. Calculate Skills (from selected skills + background skills)
   const backgroundData = BACKGROUNDS.find(bg => bg.name === data.background);
@@ -82,92 +93,21 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
     );
   }
 
-  // 5. Build Equipment Inventory
-  const inventory: EquippedItem[] = [];
-  let equippedArmor: string | undefined;
-  const equippedWeapons: string[] = [];
+  // 5. Build Equipment Inventory (using Builder Pattern for reduced complexity)
+  const { inventory, equippedArmor, equippedWeapons } = processEquipment(data, level);
 
-  // Get equipment package for the character's level
-  const equipmentPackage = EQUIPMENT_PACKAGES.find(pkg => pkg.level === level) || EQUIPMENT_PACKAGES[0];
-
-  // Add items from equipment package
-  equipmentPackage.items.forEach(item => {
-    const itemSlug = item.slug || item.name.toLowerCase().replace(/[^a-z0-9]/g, '-');
-    inventory.push({
-      equipmentSlug: itemSlug,
-      quantity: item.quantity,
-      equipped: item.equipped || false,
-    });
-
-    // Track equipped items
-    const equipment = loadEquipment().find(eq => eq.slug === itemSlug);
-    if (item.equipped && equipment) {
-      if (equipment.armor_category) {
-        equippedArmor = itemSlug;
-      } else if (equipment.weapon_category) {
-        equippedWeapons.push(itemSlug);
-      }
-    }
-  });
-
-  // Add items from class equipment choices
-  data.equipmentChoices.forEach(choice => {
-    if (choice.selected !== null) {
-      const selectedBundle = choice.options[choice.selected];
-      selectedBundle.forEach(item => {
-        // Try to find matching equipment in database
-        const equipmentSlug = item.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-        const foundEquipment = loadEquipment().find(eq =>
-          eq.slug === equipmentSlug || eq.name.toLowerCase() === item.name.toLowerCase()
-        );
-
-        if (foundEquipment) {
-          inventory.push({
-            equipmentSlug: foundEquipment.slug,
-            quantity: item.quantity,
-            equipped: false, // Will be equipped manually by player
-          });
-        }
-      });
-    }
-  });
-
-  // Add custom starting inventory from equipment browser (Sprint 4)
-  if (data.startingInventory) {
-    data.startingInventory.forEach(item => {
-      // Check if item already exists in inventory
-      const existingItem = inventory.find(inv => inv.equipmentSlug === item.equipmentSlug);
-      if (existingItem) {
-        existingItem.quantity += item.quantity;
-      } else {
-        inventory.push({
-          equipmentSlug: item.equipmentSlug,
-          quantity: item.quantity,
-          equipped: item.equipped || false,
-        });
-      }
-    });
-  }
-
-  // 6. Calculate AC based on equipped armor
+  // 6. Calculate AC based on equipped armor (using centralized helper)
   let armorClass = BASE_ARMOR_CLASS + finalAbilities.DEX.modifier; // Default unarmored
   if (equippedArmor) {
     const armor = loadEquipment().find(eq => eq.slug === equippedArmor);
-    if (armor?.armor_class) {
-      if (armor.armor_category === 'Light') {
-        // Light armor: base + full DEX
-        armorClass = armor.armor_class.base + finalAbilities.DEX.modifier;
-      } else if (armor.armor_category === 'Medium') {
-        // Medium armor: base + DEX (max +2)
-        const dexBonus = Math.min(finalAbilities.DEX.modifier, armor.armor_class.max_bonus || MAX_DEX_BONUS_MEDIUM_ARMOR);
-        armorClass = armor.armor_class.base + dexBonus;
-      } else if (armor.armor_category === 'Heavy') {
-        // Heavy armor: base only
-        armorClass = armor.armor_class.base;
-      } else if (armor.armor_category === 'Shield') {
-        // Shield adds bonus to current AC
-        armorClass += SHIELD_AC_BONUS;
-      }
+    if (armor?.armor_class && armor.armor_category) {
+      armorClass = calculateArmorClassByCategory(
+        armor.armor_category as ArmorCategory,
+        armor.armor_class.base,
+        finalAbilities.DEX.modifier,
+        armor.armor_class.max_bonus,
+        armorClass
+      );
     }
   }
 
@@ -193,7 +133,7 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
   // 11. Construct Final Character Object
   return {
     id: generateUUID(), // Generate UUID for IndexedDB
-    name: data.name || "Unnamed Hero",
+    name: data.name || DEFAULT_CHARACTER_NAME,
     species: speciesData.name,
     class: classData.name,
     subclass: data.subclassSlug, // Sprint 5: Store subclass slug
@@ -212,7 +152,7 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
         max: data.level,
         dieType: getHitDieForClass(data.classSlug),
       },
-    speed: 30,
+    speed: speciesData.baseSpeed || DEFAULT_WALKING_SPEED,
     initiative: finalAbilities.DEX.modifier,
     abilities: finalAbilities,
     skills: finalSkills,
@@ -229,10 +169,8 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
     // Sprint 4: Equipment and inventory
     inventory,
     currency: {
-      cp: 0,
-      sp: 0,
+      ...DEFAULT_STARTING_CURRENCY,
       gp: equipmentPackage.startingGold || 0,
-      pp: 0,
     },
     equippedArmor,
     equippedWeapons,

@@ -36,17 +36,6 @@ export const Step5point5Feats: React.FC<StepProps> = ({ data, updateData, nextSt
   const maxFeats = calculateFeatAvailability(data);
   const selectedFeats = data.selectedFeats || [];
 
-  // Get all feats and their eligibility status
-  const allFeats = FEAT_DATABASE.map(feat => ({
-    feat,
-    isAvailable: checkFeatPrerequisites(feat, data),
-    requirements: feat.prerequisite ? getPrerequisiteDescription(feat.prerequisite) : null
-  }));
-
-  const featRequiresChoices = (featSlug: string): boolean => {
-    return ['elemental-adept', 'metamagic-adept', 'lightly-armored', 'moderately-armored'].includes(featSlug);
-  };
-
   const getPrerequisiteDescription = (prerequisite: string): string => {
     // Convert technical prerequisite text to user-friendly descriptions
     const lower = prerequisite.toLowerCase();

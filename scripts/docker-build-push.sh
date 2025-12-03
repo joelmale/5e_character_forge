@@ -3,37 +3,51 @@
 # - Uses BuildKit cache mounts for npm and Vite
 # - Copies files in layers for better caching
 # - Excludes unnecessary files via .dockerignore
-# - Uses --no-cache to ensure fresh builds and prevent version discrepancies
-set -e
+# - Optimized caching strategy for faster rebuilds
+set -euo pipefail
 
 DOCKER_IMAGE="joelmale/5e-character-forge:latest"
 DOCKER_IMAGE_BUILDER="${DOCKER_IMAGE}-builder"
 
-echo "🚀 Building and pushing optimized Docker images: $DOCKER_IMAGE"
-echo "⏱️  Start time: $(date '+%Y-%m-%d %H:%M:%S')"
+# Logging function
+log() {
+    echo "[$(date +'%Y-%m-%d %H:%M:%S')] $*" >&2
+}
+
+log "🚀 Building and pushing optimized Docker images: $DOCKER_IMAGE"
+log "⏱️  Start time: $(date '+%Y-%m-%d %H:%M:%S')"
 BUILD_START=$(date +%s)
 
 # Enable BuildKit for faster builds
 export DOCKER_BUILDKIT=1
 
-# Create and use buildx builder if it doesn't exist
-if ! docker buildx ls | grep -q "multi-arch-builder"; then
-    echo "📦 Creating multi-arch builder..."
-    docker buildx create --name multi-arch-builder --use
-    docker buildx inspect --bootstrap
+# Use or create buildx builder
+BUILDER_NAME="multi-arch-builder"
+
+log "🔍 Checking for existing builder: $BUILDER_NAME"
+if docker buildx use $BUILDER_NAME 2>/dev/null; then
+    log "📦 Using existing $BUILDER_NAME builder..."
+else
+    log "📦 Creating $BUILDER_NAME builder..."
+    docker buildx create --name $BUILDER_NAME --use
 fi
 
+# Ensure builder is ready
+log "🔄 Ensuring builder is bootstrapped..."
+docker buildx inspect --bootstrap $BUILDER_NAME
+
 echo ""
-echo "🏗️  Building builder stage for cache..."
-echo "⏱️  Builder stage start: $(date '+%H:%M:%S')"
+log "🏗️  Building builder stage for cache..."
+log "⏱️  Builder stage start: $(date '+%H:%M:%S')"
 BUILDER_START=$(date +%s)
 
-# Ensure cache directory exists
+# Ensure cache directories exist
 mkdir -p /tmp/.buildx-cache
+mkdir -p /tmp/.buildx-cache-new
 
-# Build builder stage first for better caching
-docker buildx build \
-    --no-cache \
+# Build builder stage with proper caching (removed --no-cache)
+log "🔨 Building builder stage..."
+if ! docker buildx build \
     --progress=plain \
     --target builder \
     --platform linux/amd64,linux/arm64 \
@@ -41,40 +55,50 @@ docker buildx build \
     --cache-to type=local,dest=/tmp/.buildx-cache-new,mode=max \
     --tag "$DOCKER_IMAGE_BUILDER" \
     --push \
-    .
+    .; then
+    log "❌ Builder stage failed"
+    exit 1
+fi
 
 BUILDER_END=$(date +%s)
 BUILDER_DURATION=$((BUILDER_END - BUILDER_START))
-echo "✅ Builder stage completed in ${BUILDER_DURATION}s"
+log "✅ Builder stage completed in ${BUILDER_DURATION}s"
 
 echo ""
-echo "🏗️  Building and pushing final production image..."
-echo "⏱️  Production stage start: $(date '+%H:%M:%S')"
+log "🏗️  Building and pushing final production image..."
+log "⏱️  Production stage start: $(date '+%H:%M:%S')"
 PRODUCTION_START=$(date +%s)
 
 # Ensure cache directory exists
 mkdir -p /tmp/.buildx-cache
 
-# Build and push final production image with cache
-docker buildx build \
-    --no-cache \
+# Build and push final production image with cache (removed --no-cache)
+log "🔨 Building production image..."
+if ! docker buildx build \
     --progress=plain \
     --platform linux/amd64,linux/arm64 \
     --cache-from type=local,src=/tmp/.buildx-cache \
     --cache-from "$DOCKER_IMAGE_BUILDER" \
     --tag "$DOCKER_IMAGE" \
     --push \
-    .
+    .; then
+    log "❌ Production build failed"
+    exit 1
+fi
 
 PRODUCTION_END=$(date +%s)
 PRODUCTION_DURATION=$((PRODUCTION_END - PRODUCTION_START))
-echo "✅ Production stage completed in ${PRODUCTION_DURATION}s"
+log "✅ Production stage completed in ${PRODUCTION_DURATION}s"
 
-# Clean up cache (optional - comment out if you want to keep cache)
+# Clean up and rotate cache
 echo ""
-echo "🧹 Cleaning up build cache..."
+log "🧹 Rotating build cache..."
 rm -rf /tmp/.buildx-cache
-mv /tmp/.buildx-cache-new /tmp/.buildx-cache 2>/dev/null || true
+if [ -d /tmp/.buildx-cache-new ]; then
+    mv /tmp/.buildx-cache-new /tmp/.buildx-cache || log "Warning: Cache rotation failed"
+else
+    log "Warning: No new cache directory found"
+fi
 
 BUILD_END=$(date +%s)
 TOTAL_DURATION=$((BUILD_END - BUILD_START))
@@ -90,6 +114,17 @@ echo "Total time:        ${TOTAL_DURATION}s"
 echo "End time:          $(date '+%Y-%m-%d %H:%M:%S')"
 echo ""
 
+# Build analytics
+if [ $TOTAL_DURATION -gt 0 ]; then
+    BUILD_MINUTES=$((TOTAL_DURATION / 60))
+    BUILD_SECONDS=$((TOTAL_DURATION % 60))
+    echo "⏱️  Build Performance:"
+    echo "   - Total: ${BUILD_MINUTES}m ${BUILD_SECONDS}s"
+    echo "   - Builder efficiency: $((BUILDER_DURATION * 100 / TOTAL_DURATION))% of total time"
+    echo "   - Production efficiency: $((PRODUCTION_DURATION * 100 / TOTAL_DURATION))% of total time"
+    echo ""
+fi
+
 # Get container sizes for both architectures
 echo "📏 Container Sizes:"
 echo "────────────────────────────────────────────────────────────"
@@ -97,19 +132,19 @@ echo "────────────────────────�
 # Function to get human-readable size
 get_size() {
     local size_bytes=$1
-    if [ $size_bytes -ge 1073741824 ]; then
+    if [ "$size_bytes" -ge 1073741824 ] 2>/dev/null; then
         # Calculate GB with one decimal place
         local gb=$(( size_bytes / 1073741824 ))
         local remainder=$(( size_bytes % 1073741824 ))
         local decimal=$(( remainder * 10 / 1073741824 ))
         echo "${gb}.${decimal}GB"
-    elif [ $size_bytes -ge 1048576 ]; then
+    elif [ "$size_bytes" -ge 1048576 ] 2>/dev/null; then
         # Calculate MB with one decimal place
         local mb=$(( size_bytes / 1048576 ))
         local remainder=$(( size_bytes % 1048576 ))
         local decimal=$(( remainder * 10 / 1048576 ))
         echo "${mb}.${decimal}MB"
-    elif [ $size_bytes -ge 1024 ]; then
+    elif [ "$size_bytes" -ge 1024 ] 2>/dev/null; then
         # Calculate KB with one decimal place
         local kb=$(( size_bytes / 1024 ))
         local remainder=$(( size_bytes % 1024 ))
@@ -120,84 +155,59 @@ get_size() {
     fi
 }
 
-# Get image manifest information
-echo "🔍 Inspecting built images..."
-MANIFEST_INFO=$(docker buildx imagetools inspect $DOCKER_IMAGE --format "{{json .}}" 2>/dev/null)
-
-if [ -n "$MANIFEST_INFO" ]; then
-    # Extract sizes for each platform
-    AMD64_SIZE=$(echo "$MANIFEST_INFO" | grep -o '"platform":\s*"linux/amd64"[^}]*"size":\s*[0-9]*' | grep -o '"size":\s*[0-9]*' | grep -o '[0-9]*' | head -1)
-    ARM64_SIZE=$(echo "$MANIFEST_INFO" | grep -o '"platform":\s*"linux/arm64"[^}]*"size":\s*[0-9]*' | grep -o '"size":\s*[0-9]*' | grep -o '[0-9]*' | head -1)
-
-    if [ -n "$AMD64_SIZE" ]; then
-        AMD64_SIZE_HUMAN=$(get_size $AMD64_SIZE)
-        echo "AMD64 (x86_64):    $AMD64_SIZE_HUMAN"
-    else
-        echo "AMD64 (x86_64):    Size unavailable"
-    fi
-
-    if [ -n "$ARM64_SIZE" ]; then
-        ARM64_SIZE_HUMAN=$(get_size $ARM64_SIZE)
-        echo "ARM64 (aarch64):  $ARM64_SIZE_HUMAN"
-    else
-        echo "ARM64 (aarch64):  Size unavailable"
-    fi
-
-    # Calculate total size if both are available
-    if [ -n "$AMD64_SIZE" ] && [ -n "$ARM64_SIZE" ]; then
-        TOTAL_SIZE=$((AMD64_SIZE + ARM64_SIZE))
-        TOTAL_SIZE_HUMAN=$(get_size $TOTAL_SIZE)
-        echo "Total (both):      $TOTAL_SIZE_HUMAN"
-    fi
-else
-    echo "Unable to retrieve image size information"
-    echo "This may be normal for some registries or network conditions"
-fi
-
-# Try to show local images if available
-if docker images $DOCKER_IMAGE 2>/dev/null | grep -q $DOCKER_IMAGE; then
-    echo ""
-    echo "📦 Local Images (if available):"
-    docker images $DOCKER_IMAGE --format "table {{.Repository}}:{{.Tag}}\t{{.Size}}\t{{.Architecture}}" 2>/dev/null || echo "No local images found"
-fi
-
-# Get amd64 image size
-AMD64_SIZE=$(docker buildx imagetools inspect $DOCKER_IMAGE --format "{{.Manifest.Digest}}" 2>/dev/null | head -1)
-if [ -n "$AMD64_SIZE" ]; then
-    # Try to get size from registry (this might not work for all registries)
-    AMD64_SIZE_BYTES=$(docker manifest inspect $DOCKER_IMAGE | grep -A 10 '"platform": {"architecture": "amd64"' | grep '"size"' | head -1 | sed 's/.*"size": \([0-9]*\).*/\1/' 2>/dev/null || echo "0")
-    if [ "$AMD64_SIZE_BYTES" != "0" ]; then
-        AMD64_SIZE_HUMAN=$(get_size $AMD64_SIZE_BYTES)
-        echo "AMD64 (x86_64):    $AMD64_SIZE_HUMAN"
-    else
-        echo "AMD64 (x86_64):    Size unavailable"
-    fi
-else
-    echo "AMD64 (x86_64):    Size unavailable"
-fi
-
-# Get arm64 image size
-ARM64_SIZE=$(docker buildx imagetools inspect $DOCKER_IMAGE --format "{{.Manifest.Digest}}" 2>/dev/null | head -1)
-if [ -n "$ARM64_SIZE" ]; then
-    # Try to get size from registry
-    ARM64_SIZE_BYTES=$(docker manifest inspect $DOCKER_IMAGE | grep -A 10 '"platform": {"architecture": "arm64"' | grep '"size"' | head -1 | sed 's/.*"size": \([0-9]*\).*/\1/' 2>/dev/null || echo "0")
-    if [ "$ARM64_SIZE_BYTES" != "0" ]; then
-        ARM64_SIZE_HUMAN=$(get_size $ARM64_SIZE_BYTES)
-        echo "ARM64 (aarch64):  $ARM64_SIZE_HUMAN"
-    else
-        echo "ARM64 (aarch64):  Size unavailable"
-    fi
-else
-    echo "ARM64 (aarch64):  Size unavailable"
-fi
-
-# Try alternative method using docker images command if available locally
-if docker images $DOCKER_IMAGE | grep -q $DOCKER_IMAGE; then
-    echo ""
-    echo "📦 Local Images:"
+# Try to get sizes from local images first (most reliable)
+if docker images $DOCKER_IMAGE --format "{{.Size}}" 2>/dev/null | head -1 | grep -q .; then
+    log "📦 Using local image sizes..."
     docker images $DOCKER_IMAGE --format "table {{.Repository}}:{{.Tag}}\t{{.Size}}\t{{.Architecture}}"
+else
+    log "🔍 Inspecting registry images..."
+
+    # Try to get sizes from registry using buildx imagetools
+    if command -v jq >/dev/null 2>&1; then
+        # Use jq for reliable JSON parsing if available
+        MANIFEST_INFO=$(docker buildx imagetools inspect $DOCKER_IMAGE --format "{{json .}}" 2>/dev/null)
+        if [ -n "$MANIFEST_INFO" ]; then
+            # Extract sizes for each platform using jq
+            AMD64_SIZE=$(echo "$MANIFEST_INFO" | jq -r '.manifests[] | select(.platform.architecture == "amd64") | .size' 2>/dev/null | head -1)
+            ARM64_SIZE=$(echo "$MANIFEST_INFO" | jq -r '.manifests[] | select(.platform.architecture == "arm64") | .size' 2>/dev/null | head -1)
+
+            if [ -n "$AMD64_SIZE" ] && [ "$AMD64_SIZE" != "null" ]; then
+                AMD64_SIZE_HUMAN=$(get_size "$AMD64_SIZE")
+                echo "AMD64 (x86_64):    $AMD64_SIZE_HUMAN"
+            else
+                echo "AMD64 (x86_64):    Size unavailable"
+            fi
+
+            if [ -n "$ARM64_SIZE" ] && [ "$ARM64_SIZE" != "null" ]; then
+                ARM64_SIZE_HUMAN=$(get_size "$ARM64_SIZE")
+                echo "ARM64 (aarch64):  $ARM64_SIZE_HUMAN"
+            else
+                echo "ARM64 (aarch64):  Size unavailable"
+            fi
+
+            # Calculate total size if both are available
+            if [ -n "$AMD64_SIZE" ] && [ -n "$ARM64_SIZE" ] && [ "$AMD64_SIZE" != "null" ] && [ "$ARM64_SIZE" != "null" ]; then
+                TOTAL_SIZE=$((AMD64_SIZE + ARM64_SIZE))
+                TOTAL_SIZE_HUMAN=$(get_size "$TOTAL_SIZE")
+                echo "Total (both):      $TOTAL_SIZE_HUMAN"
+            fi
+        else
+            echo "Unable to retrieve image size information from registry"
+        fi
+    else
+        log "⚠️  jq not available, size reporting limited"
+        echo "AMD64 (x86_64):    Size unavailable (install jq for better reporting)"
+        echo "ARM64 (aarch64):  Size unavailable (install jq for better reporting)"
+    fi
 fi
 
 echo "════════════════════════════════════════════════════════════"
 echo ""
-echo "✅ Successfully built and pushed $DOCKER_IMAGE for amd64 and arm64!"
+log "✅ Successfully built and pushed $DOCKER_IMAGE for amd64 and arm64!"
+echo ""
+echo "🌟 Build completed successfully!"
+echo "   - Images available: $DOCKER_IMAGE"
+echo "   - Architectures: linux/amd64, linux/arm64"
+echo "   - Cache optimized for future builds"
+echo ""
+echo "🚀 Ready for deployment!"

@@ -1,7 +1,8 @@
-import React, { useRef, useEffect } from 'react';
-import { ArrowLeft, ArrowRight, Check, Shuffle } from 'lucide-react';
+import React, { useRef, useEffect, useState } from 'react';
+import { ArrowLeft, ArrowRight, Check, Shuffle, MoreHorizontal } from 'lucide-react';
 import { StepProps } from '../types/wizard.types';
 import { loadClasses, getCantripsByClass, getLeveledSpellsByClass, AppSpell, SPELLS_KNOWN_BY_CLASS } from '../../../services/dataService';
+import SpellDetailsModal from '../../SpellDetailsModal';
 import {
   getSpellcastingType,
   cleanupInvalidSpellSelections,
@@ -31,6 +32,10 @@ export const Step4Spells: React.FC<StepProps> = ({ data, updateData, nextStep, p
   const allClasses = loadClasses(data.edition);
   const selectedClass = allClasses.find(c => c.slug === data.classSlug);
   const hasProcessedAutoAdvance = useRef(false);
+
+  // Modal state
+  const [selectedSpellForModal, setSelectedSpellForModal] = useState<AppSpell | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Auto-advance and validation effects (must be called before any conditional returns)
   useEffect(() => {
@@ -102,6 +107,41 @@ export const Step4Spells: React.FC<StepProps> = ({ data, updateData, nextStep, p
   } else {
     maxPreparedSpellsAtLevel = spellcasting.spellsKnownOrPrepared;
   }
+
+  // Modal handlers
+  const openSpellModal = (spell: AppSpell) => {
+    setSelectedSpellForModal(spell);
+    setIsModalOpen(true);
+  };
+
+  const closeSpellModal = () => {
+    setSelectedSpellForModal(null);
+    setIsModalOpen(false);
+  };
+
+  const selectSpellFromModal = () => {
+    if (!selectedSpellForModal) return;
+
+    // Determine which toggle function to call based on spell type and context
+    if (selectedSpellForModal.level === 0) {
+      // Cantrip
+      handleCantripToggle(selectedSpellForModal.slug);
+    } else {
+      // Spell - determine the appropriate field based on spellcasting type
+      let field: keyof typeof data.spellSelection = 'preparedSpells';
+      if (spellcastingType === 'known') {
+        field = 'knownSpells';
+      } else if (spellcastingType === 'wizard') {
+        // For wizard, check if we're in spellbook or daily prep mode
+        // This is a simplification - in practice we'd need more context
+        field = 'spellbook';
+      }
+      handleSpellToggle(selectedSpellForModal.slug, field);
+    }
+
+    // Close modal after selection
+    closeSpellModal();
+  };
 
   const handleCantripToggle = (spellSlug: string) => {
     const current = data.spellSelection.selectedCantrips;
@@ -257,33 +297,44 @@ export const Step4Spells: React.FC<StepProps> = ({ data, updateData, nextStep, p
             const canSelect = data.spellSelection.selectedCantrips.length < cantripsKnownAtLevel;
 
             return (
-              <button
-                key={spell.slug}
-                onClick={() => handleCantripToggle(spell.slug)}
-                disabled={!isSelected && !canSelect}
-                className={`p-3 rounded-lg border-2 text-left transition-all ${
-                  isSelected
-                    ? 'bg-blue-900 border-blue-500'
-                    : canSelect
-                    ? 'bg-theme-tertiary border-theme-primary hover:border-blue-400'
-                    : 'bg-theme-secondary border-theme-secondary opacity-50 cursor-not-allowed'
-                }`}
-              >
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="font-semibold text-white">{spell.name}</div>
-                    <div className="text-xs text-purple-300">{spell.school}</div>
+              <div className="relative">
+                <button
+                  onClick={() => handleCantripToggle(spell.slug)}
+                  disabled={!isSelected && !canSelect}
+                  className={`w-full p-3 rounded-lg border-2 text-left transition-all ${
+                    isSelected
+                      ? 'bg-blue-900 border-blue-500'
+                      : canSelect
+                      ? 'bg-theme-tertiary border-theme-primary hover:border-blue-400'
+                      : 'bg-theme-secondary border-theme-secondary opacity-50 cursor-not-allowed'
+                  }`}
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="font-semibold text-white">{spell.name}</div>
+                      <div className="text-xs text-purple-300">{spell.school}</div>
+                    </div>
+                    {isSelected && <Check className="w-5 h-5 text-accent-green-light" />}
                   </div>
-                  {isSelected && <Check className="w-5 h-5 text-accent-green-light" />}
-                </div>
-                <div className="text-xs text-theme-muted mt-2 line-clamp-2">
-                  {spell.description}
-                </div>
-                <div className="text-xs text-theme-disabled mt-1">
-                  {spell.castingTime} • {spell.range}
-                  {spell.concentration && ' • Concentration'}
-                </div>
-              </button>
+                  <div className="text-xs text-theme-muted mt-2 line-clamp-2">
+                    {spell.description}
+                  </div>
+                  <div className="text-xs text-theme-disabled mt-1">
+                    {spell.castingTime} • {spell.range}
+                    {spell.concentration && ' • Concentration'}
+                  </div>
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    openSpellModal(spell);
+                  }}
+                  className="absolute top-2 right-2 w-6 h-6 bg-theme-secondary hover:bg-theme-primary rounded-full flex items-center justify-center text-theme-muted hover:text-white transition-colors z-10"
+                  title="View full spell details"
+                >
+                  <MoreHorizontal className="w-3 h-3" />
+                </button>
+              </div>
             );
           })}
         </div>
@@ -307,34 +358,45 @@ export const Step4Spells: React.FC<StepProps> = ({ data, updateData, nextStep, p
                 const canSelect = (data.spellSelection.spellbook?.length || 0) < 6;
 
                 return (
-                  <button
-                    key={spell.slug}
-                    onClick={() => handleSpellToggle(spell.slug, 'spellbook')}
-                    disabled={!isSelected && !canSelect}
-                    className={`p-3 rounded-lg border-2 text-left transition-all ${
-                      isSelected
-                        ? 'bg-blue-900 border-blue-500'
-                        : canSelect
-                        ? 'bg-theme-tertiary border-theme-primary hover:border-blue-400'
-                        : 'bg-theme-secondary border-theme-secondary opacity-50 cursor-not-allowed'
-                    }`}
-                  >
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="font-semibold text-white">{spell.name}</div>
-                        <div className="text-xs text-purple-300">{spell.school}</div>
+                  <div className="relative">
+                    <button
+                      onClick={() => handleSpellToggle(spell.slug, 'spellbook')}
+                      disabled={!isSelected && !canSelect}
+                      className={`w-full p-3 rounded-lg border-2 text-left transition-all ${
+                        isSelected
+                          ? 'bg-blue-900 border-blue-500'
+                          : canSelect
+                          ? 'bg-theme-tertiary border-theme-primary hover:border-blue-400'
+                          : 'bg-theme-secondary border-theme-secondary opacity-50 cursor-not-allowed'
+                      }`}
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="font-semibold text-white">{spell.name}</div>
+                          <div className="text-xs text-purple-300">{spell.school}</div>
+                        </div>
+                        {isSelected && <Check className="w-5 h-5 text-accent-green-light" />}
                       </div>
-                      {isSelected && <Check className="w-5 h-5 text-accent-green-light" />}
-                    </div>
-                    <div className="text-xs text-theme-muted mt-2 line-clamp-2">
-                      {spell.description}
-                    </div>
-                    <div className="text-xs text-theme-disabled mt-1">
-                      {spell.castingTime} • {spell.range}
-                      {spell.concentration && ' • Concentration'}
-                      {spell.ritual && ' • Ritual'}
-                    </div>
-                  </button>
+                      <div className="text-xs text-theme-muted mt-2 line-clamp-2">
+                        {spell.description}
+                      </div>
+                      <div className="text-xs text-theme-disabled mt-1">
+                        {spell.castingTime} • {spell.range}
+                        {spell.concentration && ' • Concentration'}
+                        {spell.ritual && ' • Ritual'}
+                      </div>
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openSpellModal(spell);
+                      }}
+                      className="absolute top-2 right-2 w-6 h-6 bg-theme-secondary hover:bg-theme-primary rounded-full flex items-center justify-center text-theme-muted hover:text-white transition-colors z-10"
+                      title="View full spell details"
+                    >
+                      <MoreHorizontal className="w-3 h-3" />
+                    </button>
+                  </div>
                 );
               })}
             </div>
@@ -359,34 +421,45 @@ export const Step4Spells: React.FC<StepProps> = ({ data, updateData, nextStep, p
                 const canSelect = (data.spellSelection.dailyPrepared?.length || 0) < maxPrepared;
 
                 return (
-                  <button
-                    key={spell.slug}
-                    onClick={() => handleSpellToggle(spell.slug, 'dailyPrepared')}
-                    disabled={!isSelected && !canSelect}
-                    className={`p-3 rounded-lg border-2 text-left transition-all ${
-                      isSelected
-                        ? 'bg-green-900 border-green-500'
-                        : canSelect
-                        ? 'bg-theme-tertiary border-theme-primary hover:border-green-400'
-                        : 'bg-theme-secondary border-theme-secondary opacity-50 cursor-not-allowed'
-                    }`}
-                  >
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="font-semibold text-white">{spell.name}</div>
-                        <div className="text-xs text-purple-300">{spell.school}</div>
+                  <div className="relative">
+                    <button
+                      onClick={() => handleSpellToggle(spell.slug, 'dailyPrepared')}
+                      disabled={!isSelected && !canSelect}
+                      className={`w-full p-3 rounded-lg border-2 text-left transition-all ${
+                        isSelected
+                          ? 'bg-green-900 border-green-500'
+                          : canSelect
+                          ? 'bg-theme-tertiary border-theme-primary hover:border-green-400'
+                          : 'bg-theme-secondary border-theme-secondary opacity-50 cursor-not-allowed'
+                      }`}
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="font-semibold text-white">{spell.name}</div>
+                          <div className="text-xs text-purple-300">{spell.school}</div>
+                        </div>
+                        {isSelected && <Check className="w-5 h-5 text-accent-green-light" />}
                       </div>
-                      {isSelected && <Check className="w-5 h-5 text-accent-green-light" />}
-                    </div>
-                    <div className="text-xs text-theme-muted mt-2 line-clamp-2">
-                      {spell.description}
-                    </div>
-                    <div className="text-xs text-theme-disabled mt-1">
-                      {spell.castingTime} • {spell.range}
-                      {spell.concentration && ' • Concentration'}
-                      {spell.ritual && ' • Ritual'}
-                    </div>
-                  </button>
+                      <div className="text-xs text-theme-muted mt-2 line-clamp-2">
+                        {spell.description}
+                      </div>
+                      <div className="text-xs text-theme-disabled mt-1">
+                        {spell.castingTime} • {spell.range}
+                        {spell.concentration && ' • Concentration'}
+                        {spell.ritual && ' • Ritual'}
+                      </div>
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openSpellModal(spell);
+                      }}
+                      className="absolute top-2 right-2 w-6 h-6 bg-theme-secondary hover:bg-theme-primary rounded-full flex items-center justify-center text-theme-muted hover:text-white transition-colors z-10"
+                      title="View full spell details"
+                    >
+                      <MoreHorizontal className="w-3 h-3" />
+                    </button>
+                  </div>
                 );
               })}
             </div>
@@ -419,34 +492,45 @@ export const Step4Spells: React.FC<StepProps> = ({ data, updateData, nextStep, p
                     const canSelect = (data.spellSelection.knownSpells?.length || 0) < maxPreparedSpellsAtLevel;
 
                     return (
-                      <button
-                        key={spell.slug}
-                        onClick={() => handleSpellToggle(spell.slug, 'knownSpells')}
-                        disabled={!isSelected && !canSelect}
-                        className={`p-3 rounded-lg border-2 text-left transition-all ${
-                          isSelected
-                            ? 'bg-blue-900 border-blue-500'
-                            : canSelect
-                            ? 'bg-theme-tertiary border-theme-primary hover:border-blue-400'
-                            : 'bg-theme-secondary border-theme-secondary opacity-50 cursor-not-allowed'
-                        }`}
-                      >
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <div className="font-semibold text-white">{spell.name}</div>
-                            <div className="text-xs text-purple-300">{spell.school}</div>
+                      <div className="relative">
+                        <button
+                          onClick={() => handleSpellToggle(spell.slug, 'knownSpells')}
+                          disabled={!isSelected && !canSelect}
+                          className={`w-full p-3 rounded-lg border-2 text-left transition-all ${
+                            isSelected
+                              ? 'bg-blue-900 border-blue-500'
+                              : canSelect
+                              ? 'bg-theme-tertiary border-theme-primary hover:border-blue-400'
+                              : 'bg-theme-secondary border-theme-secondary opacity-50 cursor-not-allowed'
+                          }`}
+                        >
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <div className="font-semibold text-white">{spell.name}</div>
+                              <div className="text-xs text-purple-300">{spell.school}</div>
+                            </div>
+                            {isSelected && <Check className="w-5 h-5 text-accent-green-light" />}
                           </div>
-                          {isSelected && <Check className="w-5 h-5 text-accent-green-light" />}
-                        </div>
-                        <div className="text-xs text-theme-muted mt-2 line-clamp-2">
-                          {spell.description}
-                        </div>
-                        <div className="text-xs text-theme-disabled mt-1">
-                          {spell.castingTime} • {spell.range}
-                          {spell.concentration && ' • Concentration'}
-                          {spell.ritual && ' • Ritual'}
-                        </div>
-                      </button>
+                          <div className="text-xs text-theme-muted mt-2 line-clamp-2">
+                            {spell.description}
+                          </div>
+                          <div className="text-xs text-theme-disabled mt-1">
+                            {spell.castingTime} • {spell.range}
+                            {spell.concentration && ' • Concentration'}
+                            {spell.ritual && ' • Ritual'}
+                          </div>
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openSpellModal(spell);
+                          }}
+                          className="absolute top-2 right-2 w-6 h-6 bg-theme-secondary hover:bg-theme-primary rounded-full flex items-center justify-center text-theme-muted hover:text-white transition-colors z-10"
+                          title="View full spell details"
+                        >
+                          <MoreHorizontal className="w-3 h-3" />
+                        </button>
+                      </div>
                     );
                   })}
                 </div>
@@ -481,34 +565,45 @@ export const Step4Spells: React.FC<StepProps> = ({ data, updateData, nextStep, p
                     const canSelect = (data.spellSelection.preparedSpells?.length || 0) < maxPreparedSpellsAtLevel;
 
                     return (
-                      <button
-                        key={spell.slug}
-                        onClick={() => handleSpellToggle(spell.slug, 'preparedSpells')}
-                        disabled={!isSelected && !canSelect}
-                        className={`p-3 rounded-lg border-2 text-left transition-all ${
-                          isSelected
-                            ? 'bg-blue-900 border-blue-500'
-                            : canSelect
-                            ? 'bg-theme-tertiary border-theme-primary hover:border-blue-400'
-                            : 'bg-theme-secondary border-theme-secondary opacity-50 cursor-not-allowed'
-                        }`}
-                      >
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <div className="font-semibold text-white">{spell.name}</div>
-                            <div className="text-xs text-purple-300">{spell.school}</div>
+                      <div className="relative">
+                        <button
+                          onClick={() => handleSpellToggle(spell.slug, 'preparedSpells')}
+                          disabled={!isSelected && !canSelect}
+                          className={`w-full p-3 rounded-lg border-2 text-left transition-all ${
+                            isSelected
+                              ? 'bg-blue-900 border-blue-500'
+                              : canSelect
+                              ? 'bg-theme-tertiary border-theme-primary hover:border-blue-400'
+                              : 'bg-theme-secondary border-theme-secondary opacity-50 cursor-not-allowed'
+                          }`}
+                        >
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <div className="font-semibold text-white">{spell.name}</div>
+                              <div className="text-xs text-purple-300">{spell.school}</div>
+                            </div>
+                            {isSelected && <Check className="w-5 h-5 text-accent-green-light" />}
                           </div>
-                          {isSelected && <Check className="w-5 h-5 text-accent-green-light" />}
-                        </div>
-                        <div className="text-xs text-theme-muted mt-2 line-clamp-2">
-                          {spell.description}
-                        </div>
-                        <div className="text-xs text-theme-disabled mt-1">
-                          {spell.castingTime} • {spell.range}
-                          {spell.concentration && ' • Concentration'}
-                          {spell.ritual && ' • Ritual'}
-                        </div>
-                      </button>
+                          <div className="text-xs text-theme-muted mt-2 line-clamp-2">
+                            {spell.description}
+                          </div>
+                          <div className="text-xs text-theme-disabled mt-1">
+                            {spell.castingTime} • {spell.range}
+                            {spell.concentration && ' • Concentration'}
+                            {spell.ritual && ' • Ritual'}
+                          </div>
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openSpellModal(spell);
+                          }}
+                          className="absolute top-2 right-2 w-6 h-6 bg-theme-secondary hover:bg-theme-primary rounded-full flex items-center justify-center text-theme-muted hover:text-white transition-colors z-10"
+                          title="View full spell details"
+                        >
+                          <MoreHorizontal className="w-3 h-3" />
+                        </button>
+                      </div>
                     );
                   })}
                 </div>
@@ -555,6 +650,38 @@ export const Step4Spells: React.FC<StepProps> = ({ data, updateData, nextStep, p
           </div>
         )}
       </div>
+
+      {/* Spell Details Modal */}
+      <SpellDetailsModal
+        spell={selectedSpellForModal}
+        isOpen={isModalOpen}
+        onClose={closeSpellModal}
+        onSelect={selectSpellFromModal}
+        isSelected={selectedSpellForModal ? (
+          selectedSpellForModal.level === 0
+            ? data.spellSelection.selectedCantrips.includes(selectedSpellForModal.slug)
+            : spellcastingType === 'known'
+            ? (data.spellSelection.knownSpells?.includes(selectedSpellForModal.slug) || false)
+            : spellcastingType === 'prepared'
+            ? (data.spellSelection.preparedSpells?.includes(selectedSpellForModal.slug) || false)
+            : spellcastingType === 'wizard'
+            ? ((data.spellSelection.spellbook?.includes(selectedSpellForModal.slug) || false) ||
+               (data.spellSelection.dailyPrepared?.includes(selectedSpellForModal.slug) || false))
+            : false
+        ) : false}
+        canSelect={selectedSpellForModal ? (
+          selectedSpellForModal.level === 0
+            ? data.spellSelection.selectedCantrips.length < cantripsKnownAtLevel
+            : spellcastingType === 'known'
+            ? (data.spellSelection.knownSpells?.length || 0) < maxPreparedSpellsAtLevel
+            : spellcastingType === 'prepared'
+            ? (data.spellSelection.preparedSpells?.length || 0) < maxPreparedSpellsAtLevel
+            : spellcastingType === 'wizard'
+            ? (((data.spellSelection.spellbook?.length || 0) < 6) ||
+               ((data.spellSelection.dailyPrepared?.length || 0) < getMaxPreparedSpells(data.abilities, 'INT', data.level)))
+            : false
+        ) : false}
+      />
     </div>
   );
 };

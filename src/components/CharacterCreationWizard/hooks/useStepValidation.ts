@@ -6,7 +6,6 @@ export const useStepValidation = (stepIndex: number, data: CharacterCreationData
   const validateStep1 = (data: CharacterCreationData): ValidationResult => {
     const missing = [];
 
-    if (!data.name?.trim()) missing.push("Character name");
     if (!data.background) missing.push("Background selection");
     if (!data.alignment) missing.push("Alignment choice");
 
@@ -43,7 +42,7 @@ export const useStepValidation = (stepIndex: number, data: CharacterCreationData
       missingSelections: missing,
       nextRequiredAction: missing.length > 0 ? missing[0] : undefined
     };
-    };
+  };
 
   const validateStep2 = (data: CharacterCreationData): ValidationResult => {
     const missing = [];
@@ -54,6 +53,9 @@ export const useStepValidation = (stepIndex: number, data: CharacterCreationData
       const species = getAllSpecies(data.edition).find(s => s.slug === data.speciesSlug);
       if (species && (species as any).speciesFeatOptions && !data.speciesFeat) {
         missing.push("Species feat choice");
+      }
+      if (species && (species as any).lineages && Object.keys((species as any).lineages).length > 0 && !data.selectedLineage) {
+        missing.push("Lineage choice");
       }
     }
 

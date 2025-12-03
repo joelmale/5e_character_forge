@@ -7,14 +7,14 @@ interface DiceTrayModalProps {
 }
 
 export const DiceTrayModal: React.FC<DiceTrayModalProps> = ({ isOpen, onClose }) => {
-  console.log('🎲 [DiceTrayModal] Component rendered with props:', { isOpen, onClose: !!onClose });
+  if (import.meta.env.DEV) console.log('🎲 [DiceTrayModal] Component rendered with props:', { isOpen, onClose: !!onClose });
 
   if (!isOpen) {
-    console.log('🎲 [DiceTrayModal] isOpen is false, returning null');
+    if (import.meta.env.DEV) console.log('🎲 [DiceTrayModal] isOpen is false, returning null');
     return null;
   }
 
-  console.log('🎲 [DiceTrayModal] isOpen is true, rendering modal!');
+  if (import.meta.env.DEV) console.log('🎲 [DiceTrayModal] isOpen is true, rendering modal!');
   return (
     <div
       className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4"

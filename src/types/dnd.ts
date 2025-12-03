@@ -464,6 +464,7 @@ export interface CharacterCreationData {
   edition: Edition; // D&D edition (2014 or 2024 rules)
   speciesSlug: string;
   selectedSpeciesVariant?: string; // e.g., "standard", "variant"
+  selectedLineage?: string; // 2024 lineage choice when applicable
 
   // Variant Human Choices
   variantAbilityBonuses?: Record<AbilityName, number>; // +1 to two abilities
@@ -560,6 +561,8 @@ export interface Species {
   name: string;
   edition: Edition; // '2014' | '2024'
   source: string;
+  /** List of all sources this species draws from (for deduped records) */
+  sources?: string[];
   speed: number;
   ability_bonuses?: Partial<Record<AbilityName, number>>; // Optional in 2024 (moved to Background)
   species_traits: string[];
@@ -567,6 +570,18 @@ export interface Species {
   typicalRoles: string[];
   variants?: SpeciesVariant[];
   defaultVariant?: string;
+  /** Flag species as 2024 PHB core entry */
+  core?: boolean;
+  /** Flag species as non-core expanded option */
+  expanded?: boolean;
+  /** Tag species for category filtering (e.g., monstrous, planar, exotic) */
+  tags?: string[];
+  /** Mark legacy-only species (2014 or deprecated) */
+  legacy?: boolean;
+  /** Alternate historical slugs for migration */
+  legacySlugs?: string[];
+  /** Additional aliases used in saved data */
+  slugAliases?: string[];
 
   // 2024 Fields
   creatureType?: 'Humanoid' | 'Construct' | 'Undead' | string;
@@ -578,11 +593,18 @@ export interface Species {
   giantAncestry?: Record<string, string>; // Goliath options
   ancestries?: Record<string, string[]>; // Dragonborn options
   celestialRevelationOptions?: string[]; // Aasimar options
+
+  // Mechanical bonuses (data-driven instead of hardcoded)
+  baseSpeed?: number; // Base walking speed in feet (default 30)
+  mechanicalBonuses?: {
+    hpPerLevel?: number; // HP bonus per character level (e.g., Dwarf Toughness)
+  };
 }
 
 export interface SpeciesLineage {
   traits?: string[];
   spells?: string[];
+  baseSpeed?: number; // Override base speed (e.g., Wood Elf = 35 ft)
 }
 
 export interface FiendishLegacy {
