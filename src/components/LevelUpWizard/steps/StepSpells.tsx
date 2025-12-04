@@ -9,6 +9,7 @@ import { Character, LevelUpChoices } from '../../../types/dnd';
 import { LevelUpData } from '../../../data/classProgression';
 import { loadSpells } from '../../../services/dataService';
 import { SPELL_SLOTS_BY_CLASS } from '../../../data/spellSlots';
+import { getHighestSpellSlotLevel, normalizeSpellSlots } from '../../../utils/spellSlotUtils';
 
 interface StepSpellsProps {
   character: Character;
@@ -72,15 +73,13 @@ export const StepSpells: React.FC<StepSpellsProps> = ({
   const isCantripChoice = currentSpellChoice.description.toLowerCase().includes('cantrip');
 
   // Determine the highest spell level the character can cast at the new level
-  const spellSlotsAtNewLevel =
+  const rawSlotsAtNewLevel =
     SPELL_SLOTS_BY_CLASS[classSlug]?.[levelUpData.toLevel] ||
     character.spellcasting?.spellSlots ||
     [];
-  const derivedMaxSpellLevel = spellSlotsAtNewLevel.reduce((max, slots, levelIndex) => {
-    if (levelIndex === 0) return max; // Index 0 is cantrips
-    return slots > 0 ? levelIndex : max;
-  }, 0);
-  const maxSpellLevel = derivedMaxSpellLevel || Math.max(1, Math.ceil(levelUpData.toLevel / 2));
+  const normalizedSlots = normalizeSpellSlots(classSlug, rawSlotsAtNewLevel);
+  const derivedMaxSpellLevel = getHighestSpellSlotLevel(classSlug, rawSlotsAtNewLevel);
+  const maxSpellLevel = derivedMaxSpellLevel || normalizedSlots.findIndex((slots, idx) => idx > 0 && slots > 0) || 0;
 
   // Filter spells based on choice type and exclude already known
   const availableSpells = classSpells.filter(spell => {

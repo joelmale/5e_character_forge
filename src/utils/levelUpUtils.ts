@@ -29,6 +29,7 @@ import { artificer2024Progression } from '../data/progressions/artificer2024';
 import { PROFICIENCY_BONUSES, CANTRIPS_KNOWN_BY_CLASS, loadSpells, loadFeats } from '../services/dataService';
 import { SPELL_LEARNING_RULES } from '../data/spellLearning';
 import { SPELL_SLOTS_BY_CLASS } from '../data/spellSlots';
+import { normalizeSpellSlots } from './spellSlotUtils';
 
 /**
  * Get the class progression data for a given class
@@ -123,8 +124,8 @@ export function calculateLevelUpData(character: Character): LevelUpData | null {
 
   if (character.spellcasting) {
     const classSlug = character.class.toLowerCase();
-    const currentSlots = SPELL_SLOTS_BY_CLASS[classSlug]?.[fromLevel] || [];
-    const nextLevelSlots = SPELL_SLOTS_BY_CLASS[classSlug]?.[toLevel] || [];
+    const currentSlots = normalizeSpellSlots(classSlug, SPELL_SLOTS_BY_CLASS[classSlug]?.[fromLevel]);
+    const nextLevelSlots = normalizeSpellSlots(classSlug, SPELL_SLOTS_BY_CLASS[classSlug]?.[toLevel]);
 
     // Check if spell slots changed
     if (JSON.stringify(currentSlots) !== JSON.stringify(nextLevelSlots)) {
@@ -343,7 +344,7 @@ export function applyLevelUp(
   // Apply spell slot increases
   if (levelUpData.newSpellSlots && updatedCharacter.spellcasting) {
     const classSlug = character.class.toLowerCase();
-    const newSlots = SPELL_SLOTS_BY_CLASS[classSlug]?.[levelUpData.toLevel] || [];
+    const newSlots = normalizeSpellSlots(classSlug, SPELL_SLOTS_BY_CLASS[classSlug]?.[levelUpData.toLevel]);
     updatedCharacter.spellcasting.spellSlots = newSlots;
     updatedCharacter.spellcasting.usedSpellSlots = new Array(newSlots.length).fill(0);
   }

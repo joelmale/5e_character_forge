@@ -1,6 +1,6 @@
 {
   "name": "5e-character-forge",
-  "version": "1.10.2",
+  "version": "1.10.3",
   "description": "A client-side D&D 5e character generator and sheet manager",
   "type": "module",
   "scripts": {
