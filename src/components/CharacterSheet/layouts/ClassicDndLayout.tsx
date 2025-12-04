@@ -166,16 +166,21 @@ export const ClassicDndLayout: React.FC<CharacterSheetProps> = ({
              </div>
 
             {/* Progression - Experience & Attunement */}
-            <div className="bg-theme-secondary border border-theme-secondary rounded-lg p-2 shadow-lg">
-              <h2 className="text-sm font-bold mb-2 text-theme-muted uppercase tracking-wider font-cinzel">
-                Progression
-              </h2>
-              <div className="space-y-3">
+            <div className="bg-gradient-to-br from-theme-secondary/80 via-theme-tertiary/60 to-theme-secondary/80 border border-theme-border rounded-lg p-3 shadow-[0_10px_30px_rgba(0,0,0,0.35)]">
+              <div className="flex items-center justify-between pb-2 border-b border-theme-border">
+                <h2 className="text-sm font-bold text-theme-primary uppercase tracking-wider font-cinzel">
+                  Progression
+                </h2>
+                <span className="text-[11px] uppercase tracking-[0.16em] text-theme-muted font-semibold">
+                  XP & Attunement
+                </span>
+              </div>
+              <div className="space-y-3 pt-2">
                 <ExperiencePoints
                   character={character}
                   onUpdateCharacter={onUpdateCharacter}
                 />
-                <div className="border-t border-theme-secondary pt-3">
+                <div className="border-t border-theme-border/60 pt-3">
                   <AttunementSlots character={character} />
                 </div>
               </div>

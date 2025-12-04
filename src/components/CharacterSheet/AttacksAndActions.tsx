@@ -568,11 +568,21 @@ export const AttacksAndActions: React.FC<AttacksAndActionsProps> = ({
   return (
     <div className="space-y-6">
       {/* Main Header */}
-      <h2 className={`text-2xl font-bold border-b-2 border-theme-primary pb-2 ${
-        layoutMode === 'paper-sheet' ? 'text-black' : 'text-theme-primary'
+      <div className={`flex items-center justify-between gap-3 pb-2 border-b-2 ${
+        layoutMode === 'paper-sheet'
+          ? 'border-[#1e140a]/30 text-[#1e140a]'
+          : 'border-theme-border text-theme-primary'
       }`}>
-        ⚔️ COMBAT OPTIONS
-      </h2>
+        <div className="flex items-center gap-2">
+          <span className="text-xl">⚔️</span>
+          <h2 className="text-2xl font-bold tracking-tight">Combat Options</h2>
+        </div>
+        <span className={`text-xs uppercase tracking-[0.2em] font-semibold ${
+          layoutMode === 'paper-sheet' ? 'text-[#3d2817]' : 'text-theme-muted'
+        }`}>
+          Attacks & Spellcasting
+        </span>
+      </div>
 
       {/* Spell Attacks Section (if applicable) */}
       {character.spellcasting && (

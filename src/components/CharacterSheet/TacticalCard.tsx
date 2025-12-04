@@ -25,15 +25,20 @@ interface TacticalCardProps {
 export const TacticalCard: React.FC<TacticalCardProps> = ({ action, onAction, theme = 'standard', layoutMode }) => {
   const isAccent = theme === 'accent' || action.isLimited;
   const isPaperSheet = layoutMode === 'paper-sheet';
+  const isClassic = layoutMode === 'classic-dnd';
 
   // Card background colors
   const standardBgClass = isPaperSheet
     ? 'bg-[#fcf6e3] hover:bg-[#ebe1c8] border-[#1e140a]/20'
-    : 'bg-theme-tertiary hover:bg-theme-quaternary border-theme-primary/20';
+    : isClassic
+      ? 'bg-gradient-to-br from-theme-secondary/80 to-theme-tertiary/70 hover:from-theme-secondary hover:to-theme-tertiary border-theme-border shadow-[0_6px_18px_rgba(0,0,0,0.25)]'
+      : 'bg-theme-tertiary hover:bg-theme-quaternary border-theme-primary/20';
 
   const accentBgClass = isPaperSheet
     ? 'bg-[#8b4513] hover:bg-[#a0522d] border-[#1e140a] text-[#fcf6e3]'
-    : 'bg-orange-700 hover:bg-orange-600 border-orange-500 text-white';
+    : isClassic
+      ? 'bg-gradient-to-br from-accent-red to-accent-red-dark border-accent-red-dark text-white shadow-[0_8px_20px_rgba(185,28,28,0.45)]'
+      : 'bg-orange-700 hover:bg-orange-600 border-orange-500 text-white';
 
   // Text colors
   const textPrimaryClass = isPaperSheet ? 'text-[#1e140a]' : 'text-theme-primary';
@@ -43,7 +48,9 @@ export const TacticalCard: React.FC<TacticalCardProps> = ({ action, onAction, th
   // Button colors
   const buttonClass = isPaperSheet
     ? 'bg-[#8b4513] hover:bg-[#a0522d] text-[#fcf6e3]'
-    : 'bg-theme-primary hover:bg-theme-primary/80 text-theme-secondary';
+    : isClassic
+      ? 'bg-accent-red hover:bg-accent-red-dark text-white shadow-[0_4px_12px_rgba(185,28,28,0.35)]'
+      : 'bg-theme-primary hover:bg-theme-primary/80 text-theme-secondary';
 
   // Action badge colors
   const getActionBadgeClass = (cost: string) => {
@@ -69,20 +76,68 @@ export const TacticalCard: React.FC<TacticalCardProps> = ({ action, onAction, th
   // Bubble colors
   const activeBubbleClass = isPaperSheet
     ? 'bg-[#8b4513] border-[#1e140a]'
-    : 'bg-accent-red-light border-red-400';
+    : isClassic
+      ? 'bg-accent-red border-red-500'
+      : 'bg-accent-red-light border-red-400';
 
   const inactiveBubbleClass = isPaperSheet
     ? 'bg-[#d4c4a8] border-[#8b7355]'
-    : 'bg-gray-600 border-gray-500';
+    : isClassic
+      ? 'bg-theme-tertiary border-theme-border'
+      : 'bg-gray-600 border-gray-500';
 
   const cardClasses = isAccent ? accentBgClass : standardBgClass;
   const cardTextClass = isAccent && !isPaperSheet ? 'text-white' : textPrimaryClass;
 
+  const typeBadge = (() => {
+    const palette = (() => {
+      if (isPaperSheet) {
+        return {
+          attack: 'bg-[#8b4513]/15 text-[#3d2817] border-[#8b4513]/40',
+          defense: 'bg-[#1e3a8a]/15 text-[#1e140a] border-[#1e3a8a]/30',
+          move: 'bg-[#166534]/15 text-[#1e140a] border-[#166534]/30',
+          support: 'bg-[#b45309]/15 text-[#1e140a] border-[#b45309]/30',
+          reaction: 'bg-[#6b21a8]/15 text-[#1e140a] border-[#6b21a8]/30',
+        };
+      }
+      if (isClassic) {
+        return {
+          attack: 'bg-red-500/15 text-red-100 border-red-500/40',
+          defense: 'bg-blue-500/15 text-blue-100 border-blue-500/40',
+          move: 'bg-green-500/15 text-green-100 border-green-500/40',
+          support: 'bg-yellow-500/15 text-yellow-100 border-yellow-500/40',
+          reaction: 'bg-purple-500/15 text-purple-100 border-purple-500/40',
+        };
+      }
+      return {
+        attack: 'bg-red-500/20 text-red-200 border-red-500/50',
+        defense: 'bg-blue-500/20 text-blue-200 border-blue-500/50',
+        move: 'bg-green-500/20 text-green-200 border-green-500/50',
+        support: 'bg-yellow-500/20 text-yellow-200 border-yellow-500/50',
+        reaction: 'bg-purple-500/20 text-purple-200 border-purple-500/50',
+      };
+    })();
+
+    if (action.type === 'weapon-attack' || action.type === 'unarmed-attack' || action.type === 'spell-attack') return { label: 'Attack', color: palette.attack };
+    if (action.type === 'defensive') return { label: 'Defense', color: palette.defense };
+    if (action.type === 'movement' || action.type === 'stealth') return { label: 'Move', color: palette.move };
+    if (action.type === 'support' || action.type === 'healing') return { label: 'Support', color: palette.support };
+    if (action.type === 'action-surge' || action.type === 'reaction-setup') return { label: 'Reaction', color: palette.reaction };
+    return null;
+  })();
+
   return (
-    <div className={`rounded-lg border-2 p-3 transition-all duration-200 ${cardClasses}`}>
+    <div className={`rounded-xl border-2 p-3 transition-all duration-200 ${cardClasses}`}>
       {/* Header Row */}
-      <div className="flex items-center justify-between mb-2">
-        <h4 className={`font-semibold text-sm ${cardTextClass}`}>{action.name}</h4>
+      <div className="flex items-center justify-between mb-2 gap-2">
+        <div className="flex items-center gap-2">
+          <h4 className={`font-semibold text-sm ${cardTextClass}`}>{action.name}</h4>
+          {typeBadge && (
+            <span className={`text-[10px] px-2 py-0.5 rounded-full border ${typeBadge.color}`}>
+              {typeBadge.label}
+            </span>
+          )}
+        </div>
         <span className={`text-xs px-2 py-0.5 rounded-full ${getActionBadgeClass(action.actionCost)}`}>
           {action.actionCost}
         </span>

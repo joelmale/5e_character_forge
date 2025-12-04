@@ -67,30 +67,38 @@ export const SpellcastingSection: React.FC<SpellcastingSectionProps> = ({
 
   return (
     <div className="space-y-4">
-      <h2 className="text-xl font-bold text-purple-500 border-b border-purple-800 pb-1">Spellcasting</h2>
+      <div className="flex items-center justify-between pb-2 border-b border-theme-border">
+        <div className="flex items-center gap-2">
+          <span className="text-lg">🔮</span>
+          <h2 className="text-xl font-bold text-accent-purple">Spellcasting</h2>
+        </div>
+        <div className="text-[11px] uppercase tracking-[0.16em] text-theme-muted font-semibold">
+          Power Profile
+        </div>
+      </div>
       {/* Top Row: Spell Stats and Prepared Spells side by side */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Spellcasting Stats */}
-        <div className="p-4 bg-theme-secondary rounded-xl shadow-lg border-l-4 border-accent-purple">
+        <div className="p-4 bg-gradient-to-br from-theme-secondary/80 to-theme-tertiary/60 rounded-xl shadow-lg border border-theme-border">
           <h3 className="text-lg font-bold text-accent-purple-light mb-3">Spell Stats</h3>
-          <div className="space-y-2 text-sm">
-            <div className="flex justify-between">
-              <span className="text-theme-muted">Spellcasting Ability:</span>
-              <span className="font-bold text-theme-primary">{character.spellcasting.ability}</span>
+          <div className="grid grid-cols-3 gap-2 text-sm">
+            <div className="flex flex-col items-start p-2 rounded-lg bg-theme-quaternary/40 border border-theme-border/40">
+              <span className="text-[11px] uppercase tracking-wide text-theme-muted">Ability</span>
+              <span className="text-base font-bold text-theme-primary">{character.spellcasting.ability}</span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-theme-muted">Spell Save DC:</span>
-              <span className="font-bold text-accent-yellow-light">{character.spellcasting.spellSaveDC}</span>
+            <div className="flex flex-col items-start p-2 rounded-lg bg-theme-quaternary/40 border border-theme-border/40">
+              <span className="text-[11px] uppercase tracking-wide text-theme-muted">Save DC</span>
+              <span className="text-base font-bold text-accent-yellow-light">{character.spellcasting.spellSaveDC}</span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-theme-muted">Spell Attack:</span>
-              <span className="font-bold text-accent-yellow-light">+{character.spellcasting.spellAttackBonus}</span>
+            <div className="flex flex-col items-start p-2 rounded-lg bg-theme-quaternary/40 border border-theme-border/40">
+              <span className="text-[11px] uppercase tracking-wide text-theme-muted">Attack</span>
+              <span className="text-base font-bold text-accent-yellow-light">+{character.spellcasting.spellAttackBonus}</span>
             </div>
           </div>
         </div>
 
         {/* Cantrips & Spells - Simplified */}
-        <div className="p-4 bg-theme-secondary rounded-xl shadow-lg border-l-4 border-green-500">
+        <div className="p-4 bg-gradient-to-br from-theme-secondary/80 to-theme-tertiary/60 rounded-xl shadow-lg border border-theme-border">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-lg font-bold text-accent-green-light">
               {character.spellcasting.spellcastingType === 'wizard' ? 'Spellcasting' :
@@ -109,7 +117,12 @@ export const SpellcastingSection: React.FC<SpellcastingSectionProps> = ({
           </div>
           <div className="space-y-3 text-sm">
             <div>
-              <div className="font-semibold text-theme-tertiary mb-1">Cantrips ({character.spellcasting.cantripsKnown.length})</div>
+              <div className="font-semibold text-theme-tertiary mb-1 flex items-center gap-2">
+                <span>Cantrips</span>
+                <span className="text-xs px-2 py-0.5 rounded-full bg-accent-purple/10 text-accent-purple-light border border-accent-purple/30">
+                  {character.spellcasting.cantripsKnown.length}
+                </span>
+              </div>
               <div className="flex flex-wrap gap-2">
                 {character.spellcasting.cantripsKnown.map((spellSlug) => {
                   const spell = SPELL_DATABASE.find(s => s.slug === spellSlug);
@@ -117,7 +130,7 @@ export const SpellcastingSection: React.FC<SpellcastingSectionProps> = ({
                     <button
                       key={spellSlug}
                       onClick={() => handleSpellClick(spellSlug)}
-                      className="px-2 py-1 bg-purple-700 hover:bg-purple-600 text-theme-primary text-xs rounded cursor-pointer transition-colors"
+                      className="px-2 py-1 bg-purple-700 hover:bg-purple-600 text-theme-primary text-xs rounded cursor-pointer transition-colors shadow-sm"
                       title="Click for spell details"
                     >
                       {spell?.name || spellSlug}
@@ -132,7 +145,7 @@ export const SpellcastingSection: React.FC<SpellcastingSectionProps> = ({
 
       {/* Feat-Granted Spells - Condensed */}
       {character.spellcasting.featGrantedSpells && character.spellcasting.featGrantedSpells.length > 0 && (
-        <div className="p-4 bg-theme-secondary rounded-xl shadow-lg border-l-4 border-accent-red">
+        <div className="p-4 bg-gradient-to-br from-theme-secondary/80 to-theme-tertiary/60 rounded-xl shadow-lg border border-theme-border">
           <h3 className="text-lg font-bold text-accent-red-light mb-3">Feat Spells</h3>
           <div className="flex flex-wrap gap-2">
             {character.spellcasting.featGrantedSpells.map((featSpell, index) => {
@@ -159,7 +172,7 @@ export const SpellcastingSection: React.FC<SpellcastingSectionProps> = ({
 
         if (spellcasting.spellcastingType === 'known' && spellcasting.spellsKnown) {
           return (
-            <div className="p-4 bg-theme-secondary rounded-xl shadow-lg border-l-4 border-accent-blue">
+            <div className="p-4 bg-gradient-to-br from-theme-secondary/80 to-theme-tertiary/60 rounded-xl shadow-lg border border-theme-border">
               <div className="flex items-center justify-between mb-3">
                 <h3 className="text-lg font-bold text-accent-blue-light">Known Spells</h3>
                 <span className="text-sm text-theme-muted">
@@ -182,7 +195,7 @@ export const SpellcastingSection: React.FC<SpellcastingSectionProps> = ({
                       <button
                         key={spell!.slug}
                         onClick={() => handleSpellClick(spell!.slug)}
-                        className="px-2 py-1 bg-blue-700 hover:bg-blue-600 text-theme-primary text-xs rounded flex items-center gap-1 cursor-pointer transition-colors"
+                        className="px-2 py-1 bg-blue-700 hover:bg-blue-600 text-theme-primary text-xs rounded flex items-center gap-1 cursor-pointer transition-colors shadow-sm"
                         title="Click for spell details"
                       >
                         {spell!.name}
@@ -199,7 +212,7 @@ export const SpellcastingSection: React.FC<SpellcastingSectionProps> = ({
         } else if ((spellcasting.spellcastingType === 'prepared' && spellcasting.preparedSpells) ||
                    (spellcasting.spellcastingType === 'wizard' && spellcasting.preparedSpells)) {
           return (
-            <div className="p-4 bg-theme-secondary rounded-xl shadow-lg border-l-4 border-accent-blue">
+            <div className="p-4 bg-gradient-to-br from-theme-secondary/80 to-theme-tertiary/60 rounded-xl shadow-lg border border-theme-border">
               <div className="flex items-center justify-between mb-3">
                 <h3 className="text-lg font-bold text-accent-blue-light">Daily Prepared Spells</h3>
                 <span className="text-sm text-theme-muted">

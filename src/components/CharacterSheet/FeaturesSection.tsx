@@ -12,6 +12,8 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({
   onFeatureClick,
   layoutMode = 'modern',
 }) => {
+  const handwritingClass = layoutMode === 'paper-sheet' ? 'font-handwriting' : '';
+
   // Classic layout: All panes vertically stacked
   if (layoutMode === 'classic-dnd') {
     return (
@@ -22,10 +24,10 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({
           <div className="p-4 bg-theme-secondary rounded-xl shadow-lg border-l-4 border-blue-500">
             <h3 className="text-lg font-bold text-accent-blue-light mb-2">Personality, Ideals, Bonds & Flaws</h3>
             <ul className="list-disc list-inside space-y-1 text-sm text-theme-tertiary">
-              <li><span className="font-semibold text-theme-primary">Personality:</span> <span className="font-handwriting">{character.featuresAndTraits.personality}</span></li>
-              <li><span className="font-semibold text-theme-primary">Ideals:</span> <span className="font-handwriting">{character.featuresAndTraits.ideals}</span></li>
-              <li><span className="font-semibold text-theme-primary">Bonds:</span> <span className="font-handwriting">{character.featuresAndTraits.bonds}</span></li>
-              <li><span className="font-semibold text-theme-primary">Flaws:</span> <span className="font-handwriting">{character.featuresAndTraits.flaws}</span></li>
+              <li><span className="font-semibold text-theme-primary">Personality:</span> <span className={handwritingClass}>{character.featuresAndTraits.personality}</span></li>
+              <li><span className="font-semibold text-theme-primary">Ideals:</span> <span className={handwritingClass}>{character.featuresAndTraits.ideals}</span></li>
+              <li><span className="font-semibold text-theme-primary">Bonds:</span> <span className={handwritingClass}>{character.featuresAndTraits.bonds}</span></li>
+              <li><span className="font-semibold text-theme-primary">Flaws:</span> <span className={handwritingClass}>{character.featuresAndTraits.flaws}</span></li>
             </ul>
           </div>
 
@@ -181,10 +183,10 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({
         <div className="p-4 bg-theme-secondary rounded-xl shadow-lg border-l-4 border-blue-500">
           <h3 className="text-lg font-bold text-accent-blue-light mb-2">Personality, Ideals, Bonds & Flaws</h3>
           <ul className="list-disc list-inside space-y-1 text-sm text-theme-tertiary">
-            <li><span className="font-semibold text-theme-primary">Personality:</span> <span className="font-handwriting">{character.featuresAndTraits.personality}</span></li>
-            <li><span className="font-semibold text-theme-primary">Ideals:</span> <span className="font-handwriting">{character.featuresAndTraits.ideals}</span></li>
-            <li><span className="font-semibold text-theme-primary">Bonds:</span> <span className="font-handwriting">{character.featuresAndTraits.bonds}</span></li>
-            <li><span className="font-semibold text-theme-primary">Flaws:</span> <span className="font-handwriting">{character.featuresAndTraits.flaws}</span></li>
+            <li><span className="font-semibold text-theme-primary">Personality:</span> <span className={handwritingClass}>{character.featuresAndTraits.personality}</span></li>
+            <li><span className="font-semibold text-theme-primary">Ideals:</span> <span className={handwritingClass}>{character.featuresAndTraits.ideals}</span></li>
+            <li><span className="font-semibold text-theme-primary">Bonds:</span> <span className={handwritingClass}>{character.featuresAndTraits.bonds}</span></li>
+            <li><span className="font-semibold text-theme-primary">Flaws:</span> <span className={handwritingClass}>{character.featuresAndTraits.flaws}</span></li>
           </ul>
         </div>
       </div>

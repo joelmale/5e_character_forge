@@ -1,6 +1,8 @@
 // Random Character Detail Generator
 // Generates random names, personality traits, ideals, bonds, and flaws
 
+import { Edition } from '../types/dnd';
+
 const FIRST_NAMES = {
   Human: ['Aric', 'Elara', 'Gareth', 'Lyra', 'Marcus', 'Nora', 'Roland', 'Selena', 'Theron', 'Vera'],
   Elf: ['Aelith', 'Caelynn', 'Erevan', 'Faelyn', 'Isilme', 'Laucian', 'Nailo', 'Sariel', 'Theren', 'Valanthe'],

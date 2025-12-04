@@ -57,6 +57,7 @@ const mockCharacter: Character = {
     flaws: 'Test flaws',
      classFeatures: [],
      speciesTraits: [],
+     backgroundFeatures: [],
      musicalInstrumentProficiencies: [],
    },
 };

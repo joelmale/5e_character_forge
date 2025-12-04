@@ -192,6 +192,18 @@ export const CombatStatsPanel: React.FC<CombatStatsPanelProps> = ({
 
   return (
     <div className="space-y-3">
+      <div className="flex items-center justify-between pb-2 border-b border-theme-border">
+        <div className="flex items-center gap-2">
+          <Shield className="w-5 h-5 text-accent-red" />
+          <h2 className="text-xl font-bold">Combat Stats</h2>
+        </div>
+        <div className={`text-[11px] uppercase tracking-[0.16em] font-semibold ${
+          isPaperSheet ? 'text-[#3d2817]' : 'text-theme-muted'
+        }`}>
+          Survivability
+        </div>
+      </div>
+
       {/* Top Row - AC, Initiative, Speed */}
       <div className="grid grid-cols-3 gap-3">
         {/* Armor Class */}

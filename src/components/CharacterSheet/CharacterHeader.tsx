@@ -38,9 +38,9 @@ export const CharacterHeader: React.FC<CharacterHeaderProps> = ({
           </h1>
           <div className="text-sm text-theme-tertiary">
             {character.species} {character.class} • Level {character.level}
-            {character.selectedLineage && (
+            {character.selectedSpeciesVariant && (
               <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full bg-accent-blue-darker text-xs font-semibold text-blue-100 border border-accent-blue-dark">
-                {character.selectedLineage}
+                {character.selectedSpeciesVariant}
               </span>
             )}
           </div>

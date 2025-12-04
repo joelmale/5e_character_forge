@@ -31,6 +31,7 @@ export const StepSpells: React.FC<StepSpellsProps> = ({
   spellChoiceIndex = 0
 }) => {
   const [selectedSpells, setSelectedSpells] = useState<string[]>([]);
+  const [expandedSpell, setExpandedSpell] = useState<string | null>(null);
 
   // Load spells for this class
   const allSpells = loadSpells();
@@ -79,7 +80,14 @@ export const StepSpells: React.FC<StepSpellsProps> = ({
     [];
   const normalizedSlots = normalizeSpellSlots(classSlug, rawSlotsAtNewLevel);
   const derivedMaxSpellLevel = getHighestSpellSlotLevel(classSlug, rawSlotsAtNewLevel);
-  const maxSpellLevel = derivedMaxSpellLevel || normalizedSlots.findIndex((slots, idx) => idx > 0 && slots > 0) || 0;
+  let fallbackMaxSpellLevel = 0;
+  for (let level = normalizedSlots.length - 1; level > 0; level -= 1) {
+    if (normalizedSlots[level] > 0) {
+      fallbackMaxSpellLevel = level;
+      break;
+    }
+  }
+  const maxSpellLevel = derivedMaxSpellLevel || fallbackMaxSpellLevel;
 
   // Filter spells based on choice type and exclude already known
   const availableSpells = classSpells.filter(spell => {
@@ -110,6 +118,28 @@ export const StepSpells: React.FC<StepSpellsProps> = ({
     }
   };
 
+  const handleToggleExpand = (spellSlug: string) => {
+    setExpandedSpell(prev => (prev === spellSlug ? null : spellSlug));
+  };
+
+  const handleCardKeyDown = (
+    event: React.KeyboardEvent<HTMLDivElement>,
+    spellSlug: string,
+    isSelected: boolean,
+    selectionDisabled: boolean
+  ) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      handleToggleExpand(spellSlug);
+    }
+    if (event.key === ' ') {
+      event.preventDefault();
+      if (!selectionDisabled || isSelected) {
+        handleToggleSpell(spellSlug);
+      }
+    }
+  };
+
   const handleNext = () => {
     updateChoices({ spellsLearned: selectedSpells });
     onNext();
@@ -133,36 +163,99 @@ export const StepSpells: React.FC<StepSpellsProps> = ({
       </div>
 
       <div className="max-h-96 overflow-y-auto space-y-2">
-        {availableSpells.map((spell: any) => (
-          <button
-            key={spell.slug}
-            onClick={() => handleToggleSpell(spell.slug)}
-            disabled={!selectedSpells.includes(spell.slug) && selectedSpells.length >= spellsToLearn}
-            className={`w-full text-left p-3 rounded-lg border transition-all ${
-              selectedSpells.includes(spell.slug)
-                ? 'border-accent-gold bg-accent-gold bg-opacity-10'
-                : 'border-theme-border bg-theme-primary hover:border-accent-gold hover:border-opacity-50 disabled:opacity-50'
-            }`}
-          >
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <h4 className="font-semibold text-theme-text">{spell.name}</h4>
-                <p className="text-xs text-[#992600] mt-1">
-                  {spell.level === 0 ? `${spell.school} • ${spell.castingTime}` : `Level ${spell.level} • ${spell.school} • ${spell.castingTime}`}
-                </p>
+        {availableSpells.map((spell: any) => {
+          const isSelected = selectedSpells.includes(spell.slug);
+          const selectionDisabled = !isSelected && selectedSpells.length >= spellsToLearn;
+          const isExpanded = expandedSpell === spell.slug;
+
+          return (
+            <div
+              key={spell.slug}
+              className={`w-full text-left p-3 rounded-lg border transition-all cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-gold ${
+                isSelected
+                  ? 'border-accent-gold bg-accent-gold bg-opacity-10'
+                  : 'border-theme-border bg-theme-primary hover:border-accent-gold hover:border-opacity-50'
+              }`}
+              onClick={() => handleToggleExpand(spell.slug)}
+              aria-expanded={isExpanded}
+              role="button"
+              tabIndex={0}
+              onKeyDown={event => handleCardKeyDown(event, spell.slug, isSelected, selectionDisabled)}
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex-1">
+                  <h4 className="font-semibold text-theme-text">{spell.name}</h4>
+                  <p className="text-xs text-[#992600] mt-1 flex flex-wrap items-center gap-1">
+                    {spell.level === 0 ? `${spell.school} • ${spell.castingTime}` : `Level ${spell.level} • ${spell.school} • ${spell.castingTime}`}
+                    {spell.ritual && <span className="text-[10px] uppercase tracking-wide px-1 py-0.5 rounded bg-theme-primary border border-theme-border">Ritual</span>}
+                    {spell.concentration && <span className="text-[10px] uppercase tracking-wide px-1 py-0.5 rounded bg-theme-primary border border-theme-border">Conc.</span>}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={e => {
+                    e.stopPropagation();
+                    handleToggleSpell(spell.slug);
+                  }}
+                  disabled={selectionDisabled}
+                  className={`flex-shrink-0 px-3 py-1 rounded-md text-sm font-semibold border ${
+                    isSelected
+                      ? 'bg-accent-gold text-theme-primary border-accent-gold'
+                      : 'bg-theme-primary text-theme-text border-theme-border hover:border-accent-gold disabled:opacity-50'
+                  }`}
+                >
+                  {isSelected ? 'Selected' : 'Select'}
+                </button>
               </div>
-              <div className={`flex-shrink-0 ml-4 w-5 h-5 rounded border flex items-center justify-center ${
-                selectedSpells.includes(spell.slug) ? 'border-accent-gold bg-accent-gold' : 'border-theme-border'
-              }`}>
-                {selectedSpells.includes(spell.slug) && (
-                  <svg className="w-3 h-3 text-theme-primary" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                )}
-              </div>
+
+              {isExpanded && (
+                <div className="mt-3 text-sm text-theme-text space-y-3">
+                  <div className="flex flex-wrap gap-2">
+                    <span className="inline-flex items-center gap-1 rounded-full border border-accent-gold/50 bg-accent-gold/10 px-2 py-1 text-[11px] font-semibold uppercase tracking-wide text-accent-gold">
+                      {spell.level === 0 ? 'Cantrip' : `Level ${spell.level}`}
+                    </span>
+                    <span className="inline-flex items-center gap-1 rounded-full border border-theme-border px-2 py-1 text-[11px] font-semibold uppercase tracking-wide">
+                      {spell.school}
+                    </span>
+                    {spell.ritual && (
+                      <span className="inline-flex items-center gap-1 rounded-full border border-theme-border px-2 py-1 text-[11px] font-semibold uppercase tracking-wide">
+                        Ritual
+                      </span>
+                    )}
+                    {spell.concentration && (
+                      <span className="inline-flex items-center gap-1 rounded-full border border-theme-border px-2 py-1 text-[11px] font-semibold uppercase tracking-wide">
+                        Concentration
+                      </span>
+                    )}
+                    <span className="inline-flex items-center gap-1 rounded-full border border-theme-border px-2 py-1 text-[11px] font-semibold uppercase tracking-wide">
+                      {[['V', spell.components?.verbal], ['S', spell.components?.somatic], ['M', spell.components?.material]]
+                        .filter(([, present]) => present)
+                        .map(([label]) => label)
+                        .join(' • ') || 'V/S/M'}
+                    </span>
+                  </div>
+
+                  <p className="whitespace-pre-line leading-relaxed">{spell.description}</p>
+
+                  {spell.atHigherLevels && (
+                    <p className="whitespace-pre-line leading-relaxed text-[#992600]">
+                      <span className="font-semibold">At Higher Levels:</span> {spell.atHigherLevels}
+                    </p>
+                  )}
+
+                  <div className="flex flex-wrap gap-3 text-xs text-theme-text opacity-80">
+                    <span><span className="font-semibold">Casting Time:</span> {spell.castingTime}</span>
+                    <span><span className="font-semibold">Range:</span> {spell.range}</span>
+                    <span><span className="font-semibold">Duration:</span> {spell.duration}</span>
+                    {spell.components?.materialDescription && (
+                      <span><span className="font-semibold">Materials:</span> {spell.components.materialDescription}</span>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
-          </button>
-        ))}
+          );
+        })}
       </div>
 
       {/* Navigation */}

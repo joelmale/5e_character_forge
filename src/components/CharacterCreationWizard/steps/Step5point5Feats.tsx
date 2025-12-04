@@ -6,8 +6,10 @@ import {
   calculateFeatAvailability,
   featProvidesAbilityIncrease,
   getFeatSourceInfo,
-  canSelectMoreFeats
+  canSelectMoreFeats,
+  checkFeatPrerequisites
 } from '../../../utils/featUtils';
+import { loadFeats } from '../../../services/dataService';
 import { FeatChoiceModal } from '../components';
 
 const RandomizeButton: React.FC<{ onClick: () => void; title?: string; className?: string }> = ({
@@ -34,6 +36,19 @@ export const Step5point5Feats: React.FC<StepProps> = ({ data, updateData, nextSt
   // Calculate how many feats the character can take
   const maxFeats = calculateFeatAvailability(data);
   const selectedFeats = data.selectedFeats || [];
+
+  // Load all feats and calculate availability
+  const allFeats = loadFeats().map(feat => ({
+    feat,
+    isAvailable: checkFeatPrerequisites(feat, data),
+    requirements: feat.prerequisite || ''
+  }));
+
+  // Helper function to check if a feat requires choices
+  const featRequiresChoices = (featSlug: string): boolean => {
+    const feat = loadFeats().find(f => f.slug === featSlug);
+    return !!(feat?.abilityScoreIncrease);
+  };
 
 
 

@@ -35,7 +35,7 @@ import { APP_VERSION } from './version';
 // REFACTORED: Language utilities moved to languageUtils.ts for the wizard
 // Still used here in main App for character sheet display - can be removed once main app is refactored
 
-import { Ability, Character, CharacterCreationData, Equipment, EquippedItem, Feature, Monster, UserMonster } from './types/dnd';
+import { Ability, Character, CharacterCreationData, Equipment, EquippedItem, Feature, Monster, UserMonster, Edition } from './types/dnd';
 
 import { useDiceContext, useLayout } from './hooks';
 
@@ -829,35 +829,34 @@ const App: React.FC = () => {
   }, [characters, recalculateAC]);
 
   const handleAddItem = useCallback(async (characterId: string, equipmentSlug: string, quantity: number = 1) => {
-    const character = characters.find(c => c.id === characterId);
-    if (!character) return;
-
     const equipment = EQUIPMENT_DATABASE.find(eq => eq.slug === equipmentSlug);
     if (!equipment) return;
 
-    // Check if item already in inventory
-    const existingItem = character.inventory?.find(item => item.equipmentSlug === equipmentSlug);
+    // Use functional state updates so multiple rapid calls accumulate correctly
+    await new Promise<void>((resolve) => {
+      setCharacters(prev => {
+        const character = prev.find(c => c.id === characterId);
+        if (!character) return prev;
 
-    let updatedInventory: EquippedItem[];
-    if (existingItem) {
-      // Increase quantity
-      updatedInventory = character.inventory!.map(item =>
-        item.equipmentSlug === equipmentSlug ? { ...item, quantity: item.quantity + quantity } : item
-      );
-    } else {
-      // Add new item
-      updatedInventory = [...(character.inventory || []), { equipmentSlug, quantity, equipped: false }];
-    }
+        const existingItem = character.inventory?.find(item => item.equipmentSlug === equipmentSlug);
+        let updatedInventory: EquippedItem[];
+        if (existingItem) {
+          updatedInventory = character.inventory!.map(item =>
+            item.equipmentSlug === equipmentSlug ? { ...item, quantity: item.quantity + quantity } : item
+          );
+        } else {
+          updatedInventory = [...(character.inventory || []), { equipmentSlug, quantity, equipped: false }];
+        }
 
-    const updatedCharacter = { ...character, inventory: updatedInventory };
+        const updatedCharacter = { ...character, inventory: updatedInventory };
+        // Fire and forget persistence; resolve immediately so chained calls keep state in sync
+        updateCharacter(updatedCharacter).catch(() => {});
 
-    try {
-      await updateCharacter(updatedCharacter);
-      setCharacters(prev => prev.map(c => c.id === characterId ? updatedCharacter : c));
-    } catch {
-      // Error adding item
-    }
-  }, [characters]);
+        resolve();
+        return prev.map(c => c.id === characterId ? updatedCharacter : c);
+      });
+    });
+  }, []);
 
   const handleRemoveItem = useCallback(async (characterId: string, equipmentSlug: string, quantity: number = 1) => {
     const character = characters.find(c => c.id === characterId);

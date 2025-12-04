@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ArrowLeft, ArrowRight, User, Heart, Target, Link2, Frown, Dices } from 'lucide-react';
 import { CharacterProfile } from '../data/characterProfiles';
+import { Edition } from '../types/dnd';
 import {
   generateRandomName,
   generateRandomPersonality,

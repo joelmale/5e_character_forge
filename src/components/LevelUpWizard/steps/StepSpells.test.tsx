@@ -11,11 +11,11 @@ vi.mock('../../../services/dataService', () => ({
 
 describe('StepSpells', () => {
   const mockSpells = [
-    { slug: 'light', name: 'Light', level: 0, school: 'Evocation', castingTime: 'Action', classes: ['sorcerer'] },
-    { slug: 'burning-hands', name: 'Burning Hands', level: 1, school: 'Evocation', castingTime: 'Action', classes: ['sorcerer'] },
-    { slug: 'scorching-ray', name: 'Scorching Ray', level: 2, school: 'Evocation', castingTime: 'Action', classes: ['sorcerer'] },
-    { slug: 'ice-storm', name: 'Ice Storm', level: 4, school: 'Evocation', castingTime: 'Action', classes: ['sorcerer'] },
-    { slug: 'cone-of-cold', name: 'Cone of Cold', level: 5, school: 'Evocation', castingTime: 'Action', classes: ['sorcerer'] },
+    { slug: 'light', name: 'Light', level: 0, school: 'Evocation', castingTime: 'Action', classes: ['sorcerer', 'bard'] },
+    { slug: 'burning-hands', name: 'Burning Hands', level: 1, school: 'Evocation', castingTime: 'Action', classes: ['sorcerer', 'bard'] },
+    { slug: 'scorching-ray', name: 'Scorching Ray', level: 2, school: 'Evocation', castingTime: 'Action', classes: ['sorcerer', 'bard'] },
+    { slug: 'ice-storm', name: 'Ice Storm', level: 4, school: 'Evocation', castingTime: 'Action', classes: ['sorcerer', 'bard'] },
+    { slug: 'cone-of-cold', name: 'Cone of Cold', level: 5, school: 'Evocation', castingTime: 'Action', classes: ['sorcerer', 'bard'] },
   ];
 
   const character = {
@@ -74,5 +74,26 @@ describe('StepSpells', () => {
     expect(screen.getByText('Scorching Ray')).toBeInTheDocument();
     expect(screen.queryByText('Ice Storm')).not.toBeInTheDocument();
     expect(screen.queryByText('Cone of Cold')).not.toBeInTheDocument();
+  });
+
+  it('handles bard zero-based slot arrays by normalizing to cantrip placeholder', () => {
+    const bardCharacter = {
+      ...character,
+      class: 'bard',
+    } as Character;
+
+    render(
+      <StepSpells
+        character={bardCharacter}
+        levelUpData={{ ...levelUpData, toLevel: 2 }}
+        choices={baseChoices}
+        updateChoices={noop}
+        onNext={noop}
+        onPrev={noop}
+      />
+    );
+
+    expect(screen.getByText('Burning Hands')).toBeInTheDocument();
+    expect(screen.queryByText('Scorching Ray')).not.toBeInTheDocument();
   });
 });

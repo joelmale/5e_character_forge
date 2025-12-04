@@ -163,6 +163,7 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
       flaws: data.flaws,
       classFeatures: allClassFeatures, // Includes fighting style if applicable
       speciesTraits: speciesData.species_traits,
+      backgroundFeatures: [],
       musicalInstrumentProficiencies: [],
     },
     spellcasting: spellcastingData, // Sprint 2: Include spell data

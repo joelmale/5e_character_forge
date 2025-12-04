@@ -7,11 +7,12 @@ import { useCharacterManagement } from '../hooks/useCharacterManagement';
 
 interface ManualEntryScreenProps {
   isOpen: boolean;
+  edition: '2014' | '2024';
   onClose: () => void;
   onCharacterCreated?: (character: Character) => void;
 }
 
-const ManualEntryScreen: React.FC<ManualEntryScreenProps> = ({ isOpen, onClose, onCharacterCreated }) => {
+const ManualEntryScreen: React.FC<ManualEntryScreenProps> = ({ isOpen, edition, onClose, onCharacterCreated }) => {
   const { createCharacter } = useCharacterManagement();
 
   const handleCreateCharacter = async (character: Character) => {

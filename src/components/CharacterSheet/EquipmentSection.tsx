@@ -29,10 +29,12 @@ export const EquipmentSection: React.FC<EquipmentSectionProps> = ({
   setEquipmentModal: _setEquipmentModal,
   layoutMode = 'modern',
 }) => {
+  const equipmentData = React.useMemo(() => loadEquipment(), []);
   const [selectedEquipment, setSelectedEquipment] = React.useState<Equipment | null>(null);
   const [equipError, setEquipError] = React.useState<string>('');
   const [equipmentManagerOpen, setEquipmentManagerOpen] = React.useState(false);
   const [filter, setFilter] = React.useState<'all' | 'weapons' | 'armor' | 'gear' | 'equipped'>('all');
+  const [searchTerm, setSearchTerm] = React.useState('');
 
   const handleEquipmentClick = (equipment: Equipment) => {
     setSelectedEquipment(equipment);
@@ -67,25 +69,33 @@ export const EquipmentSection: React.FC<EquipmentSectionProps> = ({
   };
 
   // Filter inventory items
-  const filteredInventory = character.inventory?.filter(item => {
-    const equipment = loadEquipment().find(eq => eq.slug === item.equipmentSlug);
-    if (!equipment) return false;
-
-    switch (filter) {
-      case 'weapons':
-        return equipment.equipment_category === 'Weapon';
-      case 'armor':
-        return equipment.equipment_category === 'Armor';
-      case 'gear':
-        return equipment.equipment_category === 'Adventuring Gear' || equipment.equipment_category === 'Tools';
-      case 'equipped':
-        return item.equipped ||
-               character.equippedArmor === item.equipmentSlug ||
-               character.equippedWeapons?.includes(item.equipmentSlug);
-      default:
-        return true;
-    }
-  }) || [];
+  const filteredInventory = (character.inventory || [])
+    .filter(item => {
+      const equipment = equipmentData.find(eq => eq.slug === item.equipmentSlug);
+      if (!equipment) return false;
+      switch (filter) {
+        case 'weapons':
+          return equipment.equipment_category === 'Weapon';
+        case 'armor':
+          return equipment.equipment_category === 'Armor';
+        case 'gear':
+          return equipment.equipment_category === 'Adventuring Gear' || equipment.equipment_category === 'Tools';
+        case 'equipped':
+          return (
+            item.equipped ||
+            character.equippedArmor === item.equipmentSlug ||
+            character.equippedWeapons?.includes(item.equipmentSlug)
+          );
+        default:
+          return true;
+      }
+    })
+    .filter(item => {
+      if (!searchTerm.trim()) return true;
+      const equipment = equipmentData.find(eq => eq.slug === item.equipmentSlug);
+      const haystack = `${equipment?.name || item.equipmentSlug} ${equipment?.equipment_category || ''}`.toLowerCase();
+      return haystack.includes(searchTerm.toLowerCase());
+    });
 
   // Determine color scheme based on layout mode
   const isPaperSheet = layoutMode === 'paper-sheet';
@@ -97,27 +107,52 @@ export const EquipmentSection: React.FC<EquipmentSectionProps> = ({
   const textTertiaryClass = isPaperSheet ? 'text-[#3d2817]' : 'text-theme-tertiary';
   const textDisabledClass = isPaperSheet ? 'text-[#8b7355]' : 'text-theme-disabled';
 
+  const totalWeight =
+    (character.inventory || []).reduce((sum, item) => {
+      const eq = equipmentData.find(eq => eq.slug === item.equipmentSlug);
+      const wt = eq?.weight || 0;
+      return sum + wt * (item.quantity || 0);
+    }, 0);
+
   return (
     <div className="space-y-4">
-      <h2 className="text-xl font-bold text-orange-500 border-b border-orange-800 pb-1">Inventory</h2>
+      <div className="flex items-center justify-between pb-2 border-b border-theme-border">
+        <div className="flex items-center gap-2">
+          <Box className="w-5 h-5 text-accent-yellow" />
+          <h2 className="text-xl font-bold">Inventory</h2>
+        </div>
+        <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.16em] font-semibold">
+          <span className={textMutedClass}>Loadout</span>
+          <span className="px-2 py-1 rounded-full bg-theme-tertiary/40 text-xs">
+            {totalWeight} lb
+          </span>
+        </div>
+      </div>
 
-      {/* Inventory List - Full Width */}
-      <div className={`p-4 ${bgSecondaryClass} rounded-xl shadow-lg border-l-4 border-yellow-500`}>
-        <div className="mb-3 flex items-center justify-between">
+      <div className={`p-4 ${bgSecondaryClass} rounded-xl shadow-lg border border-theme-border`}>
+        <div className="mb-3 flex items-center justify-between gap-3 flex-wrap">
           <h3 className="text-lg font-bold text-orange-500">
             Inventory ({character.inventory?.length || 0} items)
           </h3>
-          <button
-            onClick={() => setEquipmentManagerOpen(true)}
-            className="px-3 py-2 bg-accent-blue hover:bg-accent-blue-light text-white rounded-lg flex items-center gap-2 transition-colors"
-            title="Add items to inventory"
-          >
-            <Plus className="w-4 h-4" />
-            Add Items
-          </button>
+          <div className="flex items-center gap-2 flex-wrap justify-end">
+            <input
+              type="text"
+              placeholder="Search items..."
+              className={`px-3 py-2 rounded-lg border ${textPrimaryClass} ${bgTertiaryClass} ${hoverBgClass} focus:outline-none focus:ring-2 focus:ring-accent-blue/60 text-sm w-full md:w-56`}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              value={searchTerm}
+            />
+            <button
+              onClick={() => setEquipmentManagerOpen(true)}
+              className="px-3 py-2 bg-accent-blue hover:bg-accent-blue-light text-white rounded-lg flex items-center gap-2 transition-colors"
+              title="Add items to inventory"
+            >
+              <Plus className="w-4 h-4" />
+              Add Items
+            </button>
+          </div>
         </div>
 
-        {/* Filter Controls */}
         <div className="flex flex-wrap gap-2 mb-4">
           {[
             { key: 'all', label: 'All', count: character.inventory?.length || 0 },
@@ -127,15 +162,15 @@ export const EquipmentSection: React.FC<EquipmentSectionProps> = ({
               character.equippedWeapons?.includes(item.equipmentSlug)
             ).length || 0 },
             { key: 'weapons', label: 'Weapons', count: character.inventory?.filter(item => {
-              const equipment = loadEquipment().find(eq => eq.slug === item.equipmentSlug);
+              const equipment = equipmentData.find(eq => eq.slug === item.equipmentSlug);
               return equipment?.equipment_category === 'Weapon';
             }).length || 0 },
             { key: 'armor', label: 'Armor', count: character.inventory?.filter(item => {
-              const equipment = loadEquipment().find(eq => eq.slug === item.equipmentSlug);
+              const equipment = equipmentData.find(eq => eq.slug === item.equipmentSlug);
               return equipment?.equipment_category === 'Armor';
             }).length || 0 },
             { key: 'gear', label: 'Gear/Tools', count: character.inventory?.filter(item => {
-              const equipment = loadEquipment().find(eq => eq.slug === item.equipmentSlug);
+              const equipment = equipmentData.find(eq => eq.slug === item.equipmentSlug);
               return equipment?.equipment_category === 'Adventuring Gear' || equipment?.equipment_category === 'Tools';
             }).length || 0 }
           ].map(({ key, label, count }) => (
@@ -144,7 +179,7 @@ export const EquipmentSection: React.FC<EquipmentSectionProps> = ({
               onClick={() => setFilter(key as any)}
               className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${
                 filter === key
-                  ? 'bg-accent-blue text-white'
+                  ? 'bg-accent-blue text-white shadow-[0_4px_10px_rgba(37,99,235,0.35)]'
                   : `${bgTertiaryClass} ${textMutedClass} ${hoverBgClass}`
               }`}
             >
@@ -153,7 +188,7 @@ export const EquipmentSection: React.FC<EquipmentSectionProps> = ({
           ))}
         </div>
 
-        {(!filteredInventory || filteredInventory.length === 0) ? (
+        {filteredInventory.length === 0 ? (
           <div className={`text-center py-8 ${textDisabledClass}`}>
             <Box className="w-12 h-12 mx-auto mb-4 opacity-50" />
             <p className="text-lg font-medium mb-2">
@@ -164,17 +199,21 @@ export const EquipmentSection: React.FC<EquipmentSectionProps> = ({
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-[400px] overflow-y-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-[420px] overflow-y-auto pr-1">
             {filteredInventory.map((item, idx) => {
-              const equipment = loadEquipment().find(eq => eq.slug === item.equipmentSlug);
+              const equipment = equipmentData.find(eq => eq.slug === item.equipmentSlug);
               const isWeapon = equipment?.weapon_category !== undefined;
               const isMastered = character.weaponMastery?.includes(item.equipmentSlug);
               const masteryProperty = equipment?.mastery;
+              const itemWeight = (equipment?.weight || 0) * (item.quantity || 0);
 
               return (
-                <div key={idx} className={`${bgTertiaryClass} p-2 rounded ${hoverBgClass} transition-colors`}>
+                <div
+                  key={idx}
+                  className={`${bgTertiaryClass} p-3 rounded-lg ${hoverBgClass} transition-all border border-theme-border/60 shadow-sm`}
+                >
                   <div className="flex items-start justify-between gap-2">
-                    <div className="flex-grow min-w-0">
+                    <div className="flex-grow min-w-0 space-y-1">
                       <div className="flex items-center gap-2 flex-wrap">
                         {equipment ? (
                           <button
@@ -187,107 +226,113 @@ export const EquipmentSection: React.FC<EquipmentSectionProps> = ({
                           <span className={`font-semibold ${textPrimaryClass} text-left`}>
                             {item.trinket?.short_name || item.equipmentSlug}
                           </span>
-                        )}                        {item.equipped && <span className="text-xs bg-accent-green px-2 py-0.5 rounded">Equipped</span>}
-                        {item.trinket && <span className="text-xs bg-purple-600 px-2 py-0.5 rounded">Trinket</span>}\                        {/* Weapon Mastery Indicator */}
+                        )}
+                        {item.equipped && <span className="text-[11px] bg-accent-green/20 border border-accent-green/40 text-accent-green px-2 py-0.5 rounded">Equipped</span>}
+                        {item.trinket && <span className="text-[11px] bg-purple-600/20 border border-purple-500/40 text-purple-100 px-2 py-0.5 rounded">Trinket</span>}
                         {isWeapon && isMastered && masteryProperty && (
                           <span
-                            className="text-xs bg-amber-900/50 border border-amber-500/50 text-amber-300 px-2 py-0.5 rounded flex items-center gap-1"
+                            className="text-[11px] bg-amber-900/30 border border-amber-500/50 text-amber-200 px-2 py-0.5 rounded flex items-center gap-1"
                             title={`Mastery: ${masteryProperty.name}`}
                           >
                             ⚔️ {masteryProperty.name}
                           </span>
                         )}
+                        <span className={`text-[11px] px-2 py-0.5 rounded-full border border-theme-border/60 ${textMutedClass}`}>
+                          ×{item.quantity}
+                        </span>
                       </div>
-                      <div className={`text-xs ${textMutedClass}`}>
-                        Equipment | Weight: {item.quantity * 1} lb
+                      <div className={`text-xs ${textMutedClass} flex items-center gap-3 flex-wrap`}>
+                        <span>{equipment?.equipment_category || 'Item'}</span>
+                        <span>Weight: {itemWeight} lb</span>
+                        {equipment?.weapon_range && <span>{equipment.weapon_range}</span>}
+                        {equipment?.armor_category && <span>{equipment.armor_category}</span>}
                       </div>
                     </div>
                     <div className="flex items-center gap-2 flex-shrink-0">
-                      <span className={`font-mono text-sm ${textTertiaryClass}`}>×{item.quantity}</span>
-                       <div className="flex gap-1">
-                         {/* Equip/Unequip buttons */}
-                         {equipment && equipment.equipable && (
-                           <>
-                             {equipment.equipment_category === 'Armor' && equipment.armor_category !== 'Shield' && (
-                               <button
-                                 onClick={() => {
-                                   if (item.equipped) {
-                                     onUnequipItem(character.id, item.equipmentSlug);
-                                   } else {
-                                     onEquipArmor(character.id, item.equipmentSlug);
-                                   }
-                                 }}
-                                 className={`px-2 py-0.5 rounded text-xs transition-colors ${
-                                   item.equipped
-                                     ? 'bg-accent-red hover:bg-accent-red-light text-white'
-                                     : 'bg-accent-green hover:bg-accent-green-dark text-white'
-                                 }`}
-                                 title={item.equipped ? 'Unequip armor' : 'Equip armor'}
-                               >
-                                 {item.equipped ? 'Unequip' : 'Equip'}
-                               </button>
-                             )}
-                             {equipment.equipment_category === 'Weapon' && (
-                               <button
-                                 onClick={() => {
-                                   if (item.equipped) {
-                                     onUnequipItem(character.id, item.equipmentSlug);
-                                   } else {
-                                     onEquipWeapon(character.id, item.equipmentSlug);
-                                   }
-                                 }}
-                                 className={`px-2 py-0.5 rounded text-xs transition-colors ${
-                                   item.equipped
-                                     ? 'bg-accent-red hover:bg-accent-red-light text-white'
-                                     : 'bg-accent-blue hover:bg-accent-blue-dark text-white'
-                                 }`}
-                                 title={item.equipped ? 'Unequip weapon' : 'Equip weapon'}
-                               >
-                                 {item.equipped ? 'Unequip' : 'Equip'}
-                               </button>
-                             )}
-                             {equipment.armor_category === 'Shield' && (
-                               <button
-                                 onClick={() => {
-                                   if (item.equipped) {
-                                     onUnequipItem(character.id, item.equipmentSlug);
-                                   } else {
-                                     onEquipWeapon(character.id, item.equipmentSlug);
-                                   }
-                                 }}
-                                 className={`px-2 py-0.5 rounded text-xs transition-colors ${
-                                   item.equipped
-                                     ? 'bg-accent-red hover:bg-accent-red-light text-white'
-                                     : 'bg-accent-purple hover:bg-accent-purple-dark text-white'
-                                 }`}
-                                 title={item.equipped ? 'Unequip shield' : 'Equip shield'}
-                               >
-                                 {item.equipped ? 'Unequip' : 'Equip'}
-                               </button>
-                             )}
-                           </>
-                         )}
-                        {/* Quantity adjustment buttons */}
-                        <div className="flex flex-col gap-1">
-                          <div className="flex items-center gap-1">
-                            <button
-                              onClick={() => onAddItem(character.id, item.equipmentSlug, 1)}
-                              className="w-5 h-5 bg-green-600 hover:bg-green-700 text-white rounded flex items-center justify-center text-xs font-bold"
-                              title="Add 1 to inventory"
-                            >
-                              +
-                            </button>
-                            <button
-                              onClick={() => onRemoveItem(character.id, item.equipmentSlug, 1)}
-                              className="w-5 h-5 bg-red-600 hover:bg-red-700 text-white rounded flex items-center justify-center text-xs font-bold"
-                              title={item.quantity > 1 ? "Use/consume 1 (reduce quantity)" : "Remove from inventory"}
-                            >
-                              −
-                            </button>
-                          </div>
-                          <div className={`text-xs ${textMutedClass} text-center`}>
-                            {item.quantity > 1 ? "Use" : "Remove"}
-                          </div>
+                      <div className="flex gap-1">
+                        {/* Equip/Unequip buttons */}
+                        {equipment && equipment.equipable && (
+                          <>
+                            {equipment.equipment_category === 'Armor' && equipment.armor_category !== 'Shield' && (
+                              <button
+                                onClick={() => {
+                                  if (item.equipped) {
+                                    onUnequipItem(character.id, item.equipmentSlug);
+                                  } else {
+                                    onEquipArmor(character.id, item.equipmentSlug);
+                                  }
+                                }}
+                                className={`px-2 py-0.5 rounded text-xs transition-colors ${
+                                  item.equipped
+                                    ? 'bg-accent-red hover:bg-accent-red-light text-white'
+                                    : 'bg-accent-green hover:bg-accent-green-dark text-white'
+                                }`}
+                                title={item.equipped ? 'Unequip armor' : 'Equip armor'}
+                              >
+                                {item.equipped ? 'Unequip' : 'Equip'}
+                              </button>
+                            )}
+                            {equipment.equipment_category === 'Weapon' && (
+                              <button
+                                onClick={() => {
+                                  if (item.equipped) {
+                                    onUnequipItem(character.id, item.equipmentSlug);
+                                  } else {
+                                    onEquipWeapon(character.id, item.equipmentSlug);
+                                  }
+                                }}
+                                className={`px-2 py-0.5 rounded text-xs transition-colors ${
+                                  item.equipped
+                                    ? 'bg-accent-red hover:bg-accent-red-light text-white'
+                                    : 'bg-accent-blue hover:bg-accent-blue-dark text-white'
+                                }`}
+                                title={item.equipped ? 'Unequip weapon' : 'Equip weapon'}
+                              >
+                                {item.equipped ? 'Unequip' : 'Equip'}
+                              </button>
+                            )}
+                            {equipment.armor_category === 'Shield' && (
+                              <button
+                                onClick={() => {
+                                  if (item.equipped) {
+                                    onUnequipItem(character.id, item.equipmentSlug);
+                                  } else {
+                                    onEquipWeapon(character.id, item.equipmentSlug);
+                                  }
+                                }}
+                                className={`px-2 py-0.5 rounded text-xs transition-colors ${
+                                  item.equipped
+                                    ? 'bg-accent-red hover:bg-accent-red-light text-white'
+                                    : 'bg-accent-purple hover:bg-accent-purple-dark text-white'
+                                }`}
+                                title={item.equipped ? 'Unequip shield' : 'Equip shield'}
+                              >
+                                {item.equipped ? 'Unequip' : 'Equip'}
+                              </button>
+                            )}
+                          </>
+                        )}
+                      </div>
+                      {/* Quantity adjustment buttons */}
+                      <div className="flex flex-col gap-1">
+                        <div className="flex items-center gap-1">
+                          <button
+                            onClick={() => onAddItem(character.id, item.equipmentSlug, 1)}
+                            className="w-5 h-5 bg-green-600 hover:bg-green-700 text-white rounded flex items-center justify-center text-xs font-bold"
+                            title="Add 1 to inventory"
+                          >
+                            +
+                          </button>
+                          <button
+                            onClick={() => onRemoveItem(character.id, item.equipmentSlug, 1)}
+                            className="w-5 h-5 bg-red-600 hover:bg-red-700 text-white rounded flex items-center justify-center text-xs font-bold"
+                            title={item.quantity > 1 ? 'Use/consume 1 (reduce quantity)' : 'Remove from inventory'}
+                          >
+                            −
+                          </button>
+                        </div>
+                        <div className={`text-xs ${textMutedClass} text-center`}>
+                          {item.quantity > 1 ? 'Use' : 'Remove'}
                         </div>
                       </div>
                     </div>
@@ -297,40 +342,40 @@ export const EquipmentSection: React.FC<EquipmentSectionProps> = ({
             })}
           </div>
         )}
+      </div>
 
-        </div>
+      <EquipmentModal
+        equipment={selectedEquipment}
+        isOpen={selectedEquipment !== null}
+        onClose={() => {
+          setSelectedEquipment(null);
+          setEquipError('');
+        }}
+        onEquip={selectedEquipment && selectedEquipment.equipable ? handleEquipFromModal : undefined}
+        onUnequip={
+          selectedEquipment &&
+          selectedEquipment.equipable &&
+          (character.equippedArmor === selectedEquipment.slug || character.equippedWeapons?.includes(selectedEquipment.slug))
+            ? handleUnequipFromModal
+            : undefined
+        }
+        canEquip={selectedEquipment ? canEquipItem(character, selectedEquipment).canEquip : true}
+        equipError={equipError}
+      />
 
-        {/* Equipment Modal */}
-        <EquipmentModal
-          equipment={selectedEquipment}
-          isOpen={selectedEquipment !== null}
-          onClose={() => {
-            setSelectedEquipment(null);
-            setEquipError('');
-          }}
-          onEquip={selectedEquipment && selectedEquipment.equipable ? handleEquipFromModal : undefined}
-           onUnequip={selectedEquipment && selectedEquipment.equipable && (
-             character.equippedArmor === selectedEquipment.slug ||
-             character.equippedWeapons?.includes(selectedEquipment.slug)
-           ) ? handleUnequipFromModal : undefined}          canEquip={selectedEquipment ? canEquipItem(character, selectedEquipment).canEquip : true}
-          equipError={equipError}
-        />
-
-        {/* Equipment Manager Modal */}
-        <EquipmentManagerModal
-          isOpen={equipmentManagerOpen}
-          onClose={() => setEquipmentManagerOpen(false)}
-          character={character}
-          onAddItems={(items) => {
-            // Use the existing onAddItem function for each item
-            items.forEach(item => {
-              for (let i = 0; i < item.quantity; i++) {
-                onAddItem(character.id, item.equipmentSlug, 1);
-              }
-            });
-            setEquipmentManagerOpen(false);
-          }}
-        />
+      <EquipmentManagerModal
+        isOpen={equipmentManagerOpen}
+        onClose={() => setEquipmentManagerOpen(false)}
+        character={character}
+        onAddItems={(items) => {
+          items.forEach(item => {
+            for (let i = 0; i < item.quantity; i++) {
+              onAddItem(character.id, item.equipmentSlug, 1);
+            }
+          });
+          setEquipmentManagerOpen(false);
+        }}
+      />
     </div>
   );
 };
