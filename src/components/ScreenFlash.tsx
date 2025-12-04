@@ -17,7 +17,7 @@ export const ScreenFlash: React.FC<ScreenFlashProps> = ({ type, onComplete }) =>
       }, 600); // Flash duration
       return () => clearTimeout(timer);
     }
-  }, [type, onComplete]);
+  }, [type, onComplete]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!isVisible || !type) return null;
 

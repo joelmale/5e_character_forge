@@ -8,6 +8,7 @@ import React, { useState } from 'react';
 import { Character, LevelUpChoices } from '../../../types/dnd';
 import { LevelUpData } from '../../../data/classProgression';
 import { loadSpells } from '../../../services/dataService';
+import { SPELL_SLOTS_BY_CLASS } from '../../../data/spellSlots';
 
 interface StepSpellsProps {
   character: Character;
@@ -32,10 +33,11 @@ export const StepSpells: React.FC<StepSpellsProps> = ({
 
   // Load spells for this class
   const allSpells = loadSpells();
+  const classSlug = character.class.toLowerCase();
   const classSpells = allSpells.filter(spell => {
     if (!spell.classes) return false;
     const classList = Array.isArray(spell.classes) ? spell.classes : [spell.classes];
-    return classList.some(c => c && typeof c === 'string' && c.toLowerCase() === character.class.toLowerCase());
+    return classList.some(c => c && typeof c === 'string' && c.toLowerCase() === classSlug);
   });
 
   // Get the specific spell choice for this step
@@ -69,13 +71,27 @@ export const StepSpells: React.FC<StepSpellsProps> = ({
   const spellsToLearn = currentSpellChoice.count || 1;
   const isCantripChoice = currentSpellChoice.description.toLowerCase().includes('cantrip');
 
+  // Determine the highest spell level the character can cast at the new level
+  const spellSlotsAtNewLevel =
+    SPELL_SLOTS_BY_CLASS[classSlug]?.[levelUpData.toLevel] ||
+    character.spellcasting?.spellSlots ||
+    [];
+  const derivedMaxSpellLevel = spellSlotsAtNewLevel.reduce((max, slots, levelIndex) => {
+    if (levelIndex === 0) return max; // Index 0 is cantrips
+    return slots > 0 ? levelIndex : max;
+  }, 0);
+  const maxSpellLevel = derivedMaxSpellLevel || Math.max(1, Math.ceil(levelUpData.toLevel / 2));
+
   // Filter spells based on choice type and exclude already known
   const availableSpells = classSpells.filter(spell => {
     if (!character.spellcasting) return false;
 
     // Filter by spell level based on choice type
     if (isCantripChoice && spell.level !== 0) return false;
-    if (!isCantripChoice && spell.level === 0) return false;
+    if (!isCantripChoice) {
+      if (spell.level === 0) return false;
+      if (maxSpellLevel > 0 && spell.level > maxSpellLevel) return false;
+    }
 
     const alreadyKnown =
       character.spellcasting.cantripsKnown?.includes(spell.slug) ||

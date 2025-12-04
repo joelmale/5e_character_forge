@@ -117,7 +117,7 @@ const NameGeneratorModal: React.FC<NameGeneratorModalProps> = ({
 
       loadSavedData();
     }
-  }, [isOpen, selectedSpecies, selectedGender, nameHistory]);
+   }, [isOpen, selectedSpecies, selectedGender, nameHistory]); // eslint-disable-line react-hooks/exhaustive-deps
 
   /**
    * Save name generator favorites to localStorage

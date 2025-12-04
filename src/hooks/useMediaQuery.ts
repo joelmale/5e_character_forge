@@ -44,7 +44,7 @@ export function useMediaQuery(query: string): boolean {
     };
 
     // Set initial value
-    setMatches(mediaQuery.matches);
+    setMatches(mediaQuery.matches); // eslint-disable-line react-hooks/exhaustive-deps
 
     // Add event listener (modern browsers)
     // Note: Some older browsers use addListener instead of addEventListener

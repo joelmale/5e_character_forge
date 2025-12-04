@@ -786,7 +786,7 @@ function applyFeatEffects(character: Character, featSlug: string, featChoices?: 
       break;
 
     // Magic-Related Feats (Non-Spell)
-    case 'elemental-adept':
+    case 'elemental-adept': {
       // Ignore resistance to chosen element
       if (!character.featEffects!.ignoredResistances) {
         character.featEffects!.ignoredResistances = [];
@@ -796,6 +796,7 @@ function applyFeatEffects(character: Character, featSlug: string, featChoices?: 
         character.featEffects!.ignoredResistances.push(chosenDamageType);
       }
       break;
+    }
 
     case 'spell-sniper':
       character.featEffects!.spellSniper = true;

@@ -4,7 +4,7 @@ import { generateCharacterProfile, CharacterProfile } from '../data/characterPro
 import PersonalitySummary from './PersonalitySummary';
 import CharacterFinalization from './CharacterFinalization';
 import { loadClasses, getAllSpecies, BACKGROUNDS, getCantripsByClass, getLeveledSpellsByClass } from '../services/dataService';
-import { CharacterCreationData, SpellSelectionData, SkillName } from '../types/dnd';
+import { CharacterCreationData, SpellSelectionData, SkillName, Edition } from '../types/dnd';
 import { getSpellcastingType } from '../utils/spellUtils';
 import { SPELL_LEARNING_RULES } from '../data/spellLearning';
 import { assignAbilityScoresByClass } from '../utils/abilityScoreUtils';
@@ -246,7 +246,7 @@ const PersonalityWizard: React.FC<PersonalityWizardProps> = ({ isOpen, onClose: 
     console.log('📝 [PersonalityWizard] Finalization data:', finalizationData);
     console.log('📊 [PersonalityWizard] Selected options:', {
       selectedClass,
-      selectedRace,
+      selectedSpecies,
       selectedBackground
     });
 
@@ -260,7 +260,7 @@ const PersonalityWizard: React.FC<PersonalityWizardProps> = ({ isOpen, onClose: 
     const allSpecies = getAllSpecies();
 
     const baseClassName = extractBaseName(selectedClass || '');
-    const baseSpeciesName = extractBaseName(selectedRace || '');
+    const baseSpeciesName = extractBaseName(selectedSpecies || '');
 
     const selectedClassData = allClasses.find(c => c.name === baseClassName);
     const selectedSpeciesData = allSpecies.find(s => s.name === baseSpeciesName);
@@ -347,7 +347,7 @@ const PersonalityWizard: React.FC<PersonalityWizardProps> = ({ isOpen, onClose: 
 
     console.log('🚀 [PersonalityWizard] Calling onComplete...');
     onComplete(characterData);
-  }, [selectedClass, selectedRace, selectedBackground, onComplete]);
+   }, [selectedClass, selectedSpecies, selectedBackground, onComplete, customSkills, customAbilities, spellSelection]);
 
 
 

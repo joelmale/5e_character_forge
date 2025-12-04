@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, MoreHorizontal } from 'lucide-react';
+import { X } from 'lucide-react';
 import { AppSpell } from '../services/dataService';
 
 interface SpellDetailsModalProps {

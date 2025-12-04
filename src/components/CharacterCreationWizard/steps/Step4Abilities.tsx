@@ -7,14 +7,13 @@ import { rollDice } from '../../../services/diceService';
 import { SmartNavigationButton } from '../components';
 import { useStepValidation } from '../hooks';
 import {
+  getAvailableStandardArrayScores,
   ABILITY_NAMES,
   STANDARD_ARRAY_SCORES,
-  POINT_BUY_COSTS,
-  ABILITY_METHOD_TITLES,
   calculatePointBuyCost,
   isValidPointBuyChange,
-  getAvailableStandardArrayScores,
-  areAbilityScoresComplete
+  ABILITY_METHOD_TITLES,
+  POINT_BUY_COSTS
 } from '../../../utils/abilityScoreUtils';
 
 const RandomizeButton: React.FC<{ onClick: () => void; title?: string; className?: string }> = ({

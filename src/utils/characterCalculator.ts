@@ -24,8 +24,8 @@ import {
   DEFAULT_STARTING_CURRENCY,
   DEFAULT_CHARACTER_NAME,
   LEVEL_1_PROFICIENCY_BONUS,
+  type ArmorCategory,
 } from '../constants/combat';
-import type { ArmorCategory } from '../constants/combat';
 
 export const calculateCharacterStats = (data: CharacterCreationData): Character => {
   const speciesData = getAllSpecies().find(s => s.slug === data.speciesSlug);

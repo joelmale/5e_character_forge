@@ -128,7 +128,7 @@ export function applyFeatDamageModifiers(character: Character, weaponType: strin
  */
 export function applyFeatAttackModifiers(character: Character, weaponType: string): { attackBonus: number; damagePenalty: number } {
   let attackBonus = 0;
-  let damagePenalty = 0;
+  const damagePenalty = 0;
 
   // Great Weapon Master: -5 attack, +10 damage with heavy weapons
   if (character.featEffects?.greatWeaponMaster && weaponType === 'heavy') {

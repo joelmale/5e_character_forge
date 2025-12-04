@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Save, X, AlertCircle } from 'lucide-react';
 import { Character } from '../types/dnd';
 import { loadClasses, loadSpecies, BACKGROUNDS } from '../services/dataService';
+import { buildCompleteSpellcasting } from '../utils/characterEditUtils';
 
 interface CharacterEditFormProps {
   character?: Character; // If provided, we're editing; if not, we're creating
@@ -70,6 +71,7 @@ interface FormData {
     flaws: string;
     classFeatures: string[];
     speciesTraits: string[];
+    backgroundFeatures: Array<{name: string, description: string}>;
     musicalInstrumentProficiencies: string[];
   };
 }
@@ -186,6 +188,7 @@ export const CharacterEditForm: React.FC<CharacterEditFormProps> = ({
   useEffect(() => {
     if (character) {
       // Editing existing character - populate with current data
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       setFormData({
         name: character.name,
         level: character.level,
@@ -287,11 +290,18 @@ export const CharacterEditForm: React.FC<CharacterEditFormProps> = ({
           flaws: '',
           classFeatures: [],
           speciesTraits: [],
+          backgroundFeatures: [],
           musicalInstrumentProficiencies: []
         }
       });
     }
-  }, [character]);
+  }, [character]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const updateFormData = useCallback((updates: Partial<FormData>) => {
+    if (!formData) return;
+    setFormData({ ...formData, ...updates });
+    setIsDirty(true);
+  }, [formData]);
 
   // Update class-specific options when class changes
   useEffect(() => {
@@ -303,13 +313,7 @@ export const CharacterEditForm: React.FC<CharacterEditFormProps> = ({
         });
       }
     }
-  }, [formData?.class, classes]);
-
-  const updateFormData = (updates: Partial<FormData>) => {
-    if (!formData) return;
-    setFormData({ ...formData, ...updates });
-    setIsDirty(true);
-  };
+  }, [formData?.class, classes, updateFormData]);
 
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
@@ -463,10 +467,12 @@ export const CharacterEditForm: React.FC<CharacterEditFormProps> = ({
       inventory: [],
       currency: formData.currency,
 
-      spellcasting: formData.spellcasting ? {
-        ...character?.spellcasting!,
-        ...formData.spellcasting
-      } : undefined,
+      spellcasting: buildCompleteSpellcasting(formData.spellcasting, {
+        class: formData.class,
+        level: formData.level,
+        abilities: formData.abilities,
+        proficiencyBonus: formData.proficiencyBonus
+      }),
 
       featuresAndTraits: formData.featuresAndTraits,
 

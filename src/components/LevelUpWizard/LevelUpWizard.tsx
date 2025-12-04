@@ -66,7 +66,8 @@ export const LevelUpWizard: React.FC<LevelUpWizardProps> = ({
       setCurrentStepIndex(0);
       setChoices(initialChoices);
     }
-  }, [calculatedData, wizardSteps, initialChoices]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [calculatedData]);
 
   if (!isOpen || !levelUpData) return null;
 

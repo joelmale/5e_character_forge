@@ -198,18 +198,20 @@ function generateRaceSpecificName(race: string, gender: 'male' | 'female' | 'any
       case 'First':
         // No surname
         break;
-      case 'First of Place':
+      case 'First of Place': {
         // Generate actual place name instead of using surname
         const placeName = generatePlaceName(race);
         lastName = `of ${placeName}`;
         break;
-      case 'First the Epithet':
+      }
+      case 'First the Epithet': {
         // Generate epithet based on class if available, otherwise general
         const epithetStyle = options?.classSlug
           ? getEpithetStyleByClass(options.classSlug)
           : 'general';
         lastName = `the ${normalizeEpithet(generateEpithet(epithetStyle))}`;
         break;
+      }
       case 'First\'el':
       case 'First\'iel':
         lastName = firstName + (pattern.includes('iel') ? 'iel' : 'el');

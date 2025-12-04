@@ -7,9 +7,8 @@
  * This refactoring reduces equipment processing complexity from 18 to ~5 decision points.
  */
 
-import { EquippedItem, CharacterCreationData } from '../types/dnd';
+import { EquippedItem, CharacterCreationData, type Equipment, type EquipmentPackage } from '../types/dnd';
 import { loadEquipment, EQUIPMENT_PACKAGES } from '../services/dataService';
-import type { Equipment, EquipmentPackage } from '../types/dnd';
 
 /**
  * Equipment choice structure from character creation wizard
