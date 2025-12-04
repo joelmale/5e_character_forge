@@ -1,7 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { BookOpen, XCircle } from 'lucide-react';
 import { FEAT_DATABASE } from '../../../services/dataService';
-import { Feat } from '../../../types/dnd';
 
 interface OriginFeatSelectorProps {
   selectedFeat: string | undefined;

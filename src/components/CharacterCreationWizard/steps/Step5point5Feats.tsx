@@ -6,8 +6,7 @@ import {
   calculateFeatAvailability,
   featProvidesAbilityIncrease,
   getFeatSourceInfo,
-  canSelectMoreFeats,
-  checkFeatPrerequisites
+  canSelectMoreFeats
 } from '../../../utils/featUtils';
 import { FeatChoiceModal } from '../components';
 
@@ -36,40 +35,7 @@ export const Step5point5Feats: React.FC<StepProps> = ({ data, updateData, nextSt
   const maxFeats = calculateFeatAvailability(data);
   const selectedFeats = data.selectedFeats || [];
 
-  const getPrerequisiteDescription = (prerequisite: string): string => {
-    // Convert technical prerequisite text to user-friendly descriptions
-    const lower = prerequisite.toLowerCase();
 
-    // Ability scores
-    if (lower.includes('strength')) return prerequisite.replace(' or higher', '+');
-    if (lower.includes('dexterity')) return prerequisite.replace(' or higher', '+');
-    if (lower.includes('constitution')) return prerequisite.replace(' or higher', '+');
-    if (lower.includes('intelligence')) return prerequisite.replace(' or higher', '+');
-    if (lower.includes('wisdom')) return prerequisite.replace(' or higher', '+');
-    if (lower.includes('charisma')) return prerequisite.replace(' or higher', '+');
-
-    // Species
-    if (lower.includes('halfling')) return 'Halfling';
-    if (lower.includes('dragonborn')) return 'Dragonborn';
-    if (lower.includes('dwarf')) return 'Dwarf';
-    if (lower.includes('elf')) return 'Elf';
-    if (lower.includes('tiefling')) return 'Tiefling';
-    if (lower.includes('gnome')) return 'Gnome';
-    if (lower.includes('half-elf')) return 'Half-Elf';
-    if (lower.includes('half-orc')) return 'Half-Orc';
-    if (lower.includes('human')) return 'Human';
-
-    // Spellcasting
-    if (lower.includes('spellcasting') || lower.includes('ability to cast')) return 'Spellcasting class';
-
-    // Proficiencies
-    if (lower.includes('proficiency with light armor')) return 'Light armor proficiency';
-    if (lower.includes('proficiency with medium armor')) return 'Medium armor proficiency';
-    if (lower.includes('proficiency with heavy armor')) return 'Heavy armor proficiency';
-    if (lower.includes('proficiency with a martial weapon')) return 'Martial weapon proficiency';
-
-    return prerequisite; // Fallback to original text
-  };
 
   const handleFeatToggle = (featSlug: string) => {
     const isSelected = selectedFeats.includes(featSlug);

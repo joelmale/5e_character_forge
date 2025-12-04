@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Star, Shield, Sword, Zap, Heart, Eye, Users, Mountain } from 'lucide-react';
+import { X, Star, Sword, Zap, Heart, Eye, Users, Mountain } from 'lucide-react';
 import { Feat } from '../../../types/dnd';
 
 interface FeatDetailsModalProps {

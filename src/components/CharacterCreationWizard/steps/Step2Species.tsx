@@ -1,5 +1,5 @@
-import React, { useRef, useEffect, useState } from 'react';
-import { ChevronUp, ChevronDown, XCircle, Shuffle, ArrowLeft, ArrowRight } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { ChevronUp, ChevronDown, XCircle, Shuffle, ArrowLeft } from 'lucide-react';
 import { StepProps } from '../types/wizard.types';
 import { getAllSpecies, SPECIES_CATEGORIES, randomizeSpecies } from '../../../services/dataService';
 import { HumanVariantSelector, OriginFeatSelector, SmartNavigationButton } from '../components';
@@ -22,7 +22,8 @@ const RandomizeButton: React.FC<RandomizeButtonProps> = ({ onClick, title }) => 
 
 export const Step2Species: React.FC<StepProps> = ({ data, updateData, nextStep, prevStep, getNextStepLabel, openTraitModal }) => {
   // Start with all categories expanded so users can see available species
-  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
+  const allCategoryNames = SPECIES_CATEGORIES.map(cat => cat.name);
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set(allCategoryNames));
   const [showSpeciesInfo, setShowSpeciesInfo] = useState(true);
 
   const selectedSpecies = getAllSpecies().find(s => s.slug === data.speciesSlug);
@@ -30,12 +31,8 @@ export const Step2Species: React.FC<StepProps> = ({ data, updateData, nextStep, 
   // Validation hook
   const { canProceed, missingItems, nextAction } = useStepValidation(2, data);
 
-  // Expand all categories by default so users can see available species
+  // Debug logging to identify category issues (dev only)
   useEffect(() => {
-    const allCategoryNames = SPECIES_CATEGORIES.map(cat => cat.name);
-    setExpandedCategories(new Set(allCategoryNames));
-
-    // Debug logging to identify category issues (dev only)
     if (import.meta.env.DEV) {
       console.log('Species Categories Debug:');
       SPECIES_CATEGORIES.forEach(category => {
@@ -46,42 +43,7 @@ export const Step2Species: React.FC<StepProps> = ({ data, updateData, nextStep, 
     }
   }, [data.edition]);
 
-  const isStepComplete = () => {
-    if (!data.speciesSlug) return false;
 
-    // If species has variants, check if variant is selected and complete
-    if (selectedSpecies?.variants) {
-      if (!data.selectedSpeciesVariant) return false;
-
-      // Variant-specific validation
-      if (data.selectedSpeciesVariant === 'variant') {
-        const totalBonuses = data.variantAbilityBonuses
-          ? Object.values(data.variantAbilityBonuses).reduce((sum, val) => sum + val, 0)
-          : 0;
-        return totalBonuses === 2 && !!data.variantSkillProficiency && !!data.variantFeat;
-      }
-    }
-
-    // 2024 Species Feat Validation
-    if (data.edition === '2024' && selectedSpecies) {
-      const speciesData = selectedSpecies as any;
-      if (speciesData.speciesFeatOptions && !data.speciesFeat) {
-        return false; // Must choose a feat if options are available
-      }
-    }
-
-    // 2024 Human Versatile Feat Validation
-    if (data.edition === '2024' && data.speciesSlug === 'human-2024') {
-      if (!data.humanOriginFeat) {
-        return false; // Must choose an Origin Feat
-      }
-      if (data.humanOriginFeat === 'versatile' && !data.humanVersatileFeat) {
-        return false; // Must choose extra Origin Feat if Versatile is selected
-      }
-    }
-
-    return true;
-  };
 
   const toggleCategory = (categoryName: string) => {
     setExpandedCategories(prev => {

@@ -62,6 +62,13 @@ dist-ssr
 *.backup
 *.tmp
 
+# Local AI tooling
+.claude/
+.mcp.json
+
+# Local test harnesses / prototypes
+test-migration.html
+EQUIPMENT_BUILDER_EXAMPLE.ts
 # Package lock files (choose one)
 # package-lock.json
 # yarn.lock

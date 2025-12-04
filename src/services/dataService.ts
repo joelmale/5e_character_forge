@@ -51,19 +51,33 @@ interface Alignment {
   long_desc: string;
 }
 
+interface EquipmentOption {
+  label: string;
+  items?: string[];
+  gold?: number;
+}
+
 interface Background {
+  slug: string;
   name: string;
+  edition: string;
   description: string;
+  details?: string;
+  detailedDescription?: string;
   skill_proficiencies: string[];
+  tool_proficiencies?: string[];
   languages?: string[];
   equipment: string[];
-  feature: string;
-  feature_description: string;
-  suggested_characteristics?: string;
-  personality_traits?: string[];
-  ideals?: string[];
-  bonds?: string[];
-  flaws?: string[];
+  equipmentOptions?: EquipmentOption[];
+  abilityScores?: {
+    choose: number;
+    from: string[];
+  };
+  originFeat?: string;
+  personality_traits: string[];
+  ideals: string[];
+  bonds: string[];
+  flaws: string[];
   roleplaying_suggestions?: string;
 }
 

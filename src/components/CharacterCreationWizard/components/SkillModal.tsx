@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Star, Shield, Sword, Zap, Heart, Eye, Users, Mountain, BookOpen, Target, MessageCircle, Wrench, Music, Gamepad2 } from 'lucide-react';
+import { X, Star, Shield, Zap, Heart, Eye, Users, Mountain, BookOpen, Target, MessageCircle, Wrench, Music } from 'lucide-react';
 
 interface SkillModalProps {
   skill: string;

@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { ArrowLeft, ArrowRight, Dice6, Shuffle } from 'lucide-react';
+import { ArrowLeft, Dice6, Shuffle } from 'lucide-react';
 import { StepProps } from '../types/wizard.types';
 import { CharacterCreationData, AbilityName } from '../../../types/dnd';
 import { getAllSpecies, randomizeAbilities, getModifier, BACKGROUNDS } from '../../../services/dataService';
@@ -70,8 +70,7 @@ export const Step4Abilities: React.FC<StepProps> = ({ data, updateData, nextStep
   const [pointBuyPoints, setPointBuyPoints] = useState(27);
   const [rolledSets, setRolledSets] = useState<number[][]>([]);
 
-  // Check if abilities are complete
-  const isComplete = areAbilityScoresComplete(data.abilities);
+
 
   // Handle method change
   const handleMethodChange = (method: CharacterCreationData['abilityScoreMethod']) => {

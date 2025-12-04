@@ -15,7 +15,7 @@ interface FeatChoiceModalProps {
   isOpen: boolean;
   onClose: () => void;
   feat: Feat | null;
-  onConfirm: (choices: Record<string, any>) => void;
+  onConfirm: (choices: Record<string, unknown>) => void;
 }
 
 export const FeatChoiceModal: React.FC<FeatChoiceModalProps> = ({
@@ -93,13 +93,13 @@ export const FeatChoiceModal: React.FC<FeatChoiceModalProps> = ({
     ? { [choiceConfig.key]: [choiceConfig.options[0]?.value] }
     : { [choiceConfig?.key || '']: choiceConfig?.options[0]?.value };
 
-  const [selections, setSelections] = useState<Record<string, any>>(defaultSelections || {});
+  const [selections, setSelections] = useState<Record<string, string | string[]>>(defaultSelections as Record<string, string | string[]> || {});
 
 
 
   if (!isOpen || !feat || !choiceConfig) return null;
 
-  const handleSelection = (key: string, value: any) => {
+  const handleSelection = (key: string, value: string | string[]) => {
     setSelections(prev => ({ ...prev, [key]: value }));
   };
 
@@ -144,7 +144,7 @@ export const FeatChoiceModal: React.FC<FeatChoiceModalProps> = ({
                         handleSelection(choiceConfig.key, [...current, option.value]);
                       }
                     } else {
-                      handleSelection(choiceConfig.key, current.filter((v: string) => v !== option.value));
+                      handleSelection(choiceConfig.key, (current as string[]).filter((v: string) => v !== option.value));
                     }
                   } else {
                     handleSelection(choiceConfig.key, option.value);

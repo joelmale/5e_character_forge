@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useCallback } from 'react';
 import { CharacterCreationData, ValidationResult } from '../../../types/dnd';
 import { getAllSpecies, BACKGROUNDS } from '../../../services/dataService';
 
@@ -11,8 +11,8 @@ export const useStepValidation = (stepIndex: number, data: CharacterCreationData
 
     // Enhanced 2024 background ability validation
     if (data.edition === '2024' && data.background) {
-      const background = BACKGROUNDS.find((bg: any) => bg.slug === data.background);
-      const needsChoices = (background as any)?.abilityScores?.choose > 0;
+      const background = BACKGROUNDS.find(bg => bg.slug === data.background);
+      const needsChoices = background?.abilityScores?.choose && background.abilityScores.choose > 0;
 
       if (needsChoices) {
         const choices = data.backgroundAbilityChoices;
@@ -51,10 +51,10 @@ export const useStepValidation = (stepIndex: number, data: CharacterCreationData
 
     if (data.edition === '2024') {
       const species = getAllSpecies(data.edition).find(s => s.slug === data.speciesSlug);
-      if (species && (species as any).speciesFeatOptions && !data.speciesFeat) {
+      if (species && species.speciesFeatOptions && !data.speciesFeat) {
         missing.push("Species feat choice");
       }
-      if (species && (species as any).lineages && Object.keys((species as any).lineages).length > 0 && !data.selectedLineage) {
+      if (species && species.lineages && Object.keys(species.lineages).length > 0 && !data.selectedLineage) {
         missing.push("Lineage choice");
       }
     }
@@ -94,7 +94,7 @@ export const useStepValidation = (stepIndex: number, data: CharacterCreationData
     };
   };
 
-  const validateCurrentStep = (): ValidationResult => {
+  const validateCurrentStep = useCallback((): ValidationResult => {
     switch (stepIndex) {
       case 1: return validateStep1(data);
       case 2: return validateStep2(data);
@@ -102,9 +102,9 @@ export const useStepValidation = (stepIndex: number, data: CharacterCreationData
       case 4: return validateStep4(data);
       default: return { isComplete: true, missingSelections: [] };
     }
-  };
+  }, [stepIndex, data]);
 
-  const validation = useMemo(() => validateCurrentStep(), [stepIndex, data]);
+  const validation = useMemo(() => validateCurrentStep(), [validateCurrentStep]);
 
   return {
     canProceed: validation.isComplete,

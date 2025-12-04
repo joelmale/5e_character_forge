@@ -1,8 +1,7 @@
 import React from 'react';
-import { ArrowRight, Shuffle, BookOpen } from 'lucide-react';
+import { ArrowRight, Shuffle } from 'lucide-react';
 import { StepProps } from '../types/wizard.types';
 import { randomizeLevel } from '../../../services/dataService';
-import { Edition } from '../../../types/dnd';
 
 interface RandomizeButtonProps {
   onClick: () => void;

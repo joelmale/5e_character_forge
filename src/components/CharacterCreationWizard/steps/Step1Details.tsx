@@ -54,10 +54,10 @@ export const Step1Details: React.FC<StepProps> = ({ data, updateData, nextStep, 
   const { toasts, showSuccess, removeToast } = useToast();
 
   const selectedAlignmentData = ALIGNMENTS_DATA.find(a => a.name === data.alignment);
-  const selectedBackground = BACKGROUNDS.find((bg: any) => bg.slug === data.background);
+  const selectedBackground = BACKGROUNDS.find(bg => bg.slug === data.background);
   const backgroundDescription = selectedBackground
-    ? (selectedBackground as any).details
-      || (selectedBackground as any).detailedDescription
+    ? selectedBackground.details
+      || selectedBackground.detailedDescription
       || selectedBackground.description
       || ''
     : '';
@@ -181,16 +181,16 @@ export const Step1Details: React.FC<StepProps> = ({ data, updateData, nextStep, 
           className="w-full p-3 bg-theme-tertiary text-white rounded-lg focus:ring-red-500 focus:border-red-500"
         >
           <option value="">Select Background</option>
-          {BACKGROUNDS.filter((bg: any) => bg.edition === data.edition).map((bg: any) => (
+           {BACKGROUNDS.filter(bg => bg.edition === data.edition).map(bg => (
             <option key={bg.slug} value={bg.slug}>{bg.name}</option>
           ))}
         </select>
       </div>
 
       {/* 2024 Background Ability Score Selection */}
-      {data.edition === '2024' && (selectedBackground as any)?.abilityScores && (
+      {data.edition === '2024' && selectedBackground?.abilityScores && (
         <BackgroundASIWidget
-          availableOptions={(selectedBackground as any).abilityScores.from}
+          availableOptions={selectedBackground.abilityScores.from as import('../../../types/dnd').AbilityName[]}
           data={data}
           updateData={updateData}
         />
@@ -223,10 +223,10 @@ export const Step1Details: React.FC<StepProps> = ({ data, updateData, nextStep, 
           </div>
 
           {/* 2024 Origin Feat */}
-          {(selectedBackground as any).edition === '2024' && (selectedBackground as any).originFeat && (
+          {selectedBackground.edition === '2024' && selectedBackground.originFeat && (
             <div className="border-t border-theme-primary pt-3">
                <div className="flex items-center gap-2 mb-2">
-                 <h5 className="text-sm font-semibold text-yellow-200">Origin Feat: {(selectedBackground as any).originFeat}</h5>
+                 <h5 className="text-sm font-semibold text-yellow-200">Origin Feat: {selectedBackground.originFeat}</h5>
                </div>
               <p className="text-xs text-theme-tertiary">
                 This feat is granted at 1st level by your background.
@@ -247,11 +247,11 @@ export const Step1Details: React.FC<StepProps> = ({ data, updateData, nextStep, 
           </div>
 
           {/* Tool Proficiencies */}
-          {(selectedBackground as any).tool_proficiencies && (selectedBackground as any).tool_proficiencies.length > 0 && (
+          {selectedBackground.tool_proficiencies && selectedBackground.tool_proficiencies.length > 0 && (
             <div className="border-t border-theme-primary pt-3">
               <h5 className="text-sm font-semibold text-yellow-200 mb-2">Tool Proficiencies</h5>
               <div className="flex flex-wrap gap-2">
-                {(selectedBackground as any).tool_proficiencies.map((tool: string) => (
+                {selectedBackground.tool_proficiencies.map((tool: string) => (
                   <span key={tool} className="px-2 py-1 bg-purple-700 text-white text-xs rounded">
                     {tool}
                   </span>
@@ -276,11 +276,11 @@ export const Step1Details: React.FC<StepProps> = ({ data, updateData, nextStep, 
 
           {/* Equipment */}
           {/* Equipment Options */}
-          {(selectedBackground as any).equipmentOptions && (selectedBackground as any).equipmentOptions.length > 0 && (
+          {selectedBackground.equipmentOptions && selectedBackground.equipmentOptions.length > 0 && (
             <div className="border-t border-theme-primary pt-3 space-y-3">
               <h5 className="text-sm font-semibold text-yellow-200">Starting Equipment</h5>
               <div className="text-xs text-theme-tertiary space-y-2">
-                {(selectedBackground as any).equipmentOptions.map((opt: any) => (
+                {selectedBackground.equipmentOptions.map((opt) => (
                   <div key={opt.label} className="bg-theme-quaternary/40 border border-theme-primary rounded p-2">
                     <div className="text-theme-tertiary font-semibold mb-1">Option {opt.label}</div>
                     {opt.items && (

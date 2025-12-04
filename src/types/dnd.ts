@@ -15,6 +15,8 @@ export interface Background {
   name: string;
   edition: Edition; // '2014' | '2024'
   description: string;
+  details?: string; // Additional detailed description
+  detailedDescription?: string; // Even more detailed
   skill_proficiencies: string[];
   languages?: string[];
   equipment: string[];

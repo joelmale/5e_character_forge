@@ -1,5 +1,5 @@
 import React from 'react';
-import { CharacterCreationData, AbilityName } from '../../../types/dnd';
+import { CharacterCreationData, AbilityName, SkillName } from '../../../types/dnd';
 
 interface HumanVariantSelectorProps {
   data: CharacterCreationData;
@@ -132,7 +132,7 @@ export const HumanVariantSelector: React.FC<HumanVariantSelectorProps> = ({
             </div>
             <select
               value={data.variantSkillProficiency || ''}
-              onChange={(e) => updateData({ variantSkillProficiency: e.target.value as any })}
+              onChange={(e) => updateData({ variantSkillProficiency: e.target.value as SkillName })}
               className="w-full p-2 border border-theme-primary/20 rounded bg-theme-secondary text-theme-primary"
             >
               <option value="">Choose a skill...</option>

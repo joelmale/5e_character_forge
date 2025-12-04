@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ChevronUp, ChevronDown, XCircle, Shuffle, ArrowLeft, ArrowRight } from 'lucide-react';
+import { ChevronUp, ChevronDown, XCircle, Shuffle, ArrowLeft } from 'lucide-react';
 import { StepProps } from '../types/wizard.types';
 import { loadClasses, getClassCategories, BACKGROUNDS, getSubclassesByClass, randomizeClassAndSkills } from '../../../services/dataService';
 import { SkillName } from '../../../types/dnd';
