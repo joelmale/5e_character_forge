@@ -38,7 +38,7 @@ const formatModifier = (mod: number): string => mod >= 0 ? `+${mod}` : `${mod}`;
 export const Step4Abilities: React.FC<StepProps> = ({ data, updateData, nextStep, prevStep, getNextStepLabel }) => {
   const allSpecies = getAllSpecies(data.edition);
   const speciesData = allSpecies.find(s => s.slug === data.speciesSlug);
-  const backgroundData = BACKGROUNDS.find((bg: any) => bg.slug === data.background && bg.edition === data.edition);
+  const backgroundData = BACKGROUNDS.find(bg => bg.slug === data.background && bg.edition === data.edition);
   const abilityNames = ABILITY_NAMES;
 
   // Validation hook
@@ -50,12 +50,10 @@ export const Step4Abilities: React.FC<StepProps> = ({ data, updateData, nextStep
     const speciesBonus = speciesData?.ability_bonuses?.[ability] || 0;
 
     if (data.edition === '2024') {
-      // In 2024, bonuses come from Species + Background (User Selected + Fixed)
+      // In 2024, bonuses come from Species + Background (User Selected)
       const userBonus = data.backgroundAbilityChoices?.bonuses?.[ability] || 0;
-      const fixedBonus = (backgroundData as any)?.abilityScores?.fixed?.[ability] || 0;
       // Background bonuses are in addition to species bonuses
-      const backgroundBonus = Math.max(userBonus, fixedBonus);
-      return speciesBonus + backgroundBonus;
+      return speciesBonus + userBonus;
     } else {
       // In 2014, bonuses come from Species only
       return speciesBonus;
@@ -91,21 +89,34 @@ export const Step4Abilities: React.FC<StepProps> = ({ data, updateData, nextStep
   const handleAssignScore = (ability: AbilityName, score: number) => {
     const currentScore = data.abilities[ability];
 
+    // If selecting the same score that's already assigned, do nothing
+    if (currentScore === score) return;
+
+    // If ability has no score and score is available, assign it
     if (currentScore === 0 && availableScores.includes(score)) {
       updateData({ abilities: { ...data.abilities, [ability]: score } });
       return;
     }
 
-    const abilityToSwap = abilityNames.find(a => data.abilities[a] === score);
+    // If ability already has a score, we need to handle reassignment
+    if (currentScore > 0) {
+      // If the new score is available, swap it
+      if (availableScores.includes(score)) {
+        updateData({ abilities: { ...data.abilities, [ability]: score } });
+        return;
+      }
 
-    if (abilityToSwap) {
-      updateData({
-        abilities: {
-          ...data.abilities,
-          [ability]: score,
-          [abilityToSwap]: currentScore
-        }
-      });
+      // If the new score is already assigned to another ability, swap them
+      const abilityToSwap = abilityNames.find(a => data.abilities[a] === score);
+      if (abilityToSwap) {
+        updateData({
+          abilities: {
+            ...data.abilities,
+            [ability]: score,
+            [abilityToSwap]: currentScore
+          }
+        });
+      }
     }
   };
 
@@ -153,23 +164,26 @@ export const Step4Abilities: React.FC<StepProps> = ({ data, updateData, nextStep
     const score = rolledSets[setIndex].reduce((a, b) => a + b, 0);
     const currentScore = data.abilities[ability];
 
-    // Find if this score is already assigned
-    const assignedIndex = abilityNames.findIndex(a => {
-      const abilityScore = data.abilities[a];
-      return rolledSets.findIndex(set => set.reduce((sum, n) => sum + n, 0) === abilityScore) === setIndex;
-    });
+    // Check if this rolled set is already assigned to another ability
+    const assignedAbility = abilityNames.find(a =>
+      a !== ability && data.abilities[a] === score &&
+      rolledSets.findIndex(set => set.reduce((sum, n) => sum + n, 0) === score) === setIndex
+    );
 
-    if (assignedIndex !== -1) {
-      // Swap
-      const otherAbility = abilityNames[assignedIndex];
+    if (assignedAbility) {
+      // Swap with the ability that currently has this rolled set
       updateData({
         abilities: {
           ...data.abilities,
           [ability]: score,
-          [otherAbility]: currentScore
+          [assignedAbility]: currentScore
         }
       });
+    } else if (currentScore === 0) {
+      // Assign to empty ability
+      updateData({ abilities: { ...data.abilities, [ability]: score } });
     } else {
+      // Reassign from current score to new score (if current score was from a rolled set)
       updateData({ abilities: { ...data.abilities, [ability]: score } });
     }
   };

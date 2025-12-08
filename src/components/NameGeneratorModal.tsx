@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { X, Shuffle, Heart, History, Volume2, BookOpen } from 'lucide-react';
 import { generateName, generateNames, getAvailableRaces, GeneratedName } from '../utils/nameGenerator';
 
@@ -29,6 +29,19 @@ const NameGeneratorModal: React.FC<NameGeneratorModalProps> = ({
   const [selectedSpecies, setSelectedSpecies] = useState<string>(currentSpecies || ''); // Renamed from selectedRace
   const [selectedGender, setSelectedGender] = useState<'male' | 'female' | 'any'>(currentGender);
   const [showHistory, setShowHistory] = useState(false);
+
+  // Generate initial name when modal opens
+  const initialName = useMemo(() => {
+    if (isOpen && !currentName) {
+      return generateName({
+        race: selectedSpecies || undefined,
+        gender: selectedGender,
+        includeMeaning: true,
+        includePronunciation: true
+      });
+    }
+    return null;
+  }, [isOpen, selectedSpecies, selectedGender, currentName]);
   const [showFavorites, setShowFavorites] = useState(false);
   const [showMeaning, setShowMeaning] = useState(false);
 
@@ -88,25 +101,18 @@ const NameGeneratorModal: React.FC<NameGeneratorModalProps> = ({
     saveHistory(newHistory);
   }, [selectedSpecies, selectedGender, nameHistory]);
 
+  // Set initial name when generated
   useEffect(() => {
-    if (isOpen) {
-      // Generate initial name when modal opens
-      const name = generateName({
-        race: selectedSpecies || undefined, // Update property name
-        gender: selectedGender,
-        includeMeaning: true,
-        includePronunciation: true
-      });
-
-      setCurrentName(name);
+    if (initialName && isOpen && !currentName) {
+      setCurrentName(initialName);
 
       // Add to history
       const historyItem: NameHistoryItem = {
-        name: name.name,
-        meaning: name.meaning,
-        pronunciation: name.pronunciation,
-        gender: name.gender,
-        race: name.race,
+        name: initialName.name,
+        meaning: initialName.meaning,
+        pronunciation: initialName.pronunciation,
+        gender: initialName.gender,
+        race: initialName.race,
         timestamp: Date.now(),
         isFavorite: false
       };
@@ -117,7 +123,7 @@ const NameGeneratorModal: React.FC<NameGeneratorModalProps> = ({
 
       loadSavedData();
     }
-   }, [isOpen, selectedSpecies, selectedGender, nameHistory]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [initialName, isOpen, currentName, nameHistory]); // eslint-disable-line react-hooks/exhaustive-deps
 
   /**
    * Save name generator favorites to localStorage

@@ -2,7 +2,7 @@ import { Character, UserMonster, Encounter } from '../types/dnd';
 
 // --- IndexedDB Configuration ---
 const DB_NAME = '5e_character_forge';
-const DB_VERSION = 7; // Version 7: Add ruleset/edition migration
+const DB_VERSION = 8; // Version 8: Compatibility update
 const STORE_NAME = 'characters';
 const CUSTOM_MONSTERS_STORE = 'customMonsters';
 const FAVORITES_STORE = 'favoriteMonsters';

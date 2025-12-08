@@ -28,8 +28,6 @@ interface TacticalSectionProps {
 export const TacticalSection: React.FC<TacticalSectionProps> = ({
   icon, title, theme, actions, onAction, layoutMode
 }) => {
-  if (actions.length === 0) return null;
-
   const isPaperSheet = layoutMode === 'paper-sheet';
   const isClassic = layoutMode === 'classic-dnd';
   const [expanded, setExpanded] = useState(true);
@@ -40,6 +38,8 @@ export const TacticalSection: React.FC<TacticalSectionProps> = ({
     const rows = Math.ceil(actions.length / 2);
     return rows * 140 + 60; // include header padding
   }, [actions.length]);
+
+  if (actions.length === 0) return null;
 
   // Get theme classes based on layout mode
   const getThemeClasses = (themeColor: 'red' | 'blue' | 'green' | 'orange' | 'purple') => {

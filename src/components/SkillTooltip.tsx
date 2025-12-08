@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useLayoutEffect } from 'react';
 import skillsData from '../data/skills.json';
 
 interface SkillTooltipProps {
@@ -16,6 +16,7 @@ interface Skill {
 const SkillTooltip: React.FC<SkillTooltipProps> = ({ skillName, children }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [position, setPosition] = useState({ top: 0, left: 0 });
+  const [triggerTop, setTriggerTop] = useState(0);
   const triggerRef = useRef<HTMLDivElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
 
@@ -38,6 +39,7 @@ const SkillTooltip: React.FC<SkillTooltipProps> = ({ skillName, children }) => {
       const adjustedTop = top < 0 ? triggerRect.bottom + 8 : top;
 
       setPosition({ top: adjustedTop, left: adjustedLeft });
+      setTriggerTop(triggerRect.top);
     }
   }, [isVisible]);
 
@@ -86,8 +88,8 @@ const SkillTooltip: React.FC<SkillTooltipProps> = ({ skillName, children }) => {
           <div
             className="absolute w-3 h-3 bg-theme-primary border-r border-b border-theme-primary transform rotate-45"
             style={{
-              bottom: position.top < triggerRef.current?.getBoundingClientRect().top! ? 'auto' : '-6px',
-              top: position.top < triggerRef.current?.getBoundingClientRect().top! ? '-6px' : 'auto',
+              bottom: position.top < triggerTop ? 'auto' : '-6px',
+              top: position.top < triggerTop ? '-6px' : 'auto',
               left: '50%',
               marginLeft: '-6px',
             }}

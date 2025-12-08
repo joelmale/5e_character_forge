@@ -6,20 +6,20 @@ interface ScreenFlashProps {
 }
 
 export const ScreenFlash: React.FC<ScreenFlashProps> = ({ type, onComplete }) => {
-  const [isVisible, setIsVisible] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(false);
 
   useEffect(() => {
-    if (type) {
-      setIsVisible(true);
+    if (type && !isAnimating) {
+      setIsAnimating(true);
       const timer = setTimeout(() => {
-        setIsVisible(false);
+        setIsAnimating(false);
         onComplete?.();
       }, 600); // Flash duration
       return () => clearTimeout(timer);
     }
-  }, [type, onComplete]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [type, isAnimating, onComplete]);
 
-  if (!isVisible || !type) return null;
+  if (!isAnimating || !type) return null;
 
   const bgColor = type === 'success'
     ? 'bg-gradient-to-br from-yellow-300/40 via-yellow-400/30 to-yellow-500/40'

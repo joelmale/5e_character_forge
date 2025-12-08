@@ -104,7 +104,6 @@ export const EquipmentSection: React.FC<EquipmentSectionProps> = ({
   const hoverBgClass = isPaperSheet ? 'hover:bg-[#ebe1c8]' : 'hover:bg-theme-tertiary';
   const textPrimaryClass = isPaperSheet ? 'text-[#1e140a]' : 'text-theme-primary';
   const textMutedClass = isPaperSheet ? 'text-[#3d2817]' : 'text-theme-muted';
-  const textTertiaryClass = isPaperSheet ? 'text-[#3d2817]' : 'text-theme-tertiary';
   const textDisabledClass = isPaperSheet ? 'text-[#8b7355]' : 'text-theme-disabled';
 
   const totalWeight =

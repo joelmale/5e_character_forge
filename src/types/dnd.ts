@@ -567,9 +567,10 @@ export interface Species {
   sources?: string[];
   speed: number;
   ability_bonuses?: Partial<Record<AbilityName, number>>; // Optional in 2024 (moved to Background)
-  species_traits: string[];
-  description: string;
-  typicalRoles: string[];
+   species_traits: string[];
+   description: string;
+   detailedDescription?: string;
+   typicalRoles: string[];
   variants?: SpeciesVariant[];
   defaultVariant?: string;
   /** Flag species as 2024 PHB core entry */

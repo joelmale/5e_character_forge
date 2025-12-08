@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { ArrowLeft, ArrowRight, Shuffle } from 'lucide-react';
 import { StepProps } from '../types/wizard.types';
-import { FEAT_DATABASE, randomizeFeats } from '../../../services/dataService';
+import { Feat } from '../../../types/dnd';
+import { FEAT_DATABASE, randomizeFeats, loadFeats } from '../../../services/dataService';
 import {
   calculateFeatAvailability,
   featProvidesAbilityIncrease,
@@ -9,7 +10,6 @@ import {
   canSelectMoreFeats,
   checkFeatPrerequisites
 } from '../../../utils/featUtils';
-import { loadFeats } from '../../../services/dataService';
 import { FeatChoiceModal } from '../components';
 
 const RandomizeButton: React.FC<{ onClick: () => void; title?: string; className?: string }> = ({
@@ -31,7 +31,7 @@ const RandomizeButton: React.FC<{ onClick: () => void; title?: string; className
 
 export const Step5point5Feats: React.FC<StepProps> = ({ data, updateData, nextStep, prevStep, getNextStepLabel }) => {
   const [showFeatDetails, setShowFeatDetails] = useState<string | null>(null);
-  const [featChoiceModal, setFeatChoiceModal] = useState<{ isOpen: boolean; feat: any }>({ isOpen: false, feat: null });
+  const [featChoiceModal, setFeatChoiceModal] = useState<{ isOpen: boolean; feat: Feat | null }>({ isOpen: false, feat: null });
 
   // Calculate how many feats the character can take
   const maxFeats = calculateFeatAvailability(data);

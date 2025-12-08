@@ -250,7 +250,7 @@ export const Step6Equipment: React.FC<StepProps & { skipToStep?: (step: number) 
                  Take the equipment provided by your background choice.
                </p>
                {(() => {
-                 const background = BACKGROUNDS.find((bg: any) => bg.slug === data.background);
+                  const background = BACKGROUNDS.find(bg => bg.slug === data.background);
                  return background?.equipment ? (
                    <div className="space-y-1">
                      <div className="text-xs font-medium text-theme-muted uppercase">Equipment:</div>
@@ -379,7 +379,7 @@ export const Step6Equipment: React.FC<StepProps & { skipToStep?: (step: number) 
 
              if (data.equipmentChoice === 'background' && data.edition === '2024') {
                // Use only background equipment for 2024 background choice
-               const background = BACKGROUNDS.find((bg: any) => bg.slug === data.background);
+                const background = BACKGROUNDS.find(bg => bg.slug === data.background);
                if (background?.equipment) {
                  startingInventory = background.equipment.map(itemName => {
                    // Try to find the equipment item by name

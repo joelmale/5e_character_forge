@@ -21,9 +21,8 @@ const RandomizeButton: React.FC<RandomizeButtonProps> = ({ onClick, title }) => 
 );
 
 export const Step2Species: React.FC<StepProps> = ({ data, updateData, nextStep, prevStep, getNextStepLabel, openTraitModal }) => {
-  // Start with all categories expanded so users can see available species
-  const allCategoryNames = SPECIES_CATEGORIES.map(cat => cat.name);
-  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set(allCategoryNames));
+  // Start with all categories collapsed
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
   const [showSpeciesInfo, setShowSpeciesInfo] = useState(true);
 
   const selectedSpecies = getAllSpecies().find(s => s.slug === data.speciesSlug);
@@ -133,23 +132,23 @@ export const Step2Species: React.FC<StepProps> = ({ data, updateData, nextStep, 
             </div>
           </div>
 
-           <p className="text-sm text-theme-tertiary">{(selectedSpecies as any).detailedDescription || selectedSpecies.description}</p>
+            <p className="text-sm text-theme-tertiary">{selectedSpecies.detailedDescription || selectedSpecies.description}</p>
 
            <div className="space-y-3 text-sm">
              {/* 2024 Traits */}
-             {data.edition === '2024' && (selectedSpecies as any).traits && (
-               <div>
-                 <h5 className="font-semibold text-accent-green-light mb-2">Traits:</h5>
-                 <ul className="space-y-1">
-                   {(selectedSpecies as any).traits.map((trait: string, index: number) => (
-                     <li key={index} className="flex items-start">
-                       <span className="text-accent-yellow-light mr-2">•</span>
-                       <span className="text-theme-primary">{trait}</span>
-                     </li>
-                   ))}
-                 </ul>
-               </div>
-             )}
+              {data.edition === '2024' && selectedSpecies.traits && (
+                <div>
+                  <h5 className="font-semibold text-accent-green-light mb-2">Traits:</h5>
+                  <ul className="space-y-1">
+                    {selectedSpecies.traits.map((trait: string, index: number) => (
+                      <li key={index} className="flex items-start">
+                        <span className="text-accent-yellow-light mr-2">•</span>
+                        <span className="text-theme-primary">{trait}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
 
              {/* 2014 Ability Bonuses */}
              {data.edition === '2014' && selectedSpecies.ability_bonuses && Object.keys(selectedSpecies.ability_bonuses).length > 0 && (
@@ -165,100 +164,100 @@ export const Step2Species: React.FC<StepProps> = ({ data, updateData, nextStep, 
                </div>
              )}
 
-             {/* Lineage Choices for 2024 */}
-             {data.edition === '2024' && (selectedSpecies as any).lineages && (
-               <div>
-                 <h5 className="font-semibold text-accent-blue-light mb-2">Choose Lineage:</h5>
-                 <div className="space-y-2">
-                   {Object.entries((selectedSpecies as any).lineages).map(([lineageName, lineageData]) => (
-                     <button
-                       key={lineageName}
-                       className={`w-full text-left border rounded p-3 transition-all ${
-                         data.selectedLineage === lineageName
-                           ? 'border-accent-blue-light bg-theme-quaternary'
-                           : 'border-theme-primary bg-theme-secondary/30 hover:bg-theme-quaternary/40'
-                       }`}
-                       onClick={() => updateData({ selectedLineage: lineageName })}
-                     >
-                       <h6 className="font-medium text-theme-primary mb-1">{lineageName}</h6>
-                       {(lineageData as any).traits && (
-                         <div className="text-xs text-theme-muted mb-1">
-                           <strong>Traits:</strong> {(lineageData as any).traits.join(', ')}
-                         </div>
-                       )}
-                       {(lineageData as any).spells && (
-                         <div className="text-xs text-theme-muted">
-                           <strong>Spells:</strong> {(lineageData as any).spells.join(', ')}
-                         </div>
-                       )}
-                     </button>
-                   ))}
-                 </div>
-               </div>
-             )}
+              {/* Lineage Choices for 2024 */}
+              {data.edition === '2024' && selectedSpecies.lineages && (
+                <div>
+                  <h5 className="font-semibold text-accent-blue-light mb-2">Choose Lineage:</h5>
+                  <div className="space-y-2">
+                    {Object.entries(selectedSpecies.lineages).map(([lineageName, lineageData]) => (
+                      <button
+                        key={lineageName}
+                        className={`w-full text-left border rounded p-3 transition-all ${
+                          data.selectedLineage === lineageName
+                            ? 'border-accent-blue-light bg-theme-quaternary'
+                            : 'border-theme-primary bg-theme-secondary/30 hover:bg-theme-quaternary/40'
+                        }`}
+                        onClick={() => updateData({ selectedLineage: lineageName })}
+                      >
+                        <h6 className="font-medium text-theme-primary mb-1">{lineageName}</h6>
+                        {lineageData.traits && (
+                          <div className="text-xs text-theme-muted mb-1">
+                            <strong>Traits:</strong> {lineageData.traits.join(', ')}
+                          </div>
+                        )}
+                        {lineageData.spells && (
+                          <div className="text-xs text-theme-muted">
+                            <strong>Spells:</strong> {lineageData.spells.join(', ')}
+                          </div>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
 
-             {/* Ancestry Choices for Dragonborn */}
-             {data.edition === '2024' && selectedSpecies.slug === 'dragonborn' && (selectedSpecies as any).ancestries && (
-               <div>
-                 <h5 className="font-semibold text-accent-purple-light mb-2">Choose Draconic Ancestry:</h5>
-                 <div className="grid grid-cols-2 gap-2">
-                   {Object.entries((selectedSpecies as any).ancestries).map(([color, damageType]) => (
-                     <div key={color} className="text-xs p-2 bg-theme-secondary rounded border">
-                       <strong className="capitalize">{color}:</strong> {String(damageType)} damage
+              {/* Ancestry Choices for Dragonborn */}
+              {data.edition === '2024' && selectedSpecies.slug === 'dragonborn' && selectedSpecies.ancestries && (
+                <div>
+                  <h5 className="font-semibold text-accent-purple-light mb-2">Choose Draconic Ancestry:</h5>
+                  <div className="grid grid-cols-2 gap-2">
+                    {Object.entries(selectedSpecies.ancestries).map(([color, damageType]) => (
+                      <div key={color} className="text-xs p-2 bg-theme-secondary rounded border">
+                        <strong className="capitalize">{color}:</strong> {String(damageType)} damage
                      </div>
                    ))}
                  </div>
                </div>
              )}
 
-             {/* Fiendish Legacy Choices for Tiefling */}
-             {data.edition === '2024' && selectedSpecies.slug === 'tiefling' && (selectedSpecies as any).fiendishLegacies && (
-               <div>
-                 <h5 className="font-semibold text-accent-orange-light mb-2">Choose Fiendish Legacy:</h5>
-                 <div className="space-y-2">
-                   {Object.entries((selectedSpecies as any).fiendishLegacies).map(([legacyName, legacyData]: [string, any]) => (
-                     <div key={legacyName} className="border border-theme-primary rounded p-3">
-                       <h6 className="font-medium text-theme-primary mb-1 capitalize">{legacyName}</h6>
-                       <div className="text-xs text-theme-muted mb-1">
-                         <strong>Resistance:</strong> {legacyData.resistance}
-                       </div>
-                       <div className="text-xs text-theme-muted">
-                         <strong>Spells:</strong> {legacyData.spells.join(', ')}
-                       </div>
-                     </div>
-                   ))}
-                 </div>
-               </div>
-             )}
+              {/* Fiendish Legacy Choices for Tiefling */}
+              {data.edition === '2024' && selectedSpecies.slug === 'tiefling' && selectedSpecies.fiendishLegacies && (
+                <div>
+                  <h5 className="font-semibold text-accent-orange-light mb-2">Choose Fiendish Legacy:</h5>
+                  <div className="space-y-2">
+                    {Object.entries(selectedSpecies.fiendishLegacies).map(([legacyName, legacyData]) => (
+                      <div key={legacyName} className="border border-theme-primary rounded p-3">
+                        <h6 className="font-medium text-theme-primary mb-1 capitalize">{legacyName}</h6>
+                        <div className="text-xs text-theme-muted mb-1">
+                          <strong>Resistance:</strong> {legacyData.resistance}
+                        </div>
+                        <div className="text-xs text-theme-muted">
+                          <strong>Spells:</strong> {legacyData.spells.join(', ')}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
-             {/* Giant Ancestry Choices for Goliath */}
-             {data.edition === '2024' && selectedSpecies.slug === 'goliath' && (selectedSpecies as any).giantAncestry && (
-               <div>
-                 <h5 className="font-semibold text-accent-stone-light mb-2">Choose Giant Ancestry:</h5>
-                 <div className="space-y-2">
-                   {Object.entries((selectedSpecies as any).giantAncestry).map(([ancestry, effect]) => (
-                     <div key={ancestry} className="border border-theme-primary rounded p-3">
-                       <h6 className="font-medium text-theme-primary mb-1 capitalize">{ancestry} Giant</h6>
-                       <div className="text-xs text-theme-muted">{String(effect)}</div>
-                     </div>
-                   ))}
-                 </div>
-               </div>
-             )}
+              {/* Giant Ancestry Choices for Goliath */}
+              {data.edition === '2024' && selectedSpecies.slug === 'goliath' && selectedSpecies.giantAncestry && (
+                <div>
+                  <h5 className="font-semibold text-accent-stone-light mb-2">Choose Giant Ancestry:</h5>
+                  <div className="space-y-2">
+                    {Object.entries(selectedSpecies.giantAncestry).map(([ancestry, effect]) => (
+                      <div key={ancestry} className="border border-theme-primary rounded p-3">
+                        <h6 className="font-medium text-theme-primary mb-1 capitalize">{ancestry} Giant</h6>
+                        <div className="text-xs text-theme-muted">{String(effect)}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
-             {/* Celestial Revelation Choices for Aasimar */}
-             {data.edition === '2024' && selectedSpecies.slug === 'aasimar' && (selectedSpecies as any).celestialRevelationOptions && (
-               <div>
-                 <h5 className="font-semibold text-accent-gold-light mb-2">Celestial Revelation (Level 3):</h5>
-                 <div className="space-y-2">
-                   {(selectedSpecies as any).celestialRevelationOptions.map((option: string, index: number) => (
-                     <div key={index} className="border border-theme-primary rounded p-3">
-                       <div className="text-xs text-theme-muted">{option}</div>
-                     </div>
-                   ))}
-                 </div>
-               </div>
-             )}
+              {/* Celestial Revelation Choices for Aasimar */}
+              {data.edition === '2024' && selectedSpecies.slug === 'aasimar' && selectedSpecies.celestialRevelationOptions && (
+                <div>
+                  <h5 className="font-semibold text-accent-gold-light mb-2">Celestial Revelation (Level 3):</h5>
+                  <div className="space-y-2">
+                    {selectedSpecies.celestialRevelationOptions.map((option: string, index: number) => (
+                      <div key={index} className="border border-theme-primary rounded p-3">
+                        <div className="text-xs text-theme-muted">{option}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             {data.edition === '2024' && (
               <div>
                 <span className="font-semibold text-accent-red-light">Ability Score Increases: </span>
@@ -307,20 +306,29 @@ export const Step2Species: React.FC<StepProps> = ({ data, updateData, nextStep, 
        )}
 
        {/* 2024 Species Feat Selection */}
-       {data.edition === '2024' && selectedSpecies && (selectedSpecies as any).speciesFeatOptions && (
-         <div className="text-sm text-theme-muted p-4 bg-theme-secondary/50 rounded-lg border border-theme-primary space-y-4">
-           <div>
-             <p className="font-semibold text-accent-yellow-light">Species Feat:</p>
-             <p className="mt-2">Choose one feat from the following options granted by your species:</p>
-           </div>
+        {data.edition === '2024' && selectedSpecies && selectedSpecies.speciesFeatOptions && (
+          <div className="bg-theme-secondary/50 border border-theme-primary rounded-lg p-4">
+            <h5 className="font-semibold text-accent-yellow-light mb-3">Choose Species Feat</h5>
+            <select
+              value={data.speciesFeat || ''}
+              onChange={(e) => updateData({ speciesFeat: e.target.value })}
+              className="w-full p-3 bg-theme-tertiary text-white rounded-lg"
+            >
+              <option value="">Select a feat...</option>
+              {selectedSpecies.speciesFeatOptions.map((feat) => (
+                <option key={feat} value={feat}>
+                  {feat.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
 
-           <OriginFeatSelector
-             selectedFeat={data.speciesFeat}
-             onSelect={(featSlug) => updateData({ speciesFeat: featSlug })}
-             featOptions={(selectedSpecies as any).speciesFeatOptions}
-           />
-         </div>
-       )}
+        {data.edition === '2024' && selectedSpecies && selectedSpecies.speciesFeat && (
+          <div className="bg-accent-yellow/10 border border-accent-yellow rounded-lg p-3">
+            <p>Your species grants you the <strong>{selectedSpecies.speciesFeat}</strong> feat.</p>
+          </div>
+        )}
 
        {/* 2024 Species Fixed Feat Display */}
        {data.edition === '2024' && selectedSpecies && (selectedSpecies as any).speciesFeat && (
