@@ -213,7 +213,7 @@ export const EquipmentManagerModal: React.FC<EquipmentManagerModalProps> = ({
                 ].map(({ key, label, icon: Icon }) => (
                   <button
                     key={key}
-                    onClick={() => setSelectedCategory(key as any)}
+                    onClick={() => setSelectedCategory(key)}
                     className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
                       selectedCategory === key
                         ? 'bg-accent-blue text-white'

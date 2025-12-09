@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
 import { useMonsterContext } from '../../hooks';
+import { log } from '../../utils/logger';
 
 interface SaveEncounterModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: () => void;
+  onStartCombat?: () => void;
 }
 
-export const SaveEncounterModal: React.FC<SaveEncounterModalProps> = ({ isOpen, onClose, onSave }) => {
+export const SaveEncounterModal: React.FC<SaveEncounterModalProps> = ({ isOpen, onClose, onSave, onStartCombat }) => {
   const { saveEncounter, selectedEncounterMonsters, allMonsters } = useMonsterContext();
   const [encounterName, setEncounterName] = useState('');
   const [saving, setSaving] = useState(false);
@@ -24,6 +26,11 @@ export const SaveEncounterModal: React.FC<SaveEncounterModalProps> = ({ isOpen, 
       return;
     }
 
+    if (totalMonsters === 0) {
+      alert('Please add at least one monster to this encounter');
+      return;
+    }
+
     setSaving(true);
     try {
       const success = await saveEncounter(encounterName.trim());
@@ -34,7 +41,7 @@ export const SaveEncounterModal: React.FC<SaveEncounterModalProps> = ({ isOpen, 
         alert('Failed to save encounter. Please try again.');
       }
     } catch (err) {
-      console.error('Error saving encounter:', err);
+      log.error('Error saving encounter', { error: err, name: encounterName, totalMonsters });
       alert('Failed to save encounter. Please try again.');
     } finally {
       setSaving(false);
@@ -102,6 +109,16 @@ export const SaveEncounterModal: React.FC<SaveEncounterModalProps> = ({ isOpen, 
                 <span className="text-white font-bold">{uniqueMonsters}</span>
               </div>
             </div>
+            <button
+              className="bg-theme-secondary rounded-lg p-4 hover:bg-gray-750 transition-colors w-full mt-3 text-left"
+              onClick={() => {
+                onStartCombat?.();
+                onClose();
+              }}
+            >
+              <span className="text-accent-purple-light font-bold">⚔️ Start Combat</span>
+              <p className="text-theme-muted text-sm">Launch the new encounter combat system</p>
+            </button>
           </div>
 
           {/* Monster List Preview */}
@@ -128,7 +145,7 @@ export const SaveEncounterModal: React.FC<SaveEncounterModalProps> = ({ isOpen, 
             <button
               onClick={handleSave}
               className="flex-1 px-6 py-3 bg-accent-green hover:bg-accent-green-dark text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              disabled={saving || !encounterName.trim()}
+              disabled={saving || !encounterName.trim() || totalMonsters === 0}
             >
               {saving ? 'Saving...' : 'Save Encounter'}
             </button>

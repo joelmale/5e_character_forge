@@ -33,6 +33,8 @@ const SpellEditModal: React.FC<SpellEditModalProps> = ({
   const availableSpells = useMemo(() => getLeveledSpellsByClass(classSlug, level), [classSlug, level]);
 
   // Calculate spell limits
+  // Dynamic access to cantrips data by class and level
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const numCantrips = (cantripsData as any)[classSlug]?.[level.toString()] || 0;
   const numSpells = useMemo(() => {
     if (spellcastingType === 'known' && learningRules?.spellsKnown) {

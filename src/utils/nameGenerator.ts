@@ -22,21 +22,20 @@ export interface GeneratedName {
 // Cache for frequently used combinations
 const nameCache = new Map<string, GeneratedName[]>();
 const MAX_CACHE_SIZE = 1000;
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const MAX_NAMES_PER_CACHE_KEY = 50; // Reserved for future caching implementation
 
 // Track used names for uniqueness
 const usedNames = new Set<string>();
 
 // Backwards-compatible view over species name data
+// Complex dynamic structure for name generation data - species/races can have arbitrary properties
 const rawSpeciesMap =
-  (nameData as unknown as { species: Record<string, any> }).species ||
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (nameData as unknown as { races: Record<string, any> }).races ||
+  (nameData as unknown as { species: Record<string, unknown> }).species ||
+  (nameData as unknown as { races: Record<string, unknown> }).races ||
   {};
 
 // Hydrate aliases for legacy display names so tests and old saves still work
-const NAME_SPECIES_MAP: Record<string, any> = { ...rawSpeciesMap };
+// Dynamic mapping of species names to data structures
+const NAME_SPECIES_MAP: Record<string, unknown> = { ...rawSpeciesMap };
 const legacyDisplayAliases: Record<string, string> = {
   Human: 'human-2024',
   Elf: 'elf-2024',
@@ -193,7 +192,7 @@ function generateRaceSpecificName(race: string, gender: 'male' | 'female' | 'any
 
     switch (pattern) {
       case 'First Last':
-        lastName = getRandomElement(raceData.surnames.filter(s => s.length > 0));
+        lastName = getRandomElement(raceData.surnames.filter((s: string) => s.length > 0));
         break;
       case 'First':
         // No surname
@@ -226,8 +225,8 @@ function generateRaceSpecificName(race: string, gender: 'male' | 'female' | 'any
         lastName = `of Clan ${firstName}`;
         break;
       default:
-        if (Math.random() > 0.5 && raceData.surnames.some(s => s.length > 0)) {
-          lastName = getRandomElement(raceData.surnames.filter(s => s.length > 0));
+        if (Math.random() > 0.5 && raceData.surnames.some((s: string) => s.length > 0)) {
+        lastName = getRandomElement(raceData.surnames.filter((s: string) => s.length > 0));
         }
     }
   }

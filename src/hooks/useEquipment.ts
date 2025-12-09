@@ -2,6 +2,7 @@ import { useCallback } from 'react';
 import { Character, EquippedItem, Equipment } from '../types/dnd';
 import { updateCharacter } from '../services/dbService';
 import { loadEquipment } from '../services/dataService';
+import { log } from '../utils/logger';
 
 // Lazy-loaded equipment database cache
 let equipmentCache: Equipment[] | null = null;
@@ -48,7 +49,7 @@ export function useEquipment({ characters, setCharacters, recalculateAC }: UseEq
       await updateCharacter(updatedCharacter);
       setCharacters(prev => prev.map(c => c.id === characterId ? updatedCharacter : c));
     } catch (error) {
-      console.error('Error equipping armor:', error);
+      log.error('Error equipping armor', { characterId, error });
       // TODO: Show user-friendly error notification
       // Consider adding: showError('Failed to equip armor. Please try again.');
     }
@@ -78,7 +79,7 @@ export function useEquipment({ characters, setCharacters, recalculateAC }: UseEq
         await updateCharacter(updatedCharacter);
         setCharacters(prev => prev.map(c => c.id === characterId ? updatedCharacter : c));
       } catch (error) {
-        console.error('Error equipping weapon:', error);
+        log.error('Error equipping weapon', { characterId, error });
         // TODO: Show user-friendly error notification
         // Consider adding: showError('Failed to equip weapon. Please try again.');
       }
@@ -111,7 +112,7 @@ export function useEquipment({ characters, setCharacters, recalculateAC }: UseEq
       await updateCharacter(updatedCharacter);
       setCharacters(prev => prev.map(c => c.id === characterId ? updatedCharacter : c));
     } catch (error) {
-      console.error('Error unequipping item:', error);
+      log.error('Error unequipping item', { characterId, error });
       // TODO: Show user-friendly error notification
       // Consider adding: showError('Failed to unequip item. Please try again.');
     }
@@ -144,7 +145,7 @@ export function useEquipment({ characters, setCharacters, recalculateAC }: UseEq
       await updateCharacter(updatedCharacter);
       setCharacters(prev => prev.map(c => c.id === characterId ? updatedCharacter : c));
     } catch (error) {
-      console.error('Error adding item:', error);
+      log.error('Error adding item', { characterId, error });
       // TODO: Show user-friendly error notification
       // Consider adding: showError('Failed to add item. Please try again.');
     }
@@ -183,7 +184,7 @@ export function useEquipment({ characters, setCharacters, recalculateAC }: UseEq
       await updateCharacter(updatedCharacter);
       setCharacters(prev => prev.map(c => c.id === characterId ? updatedCharacter : c));
     } catch (error) {
-      console.error('Error removing item:', error);
+      log.error('Error removing item', { characterId, error });
       // TODO: Show user-friendly error notification
       // Consider adding: showError('Failed to remove item. Please try again.');
     }
@@ -210,7 +211,7 @@ export function useEquipment({ characters, setCharacters, recalculateAC }: UseEq
       await updateCharacter(updatedCharacter);
       setCharacters(prev => prev.map(c => c.id === characterId ? updatedCharacter : c));
     } catch (e) {
-      console.error('Error adding bulk items:', e);
+      log.error('Error adding bulk items', { characterId, error: e });
     }
   }, [characters, setCharacters]);
 

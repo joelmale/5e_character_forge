@@ -10,9 +10,10 @@ import { Monster, UserMonster } from '../../types/dnd';
 interface MonsterLibraryProps {
   onSelectMonster: (monster: Monster | UserMonster) => void;
   onViewEncounter?: () => void;
+  onStartCombat?: (encounterId: string) => void;
 }
 
-export const MonsterLibrary: React.FC<MonsterLibraryProps> = ({ onSelectMonster, onViewEncounter }) => {
+export const MonsterLibrary: React.FC<MonsterLibraryProps> = ({ onSelectMonster, onViewEncounter, onStartCombat }) => {
   const {
     filteredMonsters,
     loading,
@@ -101,12 +102,12 @@ export const MonsterLibrary: React.FC<MonsterLibraryProps> = ({ onSelectMonster,
         </div>
 
         {selectionMode && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex justify-between items-center">
+          <div className="bg-theme-secondary border border-theme-primary rounded-lg p-4 flex justify-between items-center">
             <div>
-              <span className="font-semibold">
+              <span className="font-semibold text-theme-primary">
                 {totalMonstersSelected} monster{totalMonstersSelected !== 1 ? 's' : ''} selected
                 {uniqueMonstersSelected > 0 && uniqueMonstersSelected !== totalMonstersSelected && (
-                  <span className="text-gray-600 ml-1">
+                  <span className="text-theme-muted ml-1">
                     ({uniqueMonstersSelected} unique)
                   </span>
                 )}
@@ -114,7 +115,7 @@ export const MonsterLibrary: React.FC<MonsterLibraryProps> = ({ onSelectMonster,
               {uniqueMonstersSelected > 0 && (
                 <button
                   onClick={clearSelection}
-                  className="ml-4 text-sm text-accent-blue hover:text-blue-800 underline"
+                  className="ml-4 text-sm text-accent-blue hover:text-accent-blue-light underline transition-colors"
                 >
                   Clear Selection
                 </button>
@@ -148,7 +149,7 @@ export const MonsterLibrary: React.FC<MonsterLibraryProps> = ({ onSelectMonster,
         </button>
         {showSavedEncounters && (
           <div className="mb-4">
-            <SavedEncountersList />
+            <SavedEncountersList onStartCombat={onStartCombat} />
           </div>
         )}
       </div>

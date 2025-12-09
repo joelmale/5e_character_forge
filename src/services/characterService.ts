@@ -31,6 +31,7 @@ import {
 } from '../types/dnd';
 import { updateCharacter } from '../services/dbService'; // Added this import
 import { migrateSpellSelectionToCharacter } from '../utils/spellUtils';
+import { log } from '../utils/logger';
 
 // Helper to check if a class is a spellcaster
 export const isSpellcaster = (characterClass: Class | undefined | null): boolean => {
@@ -352,7 +353,7 @@ export const toggleInspiration = async (
         // Optimistically update the state
         setCharacters(prev => prev.map(c => c.id === characterId ? updatedCharacter : c));
     } catch (error) {
-        console.error('Error toggling inspiration:', error);
+        log.error('Error toggling inspiration', { characterId, error });
         // TODO: Revert state and show user-friendly error notification
         // Consider adding: showError('Failed to toggle inspiration. Please try again.');
     }
@@ -407,7 +408,7 @@ export const handleShortRest = async (
         setCharacters(prev => prev.map(c => c.id === characterId ? updatedCharacter : c));
         setRollResult({ text: `Recovered ${hpRecovered} HP.`, value: newHP });
     } catch (error) {
-        console.error('Error taking short rest:', error);
+        log.error('Error taking short rest', { characterId, error });
         // TODO: Show user-friendly error notification
         // Consider adding: showError('Failed to complete short rest. Please try again.');
     }
@@ -487,7 +488,7 @@ export const handleLevelUp = async (
         setCharacters(prev => prev.map(c => c.id === characterId ? updatedCharacter : c));
         setRollResult({ text: `${character.name} is now level ${newLevel}!`, value: null });
     } catch (error) {
-        console.error('Error leveling up character:', error);
+        log.error('Error leveling up character', { characterId, error });
         // TODO: Show user-friendly error notification
         // Consider adding: showError('Failed to level up character. Please try again.');
     }
@@ -523,7 +524,7 @@ export const handleEquipArmor = async (
         await updateCharacter(updatedCharacter);
         setCharacters(prev => prev.map(c => c.id === characterId ? updatedCharacter : c));
     } catch (error) {
-        console.error('Error equipping armor:', error);
+        log.error('Error equipping armor', { characterId, error });
         // TODO: Show user-friendly error notification
         // Consider adding: showError('Failed to equip armor. Please try again.');
     }
@@ -558,7 +559,7 @@ export const handleEquipWeapon = async (
             await updateCharacter(updatedCharacter);
             setCharacters(prev => prev.map(c => c.id === characterId ? updatedCharacter : c));
         } catch (error) {
-            console.error('Error equipping weapon:', error);
+            log.error('Error equipping weapon', { characterId, error });
             // TODO: Show user-friendly error notification
             // Consider adding: showError('Failed to equip weapon. Please try again.');
         }

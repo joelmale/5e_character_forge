@@ -1,4 +1,4 @@
-import { Character, CharacterCreationData, AbilityName, SkillName, EquippedItem } from '../types/dnd';
+import { Character, CharacterCreationData, AbilityName, SkillName } from '../types/dnd';
 import { calculateKnownLanguages } from '../utils/languageUtils';
 import { initializeSpellcasting } from '../utils/spellcastingInit';
 import { generateUUID } from '../services/diceService';
@@ -18,7 +18,6 @@ import {
 } from '../services/dataService';
 import {
   BASE_ARMOR_CLASS,
-  ARMOR_CATEGORIES,
   calculateArmorClassByCategory,
   DEFAULT_WALKING_SPEED,
   DEFAULT_STARTING_CURRENCY,

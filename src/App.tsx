@@ -10,6 +10,7 @@ import ManualEntryScreen from './components/ManualEntryScreen';
 import PersonalityWizard from './components/PersonalityWizard';
 import { MonsterLibrary, MonsterStatBlock, CreateMonsterModal } from './components/MonsterLibrary';
 import { EncounterView } from './components/EncounterView';
+import { EncounterManager } from './components/EncounterManager/EncounterManager.tsx';
 
 
 
@@ -164,6 +165,8 @@ const App: React.FC = () => {
   // Character editing state
   const [editingCharacter, setEditingCharacter] = useState<Character | null>(null);
   const [showEncounterView, setShowEncounterView] = useState(false);
+  const [showEncounterManager, setShowEncounterManager] = useState(false);
+  const [currentEncounterId, setCurrentEncounterId] = useState<string>('');
   const [rollResult, setRollResult] = useState<{
     text: string;
     value: number | null;
@@ -1252,12 +1255,30 @@ const App: React.FC = () => {
           )}
           </section>
         ) : (
-          showEncounterView ? (
-            <EncounterView onBack={() => setShowEncounterView(false)} />
+          showEncounterManager ? (
+            <EncounterManager
+              encounterId={currentEncounterId}
+              onBack={() => setShowEncounterManager(false)}
+            />
+          ) : showEncounterView ? (
+            <EncounterView
+              onBack={() => setShowEncounterView(false)}
+              onStartCombat={() => {
+                // Get the current encounter ID from the saved encounters
+                // For now, use a placeholder - this should be improved to get the actual saved encounter ID
+                setCurrentEncounterId('current-encounter');
+                setShowEncounterView(false);
+                setShowEncounterManager(true);
+              }}
+            />
           ) : (
             <MonsterLibrary
               onSelectMonster={(monster) => setSelectedMonster(monster)}
               onViewEncounter={() => setShowEncounterView(true)}
+              onStartCombat={(encounterId) => {
+                setCurrentEncounterId(encounterId);
+                setShowEncounterManager(true);
+              }}
             />
           )
         )}

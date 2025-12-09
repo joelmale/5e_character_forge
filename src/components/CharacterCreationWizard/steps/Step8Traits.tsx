@@ -81,7 +81,7 @@ export const Step8Traits: React.FC<StepProps & { onSubmit: (data: CharacterCreat
       {/* Name Generator Section */}
       <div>
         <label className="block text-sm font-medium text-theme-tertiary mb-2">
-          Character Name
+          Character Name <span className="text-red-400">*</span>
         </label>
         <div className="flex gap-2 mb-2">
           <input
@@ -89,7 +89,9 @@ export const Step8Traits: React.FC<StepProps & { onSubmit: (data: CharacterCreat
             placeholder="Enter character name..."
             value={data.name || ''}
             onChange={(e) => updateData({ name: e.target.value })}
-            className="flex-1 p-3 bg-theme-tertiary text-white rounded-lg focus:ring-red-500 focus:border-red-500"
+            className={`flex-1 p-3 bg-theme-tertiary text-white rounded-lg focus:ring-red-500 focus:border-red-500 ${
+              !data.name || !data.name.trim() ? 'border-red-500' : ''
+            }`}
           />
           <button
             onClick={generateNewName}
@@ -113,6 +115,10 @@ export const Step8Traits: React.FC<StepProps & { onSubmit: (data: CharacterCreat
             title="Randomize name"
           />
         </div>
+
+        {(!data.name || !data.name.trim()) && (
+          <p className="text-xs text-red-400 mt-1">Character name is required</p>
+        )}
 
         {/* Generated Name Display */}
         {currentGeneratedName && (

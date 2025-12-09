@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useLayoutEffect } from 'react';
 import { X, Shuffle, Heart, History, Volume2, BookOpen } from 'lucide-react';
 import { generateName, generateNames, getAvailableRaces, GeneratedName } from '../utils/nameGenerator';
 
@@ -22,17 +22,18 @@ const NameGeneratorModal: React.FC<NameGeneratorModalProps> = ({
   currentGender = 'any',
   onNameSelect
 }) => {
-  const [currentName, setCurrentName] = useState<GeneratedName | null>(null);
+  const [userSelectedName, setUserSelectedName] = useState<GeneratedName | null>(null);
   const [nameOptions, setNameOptions] = useState<GeneratedName[]>([]);
   const [nameHistory, setNameHistory] = useState<NameHistoryItem[]>([]);
   const [favorites, setFavorites] = useState<NameHistoryItem[]>([]);
   const [selectedSpecies, setSelectedSpecies] = useState<string>(currentSpecies || ''); // Renamed from selectedRace
   const [selectedGender, setSelectedGender] = useState<'male' | 'female' | 'any'>(currentGender);
   const [showHistory, setShowHistory] = useState(false);
+  const [hasInitialized, setHasInitialized] = useState(false);
 
   // Generate initial name when modal opens
   const initialName = useMemo(() => {
-    if (isOpen && !currentName) {
+    if (isOpen && !userSelectedName && !hasInitialized) {
       return generateName({
         race: selectedSpecies || undefined,
         gender: selectedGender,
@@ -41,7 +42,10 @@ const NameGeneratorModal: React.FC<NameGeneratorModalProps> = ({
       });
     }
     return null;
-  }, [isOpen, selectedSpecies, selectedGender, currentName]);
+  }, [isOpen, selectedSpecies, selectedGender, userSelectedName, hasInitialized]);
+
+  // Current name is either user selected or initial
+  const currentName = userSelectedName || initialName;
   const [showFavorites, setShowFavorites] = useState(false);
   const [showMeaning, setShowMeaning] = useState(false);
 
@@ -83,7 +87,7 @@ const NameGeneratorModal: React.FC<NameGeneratorModalProps> = ({
       includePronunciation: true
     });
 
-    setCurrentName(name);
+    setUserSelectedName(name);
 
     // Add to history
     const historyItem: NameHistoryItem = {
@@ -101,10 +105,10 @@ const NameGeneratorModal: React.FC<NameGeneratorModalProps> = ({
     saveHistory(newHistory);
   }, [selectedSpecies, selectedGender, nameHistory]);
 
-  // Set initial name when generated
-  useEffect(() => {
-    if (initialName && isOpen && !currentName) {
-      setCurrentName(initialName);
+  // Handle initial name generation and history
+  useLayoutEffect(() => {
+    if (isOpen && !hasInitialized && initialName) {
+      setHasInitialized(true); // eslint-disable-line react-hooks/set-state-in-effect
 
       // Add to history
       const historyItem: NameHistoryItem = {
@@ -123,7 +127,7 @@ const NameGeneratorModal: React.FC<NameGeneratorModalProps> = ({
 
       loadSavedData();
     }
-  }, [initialName, isOpen, currentName, nameHistory]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isOpen, hasInitialized, initialName, nameHistory]);
 
   /**
    * Save name generator favorites to localStorage

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { ChevronUp, ChevronDown, XCircle, Shuffle, ArrowLeft } from 'lucide-react';
 import { StepProps } from '../types/wizard.types';
 import { getAllSpecies, SPECIES_CATEGORIES, randomizeSpecies } from '../../../services/dataService';
@@ -30,17 +30,7 @@ export const Step2Species: React.FC<StepProps> = ({ data, updateData, nextStep, 
   // Validation hook
   const { canProceed, missingItems, nextAction } = useStepValidation(2, data);
 
-  // Debug logging to identify category issues (dev only)
-  useEffect(() => {
-    if (import.meta.env.DEV) {
-      console.log('Species Categories Debug:');
-      SPECIES_CATEGORIES.forEach(category => {
-        const totalSpecies = category.species.length;
-        const editionFiltered = category.species.filter(s => s.edition === data.edition || (data.edition === '2024' && s.edition === '2014')).length;
-        console.log(`${category.name}: ${editionFiltered}/${totalSpecies} species for ${data.edition} edition`);
-      });
-    }
-  }, [data.edition]);
+
 
 
 
@@ -330,13 +320,13 @@ export const Step2Species: React.FC<StepProps> = ({ data, updateData, nextStep, 
           </div>
         )}
 
-       {/* 2024 Species Fixed Feat Display */}
-       {data.edition === '2024' && selectedSpecies && (selectedSpecies as any).speciesFeat && (
-         <div className="text-sm text-theme-muted p-4 bg-theme-secondary/50 rounded-lg border border-theme-primary">
-           <p className="font-semibold text-accent-yellow-light">Species Feat:</p>
-           <p className="mt-2">Your species grants you the <strong>{(selectedSpecies as any).speciesFeat}</strong> feat.</p>
-         </div>
-       )}
+        {/* 2024 Species Fixed Feat Display */}
+        {data.edition === '2024' && selectedSpecies?.speciesFeat && (
+          <div className="text-sm text-theme-muted p-4 bg-theme-secondary/50 rounded-lg border border-theme-primary">
+            <p className="font-semibold text-accent-yellow-light">Species Feat:</p>
+            <p className="mt-2">Your species grants you the <strong>{selectedSpecies.speciesFeat}</strong> feat.</p>
+          </div>
+        )}
 
         {selectedSpecies?.slug === 'human-2024' && data.edition === '2024' && (
          <div className="text-sm text-theme-muted p-4 bg-theme-secondary/50 rounded-lg border border-theme-primary space-y-4">

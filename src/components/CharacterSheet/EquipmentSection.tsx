@@ -153,29 +153,29 @@ export const EquipmentSection: React.FC<EquipmentSectionProps> = ({
         </div>
 
         <div className="flex flex-wrap gap-2 mb-4">
-          {[
-            { key: 'all', label: 'All', count: character.inventory?.length || 0 },
-            { key: 'equipped', label: 'Equipped', count: character.inventory?.filter(item =>
+          {([
+            { key: 'all' as const, label: 'All', count: character.inventory?.length || 0 },
+            { key: 'equipped' as const, label: 'Equipped', count: character.inventory?.filter(item =>
               item.equipped ||
               character.equippedArmor === item.equipmentSlug ||
               character.equippedWeapons?.includes(item.equipmentSlug)
             ).length || 0 },
-            { key: 'weapons', label: 'Weapons', count: character.inventory?.filter(item => {
+            { key: 'weapons' as const, label: 'Weapons', count: character.inventory?.filter(item => {
               const equipment = equipmentData.find(eq => eq.slug === item.equipmentSlug);
               return equipment?.equipment_category === 'Weapon';
             }).length || 0 },
-            { key: 'armor', label: 'Armor', count: character.inventory?.filter(item => {
+            { key: 'armor' as const, label: 'Armor', count: character.inventory?.filter(item => {
               const equipment = equipmentData.find(eq => eq.slug === item.equipmentSlug);
               return equipment?.equipment_category === 'Armor';
             }).length || 0 },
-            { key: 'gear', label: 'Gear/Tools', count: character.inventory?.filter(item => {
+            { key: 'gear' as const, label: 'Gear/Tools', count: character.inventory?.filter(item => {
               const equipment = equipmentData.find(eq => eq.slug === item.equipmentSlug);
               return equipment?.equipment_category === 'Adventuring Gear' || equipment?.equipment_category === 'Tools';
             }).length || 0 }
-          ].map(({ key, label, count }) => (
+          ] as const).map(({ key, label, count }) => (
             <button
               key={key}
-              onClick={() => setFilter(key as any)}
+              onClick={() => setFilter(key)}
               className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${
                 filter === key
                   ? 'bg-accent-blue text-white shadow-[0_4px_10px_rgba(37,99,235,0.35)]'

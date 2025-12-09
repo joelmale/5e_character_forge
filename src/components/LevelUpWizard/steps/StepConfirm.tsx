@@ -88,7 +88,7 @@ export const StepConfirm: React.FC<StepConfirmProps> = ({
             <h5 className="font-semibold text-accent-gold mb-1">Ability Score Improvement</h5>
             {choices.asiChoices && (
               <ul className="text-theme-text space-y-1">
-                {choices.asiChoices.map((choice: any, index: number) => (
+                {choices.asiChoices.map((choice: { ability: string; increase: number }, index: number) => (
                   <li key={index}>
                     {choice.ability}: {character.abilities[choice.ability as keyof typeof character.abilities].score}
                     {' → '}

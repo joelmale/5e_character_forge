@@ -34,7 +34,7 @@ export const getBackgroundDefaults = (background: string): Partial<CharacterCrea
  * Validate that all required traits are filled
  */
 export const validateTraits = (data: Partial<CharacterCreationData>): boolean => {
-  return !!(data.personality && data.ideals && data.bonds && data.flaws);
+  return !!(data.name && data.name.trim() && data.personality && data.ideals && data.bonds && data.flaws);
 };
 
 /**

@@ -1,6 +1,7 @@
 import gameConstantsData from '../data/gameConstants.json';
 import type { Level1Feature } from './widgets';
 import type { ResourceTracker, LevelUpRecord } from '../data/classProgression';
+import type { InitiativeEntry, PlayerEntry } from './encounterCombat';
 
 export const ABILITY_SCORES = gameConstantsData.ABILITY_SCORES as readonly ('STR' | 'DEX' | 'CON' | 'INT' | 'WIS' | 'CHA')[];
 export type Ability = typeof ABILITY_SCORES[number];
@@ -186,7 +187,7 @@ export interface Character {
 
   };
   selectedFeats?: string[]; // Feat slugs selected during character creation
-  featChoices?: Record<string, Record<string, any>>; // Additional choices for feats (e.g., Elemental Adept damage type)
+  featChoices?: Record<string, Record<string, string | number | boolean>>; // Additional choices for feats (e.g., Elemental Adept damage type)
 
   // Sprint 4: Equipment and inventory
   inventory?: EquippedItem[]; // All carried items
@@ -521,7 +522,7 @@ export interface CharacterCreationData {
   subclassSlug?: string | null;
   selectedFightingStyle?: string | null;
   selectedFeats?: string[]; // Array of feat slugs
-  featChoices?: Record<string, Record<string, any>>; // Additional choices for feats (e.g., Elemental Adept damage type)
+  featChoices?: Record<string, Record<string, string | number | boolean>>; // Additional choices for feats (e.g., Elemental Adept damage type)
 
   // Language selection
   knownLanguages?: string[]; // Array of selected language names
@@ -939,6 +940,14 @@ export interface Encounter {
   monsterIds: string[];
   createdAt: number;
   updatedAt: number;
+  // NEW: Combat state (can be saved mid-session)
+  combatState?: {
+    round: number;
+    currentTurn: number;
+    initiativeOrder: InitiativeEntry[];
+    players: PlayerEntry[];
+    savedAt?: number; // Timestamp for mid-session saves
+  };
 }
 
 // ==================== Level Up System ====================

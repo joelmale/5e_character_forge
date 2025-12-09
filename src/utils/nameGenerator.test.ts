@@ -8,6 +8,7 @@ import {
   NameOptions
 } from './nameGenerator';
 import nameData from '../data/nameData.json';
+import { log } from './logger';
 
 describe('Name Generator', () => {
   beforeEach(() => {
@@ -342,27 +343,29 @@ describe('Name Generator', () => {
     it('should not have duplicate names in race data', () => {
       const races = getAvailableRaces();
       races.forEach(race => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const speciesData = (nameData as any).species || (nameData as any).races;
-        const raceData = speciesData[race as keyof typeof speciesData];
+        const speciesData =
+          (nameData as { species?: Record<string, { male?: string[]; female?: string[]; surnames?: string[] }> }).species ||
+          (nameData as { races?: Record<string, { male?: string[]; female?: string[]; surnames?: string[] }> }).races ||
+          {};
+        const raceData = speciesData[race as keyof typeof speciesData] ?? {};
         if (raceData.male) {
           const uniqueMale = new Set(raceData.male);
           if (uniqueMale.size !== raceData.male.length) {
-            console.log(`Race ${race} has ${raceData.male.length} male names but only ${uniqueMale.size} are unique`);
+            log.info('Name uniqueness check (male)', { race, total: raceData.male.length, unique: uniqueMale.size });
           }
           expect(uniqueMale.size, `Race ${race} male names`).toBe(raceData.male.length);
         }
         if (raceData.female) {
           const uniqueFemale = new Set(raceData.female);
           if (uniqueFemale.size !== raceData.female.length) {
-            console.log(`Race ${race} has ${raceData.female.length} female names but only ${uniqueFemale.size} are unique`);
+            log.info('Name uniqueness check (female)', { race, total: raceData.female.length, unique: uniqueFemale.size });
           }
           expect(uniqueFemale.size, `Race ${race} female names`).toBe(raceData.female.length);
         }
         if (raceData.surnames) {
           const uniqueSurnames = new Set(raceData.surnames);
           if (uniqueSurnames.size !== raceData.surnames.length) {
-            console.log(`Race ${race} has ${raceData.surnames.length} surnames but only ${uniqueSurnames.size} are unique`);
+            log.info('Name uniqueness check (surnames)', { race, total: raceData.surnames.length, unique: uniqueSurnames.size });
           }
           expect(uniqueSurnames.size, `Race ${race} surnames`).toBe(raceData.surnames.length);
         }

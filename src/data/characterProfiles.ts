@@ -192,37 +192,12 @@ export function generateCharacterProfile(archetype: string, combat: string, soci
   const combinationKey = `${archetype}-${combat}`;
   const classesForCombination = archetypeCombatClasses[combinationKey] || combatMod.classes;
 
-  console.log('🎭 [generateCharacterProfile] Class recommendation lookup:', {
-    archetype,
-    combat,
-    combinationKey,
-    foundInMapping: !!archetypeCombatClasses[combinationKey],
-    recommendedClasses: classesForCombination
-  });
-
-  const recommendedClasses = classesForCombination.map(cls => ({
-    class: cls,
-    reason: `Combines your ${base.name} nature with your ${combat} combat approach`
-  }));
-
-  // Generate race recommendations based on social approach
-  const recommendedRaces = socialMod.races.map(race => ({
-    race,
-    reason: `Aligns with your social approach and personality`
-  }));
-
-  // Generate background recommendations based on social approach
-  const recommendedBackgrounds = socialMod.backgrounds.map(bg => ({
-    background: bg,
-    reason: `Fits your social style and life experiences`
-  }));
-
   return {
     name: base.name,
     description: fullDescription,
-    recommendedClasses,
-    recommendedRaces,
-    recommendedBackgrounds,
+    recommendedClasses: classesForCombination.map(className => ({ class: className, reason: `${archetype} ${combat} style` })),
+    recommendedRaces: socialMod.races.map(raceName => ({ race: raceName, reason: `${social} personality` })),
+    recommendedBackgrounds: socialMod.backgrounds.map(bgName => ({ background: bgName, reason: `${world} background` })),
     keyStats: combatMod.stats,
     finalQuestion: worldMod.question
   };

@@ -61,6 +61,7 @@ const ManualEntryScreen: React.FC<ManualEntryScreenProps> = ({ isOpen, edition, 
               onSave={handleCreateCharacter}
               onCancel={onClose}
               isCreating={true}
+              edition={edition}
             />
           </div>
         </div>

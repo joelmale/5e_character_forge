@@ -7,6 +7,7 @@
 
 import { loadEquipment } from '../services/dataService';
 import type { Equipment } from '../types/dnd';
+import { log } from './logger';
 
 // Lazy-loaded equipment database cache
 let equipmentCache: Equipment[] | null = null;
@@ -239,7 +240,7 @@ export function findEquipmentByName(itemName: string): Equipment | null {
   }
 
   // No match found with any strategy
-  console.warn(`Could not find equipment for: ${itemName}`);
+  log.warn('Could not find equipment match', { itemName });
   return null;
 }
 

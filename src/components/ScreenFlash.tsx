@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useLayoutEffect } from 'react';
 
 interface ScreenFlashProps {
   type: 'success' | 'failure' | null;
@@ -6,20 +6,37 @@ interface ScreenFlashProps {
 }
 
 export const ScreenFlash: React.FC<ScreenFlashProps> = ({ type, onComplete }) => {
-  const [isAnimating, setIsAnimating] = useState(false);
+  const [animationPhase, setAnimationPhase] = useState<'idle' | 'animating' | 'complete'>('idle');
 
-  useEffect(() => {
-    if (type && !isAnimating) {
-      setIsAnimating(true);
-      const timer = setTimeout(() => {
-        setIsAnimating(false);
+  useLayoutEffect(() => {
+    if (!type) {
+      return;
+    }
+
+    let timer: number | undefined;
+
+    const start = () => {
+      setAnimationPhase('animating');
+
+      timer = window.setTimeout(() => {
+        setAnimationPhase('idle');
         onComplete?.();
       }, 600); // Flash duration
-      return () => clearTimeout(timer);
-    }
-  }, [type, isAnimating, onComplete]);
+    };
 
-  if (!isAnimating || !type) return null;
+    const frame = requestAnimationFrame(start);
+
+    return () => {
+      if (frame) {
+        cancelAnimationFrame(frame);
+      }
+      if (timer) {
+        clearTimeout(timer);
+      }
+    };
+  }, [type, onComplete]);
+
+  if (animationPhase !== 'animating' || !type) return null;
 
   const bgColor = type === 'success'
     ? 'bg-gradient-to-br from-yellow-300/40 via-yellow-400/30 to-yellow-500/40'

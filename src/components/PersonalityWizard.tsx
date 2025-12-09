@@ -11,6 +11,7 @@ import { assignAbilityScoresByClass } from '../utils/abilityScoreUtils';
 import cantripsData from '../data/cantrips.json';
 import { generateQuickStartEquipment } from '../services/equipmentService';
 import { rollRandomTrinket } from '../utils/trinketUtils';
+import { log } from '../utils/logger';
 
 type CantripsKnownData = Record<string, Record<string, number>>;
 
@@ -148,35 +149,30 @@ const PersonalityWizard: React.FC<PersonalityWizardProps> = ({ isOpen, onClose: 
   }, [selectedClass]);
 
   const handlePathChoice = useCallback((choice: PathChoice) => {
-    console.log('🎯 [handlePathChoice] Called with choice:', choice);
     choicesRef.current.path = choice;
     setSelectedPath(choice);
     setCurrentStep(1);
   }, []);
 
   const handleSkillChoice = useCallback((choice: SkillChoice) => {
-    console.log('⚔️ [handleSkillChoice] Called with choice:', choice);
     if (!choice) return;
     choicesRef.current.skill = choice;
     setCurrentStep(2); // Go to combat question
   }, []);
 
   const handleMagicChoice = useCallback((choice: MagicChoice) => {
-    console.log('🔮 [handleMagicChoice] Called with choice:', choice);
     if (!choice) return;
     choicesRef.current.magic = choice;
     setCurrentStep(2); // Go to combat question
   }, []);
 
   const handleCombatChoice = useCallback((choice: CombatChoice) => {
-    console.log('🛡️ [handleCombatChoice] Called with choice:', choice);
     if (!choice) return;
     choicesRef.current.combat = choice;
     setCurrentStep(3); // Go to social question
   }, []);
 
   const handleSocialChoice = useCallback((choice: SocialChoice) => {
-    console.log('👥 [handleSocialChoice] Called with choice:', choice);
     if (!choice) return;
     choicesRef.current.social = choice;
     setCurrentStep(4); // Go to world question
@@ -190,17 +186,7 @@ const PersonalityWizard: React.FC<PersonalityWizardProps> = ({ isOpen, onClose: 
     const social = currentChoices.social;
     const finalWorld = world || currentChoices.world;
 
-    console.log('🔍 [generateProfile] Current choices:', {
-      currentChoices,
-      archetype,
-      combat,
-      social,
-      finalWorld,
-      passedWorld: world
-    });
-
     if (!archetype || !combat || !social || !finalWorld) {
-      console.log('❌ [generateProfile] Missing choices - returning incomplete');
       return {
         name: 'Incomplete Profile',
         description: 'Please complete all questions to generate your character profile.',
@@ -214,22 +200,14 @@ const PersonalityWizard: React.FC<PersonalityWizardProps> = ({ isOpen, onClose: 
 
     // Generate dynamic profile based on all choices
     const profile = generateCharacterProfile(archetype, combat, social, finalWorld);
-    console.log('✅ [generateProfile] Generated profile:', {
-      name: profile.name,
-      recommendedClasses: profile.recommendedClasses.map(c => c.class),
-      recommendedRaces: profile.recommendedRaces.map(r => r.race),
-      recommendedBackgrounds: profile.recommendedBackgrounds.map(b => b.background)
-    });
     return profile;
   };
 
   const handleWorldChoice = useCallback((choice: WorldChoice) => {
-    console.log('🌍 [handleWorldChoice] Called with choice:', choice);
     if (!choice) return;
     choicesRef.current.world = choice;
     // Generate profile based on all choices
     const profile = generateProfile(choice);
-    console.log('📋 [handleWorldChoice] Setting completedProfile:', profile.name);
     setCompletedProfile(profile);
     setCurrentStep(5); // Go to profile display
   }, []);
@@ -241,15 +219,7 @@ const PersonalityWizard: React.FC<PersonalityWizardProps> = ({ isOpen, onClose: 
     ideals: string;
     bonds: string;
     flaws: string;
-  }) => {
-    console.log('🎉 [PersonalityWizard] Finalizing character creation');
-    console.log('📝 [PersonalityWizard] Finalization data:', finalizationData);
-    console.log('📊 [PersonalityWizard] Selected options:', {
-      selectedClass,
-      selectedSpecies,
-      selectedBackground
-    });
-
+   }) => {
     // Extract base class/race name (remove subclass/variant in parentheses)
     const extractBaseName = (fullName: string): string => {
       const parenIndex = fullName.indexOf(' (');
@@ -266,7 +236,7 @@ const PersonalityWizard: React.FC<PersonalityWizardProps> = ({ isOpen, onClose: 
     const selectedSpeciesData = allSpecies.find(s => s.name === baseSpeciesName);
 
     if (!selectedClassData || !selectedSpeciesData) {
-      console.error('❌ [PersonalityWizard] Failed to find class/species data');
+      log.error('PersonalityWizard missing class/species data', { selectedClass, selectedSpecies });
       alert('Error: Could not find class or species data. Please try again.');
       return;
     }
@@ -336,16 +306,6 @@ const PersonalityWizard: React.FC<PersonalityWizardProps> = ({ isOpen, onClose: 
       flaws: finalizationData.flaws
     };
 
-    console.log('📦 [PersonalityWizard] Complete character data created:', {
-      name: characterData.name,
-      speciesSlug: characterData.speciesSlug,
-      classSlug: characterData.classSlug,
-      background: characterData.background,
-      alignment: characterData.alignment,
-      skills: characterData.selectedSkills
-    });
-
-    console.log('🚀 [PersonalityWizard] Calling onComplete...');
     onComplete(characterData);
    }, [selectedClass, selectedSpecies, selectedBackground, onComplete, customSkills, customAbilities, spellSelection]);
 
@@ -695,19 +655,16 @@ const ProfileDisplay: React.FC<{
   const [selectedBackground, setSelectedBackground] = React.useState<string | null>(initialBackground || null);
 
   const handleClassSelect = (className: string) => {
-    console.log('📝 [ProfileDisplay] Class selected:', className);
     setSelectedClass(className);
     onClassSelect?.(className);
   };
 
   const handleSpeciesSelect = (speciesName: string) => {
-    console.log('📝 [ProfileDisplay] Species selected:', speciesName);
     setSelectedSpecies(speciesName);
     onSpeciesSelect?.(speciesName);
   };
 
   const handleBackgroundSelect = (backgroundName: string) => {
-    console.log('📝 [ProfileDisplay] Background selected:', backgroundName);
     setSelectedBackground(backgroundName);
     onBackgroundSelect?.(backgroundName);
   };

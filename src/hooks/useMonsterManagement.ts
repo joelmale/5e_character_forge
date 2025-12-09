@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { Monster, UserMonster, Encounter } from '../types/dnd';
 import { MONSTER_DATABASE } from '../services/dataService';
+import { log } from '../utils/logger';
 import {
   getAllCustomMonsters,
   addCustomMonster,
@@ -56,7 +57,7 @@ export const useMonsterManagement = () => {
         setFavoriteIds(favorites);
         setEncounters(allEncounters);
       } catch (err) {
-        console.error('Monster data load error:', err);
+        log.error('Monster data load error', { error: err });
         setError(
           'Database upgrade needed. Please clear your browser cache or IndexedDB for this site and refresh.'
         );
@@ -219,6 +220,15 @@ export const useMonsterManagement = () => {
   const saveEncounterFunc = useCallback(
     async (name: string): Promise<boolean> => {
       try {
+        // Validate input
+        if (!name.trim()) {
+          throw new Error('Encounter name is required');
+        }
+
+        if (Object.keys(selectedEncounterMonsters).length === 0) {
+          throw new Error('No monsters selected for encounter');
+        }
+
         // Convert selectedEncounterMonsters object to array with duplicates for quantity
         const monsterIds: string[] = [];
         Object.entries(selectedEncounterMonsters).forEach(([monsterId, quantity]) => {
@@ -227,9 +237,15 @@ export const useMonsterManagement = () => {
           }
         });
 
+        // Validate that all monster IDs exist in our monster database
+        const invalidIds = monsterIds.filter(id => !allMonsters.some(monster => monster.index === id));
+        if (invalidIds.length > 0) {
+          throw new Error(`Invalid monster IDs found: ${invalidIds.join(', ')}`);
+        }
+
         const encounter: Encounter = {
           id: crypto.randomUUID(),
-          name,
+          name: name.trim(),
           monsterIds,
           createdAt: Date.now(),
           updatedAt: Date.now(),
@@ -239,11 +255,13 @@ export const useMonsterManagement = () => {
         setEncounters((prev) => [...prev, encounter]);
         return true;
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to save encounter');
+        const errorMessage = err instanceof Error ? err.message : 'Failed to save encounter';
+        setError(errorMessage);
+        log.error('Encounter save failed', { error: err, name });
         return false;
       }
     },
-    [selectedEncounterMonsters]
+    [selectedEncounterMonsters, allMonsters]
   );
 
   const loadEncounter = useCallback(async (id: string): Promise<void> => {

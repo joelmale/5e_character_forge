@@ -2,11 +2,20 @@ import React from 'react';
 import { Trash2, Eye, Calendar } from 'lucide-react';
 import { useMonsterContext } from '../../hooks';
 
-export const SavedEncountersList: React.FC = () => {
+interface SavedEncountersListProps {
+  onStartCombat?: (encounterId: string) => void;
+}
+
+export const SavedEncountersList: React.FC<SavedEncountersListProps> = ({ onStartCombat }) => {
   const { encounters, loadEncounter, deleteEncounterById, allMonsters } = useMonsterContext();
 
   const handleLoad = async (encounterId: string) => {
-    await loadEncounter(encounterId);
+    if (onStartCombat) {
+      onStartCombat(encounterId);
+    } else {
+      // Fallback to original behavior if no callback provided
+      await loadEncounter(encounterId);
+    }
   };
 
   const handleDelete = async (encounterId: string, encounterName: string) => {

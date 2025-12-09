@@ -82,7 +82,7 @@ export const Step5point5Feats: React.FC<StepProps> = ({ data, updateData, nextSt
     }
   };
 
-  const handleFeatChoiceConfirm = (choices: Record<string, any>) => {
+  const handleFeatChoiceConfirm = (choices: Record<string, string | number | boolean>) => {
     if (!featChoiceModal.feat) return;
 
     // Store the choices in the character data

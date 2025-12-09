@@ -3,38 +3,30 @@ import { getAllSpecies, loadClasses, BACKGROUNDS, PROFICIENCY_BONUSES, getModifi
 import { migrateSpellSelectionToCharacter } from '../utils/spellUtils';
 import { addItemToInventoryByName } from '../utils/equipmentMatching';
 import { BASE_ARMOR_CLASS } from '../constants/combat';
+import { log } from './logger';
 
 /**
  * Calculate final character stats from character creation data
  */
 export const calculateCharacterStats = (data: CharacterCreationData): Character => {
-  console.log('🔧 [CharacterCreation] Starting stat calculation');
-  console.log('📊 [CharacterCreation] Input data:', {
-    speciesSlug: data.speciesSlug,
-    classSlug: data.classSlug,
-    level: data.level,
-    background: data.background,
-    abilities: data.abilities,
-    selectedSkills: data.selectedSkills
-  });
-
-
   const speciesData = getAllSpecies().find(s => s.slug === data.speciesSlug);
   const classData = loadClasses().find(c => c.slug === data.classSlug);
   const backgroundData = BACKGROUNDS.find(bg => bg.slug === data.background); // Fetch background data here
 
-  console.log('🔍 [CharacterCreation] Data lookup results:', {
-    speciesData: speciesData ? { name: speciesData.name, slug: speciesData.slug } : null,
-    classData: classData ? { name: classData.name, slug: classData.slug } : null,
-    backgroundData: backgroundData ? { name: backgroundData.name, slug: backgroundData.slug } : null,
+  log.debug('Character creation data lookup', {
+    species: speciesData ? { name: speciesData.name, slug: speciesData.slug } : null,
+    class: classData ? { name: classData.name, slug: classData.slug } : null,
+    background: backgroundData ? { name: backgroundData.name, slug: backgroundData.slug } : null,
   });
 
   if (!speciesData || !classData || !backgroundData) {
-    console.error('❌ [CharacterCreation] Missing species, class, or background data - throwing error');
+    log.error('Character creation missing required data', {
+      speciesSlug: data.speciesSlug,
+      classSlug: data.classSlug,
+      backgroundSlug: data.background
+    });
     throw new Error("Incomplete creation data.");
   }
-
-  console.log('✅ [CharacterCreation] Data validation passed, proceeding with character creation');
 
   const finalAbilities: Character['abilities'] = {} as Character['abilities'];
 
@@ -248,18 +240,18 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
 
 
   // 5. Apply lineage effects (traits/spells/speed overrides)
-  const lineageData = data.selectedLineage && (speciesData as any).lineages
-    ? (speciesData as any).lineages[data.selectedLineage]
+  const lineageData = data.selectedLineage && 'lineages' in speciesData
+    ? (speciesData as { lineages?: Record<string, { traits?: Character['featuresAndTraits']['speciesTraits']; baseSpeed?: number }> }).lineages?.[data.selectedLineage]
     : undefined;
 
   const mergedTraits = [
-    ...((speciesData as any).traits || speciesData.species_traits || []),
-    ...(lineageData?.traits || [])
+    ...(speciesData.species_traits || []),
+    ...(lineageData?.traits || []),
   ];
 
   // Future: apply lineage spells if we surface them in spell lists
 
-  const effectiveSpeed = lineageData?.baseSpeed || (speciesData as any).baseSpeed || speciesData.speed || 30;
+  const effectiveSpeed = lineageData?.baseSpeed || speciesData.speed || 30;
 
   // 6. Calculate Armor Class (simple calculation)
   const armorClass = BASE_ARMOR_CLASS + finalAbilities.DEX.modifier;
@@ -276,8 +268,8 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
     classFeatures: classData.class_features || [],
     speciesTraits: mergedTraits,
     backgroundFeatures: backgroundData ? [{
-      name: (backgroundData as any).feature || 'Background Feature',
-      description: (backgroundData as any).feature_description || 'A feature from your background.'
+      name: backgroundData.feature || 'Background Feature',
+      description: backgroundData.feature_description || 'A feature from your background.'
     }] : [],
     musicalInstrumentProficiencies: data.selectedMusicalInstruments || [],
   };

@@ -173,6 +173,7 @@ export const HumanVariantSelector: React.FC<HumanVariantSelectorProps> = ({
               <option value="Alert">Alert - +5 initiative, can't be surprised, hidden creatures don't get advantage</option>
               <option value="Lucky">Lucky - 3 luck points for rerolls</option>
               <option value="Resilient">Resilient (CON) - Proficiency in CON saves, +1 CON</option>
+              <option value="Skilled">Skilled - Proficiency in one skill + Expertise in one skill</option>
               <option value="War Caster">War Caster - Advantage on concentration, can cast as opportunity attack, etc.</option>
               <option value="Elemental Adept">Elemental Adept (Fire) - Ignore fire resistance, spells ignore fire immunity</option>
               <option value="Spell Sniper">Spell Sniper - Double range on attack spells, ignore half cover</option>

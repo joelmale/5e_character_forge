@@ -2,6 +2,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import type { DiceRoll } from '../../services/diceService';
 import DiceBox from '@3d-dice/dice-box';
+import { log } from '../../utils/logger';
 
 interface DiceBox3DProps {
   latestRoll: DiceRoll | null;
@@ -37,8 +38,6 @@ export const DiceBox3D: React.FC<DiceBox3DProps> = ({
         canvas.style.height = '100%';
         canvas.width = width;
         canvas.height = height;
-
-        if (import.meta.env.DEV) console.log('🎲 [DiceBox3D] Canvas sized to:', canvas.width, 'x', canvas.height);
       }
     }
   };
@@ -50,7 +49,6 @@ export const DiceBox3D: React.FC<DiceBox3DProps> = ({
     }
 
     try {
-      if (import.meta.env.DEV) console.log('🎲 [DiceBox3D] Initializing DiceBox with v1.1.0+ API...');
       const diceBox = new DiceBox({
         container: '#dice-box',
         assetPath: '/assets/dice-box/',
@@ -66,10 +64,9 @@ export const DiceBox3D: React.FC<DiceBox3DProps> = ({
         settleTimeout: 2000, // Reduced from 5000ms to 2000ms
         enableShadows: true,
         scale: 6
-      } as any);
+      } as Record<string, unknown>);
 
       await diceBox.init();
-      if (import.meta.env.DEV) console.log('🎲 [DiceBox3D] DiceBox initialized successfully');
 
       // Ensure canvas is visible and sized properly
       setTimeout(() => {
@@ -79,39 +76,30 @@ export const DiceBox3D: React.FC<DiceBox3DProps> = ({
       diceBoxRef.current = diceBox;
       setIsInitialized(true);
 
-      diceBox.onRollComplete = (results) => {
-        if (import.meta.env.DEV) console.log('Roll completed:', results);
+      diceBox.onRollComplete = (_results) => {
         if (onRollComplete) {
           onRollComplete();
         }
       };
 
     } catch (err) {
-      console.error('Failed to initialize 3D dice:', err);
+      log.error('Failed to initialize 3D dice', { error: err });
       setError('Failed to initialize 3D dice');
     }
   }, [isInitialized, onRollComplete]);
 
   // Handle dice rolls
   useEffect(() => {
-    if (import.meta.env.DEV) {
-      console.log('🎲 [DiceBox3D] useEffect triggered, latestRoll:', latestRoll);
-      console.log('🎲 [DiceBox3D] lastRollIdRef.current:', lastRollIdRef.current);
-    }
-
     if (!latestRoll || lastRollIdRef.current === latestRoll.id) {
-      if (import.meta.env.DEV) console.log('🎲 [DiceBox3D] Skipping roll - no latestRoll or duplicate ID');
       return;
     }
-
-    if (import.meta.env.DEV) console.log('🎲 [DiceBox3D] Starting roll for:', latestRoll.label, latestRoll.notation);
 
     const performRoll = async () => {
       // Initialize DiceBox if needed
       await initDiceBoxIfNeeded();
 
       if (!diceBoxRef.current) {
-        console.error('DiceBox not available after initialization');
+        log.error('DiceBox not available after initialization');
         return;
       }
 
@@ -120,35 +108,26 @@ export const DiceBox3D: React.FC<DiceBox3DProps> = ({
        // Determine the correct notation to use for DiceBox
        let diceNotation: string;
 
-       if (latestRoll.pools && latestRoll.pools.length > 0) {
-         // For complex rolls (advantage/disadvantage), use the pool info
-         const pool = latestRoll.pools[0];
-         diceNotation = `${pool.count}d${pool.sides}`;
-         if (import.meta.env.DEV) console.log('🎲 [DiceBox3D] Complex roll - using notation:', diceNotation);
-       } else {
-         // For simple rolls, strip modifiers
-         diceNotation = latestRoll.notation.replace(/[+-]\d+$/, '').trim();
-         if (import.meta.env.DEV) console.log('🎲 [DiceBox3D] Simple roll - using notation:', diceNotation);
-       }
-
-       if (import.meta.env.DEV) console.log('🎲 [DiceBox3D] Original notation:', latestRoll.notation, 'Final notation:', diceNotation);
+        if (latestRoll.pools && latestRoll.pools.length > 0) {
+          // For complex rolls (advantage/disadvantage), use the pool info
+          const pool = latestRoll.pools[0];
+          diceNotation = `${pool.count}d${pool.sides}`;
+        } else {
+          // For simple rolls, strip modifiers
+          diceNotation = latestRoll.notation.replace(/[+-]\d+$/, '').trim();
+        }
 
        // Clear previous dice first
        await diceBoxRef.current.clear();
 
        // Show dice and ensure canvas is visible
        setDiceVisible(true);
-       ensureCanvasVisible();
+        ensureCanvasVisible();
 
-       if (import.meta.env.DEV) console.log('🎲 [DiceBox3D] Rolling dice randomly');
-
-       diceBoxRef.current.roll(diceNotation)
-         .then(results => {
-           if (import.meta.env.DEV) console.log('🎲 [DiceBox3D] Dice roll succeeded with results:', results);
-
-           // Extract the actual dice values from DiceBox results
-           const diceValues = results.map(result => result.value);
-           if (import.meta.env.DEV) console.log('🎲 [DiceBox3D] Extracted dice values:', diceValues);
+        diceBoxRef.current.roll(diceNotation)
+          .then(results => {
+            // Extract the actual dice values from DiceBox results
+            const diceValues = results.map(result => result.value);
 
             // Calculate the total based on roll type
             let actualTotal: number;
@@ -167,11 +146,9 @@ export const DiceBox3D: React.FC<DiceBox3DProps> = ({
            } else {
              // For simple rolls, just the die value + modifier
              actualTotal = diceValues[0] + latestRoll.modifier;
-           }
+            }
 
-           if (import.meta.env.DEV) console.log('🎲 [DiceBox3D] Calculated total:', actualTotal);
-
-           // Update the roll with real results
+            // Update the roll with real results
            if (onRollResults) {
              if (latestRoll.pools && latestRoll.pools.length > 0) {
                // For complex rolls, update both diceResults and pools
@@ -188,8 +165,8 @@ export const DiceBox3D: React.FC<DiceBox3DProps> = ({
              }
            }
          })
-         .catch(err => {
-           console.error('❌ [DiceBox3D] Dice roll failed:', err);
+        .catch(err => {
+           log.error('Dice roll failed in DiceBox3D', { error: err });
          });
 
       // Auto-hide after 3 seconds (reduced from 5 for faster settling)

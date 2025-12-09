@@ -6,7 +6,7 @@ interface ThemeContextValue {
   setTheme: (theme: ThemeType) => void;
 }
 
-export const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
+const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 
 interface ThemeProviderProps {
   children: ReactNode;
@@ -32,3 +32,6 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     </ThemeContext.Provider>
   );
 };
+
+// Export ThemeContext for useTheme hook
+export { ThemeContext };

@@ -154,7 +154,15 @@ const BranchCard: React.FC<BranchCardProps> = ({ option, selected, onClick }) =>
 /**
  * Format grant configuration into readable text
  */
-const formatGrant = (grant: any): string => {
+type Grant =
+  | { type: 'proficiency'; proficiencies?: string[] }
+  | { type: 'skill_bonus'; skill_bonuses?: { ability: string; skill: string }[] }
+  | { type: 'cantrip'; cantrip_bonus?: number }
+  | { type: 'language' }
+  | { type: 'feature' }
+  | { type: string; [key: string]: unknown };
+
+const formatGrant = (grant: Grant): string => {
   switch (grant.type) {
     case 'proficiency':
       if (grant.proficiencies) {
@@ -167,7 +175,7 @@ const formatGrant = (grant: any): string => {
 
     case 'skill_bonus':
       if (grant.skill_bonuses) {
-        const bonuses = grant.skill_bonuses.map((bonus: any) =>
+        const bonuses = grant.skill_bonuses.map((bonus: { ability: string; skill: string }) =>
           `+${bonus.ability} modifier to ${formatSkillName(bonus.skill)}`
         );
         return bonuses.join(', ');

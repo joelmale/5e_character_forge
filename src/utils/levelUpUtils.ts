@@ -5,7 +5,7 @@
  * Handles HP increases, spell slot progression, feature grants, and player choices.
  */
 
-import { Character, LevelUpChoices } from '../types/dnd';
+import { Character, LevelUpChoices, AppSpell } from '../types/dnd';
 import {
   ClassProgression,
   LevelUpData,
@@ -328,7 +328,7 @@ export function applyLevelUp(
     updatedCharacter.selectedFeats.push(choices.featChosen);
 
   // Process feat-granted abilities and spells
-  applyFeatEffects(updatedCharacter, choices.featChosen, (character as any).featChoices);
+  applyFeatEffects(updatedCharacter, choices.featChosen, character.featChoices);
   }
 
   // Apply subclass
@@ -352,15 +352,15 @@ export function applyLevelUp(
   // Apply spells learned
   if (choices.spellsLearned && updatedCharacter.spellcasting) {
     // Load spell data to separate cantrips from leveled spells
-    const allSpells = loadSpells();
-    const cantrips = choices.spellsLearned.filter((spellSlug: string) => {
-      const spell = allSpells.find((s: any) => s.slug === spellSlug);
-      return spell && spell.level === 0;
-    });
-    const leveledSpells = choices.spellsLearned.filter((spellSlug: string) => {
-      const spell = allSpells.find((s: any) => s.slug === spellSlug);
-      return spell && spell.level > 0;
-    });
+      const allSpells: AppSpell[] = loadSpells();
+      const cantrips = choices.spellsLearned.filter((spellSlug: string) => {
+        const spell = allSpells.find((s: AppSpell) => s.slug === spellSlug);
+        return spell && spell.level === 0;
+      });
+      const leveledSpells = choices.spellsLearned.filter((spellSlug: string) => {
+        const spell = allSpells.find((s: AppSpell) => s.slug === spellSlug);
+        return spell && spell.level > 0;
+      });
 
     // Add cantrips to cantripsKnown
     if (cantrips.length > 0) {
@@ -472,7 +472,7 @@ export function getAverageHPGain(hitDie: string, conModifier: number): number {
 /**
  * Apply effects granted by a feat to the character
  */
-function applyFeatEffects(character: Character, featSlug: string, featChoices?: Record<string, Record<string, any>>): void {
+function applyFeatEffects(character: Character, featSlug: string, featChoices?: Character['featChoices']): void {
   const feats = loadFeats();
   const feat = feats.find(f => f.slug === featSlug);
 

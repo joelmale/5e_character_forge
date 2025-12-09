@@ -43,10 +43,8 @@ export function useMediaQuery(query: string): boolean {
       setMatches(event.matches);
     };
 
-    // Set initial value
-    setMatches(mediaQuery.matches); // eslint-disable-line react-hooks/exhaustive-deps
-
     // Add event listener (modern browsers)
+    // Initial value is already set via lazy state initialization
     // Note: Some older browsers use addListener instead of addEventListener
     if (mediaQuery.addEventListener) {
       mediaQuery.addEventListener('change', handleChange);

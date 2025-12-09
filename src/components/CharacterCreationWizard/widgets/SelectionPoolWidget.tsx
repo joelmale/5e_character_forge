@@ -269,8 +269,8 @@ export const SelectionPoolWidget: React.FC<SelectionPoolWidgetProps> = ({
 // ============================================================================
 
 interface WeaponGroupedUIProps {
-  feature: any;
-  config: any;
+  feature: { name: string; desc?: string };
+  config: { count: number };
   weapons: WeaponOption[];
   currentSelection: string[];
   handleSelect: (id: string) => void;
@@ -585,5 +585,4 @@ const formatToolName = (tool: string): string => {
 const formatMasteryName = (mastery: string): string => {
   return mastery.charAt(0).toUpperCase() + mastery.slice(1);
 };
-
 

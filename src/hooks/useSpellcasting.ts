@@ -2,6 +2,7 @@ import { useCallback } from 'react';
 import { Character, Ability } from '../types/dnd';
 import { updateCharacter } from '../services/dbService';
 import { getModifier, AppSubclass } from '../services/dataService';
+import { log } from '../utils/logger';
 
 interface UseSpellcastingProps {
   characters: Character[];
@@ -48,7 +49,7 @@ export function useSpellcasting({
       setCharacters(prev => prev.map(c => c.id === characterId ? updatedCharacter : c));
       setCantripModalState({ isOpen: false, characterId: null, characterClass: null });
     } catch (error) {
-      console.error('Error selecting cantrip:', error);
+      log.error('Error selecting cantrip', { characterId, error });
       // TODO: Show user-friendly error notification
       // Consider adding: showError('Failed to select cantrip. Please try again.');
     }
@@ -71,7 +72,7 @@ export function useSpellcasting({
       setCharacters(prev => prev.map(c => c.id === characterId ? updatedCharacter : c));
       setSubclassModalState({ isOpen: false, characterId: null, characterClass: null });
     } catch (error) {
-      console.error('Error selecting subclass:', error);
+      log.error('Error selecting subclass', { characterId, error });
       // TODO: Show user-friendly error notification
       // Consider adding: showError('Failed to select subclass. Please try again.');
     }
@@ -101,7 +102,7 @@ export function useSpellcasting({
       setCharacters(prev => prev.map(c => c.id === characterId ? updatedCharacter : c));
       setAsiModalState({ isOpen: false, characterId: null });
     } catch (error) {
-      console.error('Error applying ability score increase:', error);
+      log.error('Error applying ability score increase', { characterId, error });
       // TODO: Show user-friendly error notification
       // Consider adding: showError('Failed to apply ability score increase. Please try again.');
     }

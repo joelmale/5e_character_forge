@@ -174,16 +174,24 @@ export const Step3Class: React.FC<StepProps> = ({ data, updateData, nextStep, pr
         </div>
       )}
 
-      {/* Skill Selection */}
-      {selectedClass && (
-        <div className="bg-theme-tertiary/50 border border-theme-primary rounded-lg p-4 space-y-3">
-          <h4 className="text-lg font-bold text-accent-yellow-light">
-            Choose Skills ({data.selectedSkills.length} / {(selectedClass.num_skill_choices || 0)} selected)
-          </h4>
-          <p className="text-xs text-theme-muted">
-            Select {(selectedClass.num_skill_choices || 0)} skill{(selectedClass.num_skill_choices || 0) !== 1 ? 's' : ''} from your class options.
-            Skills from your background are automatically granted.
-          </p>
+       {/* Skill Selection */}
+       {selectedClass && (() => {
+         // Calculate total skill choices including bonuses from feats
+         const baseSkillChoices = selectedClass.num_skill_choices || 0;
+         const hasSkilledFeat = data.variantFeat === 'Skilled' || data.selectedFeats?.includes('skilled');
+         const extraSkillChoices = hasSkilledFeat ? 1 : 0;
+         const totalSkillChoices = baseSkillChoices + extraSkillChoices;
+
+         return (
+           <div className="bg-theme-tertiary/50 border border-theme-primary rounded-lg p-4 space-y-3">
+             <h4 className="text-lg font-bold text-accent-yellow-light">
+               Choose Skills ({data.selectedSkills.length} / {totalSkillChoices} selected)
+             </h4>
+             <p className="text-xs text-theme-muted">
+               Select {totalSkillChoices} skill{totalSkillChoices !== 1 ? 's' : ''} from your class options
+               {hasSkilledFeat && ' (+1 from Skilled feat)'}.
+               Skills from your background are automatically granted.
+             </p>
 
           {/* Background Skills (Auto-granted) */}
           {(() => {
@@ -216,7 +224,7 @@ export const Step3Class: React.FC<StepProps> = ({ data, updateData, nextStep, pr
               const backgroundSkills = backgroundData?.skill_proficiencies || [];
               const isBackgroundSkill = backgroundSkills.includes(skill);
               const isSelected = data.selectedSkills.includes(skill as SkillName);
-              const canSelect = data.selectedSkills.length < (selectedClass.num_skill_choices || 0);
+               const canSelect = data.selectedSkills.length < totalSkillChoices;
 
               return (
                 <button
@@ -276,11 +284,12 @@ export const Step3Class: React.FC<StepProps> = ({ data, updateData, nextStep, pr
 
           {data.selectedSkills.length < (selectedClass.num_skill_choices || 0) && (
             <div className="text-xs text-accent-yellow-light mt-2">
-              ⚠️ Please select {((selectedClass.num_skill_choices || 0) - data.selectedSkills.length)} more skill{((selectedClass.num_skill_choices || 0) - data.selectedSkills.length) !== 1 ? 's' : ''}
+              ⚠️ Please select {(totalSkillChoices - data.selectedSkills.length)} more skill{(totalSkillChoices - data.selectedSkills.length) !== 1 ? 's' : ''}
             </div>
           )}
         </div>
-      )}
+      );
+       })()}
 
       {/* Musical Instrument Selection */}
       {selectedClass && (selectedClass.num_instrument_choices || 0) > 0 && (

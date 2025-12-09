@@ -2,6 +2,7 @@
  * Theme Service
  * Handles localStorage persistence for theme preferences
  */
+import { log } from '../utils/logger';
 
 export type ThemeType = 'dark-colorful' | 'light' | 'paper';
 
@@ -18,7 +19,7 @@ export const loadTheme = (): ThemeType => {
       return stored as ThemeType;
     }
   } catch (error) {
-    console.warn('Failed to load theme from localStorage:', error);
+    log.warn('Failed to load theme from localStorage', { error });
   }
   return DEFAULT_THEME;
 };
@@ -30,7 +31,7 @@ export const saveTheme = (theme: ThemeType): void => {
   try {
     localStorage.setItem(THEME_STORAGE_KEY, theme);
   } catch (error) {
-    console.warn('Failed to save theme to localStorage:', error);
+    log.warn('Failed to save theme to localStorage', { error, theme });
   }
 };
 
@@ -41,7 +42,7 @@ export const clearTheme = (): void => {
   try {
     localStorage.removeItem(THEME_STORAGE_KEY);
   } catch (error) {
-    console.warn('Failed to clear theme from localStorage:', error);
+    log.warn('Failed to clear theme from localStorage', { error });
   }
 };
 

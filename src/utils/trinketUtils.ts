@@ -1,5 +1,6 @@
 import trinketTable from '../data/trinketTable.json';
 import { TrinketData } from '../types/dnd';
+import { log } from './logger';
 
 /**
  * Roll a random trinket from the Player's Handbook table
@@ -11,7 +12,7 @@ export function rollRandomTrinket(extended: boolean = false): TrinketData {
   const trinket = (trinketTable as TrinketData[]).find(t => t.roll === roll);
 
   if (!trinket) {
-    console.warn(`No trinket found for roll: ${roll}, using fallback`);
+    log.warn('No trinket found for roll; using fallback', { roll, maxRoll });
     return (trinketTable as TrinketData[])[0]; // Fallback to first trinket
   }
 

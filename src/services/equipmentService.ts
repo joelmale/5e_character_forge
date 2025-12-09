@@ -1,6 +1,7 @@
 import { QuickStartItem, ShopItem } from '../types/equipment';
 import { loadQuickStartEquipment, loadStartingWealthRules, loadNewPlayerShop, loadEquipment } from './dataService';
 import { Equipment } from '../types/dnd';
+import { log } from '../utils/logger';
 
 /**
  * Generate quick start equipment for a character based on class and background
@@ -70,7 +71,7 @@ export function rollStartingWealth(classSlug: string): number {
   const rule = rules.find(r => r.class_id === baseClassSlug);
 
   if (!rule) {
-    console.warn(`No wealth rule found for class: ${classSlug}, using default`);
+    log.warn('No wealth rule found for class; using default', { classSlug });
     return 100; // Default fallback
   }
 

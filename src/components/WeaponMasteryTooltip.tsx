@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useLayoutEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { WeaponOption } from '../types/widgets';
 import masteryData from '../data/srd/2024/5e-SRD-Weapon-Mastery-Properties.json';
 

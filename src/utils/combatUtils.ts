@@ -10,6 +10,9 @@ import { Character } from '../types/dnd';
 export interface CombatAction {
   type: 'attack' | 'damage' | 'reaction' | 'bonus-action';
   source: 'weapon' | 'spell' | 'feat' | 'class-feature';
+  // Dynamic combat details - structure varies by combat event type
+  // Examples: weapon attacks (damage type, range), spells (save DC, area), etc.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   details: Record<string, any>;
 }
 

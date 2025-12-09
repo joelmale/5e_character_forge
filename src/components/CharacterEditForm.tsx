@@ -9,6 +9,7 @@ interface CharacterEditFormProps {
   onSave: (character: Character) => void;
   onCancel: () => void;
   isCreating?: boolean;
+  edition?: '2014' | '2024'; // Edition to use for new characters
 }
 
 interface FormData {
@@ -114,7 +115,8 @@ export const CharacterEditForm: React.FC<CharacterEditFormProps> = ({
   character,
   onSave,
   onCancel,
-  isCreating = false
+  isCreating = false,
+  edition = '2024'
 }) => {
   const [formData, setFormData] = useState<FormData | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -186,116 +188,119 @@ export const CharacterEditForm: React.FC<CharacterEditFormProps> = ({
 
   // Initialize form data
   useEffect(() => {
-    if (character) {
-      // Editing existing character - populate with current data
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      setFormData({
-        name: character.name,
-        level: character.level,
-        species: character.species,
-        class: character.class,
-        background: character.background,
-        alignment: character.alignment,
-        edition: character.edition,
+    const frame = requestAnimationFrame(() => {
+      if (character) {
+        // Editing existing character - populate with current data
+        setFormData({
+          name: character.name,
+          level: character.level,
+          species: character.species,
+          class: character.class,
+          background: character.background,
+          alignment: character.alignment,
+          edition: character.edition,
 
-        abilities: {
-          STR: character.abilities.STR.score,
-          DEX: character.abilities.DEX.score,
-          CON: character.abilities.CON.score,
-          INT: character.abilities.INT.score,
-          WIS: character.abilities.WIS.score,
-          CHA: character.abilities.CHA.score,
-        },
+          abilities: {
+            STR: character.abilities.STR.score,
+            DEX: character.abilities.DEX.score,
+            CON: character.abilities.CON.score,
+            INT: character.abilities.INT.score,
+            WIS: character.abilities.WIS.score,
+            CHA: character.abilities.CHA.score,
+          },
 
-        hitPoints: character.hitPoints,
-        maxHitPoints: character.maxHitPoints,
-        armorClass: character.armorClass,
-        initiative: character.initiative || 0,
-        speed: character.speed || 30,
-        proficiencyBonus: character.proficiencyBonus,
+          hitPoints: character.hitPoints,
+          maxHitPoints: character.maxHitPoints,
+          armorClass: character.armorClass,
+          initiative: character.initiative || 0,
+          speed: character.speed || 30,
+          proficiencyBonus: character.proficiencyBonus,
 
-        skills: SKILL_NAMES.reduce((acc, skill) => {
-          acc[skill] = {
-            proficient: false, // TODO: Get from character data
-            expertise: false,
-            modifier: 0 // TODO: Calculate based on ability + proficiency
-          };
-          return acc;
-        }, {} as Record<string, { proficient: boolean; expertise: boolean; modifier: number }>),
+          skills: SKILL_NAMES.reduce((acc, skill) => {
+            acc[skill] = {
+              proficient: false, // TODO: Get from character data
+              expertise: false,
+              modifier: 0 // TODO: Calculate based on ability + proficiency
+            };
+            return acc;
+          }, {} as Record<string, { proficient: boolean; expertise: boolean; modifier: number }>),
 
-        savingThrows: {
-          STR: false, // TODO: Get from character data
-          DEX: false,
-          CON: false,
-          INT: false,
-          WIS: false,
-          CHA: false
-        },
+          savingThrows: {
+            STR: false, // TODO: Get from character data
+            DEX: false,
+            CON: false,
+            INT: false,
+            WIS: false,
+            CHA: false
+          },
 
-        num_instrument_choices: 0, // Will be set based on class
-        selectedMusicalInstruments: character?.featuresAndTraits.musicalInstrumentProficiencies || [],
+          num_instrument_choices: 0, // Will be set based on class
+          selectedMusicalInstruments: character?.featuresAndTraits.musicalInstrumentProficiencies || [],
 
-        languages: character?.languages || [],
+          languages: character?.languages || [],
 
-        equipment: [], // TODO: Get from character inventory
-        currency: character.currency || { cp: 0, sp: 0, gp: 0, pp: 0 },
+          equipment: [], // TODO: Get from character inventory
+          currency: character.currency || { cp: 0, sp: 0, gp: 0, pp: 0 },
 
-        spellcasting: character.spellcasting ? {
-          ability: character.spellcasting.ability,
-          cantripsKnown: character.spellcasting.cantripsKnown,
-          spellsKnown: character.spellcasting.spellsKnown || []
-        } : undefined,
+          spellcasting: character.spellcasting ? {
+            ability: character.spellcasting.ability,
+            cantripsKnown: character.spellcasting.cantripsKnown,
+            spellsKnown: character.spellcasting.spellsKnown || []
+          } : undefined,
 
-        featuresAndTraits: character.featuresAndTraits
-      });
-    } else {
-      // Creating new character - start with defaults
-      setFormData({
-        name: '',
-        level: 1,
-        species: '',
-        class: '',
-        background: '',
-        alignment: 'Neutral Good',
-        edition: '2024',
+          featuresAndTraits: character.featuresAndTraits
+        });
+      } else {
+        // Creating new character - start with defaults
+        setFormData({
+          name: '',
+          level: 1,
+          species: '',
+          class: '',
+          background: '',
+          alignment: 'Neutral Good',
+          edition,
 
-        abilities: { STR: 10, DEX: 10, CON: 10, INT: 10, WIS: 10, CHA: 10 },
+          abilities: { STR: 10, DEX: 10, CON: 10, INT: 10, WIS: 10, CHA: 10 },
 
-        hitPoints: 8,
-        maxHitPoints: 8,
-        armorClass: 10,
-        initiative: 0,
-        speed: 30,
-        proficiencyBonus: 2,
+          hitPoints: 8,
+          maxHitPoints: 8,
+          armorClass: 10,
+          initiative: 0,
+          speed: 30,
+          proficiencyBonus: 2,
 
-        skills: SKILL_NAMES.reduce((acc, skill) => {
-          acc[skill] = { proficient: false, expertise: false, modifier: 0 };
-          return acc;
-        }, {} as Record<string, { proficient: boolean; expertise: boolean; modifier: number }>),
+          skills: SKILL_NAMES.reduce((acc, skill) => {
+            acc[skill] = { proficient: false, expertise: false, modifier: 0 };
+            return acc;
+          }, {} as Record<string, { proficient: boolean; expertise: boolean; modifier: number }>),
 
-        savingThrows: { STR: false, DEX: false, CON: false, INT: false, WIS: false, CHA: false },
+          savingThrows: { STR: false, DEX: false, CON: false, INT: false, WIS: false, CHA: false },
 
-        num_instrument_choices: 0,
-        selectedMusicalInstruments: [],
+          num_instrument_choices: 0,
+          selectedMusicalInstruments: [],
 
-        languages: [],
+          languages: [],
 
-        equipment: [],
-        currency: { cp: 0, sp: 0, gp: 0, pp: 0 },
+          equipment: [],
+          currency: { cp: 0, sp: 0, gp: 0, pp: 0 },
 
-        featuresAndTraits: {
-          personality: '',
-          ideals: '',
-          bonds: '',
-          flaws: '',
-          classFeatures: [],
-          speciesTraits: [],
-          backgroundFeatures: [],
-          musicalInstrumentProficiencies: []
-        }
-      });
-    }
-  }, [character]); // eslint-disable-line react-hooks/exhaustive-deps
+          featuresAndTraits: {
+            personality: '',
+            ideals: '',
+            bonds: '',
+            flaws: '',
+            classFeatures: [],
+            speciesTraits: [],
+            backgroundFeatures: [],
+            musicalInstrumentProficiencies: []
+          }
+        });
+      }
+    });
+
+    return () => cancelAnimationFrame(frame);
+  }, [character, edition]);
 
   const updateFormData = useCallback((updates: Partial<FormData>) => {
     if (!formData) return;
@@ -308,11 +313,15 @@ export const CharacterEditForm: React.FC<CharacterEditFormProps> = ({
     if (formData?.class) {
       const selectedClass = classes.find(c => c.name === formData.class);
       if (selectedClass) {
-        updateFormData({
-          num_instrument_choices: selectedClass.num_instrument_choices || 0
+        const frame = requestAnimationFrame(() => {
+          updateFormData({
+            num_instrument_choices: selectedClass.num_instrument_choices || 0
+          });
         });
+        return () => cancelAnimationFrame(frame);
       }
     }
+    return undefined;
   }, [formData?.class, classes, updateFormData]);
 
   const validateForm = (): boolean => {

@@ -36,6 +36,7 @@ import speciesLanguagesData from '../data/speciesLanguages.json';
 import backgroundDefaultsData from '../data/backgroundDefaults.json';
 import combatActionsData from '../data/combatActions.json';
 import { generateName } from '../utils/nameGenerator';
+import { log } from '../utils/logger';
 import { AbilityName, Species, Class, Equipment, Feature, Subclass, Feat, SpeciesCategory, ClassCategory, EquipmentPackage, EquipmentChoice, EquipmentItem, EquippedItem, SpellcastingType, SkillName, Monster, MonsterType, Edition } from '../types/dnd';
 import { Level1Feature } from '../types/widgets';
 import { getSelectableLanguages } from '../data/languages';
@@ -707,7 +708,7 @@ export const getLeveledSpellsByClass = (classSlug: string, level: number = 1): A
 
 export function loadSpecies(): Species[] {
   // Return comprehensive species database from JSON
-  const baseSpecies = (speciesData as { species: any[] }).species.map(r => ({
+  const baseSpecies = (speciesData as { species: Species[] }).species.map(r => ({
     ...r,
     edition: r.edition || '2014', // Ensure edition is always set, default to 2014
     slug: r.slug || r.name.toLowerCase().replace(/\s+/g, '-') // Ensure slug exists
@@ -1012,7 +1013,7 @@ export const SPECIES_CATEGORIES: SpeciesCategory[] = speciesCategoriesData.map((
 
   // Debug logging for category construction
   if (filteredSpecies.length === 0) {
-    console.warn(`Category "${category.name}" has no species after filtering. Check filter criteria:`, category.filterCriteria);
+    log.warn('Species category empty after filtering', { category: category.name, filterCriteria: category.filterCriteria });
   }
 
   return {
@@ -1051,7 +1052,7 @@ export function getEnhancedSubclassData(subclassSlug: string): Partial<Subclass>
 
 // Helper function to get enhanced species data
 export function getEnhancedSpeciesData(speciesSlug: string): Partial<Species> | undefined {
-  return (enhancedSpeciesData as any)[speciesSlug];
+  return (enhancedSpeciesData as Record<string, Partial<Species>>)[speciesSlug];
 }
 
 // Enhanced class categories with rich data - filtered by edition
@@ -1098,13 +1099,6 @@ const getRandomElement = <T>(array: T[]): T => {
 };
 
 /**
- * Generate a random fantasy character name using the enhanced name generator
- */
-const generateRandomName = (): string => {
-  return generateName().name;
-};
-
-/**
  * Randomize character level with bias toward milestone levels
  */
 export const randomizeLevel = (): number => {
@@ -1137,7 +1131,7 @@ export const randomizeBackgroundAbilityChoices = (
   edition: Edition
 ): { method: '2/1' | '1/1/1'; bonuses: Partial<Record<AbilityName, number>> } | undefined => {
   if (edition !== '2024') return undefined;
-  const background = BACKGROUNDS.find(bg => bg.slug === backgroundSlug || bg.name === backgroundSlug) as any;
+  const background = BACKGROUNDS.find(bg => bg.slug === backgroundSlug || bg.name === backgroundSlug);
   const abilityScores = background?.abilityScores;
   if (!abilityScores?.from?.length) return undefined;
 

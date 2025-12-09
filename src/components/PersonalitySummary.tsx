@@ -41,19 +41,7 @@ const PersonalitySummary: React.FC<PersonalitySummaryProps> = ({
   onBack,
   edition // Added edition
 }) => {
-  // Debug logging for initial props
-  console.log('Debug info:', {
-    profileName: profile.name,
-    selectedClass,
-    selectedSpecies,
-    selectedBackground,
-    spellSelection,
-    customSkills,
-    customAbilities,
-    recommendedClasses: profile.recommendedClasses.map(c => c.class),
-    recommendedRaces: profile.recommendedRaces.map(r => r.race),
-    recommendedBackgrounds: profile.recommendedBackgrounds.map(b => b.background)
-  });
+
 
   // Editable state
   const [editingClass, setEditingClass] = useState(false);
@@ -67,12 +55,6 @@ const PersonalitySummary: React.FC<PersonalitySummaryProps> = ({
   const [currentClass, setCurrentClass] = useState(selectedClass || profile.recommendedClasses[0]?.class || '');
   const [currentSpecies, setCurrentSpecies] = useState(selectedSpecies || profile.recommendedRaces[0]?.race || ''); // Renamed from currentRace
   const [currentBackground, setCurrentBackground] = useState(selectedBackground || profile.recommendedBackgrounds[0]?.background || '');
-
-  console.log('Current selections:', {
-    currentClass,
-    currentSpecies,
-    currentBackground
-  });
 
   // Extract base class name (remove subclass in parentheses)
   const extractBaseName = (fullName: string): string => {

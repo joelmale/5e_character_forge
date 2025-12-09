@@ -1,8 +1,9 @@
 import { Character, UserMonster, Encounter } from '../types/dnd';
+import { log } from '../utils/logger';
 
 // --- IndexedDB Configuration ---
 const DB_NAME = '5e_character_forge';
-const DB_VERSION = 8; // Version 8: Compatibility update
+const DB_VERSION = 11; // Version 11: Ensure custom monsters store exists
 const STORE_NAME = 'characters';
 const CUSTOM_MONSTERS_STORE = 'customMonsters';
 const FAVORITES_STORE = 'favoriteMonsters';
@@ -32,27 +33,25 @@ const openDB = (): Promise<IDBDatabase> => {
         }
       }
 
-      // Version 2: Add monster-related stores
-      if (oldVersion < 2) {
-        // Custom monsters store
-        if (!db.objectStoreNames.contains(CUSTOM_MONSTERS_STORE)) {
-          const customMonstersStore = db.createObjectStore(CUSTOM_MONSTERS_STORE, { keyPath: 'id', autoIncrement: false });
-          customMonstersStore.createIndex('name', 'name', { unique: false });
-          customMonstersStore.createIndex('type', 'type', { unique: false });
-          customMonstersStore.createIndex('challenge_rating', 'challenge_rating', { unique: false });
-        }
+      // Custom monsters store - ensure it exists regardless of version
+      if (!db.objectStoreNames.contains(CUSTOM_MONSTERS_STORE)) {
+        const customMonstersStore = db.createObjectStore(CUSTOM_MONSTERS_STORE, { keyPath: 'id', autoIncrement: false });
+        customMonstersStore.createIndex('name', 'name', { unique: false });
+        customMonstersStore.createIndex('type', 'type', { unique: false });
+        customMonstersStore.createIndex('challenge_rating', 'challenge_rating', { unique: false });
+      }
 
-        // Favorite monsters store
-        if (!db.objectStoreNames.contains(FAVORITES_STORE)) {
-          db.createObjectStore(FAVORITES_STORE, { keyPath: 'monsterId', autoIncrement: false });
-        }
+      // Favorite monsters store - ensure it exists regardless of version
+      if (!db.objectStoreNames.contains(FAVORITES_STORE)) {
+        db.createObjectStore(FAVORITES_STORE, { keyPath: 'monsterId', autoIncrement: false });
+      }
 
-        // Encounters store
-        if (!db.objectStoreNames.contains(ENCOUNTERS_STORE)) {
-          const encountersStore = db.createObjectStore(ENCOUNTERS_STORE, { keyPath: 'id', autoIncrement: false });
-          encountersStore.createIndex('name', 'name', { unique: false });
-          encountersStore.createIndex('createdAt', 'createdAt', { unique: false });
-        }
+      // Encounters store - ensure it exists regardless of version
+      // (Added later, so we check for it on every upgrade)
+      if (!db.objectStoreNames.contains(ENCOUNTERS_STORE)) {
+        const encountersStore = db.createObjectStore(ENCOUNTERS_STORE, { keyPath: 'id', autoIncrement: false });
+        encountersStore.createIndex('name', 'name', { unique: false });
+        encountersStore.createIndex('createdAt', 'createdAt', { unique: false });
       }
 
       // Version 3: Migrate existing characters to include edition field
@@ -64,12 +63,9 @@ const openDB = (): Promise<IDBDatabase> => {
         getAllRequest.onsuccess = () => {
           const characters = getAllRequest.result as Character[];
 
-          if (import.meta.env.DEV) console.log(`🔄 [DB Migration] Migrating ${characters.length} characters to version 3`);
-
           characters.forEach((character) => {
             // Only migrate if edition field is missing
             if (!character.edition) {
-              if (import.meta.env.DEV) console.log(`  ✏️ Adding edition field to character: ${character.name}`);
 
               // Default to 2014 edition for existing characters
               // (they were created under 2014 rules)
@@ -79,12 +75,10 @@ const openDB = (): Promise<IDBDatabase> => {
               characterStore.put(character);
             }
           });
-
-          if (import.meta.env.DEV) console.log('✅ [DB Migration] Edition field migration complete');
         };
 
         getAllRequest.onerror = () => {
-          console.error('❌ [DB Migration] Failed to migrate characters:', getAllRequest.error);
+          log.error('DB migration failed during edition backfill', { error: getAllRequest.error });
         };
       }
 
@@ -97,22 +91,17 @@ const openDB = (): Promise<IDBDatabase> => {
         getAllRequest.onsuccess = () => {
           const characters = getAllRequest.result as Character[];
 
-          if (import.meta.env.DEV) console.log(`🔄 [DB Migration] Migrating ${characters.length} characters to version 4 (resources)`);
-
           characters.forEach((character) => {
             // Initialize or update resources for existing characters
             if (!character.resources || character.resources.length === 0) {
-              if (import.meta.env.DEV) console.log(`  ✏️ Adding resources to character: ${character.name}`);
               character.resources = initializeCharacterResources(character);
               characterStore.put(character);
             }
           });
-
-          if (import.meta.env.DEV) console.log('✅ [DB Migration] Resources migration complete');
         };
 
         getAllRequest.onerror = () => {
-          console.error('❌ [DB Migration] Failed to migrate characters:', getAllRequest.error);
+          log.error('DB migration failed during resources backfill', { error: getAllRequest.error });
         };
       }
 
@@ -123,14 +112,11 @@ const openDB = (): Promise<IDBDatabase> => {
 
         const getAllRequest = characterStore.getAll();
         getAllRequest.onsuccess = () => {
-          const characters = getAllRequest.result as any[]; // Use any[] to handle legacy data
-
-          if (import.meta.env.DEV) console.log(`🔄 [DB Migration] Migrating ${characters.length} characters to version 5 (race → species)`);
+          const characters = getAllRequest.result as Partial<Character>[];
 
           characters.forEach((character) => {
             // Check if character has race field but not species field
             if (character.race && !character.species) {
-              if (import.meta.env.DEV) console.log(`  ✏️ Renaming race to species for character: ${character.name}`);
 
               // Rename race field to species
               character.species = character.race;
@@ -140,12 +126,10 @@ const openDB = (): Promise<IDBDatabase> => {
               characterStore.put(character);
             }
           });
-
-          if (import.meta.env.DEV) console.log('✅ [DB Migration] Race to species migration complete');
         };
 
         getAllRequest.onerror = () => {
-          console.error('❌ [DB Migration] Failed to migrate characters:', getAllRequest.error);
+          log.error('DB migration failed during race-to-species migration', { error: getAllRequest.error });
         };
       }
 
@@ -156,14 +140,11 @@ const openDB = (): Promise<IDBDatabase> => {
 
         const getAllRequest = characterStore.getAll();
         getAllRequest.onsuccess = () => {
-          const characters = getAllRequest.result as any[]; // Use any[] to handle legacy data
-
-          if (import.meta.env.DEV) console.log(`🔄 [DB Migration] Migrating ${characters.length} characters to version 6 (add musical instruments)`);
+          const characters = getAllRequest.result as Partial<Character>[];
 
           characters.forEach((character) => {
             // Initialize musical instrument proficiencies for bards
             if (character.class === 'Bard' && !character.featuresAndTraits?.musicalInstrumentProficiencies) {
-              if (import.meta.env.DEV) console.log(`  ✏️ Adding musical instrument proficiencies for bard: ${character.name}`);
 
               // Initialize empty array for musical instruments
               // (Existing bards will need to re-select their instruments)
@@ -185,12 +166,10 @@ const openDB = (): Promise<IDBDatabase> => {
               characterStore.put(character);
             }
           });
-
-          if (import.meta.env.DEV) console.log('✅ [DB Migration] Musical instruments migration complete');
         };
 
         getAllRequest.onerror = () => {
-          console.error('❌ [DB Migration] Failed to migrate characters:', getAllRequest.error);
+          log.error('DB migration failed during health cleanup', { error: getAllRequest.error });
         };
       } // Correctly closing the if (oldVersion < 6) block
 
@@ -201,23 +180,19 @@ const openDB = (): Promise<IDBDatabase> => {
 
         const getAllRequest = characterStore.getAll();
         getAllRequest.onsuccess = () => {
-          const characters = getAllRequest.result as any[];
-
-          if (import.meta.env.DEV) console.log(`🔄 [DB Migration] Migrating ${characters.length} characters to version 7 (edition field)`);
+          const characters = getAllRequest.result as Partial<Character>[];
 
           characters.forEach((character) => {
             let updated = false;
-            
+
             // Ensure edition is set
             if (!character.edition) {
-              if (import.meta.env.DEV) console.log(`  ✏️ Setting edition to '2014' for character: ${character.name}`);
               character.edition = '2014';
               updated = true;
             }
             
             // Ensure species is set (legacy 'race' fallback)
             if (!character.species && character.race) {
-               if (import.meta.env.DEV) console.log(`  ✏️ Migrating 'race' to 'species' for character: ${character.name}`);
                character.species = character.race;
                // We keep 'race' for now as per plan to prevent breakage, but strictly use species in 2024 logic
                updated = true;
@@ -227,12 +202,10 @@ const openDB = (): Promise<IDBDatabase> => {
               characterStore.put(character);
             }
           });
-
-          if (import.meta.env.DEV) console.log('✅ [DB Migration] Version 7 migration complete');
         };
         
         getAllRequest.onerror = () => {
-           console.error('❌ [DB Migration] Failed to migrate characters to v7:', getAllRequest.error);
+           log.error('DB migration failed upgrading to v7', { error: getAllRequest.error });
         };
       }
     };
@@ -248,7 +221,7 @@ const openDB = (): Promise<IDBDatabase> => {
  */
 const ensureCharacterHasEdition = (character: Character): Character => {
   if (!character.edition) {
-    console.warn(`⚠️ [DB] Character "${character.name}" loaded without edition field. Defaulting to 2014.`);
+    log.warn('Character loaded without edition; defaulting to 2014', { characterId: character.id, name: character.name });
     return {
       ...character,
       edition: '2014', // Default to 2014 for legacy characters
@@ -274,14 +247,6 @@ export const getAllCharacters = async (): Promise<Character[]> => {
 };
 
 export const addCharacter = async (character: Character): Promise<string> => {
-  if (import.meta.env.DEV) console.log('💾 [DB] Adding character:', {
-    id: character.id,
-    name: character.name,
-    species: character.species,
-    class: character.class,
-    level: character.level
-  });
-
   const db = await openDB();
   return new Promise((resolve, reject) => {
     const transaction = db.transaction([STORE_NAME], 'readwrite');
@@ -289,11 +254,10 @@ export const addCharacter = async (character: Character): Promise<string> => {
     const request = objectStore.add(character);
 
     request.onerror = () => {
-      console.error('❌ [DB] Failed to add character:', request.error);
+      log.error('Failed to add character to IndexedDB', { error: request.error });
       reject(request.error);
     };
     request.onsuccess = () => {
-      if (import.meta.env.DEV) console.log('✅ [DB] Character added successfully');
       resolve(character.id);
     };
   });
@@ -450,15 +414,48 @@ export const getEncounter = async (id: string): Promise<Encounter | undefined> =
 };
 
 export const saveEncounter = async (encounter: Encounter): Promise<string> => {
-  const db = await openDB();
-  return new Promise((resolve, reject) => {
-    const transaction = db.transaction([ENCOUNTERS_STORE], 'readwrite');
-    const objectStore = transaction.objectStore(ENCOUNTERS_STORE);
-    const request = objectStore.put(encounter);
+  // Validate encounter data
+  if (!encounter.id || !encounter.name || !Array.isArray(encounter.monsterIds)) {
+    throw new Error('Invalid encounter data: missing required fields');
+  }
 
-    request.onerror = () => reject(request.error);
-    request.onsuccess = () => resolve(encounter.id);
-  });
+  if (encounter.monsterIds.length === 0) {
+    throw new Error('Cannot save encounter with no monsters');
+  }
+
+  try {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+      // Check if encounters store exists
+      if (!db.objectStoreNames.contains(ENCOUNTERS_STORE)) {
+        log.error('Encounters store not found in database');
+        reject(new Error('Database not properly initialized. Please refresh the page or clear your browser data.'));
+        return;
+      }
+
+      const transaction = db.transaction([ENCOUNTERS_STORE], 'readwrite');
+
+      transaction.onerror = () => {
+        const errorMsg = transaction.error?.message || 'Database transaction failed';
+        log.error('Encounter save transaction error', { error: errorMsg });
+        reject(new Error(`Database error: ${errorMsg}`));
+      };
+
+      const objectStore = transaction.objectStore(ENCOUNTERS_STORE);
+      const request = objectStore.put(encounter);
+
+      request.onerror = () => {
+        const errorMsg = request.error?.message || 'Failed to save encounter';
+        log.error('Encounter save request error', { error: errorMsg });
+        reject(new Error(`Save failed: ${errorMsg}`));
+      };
+
+      request.onsuccess = () => resolve(encounter.id);
+    });
+  } catch (err) {
+    log.error('Database open error', { error: err });
+    throw new Error('Failed to open database. Please refresh the page.');
+  }
 };
 
 export const deleteEncounter = async (id: string): Promise<void> => {

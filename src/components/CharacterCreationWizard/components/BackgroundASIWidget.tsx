@@ -28,7 +28,6 @@ export const BackgroundASIWidget: React.FC<BackgroundASIWidgetProps> = ({
       setMethod(data.backgroundAbilityChoices.method || '2/1');
       setBonuses(data.backgroundAbilityChoices.bonuses || {});
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data.backgroundAbilityChoices]);
 
   const handleBonusChange = (ability: AbilityName, value: number) => {

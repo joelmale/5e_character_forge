@@ -8,9 +8,10 @@ import { SaveEncounterModal } from './SaveEncounterModal';
 
 interface EncounterViewProps {
   onBack: () => void;
+  onStartCombat?: () => void;
 }
 
-export const EncounterView: React.FC<EncounterViewProps> = ({ onBack }) => {
+export const EncounterView: React.FC<EncounterViewProps> = ({ onBack, onStartCombat }) => {
   const {
     selectedEncounterMonsters,
     encounterViewMode,
@@ -145,6 +146,7 @@ export const EncounterView: React.FC<EncounterViewProps> = ({ onBack }) => {
           setShowSaveModal(false);
           onBack();
         }}
+        onStartCombat={onStartCombat}
       />
     </div>
   );

@@ -7,7 +7,7 @@
 import React, { useState } from 'react';
 import { Character, LevelUpChoices } from '../../../types/dnd';
 import { LevelUpData } from '../../../data/classProgression';
-import { loadSpells } from '../../../services/dataService';
+import { loadSpells, AppSpell } from '../../../services/dataService';
 import { SPELL_SLOTS_BY_CLASS } from '../../../data/spellSlots';
 import { getHighestSpellSlotLevel, normalizeSpellSlots } from '../../../utils/spellSlotUtils';
 
@@ -163,7 +163,7 @@ export const StepSpells: React.FC<StepSpellsProps> = ({
       </div>
 
       <div className="max-h-96 overflow-y-auto space-y-2">
-        {availableSpells.map((spell: any) => {
+        {availableSpells.map((spell: AppSpell) => {
           const isSelected = selectedSpells.includes(spell.slug);
           const selectionDisabled = !isSelected && selectedSpells.length >= spellsToLearn;
           const isExpanded = expandedSpell === spell.slug;
