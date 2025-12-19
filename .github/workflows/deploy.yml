@@ -60,12 +60,6 @@ jobs:
       with:
         buildkitd-flags: --allow-insecure-entitlement security.insecure
 
-    - name: Log in to Docker Hub
-      uses: docker/login-action@v3
-      with:
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
-
     - name: Log in to GHCR
       uses: docker/login-action@v3
       with:
@@ -78,7 +72,6 @@ jobs:
       uses: docker/metadata-action@v5
       with:
         images: |
-          joelmale/5e-character-forge
           ghcr.io/${{ github.repository_owner }}/5e-character-forge
         tags: |
           type=ref,event=branch
@@ -96,64 +89,13 @@ jobs:
         labels: ${{ steps.meta.outputs.labels }}
         cache-from: |
           type=gha,scope=build
-          type=registry,ref=joelmale/5e-character-forge:latest
         cache-to: type=gha,mode=max,scope=build
         build-args: |
           BUILDKIT_INLINE_CACHE=1
         provenance: false
         sbom: false
 
-    - name: Ensure GHCR package is public
-      if: github.event_name == 'push'
-      env:
-        GHCR_PACKAGE: 5e-character-forge
-        GHCR_OWNER: ${{ github.repository_owner }}
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        set -euo pipefail
-        api_base="https://api.github.com"
-        payload='{"visibility":"public"}'
-
-        org_url="${api_base}/orgs/${GHCR_OWNER}/packages/container/${GHCR_PACKAGE}/visibility"
-        user_url="${api_base}/user/packages/container/${GHCR_PACKAGE}/visibility"
-
-        echo "Attempting to set GHCR package visibility via org endpoint..."
-        org_status=$(curl -s -o /dev/null -w "%{http_code}" \
-          -X PATCH \
-          -H "Authorization: Bearer ${GITHUB_TOKEN}" \
-          -H "Accept: application/vnd.github+json" \
-          "${org_url}" \
-          -d "${payload}" || true)
-
-        if [ "${org_status}" = "404" ]; then
-          echo "Org endpoint not found, attempting user endpoint..."
-          user_status=$(curl -s -o /dev/null -w "%{http_code}" \
-            -X PATCH \
-            -H "Authorization: Bearer ${GITHUB_TOKEN}" \
-            -H "Accept: application/vnd.github+json" \
-            "${user_url}" \
-            -d "${payload}")
-
-          if [ "${user_status}" -lt 200 ] || [ "${user_status}" -ge 300 ]; then
-            echo "Failed to set GHCR package visibility via user endpoint (status ${user_status})."
-            exit 1
-          fi
-        elif [ "${org_status}" -lt 200 ] || [ "${org_status}" -ge 300 ]; then
-          echo "Failed to set GHCR package visibility via org endpoint (status ${org_status})."
-          exit 1
-        fi
-
-        echo "GHCR package visibility set to public."
-
     - name: Generate artifact attestation
       uses: actions/attest-build-provenance@v1
       with:
         subject-path: /tmp/digest.txt
-
-    - name: Trigger deployment webhook
-      if: github.ref == 'refs/heads/master'
-      uses: joelwmale/webhook-action@2.4.1
-      with:
-        url: ${{ secrets.SWARM_WEBHOOK_URL }}
-        headers: '{"Authorization": "Bearer ${{ secrets.SWARM_WEBHOOK_TOKEN }}"}'
-        body: '{"service": "5e-character-forge", "image": "${{ steps.meta.outputs.tags }}"}'
