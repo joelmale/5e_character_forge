@@ -243,7 +243,7 @@ describe('Phase 6: Features & Resources', () => {
       const derived = evaluateCharacter(facts, barbarianEffects);
 
       // Should have 2 Rage uses at level 1
-      const rage = Object.values(derived.resources).find((r) => r.id === 'rage-uses');
+      const rage = Object.values(derived.resources).find((r) => r.id === 'rage');
       expect(rage).toBeDefined();
       expect(rage?.current).toBe(2);
       expect(rage?.max).toBe(2);
@@ -281,7 +281,7 @@ describe('Phase 6: Features & Resources', () => {
       const derived = evaluateCharacter(facts, barbarianEffects);
 
       // Should have 3 Rage uses at level 3 (2 base + 1 from level 3)
-      const rage = Object.values(derived.resources).find((r) => r.id === 'rage-uses');
+      const rage = Object.values(derived.resources).find((r) => r.id === 'rage');
       expect(rage).toBeDefined();
       expect(rage?.current).toBe(3);
       expect(rage?.max).toBe(3);
@@ -318,7 +318,7 @@ describe('Phase 6: Features & Resources', () => {
       const derived = evaluateCharacter(facts, barbarianEffects);
 
       // Should have 4 Rage uses at level 6 (2 + 1 + 1)
-      const rage = Object.values(derived.resources).find((r) => r.id === 'rage-uses');
+      const rage = Object.values(derived.resources).find((r) => r.id === 'rage');
       expect(rage).toBeDefined();
       expect(rage?.current).toBe(4);
       expect(rage?.max).toBe(4);
@@ -500,7 +500,7 @@ describe('Phase 6: Features & Resources', () => {
 
       const derived = evaluateCharacter(facts, barbarianEffects);
 
-      const rage = Object.values(derived.resources).find((r) => r.id === 'rage-uses');
+      const rage = Object.values(derived.resources).find((r) => r.id === 'rage');
       expect(rage?.type).toBe('perLongRest');
     });
 
