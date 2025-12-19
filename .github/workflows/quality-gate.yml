@@ -79,7 +79,7 @@ jobs:
       run: npm run build
 
     - name: Check bundle size
-      uses: preactjs/compressed-size-action@v2
+      uses: preactjs/compressed-size-action@v3
       with:
         pattern: "dist/assets/*.js"
         maximum-size: 2MB
