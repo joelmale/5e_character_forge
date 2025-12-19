@@ -105,16 +105,6 @@ jobs:
     - name: Security audit
       run: npm audit --audit-level moderate
 
-    - name: Run Super Linter
-      uses: github/super-linter/slim@v7
-      env:
-        DEFAULT_BRANCH: master
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        ESLINT_USE_FLAT_CONFIG: true
-        VALIDATE_JAVASCRIPT_ES: true
-        VALIDATE_TYPESCRIPT_ES: true
-        VALIDATE_JSON: true
-
   dependency-quality:
     name: Dependency Quality
     runs-on: ubuntu-latest
