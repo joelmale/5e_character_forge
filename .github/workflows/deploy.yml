@@ -53,6 +53,7 @@ jobs:
           type=raw,value=latest,enable={{is_default_branch}}
 
     - name: Build and push Docker image
+      id: build
       uses: docker/build-push-action@v6
       with:
         context: .
@@ -71,4 +72,5 @@ jobs:
     - name: Generate artifact attestation
       uses: actions/attest-build-provenance@v1
       with:
-        subject-path: /tmp/digest.txt
+        subject-digest: ${{ steps.build.outputs.digest }}
+        subject-name: ghcr.io/${{ github.repository_owner }}/5e-character-forge
