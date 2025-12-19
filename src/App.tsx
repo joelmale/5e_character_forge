@@ -747,17 +747,26 @@ const App: React.FC = () => {
     if (!character) return;
 
     const armor = EQUIPMENT_DATABASE.find(eq => eq.slug === armorSlug);
-    if (!armor?.armor_category) return;
+    if (!armor || armor.equipment_category !== 'Armor') return;
 
-    // Update character with new equipped armor
+    // Update character with new equipped armor and unequip other armor pieces
     const updatedCharacter = {
       ...character,
       equippedArmor: armorSlug,
-      inventory: character.inventory?.map(item =>
-        item.equipmentSlug === armorSlug
-          ? { ...item, equipped: true }
-          : { ...item, equipped: item.equipped && EQUIPMENT_DATABASE.find(eq => eq.slug === item.equipmentSlug)?.armor_category !== armor.armor_category ? item.equipped : false }
-      ),
+      inventory: character.inventory?.map(item => {
+        const eq = EQUIPMENT_DATABASE.find(eqItem => eqItem.slug === item.equipmentSlug);
+        const isArmorItem = eq?.equipment_category === 'Armor' && eq?.armor_category !== 'Shield';
+
+        if (item.equipmentSlug === armorSlug) {
+          return { ...item, equipped: true };
+        }
+
+        if (isArmorItem) {
+          return { ...item, equipped: false };
+        }
+
+        return item;
+      }),
     };
 
     // Recalculate AC

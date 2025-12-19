@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import DiceBox from '@3d-dice/dice-box';
+import DiceBox, { DiceBoxConfig } from '@3d-dice/dice-box';
 import './DiceRollerModal.css';
 import { diceSounds } from '../utils/diceSounds';
 import { rollDice as rollDiceUtil } from '../services/diceService';
@@ -62,7 +62,7 @@ export const DiceRollerModal: React.FC<DiceRollerModalProps> = ({
       const initDiceBox = async () => {
         try {
           // Simplified config matching DiceBox3D
-          const box = new DiceBox({
+          const config: DiceBoxConfig = {
             container: '#dice-box-container',
             assetPath: '/assets/dice-box/',
             offscreen: false,
@@ -77,7 +77,9 @@ export const DiceRollerModal: React.FC<DiceRollerModalProps> = ({
             settleTimeout: 2000,
             enableShadows: true,
             scale: 6
-          } as Record<string, unknown>);
+          };
+
+          const box = new DiceBox(config);
 
           await box.init();
 

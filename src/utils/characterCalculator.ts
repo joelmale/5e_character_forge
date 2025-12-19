@@ -15,6 +15,7 @@ import {
   getFeaturesByClass,
   getFeaturesBySubclass,
   getHitDieForClass,
+  EQUIPMENT_PACKAGES,
 } from '../services/dataService';
 import {
   BASE_ARMOR_CLASS,
@@ -38,7 +39,7 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
 
   // 1. Calculate Abilities with Racial Bonuses
   (Object.keys(data.abilities) as AbilityName[]).forEach((ability) => {
-    const rawScore = data.abilities[ability] + (speciesData.ability_bonuses[ability] || 0);
+    const rawScore = data.abilities[ability] + (speciesData.ability_bonuses?.[ability] || 0);
     const modifier = getModifier(rawScore);
     finalAbilities[ability] = { score: rawScore, modifier };
   });
@@ -94,6 +95,7 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
 
   // 5. Build Equipment Inventory (using Builder Pattern for reduced complexity)
   const { inventory, equippedArmor, equippedWeapons } = processEquipment(data, level);
+  const equipmentPackage = EQUIPMENT_PACKAGES.find(pkg => pkg.level === level) || EQUIPMENT_PACKAGES[0];
 
   // 6. Calculate AC based on equipped armor (using centralized helper)
   let armorClass = BASE_ARMOR_CLASS + finalAbilities.DEX.modifier; // Default unarmored
@@ -170,7 +172,7 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
     inventory,
     currency: {
       ...DEFAULT_STARTING_CURRENCY,
-      gp: equipmentPackage.startingGold || 0,
+      gp: equipmentPackage?.startingGold || 0,
     },
     equippedArmor,
     equippedWeapons,

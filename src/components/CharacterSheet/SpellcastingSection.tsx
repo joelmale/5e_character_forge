@@ -3,6 +3,33 @@ import { Character } from '../../types/dnd';
 import { SPELL_DATABASE, AppSpell } from '../../services/dataService';
 import { SpellDetailModal } from '../SpellDetailModal';
 
+type TraitSpellConfig = {
+  spellSlug: string;
+  minLevel: number;
+  rechargeType: 'at-will' | 'long-rest' | 'short-rest';
+  usesPerDay?: number;
+  spellLevelOverride?: number;
+  spellcastingAbility: 'STR' | 'DEX' | 'CON' | 'INT' | 'WIS' | 'CHA';
+};
+
+const TRAIT_SPELL_MAP: Record<string, TraitSpellConfig[]> = {
+  'Infernal Legacy': [
+    { spellSlug: 'thaumaturgy', minLevel: 1, rechargeType: 'at-will', spellcastingAbility: 'CHA' },
+    { spellSlug: 'hellish-rebuke', minLevel: 3, rechargeType: 'long-rest', usesPerDay: 1, spellLevelOverride: 2, spellcastingAbility: 'CHA' },
+    { spellSlug: 'darkness', minLevel: 5, rechargeType: 'long-rest', usesPerDay: 1, spellcastingAbility: 'CHA' },
+  ],
+};
+
+const getTraitSpells = (character: Character) => {
+  const traits = character.featuresAndTraits?.speciesTraits || [];
+  return traits.flatMap((trait) => {
+    const configs = TRAIT_SPELL_MAP[trait] || [];
+    return configs
+      .filter((config) => character.level >= config.minLevel)
+      .map((config) => ({ ...config, trait }));
+  });
+};
+
 // Helper function to get max prepared spells for a character
 const getMaxPreparedSpells = (character: Character): number => {
   if (!character.spellcasting || character.spellcasting.spellcastingType !== 'prepared') {
@@ -46,6 +73,7 @@ export const SpellcastingSection: React.FC<SpellcastingSectionProps> = ({
   onSpellPreparation,
 }) => {
   const [selectedSpell, setSelectedSpell] = useState<AppSpell | null>(null);
+  const traitSpells = getTraitSpells(character);
 
   const handleSpellClick = (spellSlug: string) => {
     const spell = SPELL_DATABASE.find(s => s.slug === spellSlug);
@@ -54,7 +82,7 @@ export const SpellcastingSection: React.FC<SpellcastingSectionProps> = ({
     }
   };
 
-  if (!character.spellcasting) {
+  if (!character.spellcasting && traitSpells.length === 0) {
     return (
       <div className="space-y-4">
         <h2 className="text-xl font-bold text-purple-500 border-b border-purple-800 pb-1">Spellcasting</h2>
@@ -79,6 +107,7 @@ export const SpellcastingSection: React.FC<SpellcastingSectionProps> = ({
       {/* Top Row: Spell Stats and Prepared Spells side by side */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Spellcasting Stats */}
+        {character.spellcasting && (
         <div className="p-4 bg-gradient-to-br from-theme-secondary/80 to-theme-tertiary/60 rounded-xl shadow-lg border border-theme-border">
           <h3 className="text-lg font-bold text-accent-purple-light mb-3">Spell Stats</h3>
           <div className="grid grid-cols-3 gap-2 text-sm">
@@ -96,8 +125,10 @@ export const SpellcastingSection: React.FC<SpellcastingSectionProps> = ({
             </div>
           </div>
         </div>
+        )}
 
         {/* Cantrips & Spells - Simplified */}
+        {character.spellcasting && (
         <div className="p-4 bg-gradient-to-br from-theme-secondary/80 to-theme-tertiary/60 rounded-xl shadow-lg border border-theme-border">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-lg font-bold text-accent-green-light">
@@ -141,10 +172,40 @@ export const SpellcastingSection: React.FC<SpellcastingSectionProps> = ({
             </div>
           </div>
         </div>
+        )}
       </div>
 
+      {/* Trait-Granted Spells */}
+      {traitSpells.length > 0 && (
+        <div className="p-4 bg-gradient-to-br from-theme-secondary/80 to-theme-tertiary/60 rounded-xl shadow-lg border border-theme-border">
+          <h3 className="text-lg font-bold text-accent-yellow-light mb-3">Trait Spells</h3>
+          <div className="flex flex-wrap gap-2">
+            {traitSpells.map((traitSpell, index) => {
+              const spell = SPELL_DATABASE.find(s => s.slug === traitSpell.spellSlug);
+              return (
+                <button
+                  key={`${traitSpell.trait}-${traitSpell.spellSlug}-${index}`}
+                  onClick={() => handleSpellClick(traitSpell.spellSlug)}
+                  className="px-2 py-1 bg-amber-700 hover:bg-amber-600 text-theme-primary text-xs rounded cursor-pointer transition-colors shadow-sm flex items-center gap-2"
+                  title={`${spell?.name || traitSpell.spellSlug} (${traitSpell.spellcastingAbility}, ${
+                    traitSpell.rechargeType === 'at-will'
+                      ? 'at will'
+                      : `${traitSpell.usesPerDay || 1}/long rest`
+                  }${traitSpell.spellLevelOverride ? `, cast as ${traitSpell.spellLevelOverride}nd level` : ''})`}
+                >
+                  <span>{spell?.name || traitSpell.spellSlug}</span>
+                  <span className="px-2 py-0.5 rounded-full bg-amber-900 text-amber-100 uppercase tracking-wide text-[10px]">
+                    {traitSpell.trait}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {/* Feat-Granted Spells - Condensed */}
-      {character.spellcasting.featGrantedSpells && character.spellcasting.featGrantedSpells.length > 0 && (
+      {character.spellcasting?.featGrantedSpells && character.spellcasting.featGrantedSpells.length > 0 && (
         <div className="p-4 bg-gradient-to-br from-theme-secondary/80 to-theme-tertiary/60 rounded-xl shadow-lg border border-theme-border">
           <h3 className="text-lg font-bold text-accent-red-light mb-3">Feat Spells</h3>
           <div className="flex flex-wrap gap-2">
@@ -257,68 +318,70 @@ export const SpellcastingSection: React.FC<SpellcastingSectionProps> = ({
 
 
       {/* Bottom Row: Spell Slots - Full Width */}
-      <div className="p-4 bg-theme-secondary rounded-xl shadow-lg border-l-4 border-blue-500">
-        <h3 className="text-lg font-bold text-accent-blue-light mb-3">Spell Slots</h3>
-        <div className="grid grid-cols-2 gap-3 text-sm">
-          {character.spellcasting.spellSlots.slice(1).map((maxSlots, index) => {
-            if (maxSlots === 0) return null;
-            const spellLevel = index + 1;
-            const usedSlots = character.spellcasting?.usedSpellSlots?.[index + 1] || 0;
-            const availableSlots = maxSlots - usedSlots;
+      {character.spellcasting && (
+        <div className="p-4 bg-theme-secondary rounded-xl shadow-lg border-l-4 border-blue-500">
+          <h3 className="text-lg font-bold text-accent-blue-light mb-3">Spell Slots</h3>
+          <div className="grid grid-cols-2 gap-3 text-sm">
+            {character.spellcasting.spellSlots.slice(1).map((maxSlots, index) => {
+              if (maxSlots === 0) return null;
+              const spellLevel = index + 1;
+              const usedSlots = character.spellcasting?.usedSpellSlots?.[index + 1] || 0;
+              const availableSlots = maxSlots - usedSlots;
 
-            const availableSpells = getSpellsAvailableForSlotLevel(character, spellLevel);
+              const availableSpells = getSpellsAvailableForSlotLevel(character, spellLevel);
 
-            return (
-              <div key={spellLevel} className="flex flex-col items-center space-y-2 p-2 bg-theme-tertiary/50 rounded-lg">
-                <div className="flex items-center justify-between w-full">
-                  <span className="text-theme-muted text-xs">Level {spellLevel}</span>
-                  <span className="font-bold text-theme-primary text-xs">{availableSlots}/{maxSlots}</span>
-                </div>
-
-                {/* Show available prepared spells for this slot level */}
-                {availableSpells.length > 0 && (
-                  <div className="text-xs text-center text-theme-muted max-w-full">
-                    {availableSpells.slice(0, 3).map(spell => spell!.name).join(', ')}
-                    {availableSpells.length > 3 && (
-                      <span className="text-accent-blue-light">
-                        {' '} +{availableSpells.length - 3} more
-                      </span>
-                    )}
+              return (
+                <div key={spellLevel} className="flex flex-col items-center space-y-2 p-2 bg-theme-tertiary/50 rounded-lg">
+                  <div className="flex items-center justify-between w-full">
+                    <span className="text-theme-muted text-xs">Level {spellLevel}</span>
+                    <span className="font-bold text-theme-primary text-xs">{availableSlots}/{maxSlots}</span>
                   </div>
-                )}
 
-                <div className="flex items-center gap-1 justify-center flex-wrap">
-                  {Array.from({ length: maxSlots }, (_, slotIndex) => (
-                    <button
-                      key={slotIndex}
-                      onClick={() => {
-                        const newUsedSlots = slotIndex < usedSlots ? slotIndex : slotIndex + 1;
-                        const updatedCharacter = {
-                          ...character,
-                          spellcasting: {
-                            ...character.spellcasting!,
+                  {/* Show available prepared spells for this slot level */}
+                  {availableSpells.length > 0 && (
+                    <div className="text-xs text-center text-theme-muted max-w-full">
+                      {availableSpells.slice(0, 3).map(spell => spell!.name).join(', ')}
+                      {availableSpells.length > 3 && (
+                        <span className="text-accent-blue-light">
+                          {' '} +{availableSpells.length - 3} more
+                        </span>
+                      )}
+                    </div>
+                  )}
+
+                  <div className="flex items-center gap-1 justify-center flex-wrap">
+                    {Array.from({ length: maxSlots }, (_, slotIndex) => (
+                      <button
+                        key={slotIndex}
+                        onClick={() => {
+                          const newUsedSlots = slotIndex < usedSlots ? slotIndex : slotIndex + 1;
+                          const updatedCharacter = {
+                            ...character,
+                            spellcasting: {
+                              ...character.spellcasting!,
                               usedSpellSlots: {
                                 ...character.spellcasting!.usedSpellSlots,
                                 [index + 1]: Math.min(newUsedSlots, maxSlots)
                               }
-                          }
-                        };
-                        _onUpdateCharacter(updatedCharacter);
-                      }}
-                      className={`w-4 h-4 rounded-full border-2 transition-colors ${
-                        slotIndex < usedSlots
-                          ? 'bg-accent-red-light border-red-400 cursor-pointer hover:bg-red-400'
-                          : 'bg-blue-400 border-blue-300 cursor-pointer hover:bg-blue-300'
-                      }`}
-                      title={`${slotIndex < usedSlots ? 'Used' : 'Available'} slot - Click to toggle`}
-                    />
-                  ))}
+                            }
+                          };
+                          _onUpdateCharacter(updatedCharacter);
+                        }}
+                        className={`w-4 h-4 rounded-full border-2 transition-colors ${
+                          slotIndex < usedSlots
+                            ? 'bg-accent-red-light border-red-400 cursor-pointer hover:bg-red-400'
+                            : 'bg-blue-400 border-blue-300 cursor-pointer hover:bg-blue-300'
+                        }`}
+                        title={`${slotIndex < usedSlots ? 'Used' : 'Available'} slot - Click to toggle`}
+                      />
+                    ))}
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Spell Detail Modal */}
       <SpellDetailModal

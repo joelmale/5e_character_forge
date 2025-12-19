@@ -79,6 +79,8 @@ export interface AutomaticConfig {
   grants?: string[];                      // Automatic grants (e.g., ['language_thieves_cant'])
   bonus_language_choices?: number;        // Additional language choices
   effect?: string;                        // Effect description (e.g., 'sneak_attack_1d6')
+  uses?: number;                          // Limited-use abilities (e.g., Rage uses)
+  recovery?: 'short_rest' | 'long_rest' | string; // Recovery cadence
 }
 
 /**
@@ -86,13 +88,20 @@ export interface AutomaticConfig {
  * Defines what a choice grants to the character
  */
 export interface GrantConfig {
-  type: 'proficiency' | 'skill_bonus' | 'cantrip' | 'language' | 'feature';
+  type: 'proficiency' | 'skill_bonus' | 'cantrip_bonus' | 'language' | 'feature';
+  // New SRD 2024 grant shape
+  category?: 'armor' | 'weapons' | 'tools' | string;
+  items?: string[];
+  skills?: string[];
+  bonus?: string;
+  value?: number;
+  // Legacy/alternate shapes
   proficiency_type?: 'armor' | 'weapon' | 'tool';
   proficiencies?: string[];               // e.g., ['heavy-armor', 'martial-weapons']
   skill_bonuses?: Array<{                 // e.g., Thaumaturge +WIS to Arcana
     skill: string;
-    bonus_type: 'ability_modifier';
-    ability: 'STR' | 'DEX' | 'CON' | 'INT' | 'WIS' | 'CHA';
+    bonus_type?: 'ability_modifier';
+    ability?: 'STR' | 'DEX' | 'CON' | 'INT' | 'WIS' | 'CHA';
   }>;
   cantrip_bonus?: number;                 // Additional cantrips known
   languages?: string[];                   // Language grants

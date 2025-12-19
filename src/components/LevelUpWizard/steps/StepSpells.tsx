@@ -4,12 +4,14 @@
  * Learn new spells for spellcasters
  */
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Character, LevelUpChoices } from '../../../types/dnd';
 import { LevelUpData } from '../../../data/classProgression';
 import { loadSpells, AppSpell } from '../../../services/dataService';
 import { SPELL_SLOTS_BY_CLASS } from '../../../data/spellSlots';
 import { getHighestSpellSlotLevel, normalizeSpellSlots } from '../../../utils/spellSlotUtils';
+import { evaluatePredicate } from '../../../rulesEngine/evaluators/predicates';
+import { BaseFacts } from '../../../rulesEngine/types/baseFacts';
 
 interface StepSpellsProps {
   character: Character;
@@ -33,14 +35,65 @@ export const StepSpells: React.FC<StepSpellsProps> = ({
   const [selectedSpells, setSelectedSpells] = useState<string[]>([]);
   const [expandedSpell, setExpandedSpell] = useState<string | null>(null);
 
-  // Load spells for this class
-  const allSpells = loadSpells();
+  // Build facts for rule-engine based filtering
   const classSlug = character.class.toLowerCase();
-  const classSpells = allSpells.filter(spell => {
-    if (!spell.classes) return false;
-    const classList = Array.isArray(spell.classes) ? spell.classes : [spell.classes];
-    return classList.some(c => c && typeof c === 'string' && c.toLowerCase() === classSlug);
-  });
+  const baseClass = classSlug.split('-')[0];
+  const facts = useMemo<BaseFacts>(() => ({
+    level: levelUpData.toLevel,
+    classSlug: baseClass,
+    classLevel: { [baseClass]: levelUpData.toLevel },
+    subclassSlug: character.subclass || undefined,
+    speciesSlug: character.species,
+    lineageSlug: character.selectedSpeciesVariant,
+    backgroundSlug: character.background,
+    edition: character.edition,
+    abilities: {
+      STR: character.abilities?.STR?.score ?? 10,
+      DEX: character.abilities?.DEX?.score ?? 10,
+      CON: character.abilities?.CON?.score ?? 10,
+      INT: character.abilities?.INT?.score ?? 10,
+      WIS: character.abilities?.WIS?.score ?? 10,
+      CHA: character.abilities?.CHA?.score ?? 10
+    },
+    choices: {},
+    equippedArmor: character.equippedArmor,
+    equippedWeapons: character.equippedWeapons || [],
+    equippedItems: character.inventory?.map(item => item.equipmentSlug) || [],
+    conditions: [],
+    tags: [],
+    feats: character.selectedFeats || character.feats || []
+  }), [
+    baseClass,
+    levelUpData.toLevel,
+    character.subclass,
+    character.species,
+    character.selectedSpeciesVariant,
+    character.background,
+    character.edition,
+    character.abilities?.STR?.score,
+    character.abilities?.DEX?.score,
+    character.abilities?.CON?.score,
+    character.abilities?.INT?.score,
+    character.abilities?.WIS?.score,
+    character.abilities?.CHA?.score,
+    character.equippedArmor,
+    character.equippedWeapons,
+    character.inventory,
+    character.selectedFeats,
+    character.feats
+  ]);
+
+  // Load spells for this class via rule-engine predicate (classIs)
+  const allSpells = loadSpells();
+  const classSpells = useMemo(() => {
+    return allSpells.filter(spell => {
+      if (!spell.classes) return false;
+      const classList = Array.isArray(spell.classes) ? spell.classes : [spell.classes];
+      const predicate = { type: 'classIs' as const, slug: baseClass };
+      return classList.some(c => c && typeof c === 'string' && c.toLowerCase() === baseClass) &&
+        evaluatePredicate(predicate, { facts, derived: {} });
+    });
+  }, [allSpells, baseClass, facts]);
 
   // Get the specific spell choice for this step
   const spellChoices = levelUpData.choices.filter(c => c.type === 'spells');
@@ -75,11 +128,11 @@ export const StepSpells: React.FC<StepSpellsProps> = ({
 
   // Determine the highest spell level the character can cast at the new level
   const rawSlotsAtNewLevel =
-    SPELL_SLOTS_BY_CLASS[classSlug]?.[levelUpData.toLevel] ||
+    SPELL_SLOTS_BY_CLASS[baseClass]?.[levelUpData.toLevel] ||
     character.spellcasting?.spellSlots ||
     [];
-  const normalizedSlots = normalizeSpellSlots(classSlug, rawSlotsAtNewLevel);
-  const derivedMaxSpellLevel = getHighestSpellSlotLevel(classSlug, rawSlotsAtNewLevel);
+  const normalizedSlots = normalizeSpellSlots(baseClass, rawSlotsAtNewLevel);
+  const derivedMaxSpellLevel = getHighestSpellSlotLevel(baseClass, rawSlotsAtNewLevel);
   let fallbackMaxSpellLevel = 0;
   for (let level = normalizedSlots.length - 1; level > 0; level -= 1) {
     if (normalizedSlots[level] > 0) {
@@ -91,8 +144,6 @@ export const StepSpells: React.FC<StepSpellsProps> = ({
 
   // Filter spells based on choice type and exclude already known
   const availableSpells = classSpells.filter(spell => {
-    if (!character.spellcasting) return false;
-
     // Filter by spell level based on choice type
     if (isCantripChoice && spell.level !== 0) return false;
     if (!isCantripChoice) {
@@ -100,10 +151,17 @@ export const StepSpells: React.FC<StepSpellsProps> = ({
       if (maxSpellLevel > 0 && spell.level > maxSpellLevel) return false;
     }
 
+    const spellcasting = character.spellcasting;
+    const knownCantrips = spellcasting?.cantripsKnown || [];
+    const knownSpells = spellcasting?.spellsKnown || [];
+    const spellbook = spellcasting?.spellbook || [];
+    const prepared = spellcasting?.preparedSpells || [];
+
     const alreadyKnown =
-      character.spellcasting.cantripsKnown?.includes(spell.slug) ||
-      character.spellcasting.spellsKnown?.includes(spell.slug) ||
-      character.spellcasting.spellbook?.includes(spell.slug);
+      knownCantrips.includes(spell.slug) ||
+      knownSpells.includes(spell.slug) ||
+      spellbook.includes(spell.slug) ||
+      prepared.includes(spell.slug);
 
     return !alreadyKnown;
   });

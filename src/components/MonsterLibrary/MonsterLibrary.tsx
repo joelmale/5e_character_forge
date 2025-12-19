@@ -182,6 +182,20 @@ export const MonsterLibrary: React.FC<MonsterLibraryProps> = ({ onSelectMonster,
         }}
         editingMonster={editingMonster}
       />
+
+      {/* Floating selection toggle to avoid scrolling back to top */}
+      <div className="fixed right-4 bottom-20 z-40 hidden lg:block">
+        <button
+          onClick={handleToggleSelectionMode}
+          className={`px-4 py-3 rounded-full shadow-lg border transition-colors ${
+            selectionMode
+              ? 'bg-accent-red text-white border-accent-red-dark hover:bg-accent-red-dark'
+              : 'bg-accent-blue text-white border-blue-700 hover:bg-blue-700'
+          }`}
+        >
+          {selectionMode ? 'Exit Selection Mode' : 'Select for Encounter'}
+        </button>
+      </div>
     </div>
   );
 };

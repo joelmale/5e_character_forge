@@ -316,7 +316,7 @@ export const Step2Species: React.FC<StepProps> = ({ data, updateData, nextStep, 
 
         {data.edition === '2024' && selectedSpecies && selectedSpecies.speciesFeat && (
           <div className="bg-accent-yellow/10 border border-accent-yellow rounded-lg p-3">
-            <p>Your species grants you the <strong>{selectedSpecies.speciesFeat}</strong> feat.</p>
+            <p className="text-theme-primary">Your species grants you the <strong>{selectedSpecies.speciesFeat}</strong> feat.</p>
           </div>
         )}
 
@@ -324,7 +324,7 @@ export const Step2Species: React.FC<StepProps> = ({ data, updateData, nextStep, 
         {data.edition === '2024' && selectedSpecies?.speciesFeat && (
           <div className="text-sm text-theme-muted p-4 bg-theme-secondary/50 rounded-lg border border-theme-primary">
             <p className="font-semibold text-accent-yellow-light">Species Feat:</p>
-            <p className="mt-2">Your species grants you the <strong>{selectedSpecies.speciesFeat}</strong> feat.</p>
+            <p className="mt-2 text-theme-secondary">Your species grants you the <strong>{selectedSpecies.speciesFeat}</strong> feat.</p>
           </div>
         )}
 

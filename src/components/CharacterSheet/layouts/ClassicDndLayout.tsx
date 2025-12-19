@@ -16,8 +16,7 @@ import {
   EquipmentSection,
   ProficienciesAndLanguages,
   FeaturesSection,
-  ActiveEquipmentPanel,
-  LanguagesPanel
+  ActiveEquipmentPanel
 } from '../index';
 import { SpellPreparationModal } from '../../SpellPreparationModal';
 import { getSpellsForClass } from '../../../services/dataService';
@@ -155,13 +154,6 @@ export const ClassicDndLayout: React.FC<CharacterSheetProps> = ({
                  character={character}
                  onUpdateCharacter={onUpdateCharacter}
                  compact={true}
-               />
-             </div>
-
-             {/* Languages - Condensed */}
-             <div className="bg-theme-secondary border border-theme-secondary rounded-lg p-2 shadow-lg">
-               <LanguagesPanel
-                 character={character}
                />
              </div>
 

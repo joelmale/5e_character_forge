@@ -1,5 +1,5 @@
 import React from 'react';
-import { Monster, UserMonster } from '../../../types/dnd';
+import { Monster, UserMonster } from '../../types/dnd';
 
 interface MonsterStatPanelProps {
   monster: Monster | UserMonster | null;

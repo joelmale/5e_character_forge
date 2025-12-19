@@ -156,6 +156,7 @@ const openDB = (): Promise<IDBDatabase> => {
                   flaws: '',
                   classFeatures: [],
                   speciesTraits: [],
+                  backgroundFeatures: [],
                   musicalInstrumentProficiencies: []
                 };
               } else {

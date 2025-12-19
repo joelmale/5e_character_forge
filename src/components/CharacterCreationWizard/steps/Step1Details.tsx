@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { XCircle, ArrowLeft, Shuffle } from 'lucide-react';
 import { StepProps } from '../types/wizard.types';
 import { ALIGNMENTS_DATA, BACKGROUNDS, ALIGNMENTS, randomizeIdentity, randomizeSpecies, randomizeClassAndSkills, randomizeFightingStyle, randomizeSpells, randomizeAbilities, randomizeFeats, randomizeLanguages, randomizePersonality, randomizeStartingEquipment, randomizeBackgroundAbilityChoices } from '../../../services/dataService';
+import { getToolDescription as getToolData } from '../../../services/toolService';
 import { generateName } from '../../../utils/nameGenerator';
 import skillsData from '../../../data/skills.json';
 
@@ -112,38 +113,20 @@ export const Step1Details: React.FC<StepProps> = ({ data, updateData, nextStep, 
     return skill ? { description: skill.description, ability: skill.ability } : { description: 'No description available.', ability: undefined };
   };
 
-  const getToolDescription = (toolName: string) => {
-    // Simple descriptions for common tools
-    const toolDescriptions: Record<string, string> = {
-      "Thieves' tools": "This set of tools includes a small file, a set of lock picks, a small mirror mounted on a metal handle, a set of narrow-bladed scissors, and a pair of pliers. Proficiency with these tools lets you add your proficiency bonus to any ability check you make to disarm traps or open locks.",
-      "Artisan's tools": "These special tools include the items needed to pursue a craft or trade. Proficiency with a set of artisan's tools lets you add your proficiency bonus to any ability check you make using the tools in your craft.",
-      "Navigator's tools": "This set of instruments is used for navigation at sea. Proficiency with navigator's tools lets you chart a ship's course and follow navigation charts.",
-      "Disguise kit": "This pouch of cosmetics, hair dye, and small props lets you create disguises that change your physical appearance.",
-      "Forgery kit": "This small box contains a variety of papers and parchments, pens and inks, seals and sealing wax, gold and silver leaf, and other supplies necessary to create convincing forgeries of physical documents.",
-      "Herbalism kit": "This kit contains a variety of instruments such as clippers, mortar and pestle, and pouches and vials used by herbalists to create remedies and potions.",
-      "Poisoner's kit": "A poisoner's kit includes the vials, chemicals, and other equipment necessary for the creation of poisons.",
-      "Alchemist's supplies": "These special tools include alchemical equipment for creating alchemical items.",
-      "Brewer's supplies": "These tools include a large pot, strainer, and several barrels for brewing ale and other beverages.",
-      "Calligrapher's supplies": "These tools include special inks, quills, and parchment for creating beautiful handwriting.",
-      "Carpenter's tools": "These tools include a saw, hammer, nails, and other basic woodworking equipment.",
-      "Cartographer's supplies": "These tools include a quill, ink, parchment, a pair of compasses, a ruler, and a surveying chain.",
-      "Cobbler's tools": "These tools include a hammer, awl, knife, and other leatherworking implements.",
-      "Cook's utensils": "These tools include a knife, pot, pan, and other cooking implements.",
-      "Glassblower's tools": "These tools include a blowpipe, small marver, blocks, and tweezers for shaping molten glass.",
-      "Jeweler's tools": "These tools include small pliers, cutters, files, and magnifying lenses for working with precious metals and gems.",
-      "Leatherworker's tools": "These tools include a knife, needles, thread, and other leatherworking implements.",
-      "Mason's tools": "These tools include a chisel, hammer, and other stoneworking implements.",
-      "Painter's supplies": "These tools include brushes, pigments, canvas, and other painting implements.",
-      "Potter's tools": "These tools include a potter's wheel, clay, and other pottery-making implements.",
-      "Smith's tools": "These tools include a hammer, tongs, bellows, and other metalworking implements.",
-      "Tinker's tools": "These tools include wire, solder, small tools, and other tinkering implements.",
-      "Weaver's tools": "These tools include a loom, shuttles, and other weaving implements.",
-      "Woodcarver's tools": "These tools include a knife, chisels, and other woodcarving implements.",
-      "Gaming set": "This set of dice, cards, or other gaming pieces is used for games of chance.",
-      "Musical instrument": "This instrument produces music when played. Proficiency with a musical instrument lets you add your proficiency bonus to any ability check you make to play music with the instrument."
-    };
+  const formatToolDescription = (toolName: string): string => {
+    const tool = getToolData(toolName);
+    if (!tool) {
+      return 'This tool proficiency allows you to use specialized equipment for specific tasks.';
+    }
 
-    return toolDescriptions[toolName] || 'This tool proficiency allows you to use specialized equipment for specific tasks.';
+    // Format the detailed description
+    let description = `${tool.commonUses}\n\nTypical Abilities: ${tool.typicalAbilities.join(', ')}\n\nUses:\n${tool.uses.map((use: string) => `• ${use}`).join('\n')}`;
+
+    if (tool.specialUse) {
+      description += `\n\nSpecial Use: ${tool.specialUse}`;
+    }
+
+    return description;
   };
 
   const openProficiencyModal = (name: string, type: 'skill' | 'tool') => {
@@ -151,7 +134,7 @@ export const Step1Details: React.FC<StepProps> = ({ data, updateData, nextStep, 
       const { description, ability } = getSkillDescription(name);
       setProficiencyModal({ isOpen: true, title: name, description, ability });
     } else {
-      const description = getToolDescription(name);
+      const description = formatToolDescription(name);
       setProficiencyModal({ isOpen: true, title: name, description });
     }
   };
@@ -387,8 +370,8 @@ export const Step1Details: React.FC<StepProps> = ({ data, updateData, nextStep, 
                     <div className="text-theme-tertiary font-semibold mb-1">Option {opt.label}</div>
                     {opt.items && (
                       <ul className="space-y-1">
-                        {opt.items.map((item: string) => (
-                          <li key={item} className="flex items-start">
+                        {opt.items.map((item: string, index: number) => (
+                          <li key={`${item}-${index}`} className="flex items-start">
                             <span className="text-accent-yellow-light mr-2">•</span>
                             <span>{item}</span>
                           </li>

@@ -21,6 +21,7 @@ vi.mock('../services/dataService', async () => {
     loadEquipment: vi.fn(),
     EQUIPMENT_PACKAGES: [
       {
+        name: 'Level 1 Starter Pack',
         level: 1,
         startingGold: 100,
         items: [
@@ -43,6 +44,7 @@ describe('EquipmentInventoryBuilder', () => {
 
       const builder = new EquipmentInventoryBuilder();
       const pkg = {
+        name: 'Test Pack',
         level: 1,
         startingGold: 100,
         items: [
@@ -71,6 +73,7 @@ describe('EquipmentInventoryBuilder', () => {
 
       const builder = new EquipmentInventoryBuilder();
       const pkg = {
+        name: 'Normalization Pack',
         level: 1,
         startingGold: 100,
         items: [
@@ -95,6 +98,7 @@ describe('EquipmentInventoryBuilder', () => {
 
       const builder = new EquipmentInventoryBuilder();
       const pkg = {
+        name: 'Weapons Pack',
         level: 1,
         startingGold: 100,
         items: [
@@ -119,6 +123,7 @@ describe('EquipmentInventoryBuilder', () => {
 
       const builder = new EquipmentInventoryBuilder();
       const pkg = {
+        name: 'Armor Pack',
         level: 1,
         startingGold: 100,
         items: [
@@ -134,6 +139,7 @@ describe('EquipmentInventoryBuilder', () => {
     it('should handle items with equipped defaulting to false', () => {
       const builder = new EquipmentInventoryBuilder();
       const pkg = {
+        name: 'Default Equip Pack',
         level: 1,
         startingGold: 100,
         items: [
@@ -331,6 +337,7 @@ describe('EquipmentInventoryBuilder', () => {
 
       const builder = new EquipmentInventoryBuilder();
       const pkg = {
+        name: 'Full Pack',
         level: 1,
         startingGold: 100,
         items: [
@@ -354,6 +361,7 @@ describe('EquipmentInventoryBuilder', () => {
       ]);
 
       const pkg = {
+        name: 'Chained Pack',
         level: 1,
         startingGold: 100,
         items: [{ name: 'Longsword', slug: 'longsword', quantity: 1, equipped: true }],
@@ -389,6 +397,7 @@ describe('EquipmentInventoryBuilder', () => {
 
       const builder = new EquipmentInventoryBuilder();
       const pkg = {
+        name: 'Cached Pack',
         level: 1,
         startingGold: 100,
         items: [

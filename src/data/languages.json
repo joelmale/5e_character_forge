@@ -4,7 +4,7 @@
     "category": "Standard",
     "typicalSpeakers": "Humans, Most Civilized Peoples",
     "description": "The common tongue of most humanoid civilizations",
-    "implementationNotes": "Auto-Include: Every character knows this language.",
+    "implementationNotes": "Always available and default for most characters",
     "edition": "both",
     "rarity": "standard"
   },
@@ -281,5 +281,14 @@
     "implementationNotes": "Auto-Include (Class): Druid Level 1 feature.",
     "edition": "both",
     "rarity": "secret"
+  },
+  {
+    "name": "Common Sign Language",
+    "category": "Standard",
+    "edition": "both",
+    "rarity": "rare",
+    "typicalSpeakers": "Traders, scholars, emissaries, inclusive communities",
+    "description": "A widely understood signed form of Common used to communicate silently or across language barriers.",
+    "implementationNotes": "Selectable language; not granted by default"
   }
 ]

@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
-import { SelectionPoolWidgetProps, SkillOption, WeaponOption } from '../../../types/widgets';
+import { SelectionPoolWidgetProps, SkillOption, WeaponOption, SelectionPoolConfig } from '../../../types/widgets';
 import { loadEquipment } from '../../../services/dataService';
 import { Equipment } from '../../../types/dnd';
 import WeaponMasteryTooltip from '../../WeaponMasteryTooltip';
@@ -270,7 +270,7 @@ export const SelectionPoolWidget: React.FC<SelectionPoolWidgetProps> = ({
 
 interface WeaponGroupedUIProps {
   feature: { name: string; desc?: string };
-  config: { count: number };
+  config: SelectionPoolConfig;
   weapons: WeaponOption[];
   currentSelection: string[];
   handleSelect: (id: string) => void;
@@ -585,4 +585,3 @@ const formatToolName = (tool: string): string => {
 const formatMasteryName = (mastery: string): string => {
   return mastery.charAt(0).toUpperCase() + mastery.slice(1);
 };
-

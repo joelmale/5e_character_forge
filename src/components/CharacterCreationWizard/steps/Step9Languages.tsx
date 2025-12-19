@@ -55,7 +55,7 @@ export const Step9Languages: React.FC<StepProps> = ({ data, updateData, nextStep
   const intelligenceScore = data.abilities.INT;
   const maxLanguages = getMaxLanguages(intelligenceScore);
   const totalAvailableSlots = maxLanguages + (data.edition === '2024' ? 0 : backgroundChoices.choices);
-  const remainingSlots = Math.max(0, totalAvailableSlots - selectedLanguages.length);
+  const remainingSlots = Math.max(0, totalAvailableSlots - (autoLanguages.size + selectedLanguages.length));
 
   const toggleCategory = (categoryName: string) => {
     setExpandedCategories(prev => {

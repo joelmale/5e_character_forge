@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { ArrowLeft, ArrowRight, Shuffle } from 'lucide-react';
 import { StepProps } from '../types/wizard.types';
-import { Feat } from '../../../types/dnd';
+import { Feat, FeatChoiceMap } from '../../../types/dnd';
 import { FEAT_DATABASE, randomizeFeats, loadFeats } from '../../../services/dataService';
 import {
   calculateFeatAvailability,
   featProvidesAbilityIncrease,
   getFeatSourceInfo,
   canSelectMoreFeats,
-  checkFeatPrerequisites
+  getFeatAvailability
 } from '../../../utils/featUtils';
 import { FeatChoiceModal } from '../components';
 
@@ -32,17 +32,26 @@ const RandomizeButton: React.FC<{ onClick: () => void; title?: string; className
 export const Step5point5Feats: React.FC<StepProps> = ({ data, updateData, nextStep, prevStep, getNextStepLabel }) => {
   const [showFeatDetails, setShowFeatDetails] = useState<string | null>(null);
   const [featChoiceModal, setFeatChoiceModal] = useState<{ isOpen: boolean; feat: Feat | null }>({ isOpen: false, feat: null });
+  const [showAvailableOnly, setShowAvailableOnly] = useState(false);
 
   // Calculate how many feats the character can take
   const maxFeats = calculateFeatAvailability(data);
   const selectedFeats = data.selectedFeats || [];
 
   // Load all feats and calculate availability
-  const allFeats = loadFeats().map(feat => ({
-    feat,
-    isAvailable: checkFeatPrerequisites(feat, data),
-    requirements: feat.prerequisite || ''
-  }));
+  const allFeats = useMemo(() => loadFeats().map(feat => {
+    const availability = getFeatAvailability(feat, data);
+    return {
+      feat,
+      isAvailable: availability.isAvailable,
+      reason: availability.reason,
+      requirements: feat.prerequisite || ''
+    };
+  }), [data]);
+
+  const displayedFeats = useMemo(() => {
+    return showAvailableOnly ? allFeats.filter(f => f.isAvailable) : allFeats;
+  }, [allFeats, showAvailableOnly]);
 
   // Helper function to check if a feat requires choices
   const featRequiresChoices = (featSlug: string): boolean => {
@@ -60,7 +69,7 @@ export const Step5point5Feats: React.FC<StepProps> = ({ data, updateData, nextSt
       updateData({
         selectedFeats: selectedFeats.filter(s => s !== featSlug)
       });
-    } else if (canSelectMoreFeats(selectedFeats, data.level)) {
+    } else if (canSelectMoreFeats(selectedFeats, data)) {
       // Check if feat requires additional choices
       if (featRequiresChoices(featSlug)) {
         // For feats that require choices, we need to get the feat data
@@ -82,7 +91,7 @@ export const Step5point5Feats: React.FC<StepProps> = ({ data, updateData, nextSt
     }
   };
 
-  const handleFeatChoiceConfirm = (choices: Record<string, string | number | boolean>) => {
+  const handleFeatChoiceConfirm = (choices: FeatChoiceMap) => {
     if (!featChoiceModal.feat) return;
 
     // Store the choices in the character data
@@ -119,6 +128,17 @@ export const Step5point5Feats: React.FC<StepProps> = ({ data, updateData, nextSt
           title="Randomize feat selection"
         />
       </div>
+      <div className="flex items-center gap-2 text-sm text-theme-muted">
+        <label className="flex items-center gap-2 cursor-pointer select-none">
+          <input
+            type="checkbox"
+            className="form-checkbox text-accent-yellow-light"
+            checked={showAvailableOnly}
+            onChange={(e) => setShowAvailableOnly(e.target.checked)}
+          />
+          Show available only
+        </label>
+      </div>
 
       {selectedFeats.length > 0 && (
         <div className="bg-accent-green-darker/20 border border-accent-green-dark rounded-lg p-3">
@@ -140,9 +160,9 @@ export const Step5point5Feats: React.FC<StepProps> = ({ data, updateData, nextSt
 
       {maxFeats > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 max-h-96 overflow-y-auto p-2">
-          {allFeats.map(({ feat, isAvailable, requirements }) => {
+          {displayedFeats.map(({ feat, isAvailable, requirements, reason }) => {
             const isSelected = selectedFeats.includes(feat.slug);
-            const canSelect = canSelectMoreFeats(selectedFeats, data.level) && isAvailable;
+            const canSelect = canSelectMoreFeats(selectedFeats, data) && isAvailable;
 
             return (
               <div key={feat.slug} className="relative">
@@ -172,9 +192,9 @@ export const Step5point5Feats: React.FC<StepProps> = ({ data, updateData, nextSt
                   <p className={`text-xs mt-1 ${isAvailable ? 'text-theme-disabled' : 'text-gray-500'}`}>
                     {getFeatSourceInfo(feat)}
                   </p>
-                  {requirements && !isAvailable && (
+                  {!isAvailable && (
                     <p className="text-xs text-red-400 mt-1">
-                      Requires: {requirements}
+                      Unavailable: {reason || requirements}
                     </p>
                   )}
                   {feat.prerequisite && isAvailable && (

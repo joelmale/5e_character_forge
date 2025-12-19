@@ -5,7 +5,7 @@
  * Handles HP increases, spell slot progression, feature grants, and player choices.
  */
 
-import { Character, LevelUpChoices, AppSpell } from '../types/dnd';
+import { Character, LevelUpChoices } from '../types/dnd';
 import {
   ClassProgression,
   LevelUpData,
@@ -26,7 +26,7 @@ import { cleric2024Progression } from '../data/progressions/cleric2024';
 import { druid2024Progression } from '../data/progressions/druid2024';
 import { warlock2024Progression } from '../data/progressions/warlock2024';
 import { artificer2024Progression } from '../data/progressions/artificer2024';
-import { PROFICIENCY_BONUSES, CANTRIPS_KNOWN_BY_CLASS, loadSpells, loadFeats } from '../services/dataService';
+import { PROFICIENCY_BONUSES, CANTRIPS_KNOWN_BY_CLASS, loadSpells, loadFeats, type AppSpell } from '../services/dataService';
 import { SPELL_LEARNING_RULES } from '../data/spellLearning';
 import { SPELL_SLOTS_BY_CLASS } from '../data/spellSlots';
 import { normalizeSpellSlots } from './spellSlotUtils';
@@ -144,16 +144,25 @@ export function calculateLevelUpData(character: Character): LevelUpData | null {
       newCantripsKnown = nextCantrips;
     }
 
+    const learningRules = SPELL_LEARNING_RULES[classSlug];
+
     // For known casters, calculate new spells known
-    if (character.spellcasting.spellcastingType === 'known') {
-      const learningRules = SPELL_LEARNING_RULES[classSlug];
-      if (learningRules && learningRules.spellsKnown) {
-        const currentSpellsKnown = character.spellcasting.spellsKnown?.length || 0;
-        const expectedSpellsKnown = learningRules.spellsKnown[toLevel - 1] || 0; // Array is 0-indexed
-        const spellsToLearn = Math.max(0, expectedSpellsKnown - currentSpellsKnown);
-        if (spellsToLearn > 0) {
-          newSpellsKnown = spellsToLearn;
-        }
+    if (character.spellcasting.spellcastingType === 'known' && learningRules?.spellsKnown) {
+      const currentSpellsKnown = character.spellcasting.spellsKnown?.length || 0;
+      const expectedSpellsKnown = learningRules.spellsKnown[toLevel - 1] || 0; // Array is 0-indexed
+      const spellsToLearn = Math.max(0, expectedSpellsKnown - currentSpellsKnown);
+      if (spellsToLearn > 0) {
+        newSpellsKnown = spellsToLearn;
+      }
+    }
+
+    // For prepared casters, surface additional prepared slots as spell choices
+    if (character.spellcasting.spellcastingType === 'prepared' && learningRules?.spellsPrepared) {
+      const currentPrepared = character.spellcasting.preparedSpells?.length || 0;
+      const expectedPrepared = learningRules.spellsPrepared[toLevel - 1] || 0;
+      const newPreparedSlots = Math.max(0, expectedPrepared - currentPrepared);
+      if (newPreparedSlots > 0) {
+        newSpellsKnown = (newSpellsKnown || 0) + newPreparedSlots;
       }
     }
 
@@ -792,7 +801,8 @@ function applyFeatEffects(character: Character, featSlug: string, featChoices?: 
       if (!character.featEffects!.ignoredResistances) {
         character.featEffects!.ignoredResistances = [];
       }
-      const chosenDamageType = featChoices?.[featSlug]?.damageType || 'fire'; // Default to fire if no choice made
+      const choiceValue = featChoices?.[featSlug]?.damageType;
+      const chosenDamageType = typeof choiceValue === 'string' ? choiceValue : 'fire'; // Default to fire if no choice made
       if (!character.featEffects!.ignoredResistances.includes(chosenDamageType)) {
         character.featEffects!.ignoredResistances.push(chosenDamageType);
       }

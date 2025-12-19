@@ -41,6 +41,8 @@ export const SavingThrows: React.FC<SavingThrowsProps> = ({
   const classData = CLASSES_DATABASE.find(c => c.slug === character.class);
   const savingThrowProficiencies = classData?.save_throws || [];
 
+  const hasGnomishCunning = character.featuresAndTraits?.speciesTraits?.includes('Gnomish Cunning');
+
   const abilities: AbilityName[] = ['STR', 'DEX', 'CON', 'INT', 'WIS', 'CHA'];
 
   const handleRoll = (abilityName: AbilityName, type: RollType = rollTypes[abilityName]) => {
@@ -100,6 +102,15 @@ export const SavingThrows: React.FC<SavingThrowsProps> = ({
           const isProficient = savingThrowProficiencies.includes(abilityName);
           const saveModifier = ability.modifier + (isProficient ? character.proficiencyBonus : 0);
           const isMenuOpen = activeMenuAbility === abilityName;
+          const hasAdvantage = hasGnomishCunning && ['INT', 'WIS', 'CHA'].includes(abilityName);
+          const badge = hasAdvantage ? (
+            <span
+              className="ml-2 px-2 py-0.5 rounded-full text-[10px] uppercase bg-amber-800 text-amber-100"
+              title="Gnomish Cunning: advantage on INT/WIS/CHA saves"
+            >
+              Adv
+            </span>
+          ) : null;
 
           return (
             <div key={abilityName} className="relative">
@@ -125,6 +136,7 @@ export const SavingThrows: React.FC<SavingThrowsProps> = ({
                   <span className="text-sm font-cinzel font-semibold text-[#3d2817]">
                     {abilityName}
                   </span>
+                  {badge}
                 </div>
                 {/* Save bonus */}
                 <span className="text-lg font-cinzel font-bold text-[#1e140a] tabular-nums">
@@ -268,6 +280,15 @@ export const SavingThrows: React.FC<SavingThrowsProps> = ({
           const isProficient = savingThrowProficiencies.includes(abilityName);
           const saveModifier = ability.modifier + (isProficient ? character.proficiencyBonus : 0);
           const isMenuOpen = activeMenuAbility === abilityName;
+          const hasAdvantage = hasGnomishCunning && ['INT', 'WIS', 'CHA'].includes(abilityName);
+          const badge = hasAdvantage ? (
+            <span
+              className="ml-2 px-2 py-0.5 rounded-full text-[10px] uppercase bg-amber-800 text-amber-100"
+              title="Gnomish Cunning: advantage on INT/WIS/CHA saves"
+            >
+              Adv
+            </span>
+          ) : null;
 
           return (
             <div key={abilityName} className="relative">
@@ -288,6 +309,7 @@ export const SavingThrows: React.FC<SavingThrowsProps> = ({
                     <span className="text-xs font-bold text-accent-green-light">{getRollIcon(abilityName)}</span>
                   )}
                   <span className="text-sm font-semibold text-theme-primary">{abilityName}</span>
+                  {badge}
                 </div>
                 <span className="font-mono text-lg font-bold text-accent-yellow-light">{formatModifier(saveModifier)}</span>
               </button>

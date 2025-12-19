@@ -7,7 +7,8 @@
 import React, { useState } from 'react';
 import { Character, LevelUpChoices, AbilityName, ABILITY_SCORES } from '../../../types/dnd';
 import { LevelUpData } from '../../../data/classProgression';
-import { loadFeats } from '../../../services/dataService';
+import { loadFeats, resolveSpeciesSlug } from '../../../services/dataService';
+import { getAvailableFeatsForCharacter } from '../../../utils/featUtils';
 
 interface StepASIFeatProps {
   character: Character;
@@ -20,7 +21,7 @@ interface StepASIFeatProps {
 
 export const StepASIFeat: React.FC<StepASIFeatProps> = ({
   character,
-  levelUpData: _levelUpData,
+  levelUpData,
   choices: _choices,
   updateChoices,
   onNext,
@@ -30,7 +31,19 @@ export const StepASIFeat: React.FC<StepASIFeatProps> = ({
   const [asiSelections, setAsiSelections] = useState<Array<{ ability: AbilityName; increase: number }>>([]);
   const [selectedFeat, setSelectedFeat] = useState<string>('');
 
-  const allFeats = loadFeats();
+  const abilityScores = ABILITY_SCORES.reduce((acc, ability) => {
+    acc[ability as AbilityName] = character.abilities[ability as AbilityName].score;
+    return acc;
+  }, {} as Record<AbilityName, number>);
+
+  const featSelectionLevel = levelUpData.toLevel || character.level;
+  const availableFeats = getAvailableFeatsForCharacter(loadFeats(), {
+    level: featSelectionLevel,
+    classSlug: character.class?.toLowerCase(),
+    abilities: abilityScores,
+    speciesSlug: resolveSpeciesSlug(character.species || ''),
+    edition: character.edition
+  }, 'asi');
   const maxASIPoints = 2;
   const remainingPoints = maxASIPoints - asiSelections.reduce((sum, sel) => sum + sel.increase, 0);
 
@@ -182,8 +195,14 @@ export const StepASIFeat: React.FC<StepASIFeatProps> = ({
             </p>
           </div>
 
+          {availableFeats.length === 0 && (
+            <div className="bg-[#f5ebd2] border-2 border-[#1e140a] rounded-lg p-4 text-sm text-gray-900">
+              No feats meet your current prerequisites. Choose an Ability Score Increase instead.
+            </div>
+          )}
+
           <div className="max-h-96 overflow-y-auto space-y-2">
-            {allFeats.map((feat) => (
+            {availableFeats.map((feat) => (
               <button
                 key={feat.slug}
                 onClick={() => setSelectedFeat(feat.slug)}

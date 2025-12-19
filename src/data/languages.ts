@@ -2,7 +2,7 @@ import languagesData from './languages.json';
 
 export interface Language {
   name: string;
-  category: 'Standard' | 'Exotic' | 'Secret' | 'Dialect';
+  category: 'Standard' | 'Exotic' | 'Secret' | 'Dialect' | 'Rare';
   edition?: '2014' | '2024' | 'both';
   rarity?: 'standard' | 'rare' | 'secret';
   typicalSpeakers: string;

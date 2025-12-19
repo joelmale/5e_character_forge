@@ -1,7 +1,7 @@
  
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import type { DiceRoll } from '../../services/diceService';
-import DiceBox from '@3d-dice/dice-box';
+import DiceBox, { DiceBoxConfig } from '@3d-dice/dice-box';
 import { log } from '../../utils/logger';
 
 interface DiceBox3DProps {
@@ -49,7 +49,7 @@ export const DiceBox3D: React.FC<DiceBox3DProps> = ({
     }
 
     try {
-      const diceBox = new DiceBox({
+      const config: DiceBoxConfig = {
         container: '#dice-box',
         assetPath: '/assets/dice-box/',
         offscreen: false,
@@ -64,7 +64,9 @@ export const DiceBox3D: React.FC<DiceBox3DProps> = ({
         settleTimeout: 2000, // Reduced from 5000ms to 2000ms
         enableShadows: true,
         scale: 6
-      } as Record<string, unknown>);
+      };
+
+      const diceBox = new DiceBox(config);
 
       await diceBox.init();
 
@@ -90,7 +92,12 @@ export const DiceBox3D: React.FC<DiceBox3DProps> = ({
 
   // Handle dice rolls
   useEffect(() => {
-    if (!latestRoll || lastRollIdRef.current === latestRoll.id) {
+    // Only roll when there's a new roll that hasn't been resolved with dice results yet
+    if (
+      !latestRoll ||
+      lastRollIdRef.current === latestRoll.id ||
+      latestRoll.diceResults.length > 0
+    ) {
       return;
     }
 

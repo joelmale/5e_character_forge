@@ -16,7 +16,7 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
 
   // 1. Calculate Abilities with Racial Bonuses
   (Object.keys(data.abilities) as AbilityName[]).forEach((ability) => {
-    let racialBonus = speciesData.ability_bonuses[ability] || 0;
+    let racialBonus = speciesData.ability_bonuses?.[ability] || 0;
 
     // Handle variant human ability bonuses
     if (speciesData.slug === 'human' && data.selectedSpeciesVariant === 'variant' && data.variantAbilityBonuses) {
@@ -291,6 +291,9 @@ export const calculateCharacterStats = (data: CharacterCreationData): Character 
       flaws: data.flaws,
       classFeatures: allClassFeatures, // Includes fighting style if applicable
       speciesTraits: speciesData.species_traits,
+      backgroundFeatures: backgroundData?.feature
+        ? [{ name: backgroundData.feature, description: backgroundData.feature_description || '' }]
+        : [],
       musicalInstrumentProficiencies: data.selectedMusicalInstruments,
     },
     spellcasting: spellcastingData, // Sprint 2: Include spell data

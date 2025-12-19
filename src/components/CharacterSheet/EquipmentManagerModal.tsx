@@ -16,6 +16,8 @@ interface PendingItem {
   equipment: Equipment;
 }
 
+type EquipmentCategoryKey = 'all' | 'weapons' | 'armor' | 'gear' | 'tools';
+
 export const EquipmentManagerModal: React.FC<EquipmentManagerModalProps> = ({
   isOpen,
   onClose,
@@ -23,7 +25,7 @@ export const EquipmentManagerModal: React.FC<EquipmentManagerModalProps> = ({
   onAddItems
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<'all' | 'weapons' | 'armor' | 'gear' | 'tools'>('all');
+  const [selectedCategory, setSelectedCategory] = useState<EquipmentCategoryKey>('all');
   const [pendingItems, setPendingItems] = useState<PendingItem[]>([]);
   const [tooltipData, setTooltipData] = useState<{
     presetName: string;
@@ -204,13 +206,13 @@ export const EquipmentManagerModal: React.FC<EquipmentManagerModalProps> = ({
 
               {/* Category Tabs */}
               <div className="flex gap-2 mb-4">
-                {[
+                {([
                   { key: 'all', label: 'All', icon: Package },
                   { key: 'weapons', label: 'Weapons', icon: Sword },
                   { key: 'armor', label: 'Armor', icon: Shield },
                   { key: 'gear', label: 'Gear', icon: Package },
                   { key: 'tools', label: 'Tools', icon: Wrench }
-                ].map(({ key, label, icon: Icon }) => (
+                ] as const).map(({ key, label, icon: Icon }) => (
                   <button
                     key={key}
                     onClick={() => setSelectedCategory(key)}

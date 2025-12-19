@@ -59,11 +59,13 @@ export const StepCumulativeASI: React.FC<StepProps> = ({
         level: data.level,
         classSlug: data.classSlug,
         abilities: data.abilities,
-        edition: data.edition
+        edition: data.edition,
+        speciesSlug: data.speciesSlug,
+        selectedLineage: data.selectedLineage
       }, 'asi');
     }
     return [];
-  }, [choices, currentASIIndex, data.level, data.classSlug, data.abilities, data.edition]);
+  }, [choices, currentASIIndex, data.level, data.classSlug, data.abilities, data.edition, data.speciesSlug, data.selectedLineage]);
 
   if (asiLevels.length === 0) {
     // No ASI levels, skip this step

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Condition, InitiativeEntry } from '../../../types/encounterCombat';
+import { Condition, InitiativeEntry } from '../../types/encounterCombat';
 
 // Predefined D&D 5e conditions
 const PREDEFINED_CONDITIONS: Condition[] = [

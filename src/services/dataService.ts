@@ -37,7 +37,7 @@ import backgroundDefaultsData from '../data/backgroundDefaults.json';
 import combatActionsData from '../data/combatActions.json';
 import { generateName } from '../utils/nameGenerator';
 import { log } from '../utils/logger';
-import { AbilityName, Species, Class, Equipment, Feature, Subclass, Feat, SpeciesCategory, ClassCategory, EquipmentPackage, EquipmentChoice, EquipmentItem, EquippedItem, SpellcastingType, SkillName, Monster, MonsterType, Edition } from '../types/dnd';
+import { AbilityName, Species, Class, Equipment, Feature, Subclass, Feat, SpeciesCategory, ClassCategory, EquipmentPackage, EquipmentChoice, EquipmentItem, EquippedItem, SpellcastingType, SkillName, Monster, MonsterType, Edition, Background } from '../types/dnd';
 import { Level1Feature } from '../types/widgets';
 import { getSelectableLanguages } from '../data/languages';
 
@@ -52,35 +52,7 @@ interface Alignment {
   long_desc: string;
 }
 
-interface EquipmentOption {
-  label: string;
-  items?: string[];
-  gold?: number;
-}
-
-interface Background {
-  slug: string;
-  name: string;
-  edition: string;
-  description: string;
-  details?: string;
-  detailedDescription?: string;
-  skill_proficiencies: string[];
-  tool_proficiencies?: string[];
-  languages?: string[];
-  equipment: string[];
-  equipmentOptions?: EquipmentOption[];
-  abilityScores?: {
-    choose: number;
-    from: string[];
-  };
-  originFeat?: string;
-  personality_traits: string[];
-  ideals: string[];
-  bonds: string[];
-  flaws: string[];
-  roleplaying_suggestions?: string;
-}
+// Background type is defined in shared DnD types.
 
 export interface CombatAction {
   slug: string;
@@ -357,6 +329,7 @@ export function transformSpell(srdSpell: SRDSpell): AppSpell {
 }
 
 export function transformSpecies(srdSpecies: SRDRace, year: number = 2014): Species {
+  const edition: Edition = year === 2024 ? '2024' : '2014';
   const abilityBonuses: Partial<Record<AbilityName, number>> = {};
   srdSpecies.ability_bonuses.forEach(bonus => {
     const ability = mapAbilityScore(bonus.ability_score.index);
@@ -399,6 +372,7 @@ export function transformSpecies(srdSpecies: SRDRace, year: number = 2014): Spec
    return {
      slug: srdSpecies.index,
      name: srdSpecies.name,
+     edition,
      source: `SRD ${year}`,
      speed: srdSpecies.speed,
      ability_bonuses: finalAbilityBonuses,
@@ -442,6 +416,37 @@ export function transformClass(srdClass: SRDClass, year: number = 2014): Class {
 
   const numInstrumentChoices = instrumentChoices
     .reduce((sum, choice) => sum + (choice.choose || 0), 0);
+
+  // Extract core proficiencies (armor, weapons, tools)
+  const armorProficiencies: string[] = [];
+  const weaponProficiencies: string[] = [];
+  const toolProficiencies: string[] = [];
+
+  (srdClass.proficiencies || []).forEach(prof => {
+    const name = prof.name;
+    const lower = name.toLowerCase();
+
+    if (lower.includes('saving throw')) {
+      return; // Skip saving throws
+    }
+
+    if (lower.includes('armor') || lower.includes('shield')) {
+      armorProficiencies.push(name);
+      return;
+    }
+
+    if (
+      lower.includes('tool') ||
+      lower.includes('kit') ||
+      lower.includes('vehicle') ||
+      lower.includes('instrument')
+    ) {
+      toolProficiencies.push(name);
+      return;
+    }
+
+    weaponProficiencies.push(name);
+  });
 
   // Transform spellcasting data if present
   let spellcasting: Class['spellcasting'] = undefined;
@@ -589,6 +594,11 @@ export function transformClass(srdClass: SRDClass, year: number = 2014): Class {
     keyFeatures: [],
     icon: '⚔️',
     themeColor: '#666666',
+    proficiencies: {
+      armor: Array.from(new Set(armorProficiencies)),
+      weapons: Array.from(new Set(weaponProficiencies)),
+      tools: Array.from(new Set(toolProficiencies)),
+    },
 
     // Preserve level_1_features for 2024 widget system
     ...(srdClass.level_1_features && { level_1_features: srdClass.level_1_features as Array<Level1Feature> })
@@ -606,6 +616,9 @@ export function transformEquipment(srdEquip: SRDEquipment): Equipment {
   const hasArmorCategory = srdEquip.equipment_categories.some(cat =>
     cat.name.toLowerCase().includes('armor')
   );
+  const isFocusCategory = srdEquip.equipment_categories.some(cat =>
+    cat.name.toLowerCase().includes('focus')
+  );
 
   if (hasWeaponCategory) {
     primaryCategory = 'Weapon';
@@ -621,7 +634,7 @@ export function transformEquipment(srdEquip: SRDEquipment): Equipment {
   const isClothing = srdEquip.name.toLowerCase().includes('cloth') ||
                     srdEquip.name.toLowerCase().includes('robe') ||
                     (srdEquip.name.toLowerCase().includes('armor') && srdEquip.equipment_categories.some(cat => cat.name.toLowerCase().includes('armor')));
-  const equipable = isWeapon || isArmor || isClothing;
+  const equipable = isWeapon || isArmor || isClothing || isFocusCategory;
 
   // Determine weapon category from equipment_categories
   let weaponCategory: 'Simple' | 'Martial' | undefined;
@@ -632,6 +645,20 @@ export function transformEquipment(srdEquip: SRDEquipment): Equipment {
     if (cat.name.includes('Martial')) weaponCategory = 'Martial';
     if (cat.name.includes('Melee')) weaponRange = 'Melee';
     if (cat.name.includes('Ranged')) weaponRange = 'Ranged';
+  });
+
+  let armorCategory: 'Light' | 'Medium' | 'Heavy' | 'Shield' | undefined = srdEquip.armor_category as
+    | 'Light'
+    | 'Medium'
+    | 'Heavy'
+    | 'Shield'
+    | undefined;
+  srdEquip.equipment_categories.forEach(cat => {
+    const name = cat.name.toLowerCase();
+    if (name.includes('light armor')) armorCategory = 'Light';
+    if (name.includes('medium armor')) armorCategory = 'Medium';
+    if (name.includes('heavy armor')) armorCategory = 'Heavy';
+    if (name.includes('shield')) armorCategory = 'Shield';
   });
 
   return {
@@ -664,7 +691,7 @@ export function transformEquipment(srdEquip: SRDEquipment): Equipment {
     mastery: srdEquip.mastery, // Keep as object, not just name
 
     // Armor fields
-    armor_category: srdEquip.armor_category as 'Light' | 'Medium' | 'Heavy' | 'Shield' | undefined,
+    armor_category: armorCategory,
     armor_class: srdEquip.armor_class,
     str_minimum: srdEquip.str_minimum,
     stealth_disadvantage: srdEquip.stealth_disadvantage,
@@ -955,7 +982,7 @@ export const ALIGNMENT_INFO: Record<string, string> = ALIGNMENTS_DATA.reduce((ac
   return acc;
 }, {} as Record<string, string>);
 
-export const BACKGROUNDS: Background[] = backgroundsData;
+export const BACKGROUNDS: Background[] = backgroundsData as Background[];
 
 // Comprehensive species database with 40+ species from multiple sources
 // Load species from JSON data
@@ -1052,7 +1079,7 @@ export function getEnhancedSubclassData(subclassSlug: string): Partial<Subclass>
 
 // Helper function to get enhanced species data
 export function getEnhancedSpeciesData(speciesSlug: string): Partial<Species> | undefined {
-  return (enhancedSpeciesData as Record<string, Partial<Species>>)[speciesSlug];
+  return (enhancedSpeciesData as unknown as Record<string, Partial<Species>>)[speciesSlug];
 }
 
 // Enhanced class categories with rich data - filtered by edition
@@ -1084,7 +1111,7 @@ export { SPELL_SLOTS_BY_CLASS, cantripsData as CANTRIPS_KNOWN_BY_CLASS };
 
 // New JSON data exports
 export const SPELLCASTING_TYPE_MAP = spellcastingTypesData.SPELLCASTING_TYPE_MAP;
-export const SPECIES_LANGUAGE_MAP = speciesLanguagesData.SPECIES_LANGUAGE_MAP;
+export const SPECIES_LANGUAGE_MAP = speciesLanguagesData.SPECIES_LANGUAGE_MAP as Record<string, string[]>;
 /** @deprecated Use SPECIES_LANGUAGE_MAP instead. */
 export const RACIAL_LANGUAGE_MAP = SPECIES_LANGUAGE_MAP;
 export const BACKGROUND_DEFAULTS = backgroundDefaultsData.BACKGROUND_DEFAULTS;

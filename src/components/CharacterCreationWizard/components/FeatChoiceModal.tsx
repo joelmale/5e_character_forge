@@ -9,13 +9,13 @@
 
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
-import { Feat } from '../../../types/dnd';
+import { Feat, FeatChoiceMap } from '../../../types/dnd';
 
 interface FeatChoiceModalProps {
   isOpen: boolean;
   onClose: () => void;
   feat: Feat | null;
-  onConfirm: (choices: Record<string, unknown>) => void;
+  onConfirm: (choices: FeatChoiceMap) => void;
 }
 
 export const FeatChoiceModal: React.FC<FeatChoiceModalProps> = ({

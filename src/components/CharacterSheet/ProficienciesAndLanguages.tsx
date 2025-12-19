@@ -1,6 +1,7 @@
 import React from 'react';
 import { Shield, Sword, Hammer, Languages } from 'lucide-react';
 import { LANGUAGES } from '../../data/languages';
+import { loadClasses, BACKGROUNDS } from '../../services/dataService';
 import { Character } from '../../types/dnd';
 
 interface ProficienciesAndLanguagesProps {
@@ -10,11 +11,35 @@ interface ProficienciesAndLanguagesProps {
 export const ProficienciesAndLanguages: React.FC<ProficienciesAndLanguagesProps> = ({
   character,
 }) => {
+  const classData = React.useMemo(
+    () => loadClasses().find(cls => cls.slug === character.classSlug || cls.name === character.class),
+    [character.classSlug, character.class]
+  );
+  const backgroundData = React.useMemo(
+    () => BACKGROUNDS.find(bg => bg.slug === character.background || bg.name === character.background),
+    [character.background]
+  );
+
   // Use real proficiency data from character
-  const armorProficiencies = character.proficiencies?.armor || [];
-  const weaponProficiencies = character.proficiencies?.weapons || [];
-  const toolProficiencies = character.proficiencies?.tools || [];
-  const languages = character.languages || [];
+  const armorProficiencies = character.proficiencies?.armor?.length
+    ? character.proficiencies.armor
+    : classData?.proficiencies?.armor || [];
+  const weaponProficiencies = character.proficiencies?.weapons?.length
+    ? character.proficiencies.weapons
+    : classData?.proficiencies?.weapons || [];
+  const instrumentProficiencies = character.featuresAndTraits?.musicalInstrumentProficiencies || [];
+  const baseTools = character.proficiencies?.tools?.length
+    ? character.proficiencies.tools
+    : Array.from(new Set([...(classData?.proficiencies?.tools || []), ...(backgroundData?.tool_proficiencies || [])]));
+  const toolProficiencies = instrumentProficiencies.length
+    ? Array.from(
+        new Set([
+          ...baseTools.filter(tool => !tool.toLowerCase().includes('musical instrument')),
+          ...instrumentProficiencies,
+        ])
+      )
+    : baseTools;
+  const languages = ['Common', ...(character.languages || []).filter(lang => lang !== 'Common')];
 
   const getLanguageDescription = (languageName: string): string => {
     const language = LANGUAGES.find(lang => lang.name === languageName);

@@ -390,5 +390,9 @@
   "Reach to the Blaze": {
     "description": "You know the produce flame cantrip. Once you reach 3rd level, you can cast the burning hands spell once with this trait as a 1st-level spell, and you regain the ability to do so when you finish a long rest. Constitution is your spellcasting ability for these spells.",
     "source": "Player's Handbook"
+  },
+  "Gnomish Cunning": {
+    "description": "Gnomish Cunning gives Gnomes advantage on all Intelligence, Wisdom, and Charisma saving throws (not just against magic, as in 2014), making them exceptionally resilient to mental control, charm, and illusions, a significant buff paired with new lineages (Forest/Rock) that offer spells instead of ability score bumps and a faster 30-foot speed, making them more versatile defenders.",
+    "source": "Player's Handbook"
   }
 }

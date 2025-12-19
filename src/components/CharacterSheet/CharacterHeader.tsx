@@ -75,7 +75,7 @@ export const CharacterHeader: React.FC<CharacterHeaderProps> = ({
 
            <LayoutSelector />
 
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 gap-2">
              {onEdit && (
                <button
                  onClick={onEdit}

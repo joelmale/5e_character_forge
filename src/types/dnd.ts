@@ -21,6 +21,7 @@ export interface Background {
   skill_proficiencies: string[];
   languages?: string[];
   equipment: string[];
+  equipmentOptions?: EquipmentOption[];
   
   // 2014 Legacy Fields
   feature?: string;
@@ -42,6 +43,11 @@ export interface Background {
   roleplaying_suggestions?: string;
 }
 
+export interface EquipmentOption {
+  label: string;
+  items?: string[];
+  gold?: number;
+}
 
 
 export interface EquipmentPackage {
@@ -83,8 +89,11 @@ export interface Character {
   id: string;
   name: string;
   species: string;
+  /** @deprecated Legacy field retained for migrations. */
+  race?: string;
   selectedSpeciesVariant?: string; // For human variants
   class: string;
+  classSlug?: string;
   level: number;
   alignment: string;
   background: string;
@@ -187,7 +196,7 @@ export interface Character {
 
   };
   selectedFeats?: string[]; // Feat slugs selected during character creation
-  featChoices?: Record<string, Record<string, string | number | boolean>>; // Additional choices for feats (e.g., Elemental Adept damage type)
+  featChoices?: Record<string, FeatChoiceMap>; // Additional choices for feats (e.g., Elemental Adept damage type)
 
   // Sprint 4: Equipment and inventory
   inventory?: EquippedItem[]; // All carried items
@@ -415,6 +424,7 @@ export interface Subclass {
   subclassFlavor: string; // e.g., "Path of the Berserker"
 
   // Enhanced subclass data
+  description?: string;
   detailedDescription?: string;
   keyFeatures?: string[];
   roleplayingTips?: string[];
@@ -497,7 +507,7 @@ export interface CharacterCreationData {
   selectedMusicalInstruments: string[]; // Musical instruments chosen from class options (Step 2)
   overflowSkills?: string[]; // Skills chosen via "Any Skill" duplicate rule (Step 2)
    equipmentChoices: EquipmentChoice[]; // Equipment selection choices
-   equipmentChoice?: 'background' | 'gold'; // 2024: Choose background equipment or gold
+   equipmentChoice?: 'background' | 'gold' | null; // 2024: Choose background equipment or gold
    equipmentGold?: number; // Gold amount for gold choice
    hpCalculationMethod: 'max' | 'rolled';
   rolledHP?: number; // If rolled, store the result
@@ -522,7 +532,7 @@ export interface CharacterCreationData {
   subclassSlug?: string | null;
   selectedFightingStyle?: string | null;
   selectedFeats?: string[]; // Array of feat slugs
-  featChoices?: Record<string, Record<string, string | number | boolean>>; // Additional choices for feats (e.g., Elemental Adept damage type)
+  featChoices?: Record<string, FeatChoiceMap>; // Additional choices for feats (e.g., Elemental Adept damage type)
 
   // Language selection
   knownLanguages?: string[]; // Array of selected language names
@@ -589,13 +599,13 @@ export interface Species {
 
   // 2024 Fields
   creatureType?: 'Humanoid' | 'Construct' | 'Undead' | string;
-  speciesFeat?: string; // Fixed feat for species like Half-Elf Prodigy
+  speciesFeat?: string | null; // Fixed feat for species like Half-Elf Prodigy
   speciesFeatOptions?: string[]; // Choice of feats for species like Elf, Dwarf, etc.
   traits?: string[]; // Core species traits for 2024
   lineages?: Record<string, SpeciesLineage>; // Lineage choices (Elf, Gnome)
   fiendishLegacies?: Record<string, FiendishLegacy>; // Tiefling options
   giantAncestry?: Record<string, string>; // Goliath options
-  ancestries?: Record<string, string[]>; // Dragonborn options
+  ancestries?: Record<string, string[] | string>; // Dragonborn options
   celestialRevelationOptions?: string[]; // Aasimar options
 
   // Mechanical bonuses (data-driven instead of hardcoded)
@@ -654,6 +664,12 @@ export interface Class {
   class_features: string[];
   description: string;
   keyRole: string;
+  /** Core proficiencies pulled from SRD data */
+  proficiencies?: {
+    armor: string[];
+    weapons: string[];
+    tools: string[];
+  };
   equipment_choices?: EquipmentChoice[]; // Starting equipment options (filled by helper if missing)
 
   // Sprint 2: Spellcasting configuration
@@ -733,6 +749,9 @@ export interface SpellLearningRules {
   magicalSecrets?: number[];        // Bard magical secrets by level
   invocationsKnown?: number[];      // Warlock invocations by level
 }
+
+export type FeatChoiceValue = string | number | boolean | string[];
+export type FeatChoiceMap = Record<string, FeatChoiceValue>;
 
 // ==================== Monster System ====================
 

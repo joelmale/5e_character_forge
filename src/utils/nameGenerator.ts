@@ -26,16 +26,36 @@ const MAX_CACHE_SIZE = 1000;
 // Track used names for uniqueness
 const usedNames = new Set<string>();
 
+interface NameSpeciesData {
+  male?: string[];
+  female?: string[];
+  surnames?: string[];
+  cultural_patterns?: string[];
+  pronunciation_guide?: Record<string, string>;
+}
+
+interface NameData {
+  species?: Record<string, NameSpeciesData>;
+  races?: Record<string, NameSpeciesData>;
+  place_names: {
+    prefixes: string[];
+    suffixes: {
+      elvish: string[];
+      dwarvish: string[];
+      halfling: string[];
+      general: string[];
+    };
+  };
+  epithets: Record<string, string[]>;
+}
+
+const typedNameData = nameData as NameData;
 // Backwards-compatible view over species name data
-// Complex dynamic structure for name generation data - species/races can have arbitrary properties
-const rawSpeciesMap =
-  (nameData as unknown as { species: Record<string, unknown> }).species ||
-  (nameData as unknown as { races: Record<string, unknown> }).races ||
-  {};
+const rawSpeciesMap = typedNameData.species || typedNameData.races || {};
 
 // Hydrate aliases for legacy display names so tests and old saves still work
 // Dynamic mapping of species names to data structures
-const NAME_SPECIES_MAP: Record<string, unknown> = { ...rawSpeciesMap };
+const NAME_SPECIES_MAP: Record<string, NameSpeciesData> = { ...rawSpeciesMap };
 const legacyDisplayAliases: Record<string, string> = {
   Human: 'human-2024',
   Elf: 'elf-2024',
@@ -154,7 +174,7 @@ function getEpithetStyleByClass(classSlug?: string): 'heroic' | 'mysterious' | '
  */
 function generateRaceSpecificName(race: string, gender: 'male' | 'female' | 'any' = 'any', options?: NameOptions): string {
   const baseRace = getBaseRace(race);
-  const raceData = NAME_SPECIES_MAP[baseRace as keyof typeof NAME_SPECIES_MAP];
+  const raceData = NAME_SPECIES_MAP[baseRace];
 
   if (!raceData) {
     return generateFantasyName();
@@ -167,9 +187,10 @@ function generateRaceSpecificName(race: string, gender: 'male' | 'female' | 'any
   if (gender === 'any') {
     const genderOptions = raceData.female && raceData.male ? ['male', 'female'] : ['male'];
     const selectedGender = getRandomElement(genderOptions);
-    firstName = getRandomElement(raceData[selectedGender as 'male' | 'female']);
-  } else if (raceData[gender]) {
-    firstName = getRandomElement(raceData[gender]);
+    const pool = raceData[selectedGender as 'male' | 'female'] || [];
+    firstName = getRandomElement(pool);
+  } else if (raceData[gender] && raceData[gender]?.length) {
+    firstName = getRandomElement(raceData[gender] || []);
   } else {
     // Fallback if specific gender not available
     firstName = getRandomElement(raceData.male || raceData.female || []);
@@ -319,7 +340,7 @@ function generatePronunciation(name: string, race?: string): string {
   // Get race-specific pronunciation guide
   if (race) {
     const baseRace = getBaseRace(race);
-    const raceData = NAME_SPECIES_MAP[baseRace as keyof typeof NAME_SPECIES_MAP];
+    const raceData = NAME_SPECIES_MAP[baseRace];
     if (raceData && 'pronunciation_guide' in raceData && raceData.pronunciation_guide) {
       Object.entries(raceData.pronunciation_guide).forEach(([pattern, replacement]) => {
         const regex = new RegExp(pattern, 'gi');

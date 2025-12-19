@@ -1,5 +1,5 @@
 import React from 'react';
-import { BranchChoiceWidgetProps } from '../../../types/widgets';
+import { BranchChoiceWidgetProps, GrantConfig } from '../../../types/widgets';
 
 /**
  * BranchChoiceWidget
@@ -70,17 +70,7 @@ interface BranchCardProps {
     label: string;
     description: string;
     icon?: string;
-    grants?: Array<{
-      type: string;
-      proficiency_type?: string;
-      proficiencies?: string[];
-      skill_bonuses?: Array<{
-        skill: string;
-        bonus_type: string;
-        ability: string;
-      }>;
-      cantrip_bonus?: number;
-    }>;
+    grants?: GrantConfig[];
   };
   selected: boolean;
   onClick: () => void;
@@ -154,38 +144,39 @@ const BranchCard: React.FC<BranchCardProps> = ({ option, selected, onClick }) =>
 /**
  * Format grant configuration into readable text
  */
-type Grant =
-  | { type: 'proficiency'; proficiencies?: string[] }
-  | { type: 'skill_bonus'; skill_bonuses?: { ability: string; skill: string }[] }
-  | { type: 'cantrip'; cantrip_bonus?: number }
-  | { type: 'language' }
-  | { type: 'feature' }
-  | { type: string; [key: string]: unknown };
+type Grant = GrantConfig;
 
 const formatGrant = (grant: Grant): string => {
   switch (grant.type) {
     case 'proficiency':
-      if (grant.proficiencies) {
-        const formattedProfs = grant.proficiencies.map((prof: string) =>
-          formatProficiencyName(prof)
-        ).join(', ');
+      if (grant.proficiencies || grant.items) {
+        const profs = grant.proficiencies || grant.items || [];
+        const formattedProfs = profs.map((prof: string) => formatProficiencyName(prof)).join(', ');
         return `Proficiency: ${formattedProfs}`;
       }
       return 'Additional proficiency';
 
     case 'skill_bonus':
-      if (grant.skill_bonuses) {
-        const bonuses = grant.skill_bonuses.map((bonus: { ability: string; skill: string }) =>
-          `+${bonus.ability} modifier to ${formatSkillName(bonus.skill)}`
-        );
+      if (grant.skill_bonuses && grant.skill_bonuses.length > 0) {
+        const bonuses = grant.skill_bonuses.map((bonus) => {
+          const ability = bonus.ability || '';
+          return `+${ability} modifier to ${formatSkillName(bonus.skill)}`;
+        });
         return bonuses.join(', ');
+      }
+      if (grant.skills && grant.skills.length > 0) {
+        const bonusLabel = formatSkillBonus(grant.bonus);
+        return `${bonusLabel} to ${grant.skills.map(formatSkillName).join(', ')}`;
       }
       return 'Skill bonus';
 
-    case 'cantrip':
-      return `+${grant.cantrip_bonus || 1} cantrip known`;
+    case 'cantrip_bonus':
+      return `+${grant.value || grant.cantrip_bonus || 1} cantrip known`;
 
     case 'language':
+      if (grant.languages && grant.languages.length > 0) {
+        return `Languages: ${grant.languages.join(', ')}`;
+      }
       return 'Additional language';
 
     case 'feature':
@@ -232,4 +223,15 @@ const formatSkillName = (skill: string): string => {
   return skillMap[skill] || skill.split('_').map(word =>
     word.charAt(0).toUpperCase() + word.slice(1)
   ).join(' ');
+};
+
+const formatSkillBonus = (bonus?: string): string => {
+  if (!bonus) return '+Ability modifier';
+  if (bonus.includes('wisdom')) return '+WIS modifier';
+  if (bonus.includes('intelligence')) return '+INT modifier';
+  if (bonus.includes('charisma')) return '+CHA modifier';
+  if (bonus.includes('strength')) return '+STR modifier';
+  if (bonus.includes('dexterity')) return '+DEX modifier';
+  if (bonus.includes('constitution')) return '+CON modifier';
+  return '+Ability modifier';
 };

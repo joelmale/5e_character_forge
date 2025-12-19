@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Shield, Sword, Dice6, Trophy, Zap, BookOpen, AlertTriangle, Coins, Sparkles, Package, Star, Activity, Dumbbell, ListChecks } from 'lucide-react';
+import { Shield, Sword, Dice6, Trophy, Zap, AlertTriangle, Coins, Sparkles, Package, Star, Activity, Dumbbell, ListChecks } from 'lucide-react';
 import { CharacterSheetProps } from '../../../types/components';
 import { Character } from '../../../types/dnd';
 import { DiceRoll } from '../../../services/diceService';
@@ -17,8 +17,7 @@ import {
   CollapsibleSection,
   SpellcastingSection,
   EquipmentSection,
-  FeaturesSection,
-  LanguagesPanel
+  FeaturesSection
 } from '../index';
 import { getSpellsForClass } from '../../../services/dataService';
 import { SpellPreparationModal } from '../../SpellPreparationModal';
@@ -249,14 +248,6 @@ export const ModernStackedLayout: React.FC<CharacterSheetProps> = ({
             <p>Weapons: {character.proficiencies?.weapons?.join(', ') || 'None'}</p>
             <p>Tools: {character.proficiencies?.tools?.join(', ') || 'None'}</p>
           </div>
-        )
-      },
-      languages: {
-        title: 'Languages',
-        icon: BookOpen,
-        className: 'border-teal-500 bg-teal-900',
-        content: (
-          <LanguagesPanel character={character} />
         )
       },
       conditions: {
