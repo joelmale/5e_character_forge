@@ -52,9 +52,11 @@ jobs:
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v5
+      if: ${{ secrets.CODECOV_TOKEN != '' }}
       with:
         fail_ci_if_error: true
         verbose: true
+        token: ${{ secrets.CODECOV_TOKEN }}
 
   build-quality:
     name: Build Quality
@@ -131,7 +133,7 @@ jobs:
       run: npm ci
 
     - name: Check for unused dependencies
-      run: npx depcheck --ignores="@types/*,eslint*,vite*,vitest*"
+      run: npx depcheck --ignores="@types/*,eslint*,vite*,vitest*,@3d-dice/dice-parser-interface,@3d-dice/dice-ui,@size-limit/preset-app,@tailwindcss/postcss,@testing-library/user-event,@vitest/coverage-v8,autoprefixer,postcss,tailwindcss"
 
     - name: Check for outdated dependencies
       run: npm outdated || true

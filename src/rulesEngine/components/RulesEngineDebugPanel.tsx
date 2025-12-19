@@ -25,7 +25,7 @@ export function RulesEngineDebugPanel({
   showEffects: _showEffects = true,
   showPredicates: _showPredicates = true,
   showFormulas: _showFormulas = true,
-}: RulesEngineDebugPanelProps): JSX.Element | null {
+}: RulesEngineDebugPanelProps): React.ReactElement | null {
   const [isExpanded, setIsExpanded] = useState(false);
   const [activeTab, setActiveTab] = useState<'provenance' | 'derived' | 'raw'>('provenance');
 
