@@ -1012,3 +1012,21 @@ export interface LevelUpChoices {
   /** Eldritch invocations chosen (Warlock) */
   eldritchInvocationsChosen?: string[];
 }
+
+// ==================== NPC System ====================
+
+export interface NPC {
+  id: string;
+  name: string;
+  species: string; // Race
+  occupation: string;
+  personalityTraits: string[];
+  abilityScores: Record<AbilityName, number>; // STR, DEX, CON, INT, WIS, CHA
+  alignment: string;
+  relationshipStatus: string;
+  sexualOrientation: string;
+  plotHook: string;
+  notes: string; // Rich text as HTML
+  createdAt: number;
+  updatedAt: number;
+}

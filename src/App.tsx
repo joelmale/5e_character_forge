@@ -9,6 +9,7 @@ import NewCharacterModal from './components/NewCharacterModal';
 import ManualEntryScreen from './components/ManualEntryScreen';
 import PersonalityWizard from './components/PersonalityWizard';
 import { MonsterLibrary, MonsterStatBlock, CreateMonsterModal } from './components/MonsterLibrary';
+import { NPCLibrary } from './components/NPCLibrary';
 import { EncounterView } from './components/EncounterView';
 import { EncounterManager } from './components/EncounterManager/EncounterManager.tsx';
 
@@ -158,7 +159,7 @@ const App: React.FC = () => {
   const [isWizardOpen, setIsWizardOpen] = useState<boolean>(false);
 
   // Monster Library state
-  const [activeTab, setActiveTab] = useState<'characters' | 'monsters'>('characters');
+  const [activeTab, setActiveTab] = useState<'characters' | 'monsters' | 'npcs'>('characters');
   const [selectedMonster, setSelectedMonster] = useState<Monster | UserMonster | null>(null);
   const [editingMonster, setEditingMonster] = useState<UserMonster | null>(null);
 
@@ -1108,17 +1109,28 @@ const App: React.FC = () => {
                 <Shield className="w-4 h-4 inline-block mr-2" />
                 Characters
               </button>
-              <button
-                onClick={() => setActiveTab('monsters')}
-                className={`px-6 py-3 font-bold transition-all rounded-t-lg border-t-2 border-l-2 border-r-2 ${
-                  activeTab === 'monsters'
-                    ? 'bg-theme-primary text-accent-purple-light border-accent-purple-dark relative z-10'
-                    : 'bg-theme-secondary text-theme-muted border-theme-secondary hover:bg-gray-750 translate-y-1'
-                }`}
-                style={activeTab === 'monsters' ? { borderBottom: '2px solid rgb(17, 24, 39)' } : {}}
-              >
-                🐉 Monster Library
-              </button>
+               <button
+                 onClick={() => setActiveTab('monsters')}
+                 className={`px-6 py-3 font-bold transition-all rounded-t-lg border-t-2 border-l-2 border-r-2 ${
+                   activeTab === 'monsters'
+                     ? 'bg-theme-primary text-accent-purple-light border-accent-purple-dark relative z-10'
+                     : 'bg-theme-secondary text-theme-muted border-theme-secondary hover:bg-gray-750 translate-y-1'
+                 }`}
+                 style={activeTab === 'monsters' ? { borderBottom: '2px solid rgb(17, 24, 39)' } : {}}
+               >
+                 🐉 Monster Library
+               </button>
+               <button
+                 onClick={() => setActiveTab('npcs')}
+                 className={`px-6 py-3 font-bold transition-all rounded-t-lg border-t-2 border-l-2 border-r-2 ${
+                   activeTab === 'npcs'
+                     ? 'bg-theme-primary text-accent-green-light border-accent-green-dark relative z-10'
+                     : 'bg-theme-secondary text-theme-muted border-theme-secondary hover:bg-gray-750 translate-y-1'
+                 }`}
+                 style={activeTab === 'npcs' ? { borderBottom: '2px solid rgb(17, 24, 39)' } : {}}
+               >
+                 🧙‍♂️ NPC Library
+               </button>
             </div>
           </div>
 
@@ -1263,7 +1275,7 @@ const App: React.FC = () => {
             </div>
           )}
           </section>
-        ) : (
+        ) : activeTab === 'monsters' ? (
           showEncounterManager ? (
             <EncounterManager
               encounterId={currentEncounterId}
@@ -1290,6 +1302,8 @@ const App: React.FC = () => {
               }}
             />
           )
+        ) : (
+          <NPCLibrary />
         )}
 
         {/* New Character Creation Modal */}

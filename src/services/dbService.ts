@@ -1,13 +1,14 @@
-import { Character, UserMonster, Encounter } from '../types/dnd';
+import { Character, UserMonster, Encounter, NPC } from '../types/dnd';
 import { log } from '../utils/logger';
 
 // --- IndexedDB Configuration ---
 const DB_NAME = '5e_character_forge';
-const DB_VERSION = 11; // Version 11: Ensure custom monsters store exists
+const DB_VERSION = 12; // Version 12: Add NPCs store
 const STORE_NAME = 'characters';
 const CUSTOM_MONSTERS_STORE = 'customMonsters';
 const FAVORITES_STORE = 'favoriteMonsters';
 const ENCOUNTERS_STORE = 'encounters';
+const NPCS_STORE = 'npcs';
 
 import { initializeCharacterResources } from '../utils/resourceUtils';
 
@@ -52,6 +53,15 @@ const openDB = (): Promise<IDBDatabase> => {
         const encountersStore = db.createObjectStore(ENCOUNTERS_STORE, { keyPath: 'id', autoIncrement: false });
         encountersStore.createIndex('name', 'name', { unique: false });
         encountersStore.createIndex('createdAt', 'createdAt', { unique: false });
+      }
+
+      // NPCs store - ensure it exists regardless of version
+      if (!db.objectStoreNames.contains(NPCS_STORE)) {
+        const npcsStore = db.createObjectStore(NPCS_STORE, { keyPath: 'id', autoIncrement: false });
+        npcsStore.createIndex('name', 'name', { unique: false });
+        npcsStore.createIndex('species', 'species', { unique: false });
+        npcsStore.createIndex('occupation', 'occupation', { unique: false });
+        npcsStore.createIndex('createdAt', 'createdAt', { unique: false });
       }
 
       // Version 3: Migrate existing characters to include edition field
@@ -464,6 +474,56 @@ export const deleteEncounter = async (id: string): Promise<void> => {
   return new Promise((resolve, reject) => {
     const transaction = db.transaction([ENCOUNTERS_STORE], 'readwrite');
     const objectStore = transaction.objectStore(ENCOUNTERS_STORE);
+    const request = objectStore.delete(id);
+
+    request.onerror = () => reject(request.error);
+    request.onsuccess = () => resolve();
+  });
+};
+
+// ==================== NPCs ====================
+
+export const getAllNPCs = async (): Promise<NPC[]> => {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([NPCS_STORE], 'readonly');
+    const objectStore = transaction.objectStore(NPCS_STORE);
+    const request = objectStore.getAll();
+
+    request.onerror = () => reject(request.error);
+    request.onsuccess = () => resolve(request.result);
+  });
+};
+
+export const addNPC = async (npc: NPC): Promise<string> => {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([NPCS_STORE], 'readwrite');
+    const objectStore = transaction.objectStore(NPCS_STORE);
+    const request = objectStore.add(npc);
+
+    request.onerror = () => reject(request.error);
+    request.onsuccess = () => resolve(npc.id);
+  });
+};
+
+export const updateNPC = async (npc: NPC): Promise<void> => {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([NPCS_STORE], 'readwrite');
+    const objectStore = transaction.objectStore(NPCS_STORE);
+    const request = objectStore.put(npc);
+
+    request.onerror = () => reject(request.error);
+    request.onsuccess = () => resolve();
+  });
+};
+
+export const deleteNPC = async (id: string): Promise<void> => {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([NPCS_STORE], 'readwrite');
+    const objectStore = transaction.objectStore(NPCS_STORE);
     const request = objectStore.delete(id);
 
     request.onerror = () => reject(request.error);
