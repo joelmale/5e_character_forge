@@ -6,11 +6,11 @@ A single-page, fully responsive React/TypeScript application for creating, manag
 
 | Gate | Status |
 |------|--------|
-| Code Quality | ![Code Quality](https://github.com/joelmale/5e_character_forge/workflows/Quality%20Gate/badge.svg) |
+| Quality Gate | ![Quality Gate](https://github.com/joelmale/5e_character_forge/actions/workflows/quality-gate.yml/badge.svg?branch=master) |
 | Test Coverage | ![Test Coverage](https://codecov.io/gh/joelmale/5e_character_forge/branch/master/graph/badge.svg) |
-| Bundle Size | ![Bundle Size](https://img.shields.io/bundlephobia/min/5e-character-forge) |
-| Security | ![Security](https://github.com/joelmale/5e_character_forge/workflows/CodeQL%20Security%20Scan/badge.svg) |
-| Build | ![Build](https://github.com/joelmale/5e_character_forge/workflows/Build%20%26%20Deploy/badge.svg) |
+| Bundle Size (CI) | ![Bundle Size](https://img.shields.io/badge/bundle%20size-checked%20in%20CI-2ea44f) |
+| Security | ![Security](https://github.com/joelmale/5e_character_forge/actions/workflows/codeql.yml/badge.svg?branch=master) |
+| Build & Deploy | ![Build & Deploy](https://github.com/joelmale/5e_character_forge/actions/workflows/deploy.yml/badge.svg?branch=master) |
 | Multi-Platform | ![Multi-Platform](https://img.shields.io/badge/platforms-amd64%20arm64-blue) |
 | BuildKit | ![BuildKit](https://img.shields.io/badge/buildkit-enabled-green) |
 

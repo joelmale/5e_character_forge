@@ -65,6 +65,9 @@ dist-ssr
 # Local AI tooling
 .claude/
 .mcp.json
+AGENTS.md
+CLAUDE.md
+GEMINI.md
 
 # Local test harnesses / prototypes
 test-migration.html
