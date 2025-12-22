@@ -40,6 +40,7 @@ import { APP_VERSION } from './version';
 import { Ability, Character, CharacterCreationData, Equipment, EquippedItem, Feature, Monster, UserMonster, Edition } from './types/dnd';
 
 import { useDiceContext, useLayout } from './hooks';
+import { TabNavigation, TabId } from './components/TabNavigation';
 
 
 
@@ -159,7 +160,7 @@ const App: React.FC = () => {
   const [isWizardOpen, setIsWizardOpen] = useState<boolean>(false);
 
   // Monster Library state
-  const [activeTab, setActiveTab] = useState<'characters' | 'monsters' | 'npcs'>('characters');
+  const [activeTab, setActiveTab] = useState<TabId>('characters');
   const [selectedMonster, setSelectedMonster] = useState<Monster | UserMonster | null>(null);
   const [editingMonster, setEditingMonster] = useState<UserMonster | null>(null);
 
@@ -1088,51 +1089,8 @@ const App: React.FC = () => {
     <div className="min-h-screen bg-theme-primary text-white font-sans">
       <div className="max-w-7xl mx-auto p-4 md:p-8">
         {/* Header and Controls */}
-        <header className="mb-8">
-          {/* Title and Tabs on same line */}
-          <div className="flex flex-col md:flex-row justify-between items-end mb-4 border-b border-accent-red-dark">
-            <h1 className="text-4xl font-extrabold text-red-500 mb-4 md:mb-0">
-              5e Character Forge
-            </h1>
-
-            {/* Folder-style Tab Navigation */}
-            <div className="flex gap-1 mb-[-1px]">
-              <button
-                onClick={() => setActiveTab('characters')}
-                className={`px-6 py-3 font-bold transition-all rounded-t-lg border-t-2 border-l-2 border-r-2 ${
-                  activeTab === 'characters'
-                    ? 'bg-theme-primary text-accent-red-light border-accent-red-dark relative z-10'
-                    : 'bg-theme-secondary text-theme-muted border-theme-secondary hover:bg-gray-750 translate-y-1'
-                }`}
-                style={activeTab === 'characters' ? { borderBottom: '2px solid rgb(17, 24, 39)' } : {}}
-              >
-                <Shield className="w-4 h-4 inline-block mr-2" />
-                Characters
-              </button>
-               <button
-                 onClick={() => setActiveTab('monsters')}
-                 className={`px-6 py-3 font-bold transition-all rounded-t-lg border-t-2 border-l-2 border-r-2 ${
-                   activeTab === 'monsters'
-                     ? 'bg-theme-primary text-accent-purple-light border-accent-purple-dark relative z-10'
-                     : 'bg-theme-secondary text-theme-muted border-theme-secondary hover:bg-gray-750 translate-y-1'
-                 }`}
-                 style={activeTab === 'monsters' ? { borderBottom: '2px solid rgb(17, 24, 39)' } : {}}
-               >
-                 🐉 Monster Library
-               </button>
-               <button
-                 onClick={() => setActiveTab('npcs')}
-                 className={`px-6 py-3 font-bold transition-all rounded-t-lg border-t-2 border-l-2 border-r-2 ${
-                   activeTab === 'npcs'
-                     ? 'bg-theme-primary text-accent-green-light border-accent-green-dark relative z-10'
-                     : 'bg-theme-secondary text-theme-muted border-theme-secondary hover:bg-gray-750 translate-y-1'
-                 }`}
-                 style={activeTab === 'npcs' ? { borderBottom: '2px solid rgb(17, 24, 39)' } : {}}
-               >
-                 🧙‍♂️ NPC Library
-               </button>
-            </div>
-          </div>
+        <header className="mb-8 relative">
+          <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
 
           {/* Action Buttons (only show for characters tab) */}
           {activeTab === 'characters' && (

@@ -1,7 +1,8 @@
 import React from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
-import { Bold, Italic, List, ListOrdered } from 'lucide-react';
+import Underline from '@tiptap/extension-underline';
+import { Bold, Italic, List, ListOrdered, Underline as UnderlineIcon } from 'lucide-react';
 
 interface RichTextEditorProps {
   value: string;
@@ -15,7 +16,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   placeholder = 'Enter notes...',
 }) => {
   const editor = useEditor({
-    extensions: [StarterKit],
+    extensions: [StarterKit, Underline],
     content: value,
     onUpdate: ({ editor }) => {
       onChange(editor.getHTML());
@@ -52,6 +53,15 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
           title="Italic"
         >
           <Italic className="w-4 h-4" />
+        </button>
+        <button
+          onClick={() => editor.chain().focus().toggleUnderline().run()}
+          className={`p-2 rounded hover:bg-theme-secondary ${
+            editor.isActive('underline') ? 'bg-theme-secondary text-accent-yellow-light' : 'text-white'
+          }`}
+          title="Underline"
+        >
+          <UnderlineIcon className="w-4 h-4" />
         </button>
         <button
           onClick={() => editor.chain().focus().toggleBulletList().run()}
