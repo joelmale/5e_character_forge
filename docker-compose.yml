@@ -1,6 +1,6 @@
 services:
   5e-character-forge:
-    image: joelmale/5e-character-forge:latest
+    image: ghcr.io/joelmale/5e-character-forge:latest
     networks:
       - homelab-net
     deploy:
