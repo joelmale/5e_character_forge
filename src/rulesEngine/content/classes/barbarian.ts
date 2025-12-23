@@ -4,6 +4,7 @@
  */
 
 import type { SourcedEffect } from '../../types/effects';
+import { subclassEffectsByClass } from './subclassEffects';
 
 /**
  * Barbarian base class proficiencies (both editions)
@@ -258,4 +259,5 @@ export const barbarianLevel1Features: SourcedEffect[] = [
 export const barbarianEffects: SourcedEffect[] = [
   ...barbarianProficiencies,
   ...barbarianLevel1Features,
+  ...(subclassEffectsByClass.barbarian ?? []),
 ];

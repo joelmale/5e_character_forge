@@ -1,5 +1,6 @@
  
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { Routes, Route } from 'react-router-dom';
 import { Plus, Trash2, BookOpen, Shield, Download, Upload, Settings } from 'lucide-react';
 // REFACTORED: Loader2 import removed - was unused
 import { CharacterCreationWizard } from './components/CharacterCreationWizard';
@@ -8,7 +9,7 @@ import { CharacterSheet } from './components/CharacterSheet';
 import NewCharacterModal from './components/NewCharacterModal';
 import ManualEntryScreen from './components/ManualEntryScreen';
 import PersonalityWizard from './components/PersonalityWizard';
-import { MonsterLibrary, MonsterStatBlock, CreateMonsterModal } from './components/MonsterLibrary';
+import { MonsterLibrary, MonsterStatBlock, CreateMonsterModal, EmbeddableMonsterPage, EmbeddableEncounterPage } from './components/MonsterLibrary';
 import { NPCLibrary } from './components/NPCLibrary';
 import { EncounterView } from './components/EncounterView';
 import { EncounterManager } from './components/EncounterManager/EncounterManager.tsx';
@@ -1086,7 +1087,11 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-theme-primary text-white font-sans">
+    <Routes>
+      <Route path="/monster/:monsterId" element={<EmbeddableMonsterPage />} />
+      <Route path="/encounter/:encounterId" element={<EmbeddableEncounterPage />} />
+      <Route path="*" element={
+        <div className="min-h-screen bg-theme-primary text-white font-sans">
       <div className="max-w-7xl mx-auto p-4 md:p-8">
         {/* Header and Controls */}
         <header className="mb-8 relative">
@@ -1396,6 +1401,8 @@ const App: React.FC = () => {
         </div>
       </div>
     </div>
+      } />
+    </Routes>
   );
 };
 

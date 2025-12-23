@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { X, Star, ChevronDown, ChevronUp, Edit2, Trash2 } from 'lucide-react';
+import { X, Star, ChevronDown, ChevronUp, Edit2, Trash2, ExternalLink } from 'lucide-react';
 import { Monster, UserMonster } from '../../types/dnd';
 import { useMonsterContext } from '../../hooks';
+import { generateMonsterSlug } from '../../utils/monsterUtils';
 
 interface MonsterStatBlockProps {
   monster: Monster | UserMonster;
@@ -39,6 +40,18 @@ export const MonsterStatBlock: React.FC<MonsterStatBlockProps> = ({ monster, onC
   const { isFavorited, toggleFavorite, deleteCustomMonster } = useMonsterContext();
   const isFav = isFavorited(monster.index);
   const isCustom = 'isCustom' in monster && monster.isCustom;
+
+  const getMonsterUrl = (): string => {
+    if (isCustom) {
+      return `${window.location.origin}/monster/custom-${monster.index}`;
+    } else {
+      return `${window.location.origin}/monster/${generateMonsterSlug(monster.name)}`;
+    }
+  };
+
+  const handleOpenInNewTab = () => {
+    window.open(getMonsterUrl(), '_blank');
+  };
 
   const handleFavoriteClick = async () => {
     await toggleFavorite(monster.index);
@@ -140,6 +153,13 @@ export const MonsterStatBlock: React.FC<MonsterStatBlockProps> = ({ monster, onC
                     </button>
                   </>
                 )}
+                <button
+                  onClick={handleOpenInNewTab}
+                  className="p-2 bg-accent-blue hover:bg-accent-blue-light rounded-lg transition-colors"
+                  title="Open in new tab"
+                >
+                  <ExternalLink className="w-6 h-6 text-white" />
+                </button>
                 <button
                   onClick={onClose}
                   className="p-2 bg-theme-secondary hover:bg-theme-tertiary rounded-lg transition-colors"

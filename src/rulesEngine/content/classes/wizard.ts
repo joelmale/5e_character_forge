@@ -4,6 +4,7 @@
  */
 
 import type { SourcedEffect } from '../../types/effects';
+import { subclassEffectsByClass } from './subclassEffects';
 import { createFullCasterSpellSlots } from '../spellSlots';
 
 /**
@@ -110,4 +111,5 @@ export const wizardEffects: SourcedEffect[] = [
   ...wizardProficiencies,
   ...wizardSpellcasting,
   ...createFullCasterSpellSlots('wizard'),
+  ...(subclassEffectsByClass.wizard ?? []),
 ];

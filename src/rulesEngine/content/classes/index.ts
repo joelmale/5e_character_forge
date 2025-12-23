@@ -13,3 +13,5 @@ export * from './rogue';
 export * from './paladin';
 export * from './ranger';
 export * from './bard';
+export * from './artificer';
+export * from './warlock';

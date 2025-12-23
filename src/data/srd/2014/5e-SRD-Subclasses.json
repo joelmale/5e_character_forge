@@ -1374,51 +1374,51 @@
     "subclass_levels": "/api/2014/subclasses/land/levels",
     "url": "/api/2014/subclasses/land"
   },
-   {
-     "index": "champion",
-     "class": {
-       "index": "fighter",
-       "name": "Fighter",
-       "url": "/api/2014/classes/fighter"
-     },
-     "name": "Champion",
-     "subclass_flavor": "Martial Archetype",
-     "desc": [
-       "The archetypal Champion focuses on the development of raw physical power honed to deadly perfection. Those who model themselves on this archetype combine rigorous training with physical excellence to deal devastating blows."
-     ],
-     "subclass_levels": "/api/2014/subclasses/champion/levels",
-     "url": "/api/2014/subclasses/champion"
-   },
-   {
-     "index": "battle-master",
-     "class": {
-       "index": "fighter",
-       "name": "Fighter",
-       "url": "/api/2014/classes/fighter"
-     },
-     "name": "Battle Master",
-     "subclass_flavor": "Martial Archetype",
-     "desc": [
-       "Those who emulate the archetypal Battle Master employ martial techniques passed down through generations. To a Battle Master, combat is an academic field, sometimes including subjects beyond battle such as weaponsmithing and calligraphy. Not every fighter absorbs the lessons of history, theory, and artistry that are reflected in the Battle Master archetype, but those who do are well-rounded fighters of great skill and knowledge."
-     ],
-     "subclass_levels": "/api/2014/subclasses/battle-master/levels",
-     "url": "/api/2014/subclasses/battle-master"
-   },
-   {
-     "index": "eldritch-knight",
-     "class": {
-       "index": "fighter",
-       "name": "Fighter",
-       "url": "/api/2014/classes/fighter"
-     },
-     "name": "Eldritch Knight",
-     "subclass_flavor": "Martial Archetype",
-     "desc": [
-       "The archetypal Eldritch Knight combines the martial mastery common to all fighters with a careful study of magic. Eldritch Knights use magical techniques similar to those practiced by wizards. They focus their study on two of the eight schools of magic: abjuration and evocation. Abjuration spells grant an Eldritch Knight additional protection in battle, and evocation spells deal damage to many foes at once, extending the fighter's reach in combat."
-     ],
-     "subclass_levels": "/api/2014/subclasses/eldritch-knight/levels",
-     "url": "/api/2014/subclasses/eldritch-knight"
-   },
+  {
+    "index": "champion",
+    "class": {
+      "index": "fighter",
+      "name": "Fighter",
+      "url": "/api/2014/classes/fighter"
+    },
+    "name": "Champion",
+    "subclass_flavor": "Martial Archetype",
+    "desc": [
+      "The archetypal Champion focuses on the development of raw physical power honed to deadly perfection. Those who model themselves on this archetype combine rigorous training with physical excellence to deal devastating blows."
+    ],
+    "subclass_levels": "/api/2014/subclasses/champion/levels",
+    "url": "/api/2014/subclasses/champion"
+  },
+  {
+    "index": "battle-master",
+    "class": {
+      "index": "fighter",
+      "name": "Fighter",
+      "url": "/api/2014/classes/fighter"
+    },
+    "name": "Battle Master",
+    "subclass_flavor": "Martial Archetype",
+    "desc": [
+      "Those who emulate the archetypal Battle Master employ martial techniques passed down through generations. To a Battle Master, combat is an academic field, sometimes including subjects beyond battle such as weaponsmithing and calligraphy. Not every fighter absorbs the lessons of history, theory, and artistry that are reflected in the Battle Master archetype, but those who do are well-rounded fighters of great skill and knowledge."
+    ],
+    "subclass_levels": "/api/2014/subclasses/battle-master/levels",
+    "url": "/api/2014/subclasses/battle-master"
+  },
+  {
+    "index": "eldritch-knight",
+    "class": {
+      "index": "fighter",
+      "name": "Fighter",
+      "url": "/api/2014/classes/fighter"
+    },
+    "name": "Eldritch Knight",
+    "subclass_flavor": "Martial Archetype",
+    "desc": [
+      "The archetypal Eldritch Knight combines the martial mastery common to all fighters with a careful study of magic. Eldritch Knights use magical techniques similar to those practiced by wizards. They focus their study on two of the eight schools of magic: abjuration and evocation. Abjuration spells grant an Eldritch Knight additional protection in battle, and evocation spells deal damage to many foes at once, extending the fighter's reach in combat."
+    ],
+    "subclass_levels": "/api/2014/subclasses/eldritch-knight/levels",
+    "url": "/api/2014/subclasses/eldritch-knight"
+  },
   {
     "index": "open-hand",
     "class": {
@@ -1626,7 +1626,9 @@
     "name": "Thief",
     "subclass_flavor": "Roguish Archetype",
     "desc": [
-      "You hone your skills in the larcenous arts. Burglars, bandits, cutpurses, and other criminals typically follow this archetype, but so do rogues who prefer to think of themselves as professional treasure seekers, explorers, delvers, and investigators. In addition to improving your agility and stealth, you learn skills useful for delving into ancient ruins, reading unfamiliar languages, and using magic items you normally couldn't employ."
+      "Classic rogue who thrives on mobility, item use, and environment control.",
+      "Theme: Classic rogue. Fantasy: Burglar, tomb robber, urban explorer. Primary stats: Dexterity.",
+      "Thieves emphasize fast interactions, creative problem-solving, and superior positioning in and out of combat."
     ],
     "subclass_levels": "/api/2014/subclasses/thief/levels",
     "url": "/api/2014/subclasses/thief"
@@ -1935,79 +1937,131 @@
   },
   {
     "index": "totem-warrior",
-    "class": { "index": "barbarian", "name": "Barbarian", "url": "/api/2014/classes/barbarian" },
+    "class": {
+      "index": "barbarian",
+      "name": "Barbarian",
+      "url": "/api/2014/classes/barbarian"
+    },
     "name": "Totem Warrior",
     "subclass_flavor": "Primal Path",
-    "desc": ["(Paste 'Path of the Totem Warrior' description from PHB here)"],
+    "desc": [
+      "A barbarian who channels animal spirits to gain powerful rage-based defenses, mobility, and party support. Totem choices create distinct playstyles (tank, scout, pack fighter)."
+    ],
     "subclass_levels": "/api/2014/subclasses/totem-warrior/levels",
     "url": "/api/2014/subclasses/totem-warrior"
   },
   {
     "index": "valor",
-    "class": { "index": "bard", "name": "Bard", "url": "/api/2014/classes/bard" },
+    "class": {
+      "index": "bard",
+      "name": "Bard",
+      "url": "/api/2014/classes/bard"
+    },
     "name": "Valor",
     "subclass_flavor": "Bard College",
-    "desc": ["(Paste 'College of Valor' description from PHB here)"],
+    "desc": [
+      "A battle bard who fights in the thick of combat while empowering allies with inspiration that boosts offense and defense."
+    ],
     "subclass_levels": "/api/2014/subclasses/valor/levels",
     "url": "/api/2014/subclasses/valor"
   },
   {
     "index": "knowledge",
-    "class": { "index": "cleric", "name": "Cleric", "url": "/api/2014/classes/cleric" },
+    "class": {
+      "index": "cleric",
+      "name": "Cleric",
+      "url": "/api/2014/classes/cleric"
+    },
     "name": "Knowledge",
     "subclass_flavor": "Divine Domain",
-    "desc": ["(Paste 'Knowledge Domain' description from PHB here)"],
+    "desc": [
+      "A scholar-cleric focused on mastery of lore, languages, and minds. Strong skill utility plus divination and mental manipulation tools."
+    ],
     "subclass_levels": "/api/2014/subclasses/knowledge/levels",
     "url": "/api/2014/subclasses/knowledge"
   },
   {
     "index": "light",
-    "class": { "index": "cleric", "name": "Cleric", "url": "/api/2014/classes/cleric" },
+    "class": {
+      "index": "cleric",
+      "name": "Cleric",
+      "url": "/api/2014/classes/cleric"
+    },
     "name": "Light",
     "subclass_flavor": "Divine Domain",
-    "desc": ["(Paste 'Light Domain' description from PHB here)"],
+    "desc": [
+      "A radiant/fire themed cleric who excels at blasting, revealing enemies, and countering darkness\u2014excellent vs hordes and undead."
+    ],
     "subclass_levels": "/api/2014/subclasses/light/levels",
     "url": "/api/2014/subclasses/light"
   },
   {
     "index": "nature",
-    "class": { "index": "cleric", "name": "Cleric", "url": "/api/2014/classes/cleric" },
+    "class": {
+      "index": "cleric",
+      "name": "Cleric",
+      "url": "/api/2014/classes/cleric"
+    },
     "name": "Nature",
     "subclass_flavor": "Divine Domain",
-    "desc": ["(Paste 'Nature Domain' description from PHB here)"],
+    "desc": [
+      "A cleric with druidic flavor: strong elemental defenses, nature utility, and control over beasts and plants."
+    ],
     "subclass_levels": "/api/2014/subclasses/nature/levels",
     "url": "/api/2014/subclasses/nature"
   },
   {
     "index": "tempest",
-    "class": { "index": "cleric", "name": "Cleric", "url": "/api/2014/classes/cleric" },
+    "class": {
+      "index": "cleric",
+      "name": "Cleric",
+      "url": "/api/2014/classes/cleric"
+    },
     "name": "Tempest",
     "subclass_flavor": "Divine Domain",
-    "desc": ["(Paste 'Tempest Domain' description from PHB here)"],
+    "desc": [
+      "A storm cleric who punishes attackers, deals heavy lightning/thunder damage, and controls the battlefield with weather-like force."
+    ],
     "subclass_levels": "/api/2014/subclasses/tempest/levels",
     "url": "/api/2014/subclasses/tempest"
   },
   {
     "index": "trickery",
-    "class": { "index": "cleric", "name": "Cleric", "url": "/api/2014/classes/cleric" },
+    "class": {
+      "index": "cleric",
+      "name": "Cleric",
+      "url": "/api/2014/classes/cleric"
+    },
     "name": "Trickery",
     "subclass_flavor": "Divine Domain",
-    "desc": ["(Paste 'Trickery Domain' description from PHB here)"],
+    "desc": [
+      "A deception and infiltration cleric who uses illusion, stealth support, and misdirection to enable tricky plans and team advantages."
+    ],
     "subclass_levels": "/api/2014/subclasses/trickery/levels",
     "url": "/api/2014/subclasses/trickery"
   },
   {
     "index": "war",
-    "class": { "index": "cleric", "name": "Cleric", "url": "/api/2014/classes/cleric" },
+    "class": {
+      "index": "cleric",
+      "name": "Cleric",
+      "url": "/api/2014/classes/cleric"
+    },
     "name": "War",
     "subclass_flavor": "Divine Domain",
-    "desc": ["(Paste 'War Domain' description from PHB here)"],
+    "desc": [
+      "A militant cleric built for weapon combat, battlefield command, and burst accuracy\u2014bridges frontline offense with cleric magic."
+    ],
     "subclass_levels": "/api/2014/subclasses/war/levels",
     "url": "/api/2014/subclasses/war"
   },
   {
     "index": "moon",
-    "class": { "index": "druid", "name": "Druid", "url": "/api/2014/classes/druid" },
+    "class": {
+      "index": "druid",
+      "name": "Druid",
+      "url": "/api/2014/classes/druid"
+    },
     "name": "Moon",
     "subclass_flavor": "Druid Circle",
     "desc": [
@@ -2019,91 +2073,155 @@
   },
   {
     "index": "four-elements",
-    "class": { "index": "monk", "name": "Monk", "url": "/api/2014/classes/monk" },
+    "class": {
+      "index": "monk",
+      "name": "Monk",
+      "url": "/api/2014/classes/monk"
+    },
     "name": "Four Elements",
     "subclass_flavor": "Monastic Tradition",
-    "desc": ["(Paste 'Way of the Four Elements' description from PHB here)"],
+    "desc": [
+      "An elemental monk who spends ki to perform spell-like disciplines: blasts, shaping, and utility drawn from the classic elements."
+    ],
     "subclass_levels": "/api/2014/subclasses/four-elements/levels",
     "url": "/api/2014/subclasses/four-elements"
   },
   {
     "index": "shadow",
-    "class": { "index": "monk", "name": "Monk", "url": "/api/2014/classes/monk" },
+    "class": {
+      "index": "monk",
+      "name": "Monk",
+      "url": "/api/2014/classes/monk"
+    },
     "name": "Shadow",
     "subclass_flavor": "Monastic Tradition",
-    "desc": ["(Paste 'Way of Shadow' description from PHB here)"],
+    "desc": [
+      "A stealth/assassin monk with darkness tools, teleport-style movement between shadows, and strong infiltration utility."
+    ],
     "subclass_levels": "/api/2014/subclasses/shadow/levels",
     "url": "/api/2014/subclasses/shadow"
   },
   {
     "index": "ancients",
-    "class": { "index": "paladin", "name": "Paladin", "url": "/api/2014/classes/paladin" },
+    "class": {
+      "index": "paladin",
+      "name": "Paladin",
+      "url": "/api/2014/classes/paladin"
+    },
     "name": "Ancients",
     "subclass_flavor": "Sacred Oath",
-    "desc": ["(Paste 'Oath of the Ancients' description from PHB here)"],
+    "desc": [
+      "A paladin of nature and ancient light\u2014excellent defense vs magic and strong sustain through protective auras and control."
+    ],
     "subclass_levels": "/api/2014/subclasses/ancients/levels",
     "url": "/api/2014/subclasses/ancients"
   },
   {
     "index": "vengeance",
-    "class": { "index": "paladin", "name": "Paladin", "url": "/api/2014/classes/paladin" },
+    "class": {
+      "index": "paladin",
+      "name": "Paladin",
+      "url": "/api/2014/classes/paladin"
+    },
     "name": "Vengeance",
     "subclass_flavor": "Sacred Oath",
-    "desc": ["(Paste 'Oath of Vengeance' description from PHB here)"],
+    "desc": [
+      "A relentless hunter paladin built for deleting priority targets. Strong mobility, accuracy, and single-target lockdown."
+    ],
     "subclass_levels": "/api/2014/subclasses/vengeance/levels",
     "url": "/api/2014/subclasses/vengeance"
   },
   {
     "index": "beast-master",
-    "class": { "index": "ranger", "name": "Ranger", "url": "/api/2014/classes/ranger" },
+    "class": {
+      "index": "ranger",
+      "name": "Ranger",
+      "url": "/api/2014/classes/ranger"
+    },
     "name": "Beast Master",
     "subclass_flavor": "Ranger Archetype",
-    "desc": ["(Paste 'Beast Master' description from PHB here)"],
+    "desc": [
+      "A ranger partnered with an animal companion. Strong scouting and action-economy planning; effectiveness depends on companion management (2014 version)."
+    ],
     "subclass_levels": "/api/2014/subclasses/beast-master/levels",
     "url": "/api/2014/subclasses/beast-master"
   },
   {
     "index": "arcane-trickster",
-    "class": { "index": "rogue", "name": "Rogue", "url": "/api/2014/classes/rogue" },
+    "class": {
+      "index": "rogue",
+      "name": "Rogue",
+      "url": "/api/2014/classes/rogue"
+    },
     "name": "Arcane Trickster",
     "subclass_flavor": "Roguish Archetype",
-    "desc": ["(Paste 'Arcane Trickster' description from PHB here)"],
+    "desc": [
+      "Magical infiltrator who blends stealth with illusion and enchantment.",
+      "Theme: Magical infiltrator. Fantasy: Thief who blends stealth with illusion and enchantment magic. Primary stats: Dexterity, Intelligence.",
+      "Arcane Tricksters use limited wizard spellcasting to enhance stealth, misdirection, and control. This archetype excels at battlefield manipulation and utility, not raw spell damage."
+    ],
     "subclass_levels": "/api/2014/subclasses/arcane-trickster/levels",
     "url": "/api/2014/subclasses/arcane-trickster"
   },
   {
     "index": "assassin",
-    "class": { "index": "rogue", "name": "Rogue", "url": "/api/2014/classes/rogue" },
+    "class": {
+      "index": "rogue",
+      "name": "Rogue",
+      "url": "/api/2014/classes/rogue"
+    },
     "name": "Assassin",
     "subclass_flavor": "Roguish Archetype",
-    "desc": ["(Paste 'Assassin' description from PHB here)"],
+    "desc": [
+      "Professional killer focused on ambushes and lethal alpha strikes.",
+      "Theme: Professional killer. Fantasy: Contract killer, spy, or silent executioner. Primary stats: Dexterity.",
+      "Assassins specialize in opening-round burst damage and social infiltration, trading sustained combat tools for decisive first strikes."
+    ],
     "subclass_levels": "/api/2014/subclasses/assassin/levels",
     "url": "/api/2014/subclasses/assassin"
   },
   {
     "index": "wild-magic",
-    "class": { "index": "sorcerer", "name": "Sorcerer", "url": "/api/2014/classes/sorcerer" },
+    "class": {
+      "index": "sorcerer",
+      "name": "Sorcerer",
+      "url": "/api/2014/classes/sorcerer"
+    },
     "name": "Wild Magic",
     "subclass_flavor": "Sorcerous Origin",
-    "desc": ["(Paste 'Wild Magic' description from PHB here)"],
+    "desc": [
+      "A chaotic sorcerer whose magic surges unpredictably. Great for swingy effects, advantage manipulation, and dramatic moments."
+    ],
     "subclass_levels": "/api/2014/subclasses/wild-magic/levels",
     "url": "/api/2014/subclasses/wild-magic"
   },
   {
     "index": "archfey",
-    "class": { "index": "warlock", "name": "Warlock", "url": "/api/2014/classes/warlock" },
+    "class": {
+      "index": "warlock",
+      "name": "Warlock",
+      "url": "/api/2014/classes/warlock"
+    },
     "name": "Archfey",
     "subclass_flavor": "Otherworldly Patron",
-    "desc": ["(Paste 'The Archfey' description from PHB here)"],
+    "desc": [
+      "A fey-patron warlock who manipulates emotions, escapes danger, and controls minds\u2014excellent trickster/control caster with strong defensive \u2018panic button\u2019."
+    ],
     "subclass_levels": "/api/2014/subclasses/archfey/levels",
     "url": "/api/2014/subclasses/archfey"
   },
   {
     "index": "great-old-one",
-    "class": { "index": "warlock", "name": "Warlock", "url": "/api/2014/classes/warlock" },
+    "class": {
+      "index": "warlock",
+      "name": "Warlock",
+      "url": "/api/2014/classes/warlock"
+    },
     "name": "Great Old One",
     "subclass_flavor": "Otherworldly Patron",
-    "desc": ["(Paste 'The Great Old One' description from PHB here)"],
+    "desc": [
+      "A cosmic-horror warlock with telepathy, mental disruption, and psychic defenses\u2014strong in intrigue and mind games."
+    ],
     "subclass_levels": "/api/2014/subclasses/great-old-one/levels",
     "url": "/api/2014/subclasses/great-old-one"
   }

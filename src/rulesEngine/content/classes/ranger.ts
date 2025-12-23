@@ -7,6 +7,7 @@
  */
 
 import type { SourcedEffect } from '../../types/effects';
+import { subclassEffectsByClass } from './subclassEffects';
 
 /**
  * Ranger Proficiencies
@@ -536,4 +537,5 @@ export const rangerEffects: SourcedEffect[] = [
   ...rangerLevel18Features,
   ...rangerLevel20Features,
   // Note: Spell slots handled by half-caster spell slot progression (not yet implemented)
+  ...(subclassEffectsByClass.ranger ?? []),
 ];

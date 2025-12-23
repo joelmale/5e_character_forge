@@ -1,5 +1,5 @@
 import React from 'react';
-import { Trash2, Eye, Calendar } from 'lucide-react';
+import { Trash2, Eye, Calendar, Share2 } from 'lucide-react';
 import { useMonsterContext } from '../../hooks';
 
 interface SavedEncountersListProps {
@@ -21,6 +21,23 @@ export const SavedEncountersList: React.FC<SavedEncountersListProps> = ({ onStar
   const handleDelete = async (encounterId: string, encounterName: string) => {
     if (window.confirm(`Delete encounter "${encounterName}"? This action cannot be undone.`)) {
       await deleteEncounterById(encounterId);
+    }
+  };
+
+  const handleShare = async (encounterId: string, encounterName: string) => {
+    const shareUrl = `${window.location.origin}/encounter/${encounterId}`;
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      alert(`Encounter "${encounterName}" link copied to clipboard!\n${shareUrl}`);
+    } catch {
+      // Fallback for older browsers
+      const textArea = document.createElement('textarea');
+      textArea.value = shareUrl;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+      alert(`Encounter "${encounterName}" link copied to clipboard!\n${shareUrl}`);
     }
   };
 
@@ -83,6 +100,13 @@ export const SavedEncountersList: React.FC<SavedEncountersListProps> = ({ onStar
                 title="Load encounter"
               >
                 <Eye className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => handleShare(encounter.id, encounter.name)}
+                className="p-2 bg-accent-blue hover:bg-accent-blue-dark rounded-lg transition-colors"
+                title="Share encounter link"
+              >
+                <Share2 className="w-4 h-4" />
               </button>
               <button
                 onClick={() => handleDelete(encounter.id, encounter.name)}

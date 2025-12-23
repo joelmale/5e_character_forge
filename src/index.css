@@ -529,3 +529,49 @@ code {
 .animate-screen-flash-failure {
   animation: screen-flash-failure 0.6s ease-out;
 }
+
+/* ========================================
+   IFRAME EMBEDDABLE STYLES
+   ======================================== */
+
+/* Minimal styling for iframe embedding - removes app chrome */
+.iframe-embeddable {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Ensure stat blocks are readable in iframes */
+.iframe-embeddable .monster-stat-block {
+  max-width: none;
+  margin: 0;
+  border-radius: 0;
+}
+
+/* Responsive adjustments for different iframe sizes */
+@media (max-width: 600px) {
+  .iframe-embeddable .monster-stat-block {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-height: 500px) {
+  .iframe-embeddable .monster-stat-block {
+    padding: 1rem;
+  }
+}
+
+/* Print-friendly styles for VTT printing */
+@media print {
+  .iframe-embeddable {
+    background: white !important;
+    color: black !important;
+  }
+
+  .iframe-embeddable * {
+    color: black !important;
+    background: white !important;
+    box-shadow: none !important;
+  }
+}

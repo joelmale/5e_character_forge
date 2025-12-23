@@ -7,6 +7,7 @@
  */
 
 import type { SourcedEffect } from '../../types/effects';
+import { subclassEffectsByClass } from './subclassEffects';
 import { createFullCasterSpellSlots } from '../spellSlots';
 
 /**
@@ -555,4 +556,5 @@ export const bardEffects: SourcedEffect[] = [
   ...bardLevel18Features,
   ...bardLevel20Features,
   ...createFullCasterSpellSlots('bard'),
+  ...(subclassEffectsByClass.bard ?? []),
 ];

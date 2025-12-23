@@ -4,6 +4,7 @@
  */
 
 import type { SourcedEffect } from '../../types/effects';
+import { subclassEffectsByClass } from './subclassEffects';
 
 /**
  * Fighter base class proficiencies (both editions)
@@ -287,4 +288,5 @@ export const fighterEffects: SourcedEffect[] = [
   ...fighterProficiencies,
   ...fighterLevel1Features,
   ...fighterLevel5Features,
+  ...(subclassEffectsByClass.fighter ?? []),
 ];

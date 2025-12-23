@@ -4,6 +4,7 @@
  */
 
 import type { SourcedEffect } from '../../types/effects';
+import { subclassEffectsByClass } from './subclassEffects';
 
 /**
  * Monk base class proficiencies (both editions)
@@ -280,4 +281,5 @@ export const monkEffects: SourcedEffect[] = [
   ...monkProficiencies,
   ...monkLevel1Features,
   ...monkLevel2Features,
+  ...(subclassEffectsByClass.monk ?? []),
 ];

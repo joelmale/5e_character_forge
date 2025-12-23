@@ -1,7 +1,8 @@
 import React from 'react';
-import { Eye, Star, Edit2, Trash2, Plus, Minus } from 'lucide-react';
+import { Eye, Star, Edit2, Trash2, Plus, Minus, ExternalLink } from 'lucide-react';
 import { Monster, UserMonster } from '../../types/dnd';
 import { useMonsterContext } from '../../hooks';
+import { generateMonsterSlug } from '../../utils/monsterUtils';
 
 interface MonsterCardProps {
   monster: Monster | UserMonster;
@@ -48,6 +49,19 @@ export const MonsterCard: React.FC<MonsterCardProps> = ({
   const { isFavorited, toggleFavorite, deleteCustomMonster } = useMonsterContext();
   const isFav = isFavorited(monster.index);
   const isCustom = 'isCustom' in monster && monster.isCustom;
+
+  const getMonsterUrl = (): string => {
+    if (isCustom) {
+      return `${window.location.origin}/monster/custom-${monster.index}`;
+    } else {
+      return `${window.location.origin}/monster/${generateMonsterSlug(monster.name)}`;
+    }
+  };
+
+  const handleOpenInNewTab = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    window.open(getMonsterUrl(), '_blank');
+  };
 
   const handleDelete = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -203,15 +217,24 @@ export const MonsterCard: React.FC<MonsterCardProps> = ({
         {/* Action Buttons (only when not in selection mode) */}
         {!selectionMode && (
           <div className="mt-4 space-y-2">
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onView();
-              }}
-              className="w-full py-2 bg-accent-purple hover:bg-accent-purple-light rounded-lg text-white font-semibold transition-colors flex items-center justify-center text-sm"
-            >
-              <Eye className="w-4 h-4 mr-2" /> View Stat Block
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onView();
+                }}
+                className="flex-1 py-2 bg-accent-purple hover:bg-accent-purple-light rounded-lg text-white font-semibold transition-colors flex items-center justify-center text-sm"
+              >
+                <Eye className="w-4 h-4 mr-2" /> View Stat Block
+              </button>
+              <button
+                onClick={handleOpenInNewTab}
+                className="px-3 py-2 bg-accent-blue hover:bg-accent-blue-light rounded-lg text-white font-semibold transition-colors flex items-center justify-center text-sm"
+                title="Open in new tab"
+              >
+                <ExternalLink className="w-4 h-4" />
+              </button>
+            </div>
 
             {/* Edit/Delete buttons for custom monsters */}
             {isCustom && onEdit && (

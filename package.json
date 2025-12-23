@@ -1,6 +1,6 @@
 {
   "name": "5e-character-forge",
-  "version": "1.5.0",
+  "version": "1.5.3",
   "description": "A client-side D&D 5e character generator and sheet manager",
   "type": "module",
   "scripts": {
@@ -14,10 +14,10 @@
     "size-limit": "size-limit",
     "docker:build": "bash ./scripts/fast-build.sh",
     "docker:build-push": "bash ./scripts/docker-build-push.sh",
-    "docker:run": "docker stop 5e-forge 2>/dev/null || true && docker rm 5e-forge 2>/dev/null || true && docker run -d --name 5e-forge -p 8080:80 joelmale/5e-character-forge:latest && echo '✅ Container started at http://localhost:8080'",
-    "docker:stop": "docker stop 5e-forge && docker rm 5e-forge && echo '✅ Container stopped and removed'",
+    "docker:run": "docker stop 5e-forge 2>/dev/null || true && docker rm 5e-forge 2>/dev/null || true && docker run -d --name 5e-forge -p 8080:80 joelmale/5e-character-forge:latest && echo '\u2705 Container started at http://localhost:8080'",
+    "docker:stop": "docker stop 5e-forge && docker rm 5e-forge && echo '\u2705 Container stopped and removed'",
     "docker:logs": "docker logs -f 5e-forge",
-    "docker:restart": "docker restart 5e-forge && echo '✅ Container restarted'"
+    "docker:restart": "docker restart 5e-forge && echo '\u2705 Container restarted'"
   },
   "dependencies": {
     "@3d-dice/dice-box": "^1.1.4",
@@ -31,6 +31,7 @@
     "lucide-react": "^0.561.0",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
+    "react-router-dom": "^7.11.0",
     "zod": "^4.2.1"
   },
   "devDependencies": {

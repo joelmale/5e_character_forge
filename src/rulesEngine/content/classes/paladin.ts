@@ -7,6 +7,7 @@
  */
 
 import type { SourcedEffect } from '../../types/effects';
+import { subclassEffectsByClass } from './subclassEffects';
 
 /**
  * Paladin Proficiencies
@@ -467,4 +468,5 @@ export const paladinEffects: SourcedEffect[] = [
   ...paladinLevel11Features,
   ...paladinLevel14Features,
   // Note: Spell slots handled by half-caster spell slot progression (not yet implemented)
+  ...(subclassEffectsByClass.paladin ?? []),
 ];
