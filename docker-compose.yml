@@ -1,6 +1,6 @@
 services:
-  5e-character-forge:
-    image: ghcr.io/joelmale/5e-character-forge:latest
+  nexus-forge:
+    image: ghcr.io/joelmale/nexus-forge:latest
     networks:
       - homelab-net
     deploy:
@@ -26,7 +26,7 @@ services:
           cpus: '0.5'
           memory: 256M
       labels:
-        - "com.docker.swarm.service.name=5e-character-forge"
+        - "com.docker.swarm.service.name=nexus-forge"
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/health"]
       interval: 30s

@@ -1,6 +1,6 @@
 # Adding Monsters to the Monster Library
 
-This guide explains how to add new monsters to the D&D 5e Character Forge monster library. The system supports multiple methods for adding monsters, from simple custom monster creation to adding official monsters to the SRD database.
+This guide explains how to add new monsters to the D&D NexusForge monster library. The system supports multiple methods for adding monsters, from simple custom monster creation to adding official monsters to the SRD database.
 
 ## Table of Contents
 

@@ -1,7 +1,7 @@
 # NPC Tab Implementation Plan
 
 ## Overview
-Implement an NPC tab for the 5e Character Forge app that allows DMs to generate and manage simple NPC character sheets. Unlike the prepopulated monster library, this tab focuses on user-generated NPCs with random generation and full customization capabilities.
+Implement an NPC tab for the NexusForge app that allows DMs to generate and manage simple NPC character sheets. Unlike the prepopulated monster library, this tab focuses on user-generated NPCs with random generation and full customization capabilities.
 
 ## Core Requirements
 - **Random Generation**: One-click button to generate NPC attributes
@@ -202,7 +202,7 @@ The NPC tab has been successfully implemented with all requested features:
 - **Filter**: Search functionality (enhanced filtering ready for expansion)
 - **Persist**: All data saves to browser storage
 
-The implementation is production-ready and fully integrated into the 5e Character Forge application!
+The implementation is production-ready and fully integrated into the NexusForge application!
 
 ## Phase 1: Foundation ✅ COMPLETED
 - [x] Define NPC interface in `types/dnd.ts`

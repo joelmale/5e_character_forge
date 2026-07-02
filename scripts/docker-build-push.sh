@@ -6,7 +6,7 @@
 # - Optimized caching strategy for faster rebuilds
 set -euo pipefail
 
-DOCKER_IMAGE="joelmale/5e-character-forge:latest"
+DOCKER_IMAGE="joelmale/nexus-forge:latest"
 DOCKER_IMAGE_BUILDER="${DOCKER_IMAGE}-builder"
 
 # Logging function

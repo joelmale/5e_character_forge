@@ -1,5 +1,5 @@
 services:
-  5e-character-forge:
+  nexus-forge:
     build:
       context: .
       dockerfile: Dockerfile
@@ -7,7 +7,7 @@ services:
       args:
         BUILDKIT_INLINE_CACHE: 1
       cache_from:
-        - joelmale/5e-character-forge:latest
+        - joelmale/nexus-forge:latest
     environment:
       - DOCKER_BUILDKIT=1
     command: ["npm", "run", "preview"]  # Serve built files instead of nginx

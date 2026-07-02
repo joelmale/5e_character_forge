@@ -41,7 +41,7 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({ activeTab, onTabCh
       <div className={`absolute left-0 right-0 bottom-0 h-[2px] z-20 ${ACTIVE_LINE_CLASSES[activeTab]}`} />
 
       <h1 className="text-4xl font-extrabold text-red-500 mb-4 md:mb-0">
-        5e Character Forge
+        NexusForge
       </h1>
 
       <div className="flex gap-1 mb-[-1px] relative">

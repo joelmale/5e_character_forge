@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-5e Character Forge is a **100% client-side** D&D 5e character creation and management application built with React 18, TypeScript, and Vite. All character data is stored in IndexedDB with no backend or server required.
+NexusForge is a **100% client-side** D&D 5e character creation and management application built with React 18, TypeScript, and Vite. All character data is stored in IndexedDB with no backend or server required.
 
 **Key Constraints:**
 - All data must remain client-side - no external API calls for character data
@@ -480,8 +480,8 @@ The application features an intelligent fantasy name generator with race-specifi
 ### Docker Deployment
 
 ```bash
-docker build -t 5e-character-forge .
-docker run -p 8080:80 5e-character-forge
+docker build -t nexus-forge .
+docker run -p 8080:80 nexus-forge
 ```
 
 Multi-stage Dockerfile uses nginx to serve static build. Configuration in `nginx.conf` includes SPA fallback to `index.html`.
@@ -522,7 +522,7 @@ This is used as a reference when adding new SRD content. Copy files into `/src/d
 
 ## IndexedDB Schema
 
-**Database:** `5e_character_forge`
+**Database:** `NexusForge`
 **Database Version:** 3
 **Object Stores:**
 - `characters` - Player characters (key: `id`)

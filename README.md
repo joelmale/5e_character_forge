@@ -1,4 +1,4 @@
-# 5e Character Forge
+# NexusForge
 
 A single-page, fully responsive React/TypeScript application for creating, managing, and viewing D&D 5e character sheets with **100% client-side storage** using IndexedDB. No backend, no servers, no accounts needed - your data stays on your device!
 
@@ -6,17 +6,17 @@ A single-page, fully responsive React/TypeScript application for creating, manag
 
 | Gate | Status |
 |------|--------|
-| Quality Gate | ![Quality Gate](https://github.com/joelmale/5e_character_forge/actions/workflows/quality-gate.yml/badge.svg?branch=master) |
-| Test Coverage | ![Test Coverage](https://codecov.io/gh/joelmale/5e_character_forge/branch/master/graph/badge.svg) |
+| Quality Gate | ![Quality Gate](https://github.com/joelmale/NexusForge/actions/workflows/quality-gate.yml/badge.svg?branch=master) |
+| Test Coverage | ![Test Coverage](https://codecov.io/gh/joelmale/NexusForge/branch/master/graph/badge.svg) |
 | Bundle Size (CI) | ![Bundle Size](https://img.shields.io/badge/bundle%20size-checked%20in%20CI-2ea44f) |
-| Security | ![Security](https://github.com/joelmale/5e_character_forge/actions/workflows/codeql.yml/badge.svg?branch=master) |
-| Build & Deploy | ![Build & Deploy](https://github.com/joelmale/5e_character_forge/actions/workflows/deploy.yml/badge.svg?branch=master) |
+| Security | ![Security](https://github.com/joelmale/NexusForge/actions/workflows/codeql.yml/badge.svg?branch=master) |
+| Build & Deploy | ![Build & Deploy](https://github.com/joelmale/NexusForge/actions/workflows/deploy.yml/badge.svg?branch=master) |
 | Multi-Platform | ![Multi-Platform](https://img.shields.io/badge/platforms-amd64%20arm64-blue) |
 | BuildKit | ![BuildKit](https://img.shields.io/badge/buildkit-enabled-green) |
 
 ## Overview
 
-The 5e Character Forge allows users to:
+The NexusForge allows users to:
 - Create D&D 5e characters using a step-by-step wizard
 - Store unlimited characters locally in your browser
 - View interactive character sheets with dice rolling
@@ -93,8 +93,8 @@ Works on all modern browsers with IndexedDB support:
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/joelmale/5e_character_forge.git
-cd 5e_character_forge
+git clone https://github.com/joelmale/NexusForge.git
+cd NexusForge
 ```
 
 2. Install dependencies:
@@ -121,10 +121,10 @@ See [DEPLOYMENT.md](./DEPLOYMENT.md) for complete Docker Swarm deployment instru
 **Quick Start with Docker:**
 ```bash
 # Build the image
-docker build -t 5e-character-forge .
+docker build -t nexus-forge .
 
 # Run locally
-docker run -p 8080:80 5e-character-forge
+docker run -p 8080:80 nexus-forge
 
 # Deploy to Swarm
 docker stack deploy -c docker-compose.yml character-forge
@@ -186,7 +186,7 @@ See [DOCKER_OPTIMIZATIONS.md](./DOCKER_OPTIMIZATIONS.md) for technical details.
 ## Project Structure
 
 ```
-5e_character_forge/
+NexusForge/
 ├── src/
 │   ├── App.tsx                         # Main React application
 │   ├── main.tsx                        # Application entry point
@@ -272,7 +272,7 @@ interface Character {
 
 ## Privacy & Data
 
-**Your data never leaves your device.** The 5e Character Forge:
+**Your data never leaves your device.** The NexusForge:
 - ❌ Does NOT send data to any server
 - ❌ Does NOT require internet after loading
 - ❌ Does NOT track users

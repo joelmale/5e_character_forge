@@ -367,6 +367,18 @@ const App: React.FC = () => {
       ? characters.filter(c => selectedCharacterIds.has(c.id))
       : characters;
 
+    // Broadcast to parent or opener window for NexusVTT integration
+    const messagePayload = {
+      type: 'NEXUS_FORGE_EXPORT',
+      payload: charactersToExport
+    };
+    
+    if (window.parent !== window) {
+      window.parent.postMessage(messagePayload, '*');
+    } else if (window.opener) {
+      window.opener.postMessage(messagePayload, '*');
+    }
+
     const dataStr = JSON.stringify(charactersToExport, null, 2);
     const dataBlob = new Blob([dataStr], { type: 'application/json' });
     const url = URL.createObjectURL(dataBlob);

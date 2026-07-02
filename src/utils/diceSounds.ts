@@ -1,4 +1,4 @@
-// Dice sound effects manager for 5e Character Forge
+// Dice sound effects manager for NexusForge
 
 import diceSoundsData from '../data/diceSounds.json';
 
