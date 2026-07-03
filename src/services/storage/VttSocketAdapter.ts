@@ -10,12 +10,16 @@ import { IStorageService } from './IStorageService';
  * directly and inject it via `setStorageAdapter`.
  */
 export class VttSocketAdapter implements IStorageService {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private vttApi: any;
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   constructor(vttApi?: any) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     this.vttApi = vttApi || (window as any).NexusVTT_API;
     
     if (!this.vttApi) {
+      // eslint-disable-next-line no-console
       console.warn('VttSocketAdapter initialized without vttApi. Operations may fail.');
     }
   }
@@ -50,24 +54,24 @@ export class VttSocketAdapter implements IStorageService {
   // ==================== Custom Monsters ====================
   async getAllCustomMonsters(): Promise<UserMonster[]> { return []; }
   async addCustomMonster(monster: UserMonster): Promise<string> { return monster.id; }
-  async updateCustomMonster(monster: UserMonster): Promise<void> {}
-  async deleteCustomMonster(id: string): Promise<void> {}
+  async updateCustomMonster(_monster: UserMonster): Promise<void> {}
+  async deleteCustomMonster(_id: string): Promise<void> {}
 
   // ==================== Favorites ====================
   async getFavoriteMonsters(): Promise<string[]> { return []; }
-  async addFavorite(monsterId: string): Promise<void> {}
-  async removeFavorite(monsterId: string): Promise<void> {}
-  async isFavorite(monsterId: string): Promise<boolean> { return false; }
+  async addFavorite(_monsterId: string): Promise<void> {}
+  async removeFavorite(_monsterId: string): Promise<void> {}
+  async isFavorite(_monsterId: string): Promise<boolean> { return false; }
 
   // ==================== Encounters ====================
   async getAllEncounters(): Promise<Encounter[]> { return []; }
-  async getEncounter(id: string): Promise<Encounter | undefined> { return undefined; }
+  async getEncounter(_id: string): Promise<Encounter | undefined> { return undefined; }
   async saveEncounter(encounter: Encounter): Promise<string> { return encounter.id; }
-  async deleteEncounter(id: string): Promise<void> {}
+  async deleteEncounter(_id: string): Promise<void> {}
 
   // ==================== NPCs ====================
   async getAllNPCs(): Promise<NPC[]> { return []; }
   async addNPC(npc: NPC): Promise<string> { return npc.id; }
-  async updateNPC(npc: NPC): Promise<void> {}
-  async deleteNPC(id: string): Promise<void> {}
+  async updateNPC(_npc: NPC): Promise<void> {}
+  async deleteNPC(_id: string): Promise<void> {}
 }

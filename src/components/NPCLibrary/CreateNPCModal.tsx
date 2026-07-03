@@ -34,6 +34,7 @@ export const CreateNPCModal: React.FC<CreateNPCModalProps> = ({
   // Reset form when modal opens/closes or editing NPC changes
   useEffect(() => {
     if (isOpen) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setName(editingNPC?.name || '');
       setSpecies(editingNPC?.species || '');
       setOccupation(editingNPC?.occupation || '');

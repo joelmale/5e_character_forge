@@ -14,8 +14,6 @@ export const NPCFilters: React.FC<NPCFiltersProps> = ({
 }) => {
   // Get unique values for dropdowns (in a real app, this would come from the data)
   const speciesOptions = ['Human', 'Elf', 'Dwarf', 'Halfling', 'Gnome', 'Half-Elf', 'Half-Orc', 'Tiefling', 'Dragonborn'];
-  const occupationOptions = ['Acolyte', 'Criminal', 'Entertainer', 'Folk Hero', 'Guild Artisan', 'Hermit', 'Noble', 'Outlander', 'Sage', 'Soldier', 'Urchin'];
-  const alignmentOptions = ['Lawful Good', 'Neutral Good', 'Chaotic Good', 'Lawful Neutral', 'Neutral', 'Chaotic Neutral', 'Lawful Evil', 'Neutral Evil', 'Chaotic Evil'];
 
   return (
     <div className="bg-theme-secondary rounded-lg p-4">
